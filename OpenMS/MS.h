@@ -13,6 +13,7 @@
 #if defined( _MSVC_LANG )
 #	define OPENMS_CPLUSPLUS _MSVC_LANG
 #else
+#	define __FUNCTION__ __func__
 #	define OPENMS_CPLUSPLUS __cplusplus
 #endif
 #if 201703L < OPENMS_CPLUSPLUS
@@ -85,6 +86,7 @@
 #include <thread>
 #include <mutex>
 #include <atomic>
+#include <future>
 #include <condition_variable>
 
 // ============================================
@@ -151,6 +153,17 @@ using TTuple = std::tuple<TS...>;
 using TException = std::exception;
 template <class T>
 using TLambda = std::function<T>;
+using TThread = std::thread;
+template <class T>
+using TFuture = std::future<T>;
+template <class T>
+using TPromise = std::promise<T>;
+template <class T>
+using TAtomic = std::atomic<T>;
+using TMutex = std::recursive_mutex;
+using TMutexLock = std::lock_guard<TMutex>;
+using TUniqueLock = std::unique_lock<TMutex>;
+using TMutexUnlock = std::condition_variable_any;
 using TStringList = TVector<TString>;
 using TWStringList = TVector<TWString>;
 using TString8List = TVector<TString8>;
@@ -176,6 +189,7 @@ template<class T>
 using TString16HashMap = THashMap<TString16, T>;
 template<class T>
 using TString32HashMap = THashMap<TString32, T>;
+
 
 // ============================================
 

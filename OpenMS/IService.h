@@ -11,7 +11,7 @@
 * =================================================*/
 #include "MS.h"
 
-/// @brief Interface for service.
+/// @brief Interface for service
 class OPENMS_API IService
 {
 public:
@@ -19,14 +19,14 @@ public:
 
 };
 
-/// @brief Interface for provider service.
+/// @brief Interface for provider service
 class OPENMS_API IProviderService : public IService
 {
 public:
 
 };
 
-/// @brief Interface for comsumer service.
+/// @brief Interface for comsumer service
 class OPENMS_API IComsumerService : public IService
 {
 public:

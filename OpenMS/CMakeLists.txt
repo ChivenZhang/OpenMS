@@ -39,7 +39,7 @@ add_library(OpenMS STATIC
 	TCP/TCPReactor.h
 	UDP/UDPReactor.h
 	WS/WSReactor.h
-)
+ "Private/ChannelEvent.h")
 add_dependencies(OpenMS uv_a)
 
 target_include_directories(OpenMS PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
