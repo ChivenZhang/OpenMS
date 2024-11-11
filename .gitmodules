@@ -1,3 +1,3 @@
-[submodule "Github/libuv"]
-	path = Github/libuv
+[submodule "External/libuv"]
+	path = External/libuv
 	url = https://github.com/libuv/libuv.git
