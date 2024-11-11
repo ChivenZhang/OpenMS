@@ -41,7 +41,7 @@ public:
 
 	virtual bool addBefore(TStringView which, TStringView name, TRef<IChannelInboundHandler> handler) = 0;
 
-	virtual bool addLast(TStringView which, TStringView name, TRef<IChannelInboundHandler> handler) = 0;
+	virtual bool addAfter(TStringView which, TStringView name, TRef<IChannelInboundHandler> handler) = 0;
 
 	virtual bool addFirst(TStringView name, TRef<IChannelOutboundHandler> handler) = 0;
 
@@ -49,5 +49,5 @@ public:
 
 	virtual bool addBefore(TStringView which, TStringView name, TRef<IChannelOutboundHandler> handler) = 0;
 
-	virtual bool addLast(TStringView which, TStringView name, TRef<IChannelOutboundHandler> handler) = 0;
+	virtual bool addAfter(TStringView which, TStringView name, TRef<IChannelOutboundHandler> handler) = 0;
 };

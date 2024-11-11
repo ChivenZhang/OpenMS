@@ -21,11 +21,11 @@ public:
 	bool addFirst(TStringView name, TRef<IChannelInboundHandler> handler) override;
 	bool addLast(TStringView name, TRef<IChannelInboundHandler> handler) override;
 	bool addBefore(TStringView which, TStringView name, TRef<IChannelInboundHandler> handler) override;
-	bool addLast(TStringView which, TStringView name, TRef<IChannelInboundHandler> handler) override;
+	bool addAfter(TStringView which, TStringView name, TRef<IChannelInboundHandler> handler) override;
 	bool addFirst(TStringView name, TRef<IChannelOutboundHandler> handler) override;
 	bool addLast(TStringView name, TRef<IChannelOutboundHandler> handler) override;
 	bool addBefore(TStringView which, TStringView name, TRef<IChannelOutboundHandler> handler) override;
-	bool addLast(TStringView which, TStringView name, TRef<IChannelOutboundHandler> handler) override;
+	bool addAfter(TStringView which, TStringView name, TRef<IChannelOutboundHandler> handler) override;
 
 protected:
 	TRaw<Channel> m_Channel;

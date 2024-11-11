@@ -8,13 +8,14 @@ int main()
 	ChannelReactor s(4, {
 		[](TRef<IChannel> channel) {	// Connected
 			auto handler = TNew<ChannelInboundHandler>();
-			channel->getPipeline()->addLast("https", handler);
-			channel->getPipeline()->addLast("http", handler);
-			channel->getPipeline()->addLast("auth", handler);
-			channel->getPipeline()->addLast("business", handler);
+			channel->getPipeline()->addFirst("https", handler);
+			channel->getPipeline()->addAfter("https", "http", handler);
+			channel->getPipeline()->addAfter("http", "auth", handler);
+			channel->getPipeline()->addLast("handler1", handler);
+			channel->getPipeline()->addBefore("handler1", "handler0", handler);
 		},
-		[](TRef<IChannel> channel) {	// Disconnected
-
+		[](TRef<IChannel> channel) {	// Disconnect
+			// Do something here
 		},
 		});
 

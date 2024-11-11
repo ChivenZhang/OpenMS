@@ -60,7 +60,7 @@ bool ChannelPipeline::addBefore(TStringView which, TStringView name, TRef<IChann
 	return true;
 }
 
-bool ChannelPipeline::addLast(TStringView which, TStringView name, TRef<IChannelInboundHandler> handler)
+bool ChannelPipeline::addAfter(TStringView which, TStringView name, TRef<IChannelInboundHandler> handler)
 {
 	if (m_Channel->running() == false || handler == nullptr) return false;
 	auto hashName = THash(which.data());
@@ -106,7 +106,7 @@ bool ChannelPipeline::addBefore(TStringView which, TStringView name, TRef<IChann
 	return true;
 }
 
-bool ChannelPipeline::addLast(TStringView which, TStringView name, TRef<IChannelOutboundHandler> handler)
+bool ChannelPipeline::addAfter(TStringView which, TStringView name, TRef<IChannelOutboundHandler> handler)
 {
 	if (m_Channel->running() == false || handler == nullptr) return false;
 	auto hashName = THash(which.data());
