@@ -18,4 +18,5 @@ class OPENMS_API IChannelEvent
 public:
 	TString Message;
 	THnd<IChannel> Channel;
+	void* UserData = nullptr;
 };

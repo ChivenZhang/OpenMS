@@ -48,6 +48,12 @@
 #	endif
 #endif
 
+#ifdef _WIN32
+#	ifdef _DEBUG
+#		define OPENMS_DEBUG
+#	endif
+#endif
+
 // ============================================
 
 #ifndef _CRT_SECURE_NO_WARNINGS
@@ -190,7 +196,6 @@ using TString16HashMap = THashMap<TString16, T>;
 template<class T>
 using TString32HashMap = THashMap<TString32, T>;
 
-
 // ============================================
 
 template<typename T, typename ... Args>
@@ -241,3 +246,14 @@ inline constexpr uint32_t THash(TCString value)
 	while (*value) hash = hash * 31 + (*value++);
 	return hash;
 }
+
+// ============================================
+
+#define TPrint(FORMAT, ...) fprintf(stdout, FORMAT, __VA_ARGS__)
+#define TError(FORMAT, ...) fprintf(stderr, FORMAT, __VA_ARGS__)
+#define TFatal(FORMAT, ...) do{ fprintf(stderr, FORMAT, __VA_ARGS__); exit(1); }while(0)
+#ifdef OPENMS_DEBUG
+#define TDebug(FORMAT, ...) fprintf(stdout, FORMAT, __VA_ARGS__)
+#else
+#define TDebug(FORMAT, ...)
+#endif

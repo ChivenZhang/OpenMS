@@ -10,6 +10,7 @@
 *
 * =================================================*/
 #include "MS.h"
+#include "IChannelEvent.h"
 
 /// @brief Interface for channel
 class OPENMS_API IChannelContext
@@ -17,4 +18,11 @@ class OPENMS_API IChannelContext
 public:
 	virtual ~IChannelContext() = default;
 
+	virtual void write(TRef<IChannelEvent> event) = 0;
+
+	virtual TFuture<bool> write(TRef<IChannelEvent> event, TPromise<bool>&& promise) = 0;
+
+	virtual void writeAndFlush(TRef<IChannelEvent> event) = 0;
+
+	virtual TFuture<bool> writeAndFlush(TRef<IChannelEvent> event, TPromise<bool>&& promise) = 0;
 };

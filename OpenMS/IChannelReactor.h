@@ -18,7 +18,7 @@ class OPENMS_API IChannelReactor
 public:
 	struct callback_t
 	{
-		TLambda<void(TRef<IChannel>)> Connect;
+		TLambda<void(TRef<IChannel>)> Connected;
 		TLambda<void(TRef<IChannel>)> Disconnect;
 	};
 

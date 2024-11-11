@@ -9,6 +9,7 @@
 *
 * =================================================*/
 #include "Channel.h"
+#include "ChannelReactor.h"
 
 Channel::Channel(TRaw<ChannelReactor> reactor, TRef<IChannelAddress> local, TRef<IChannelAddress> remote)
 	:
@@ -69,14 +70,16 @@ TFuture<bool> Channel::close(TPromise<bool>&& promise)
 	return result;
 }
 
-void Channel::read(TRaw<IChannelEvent> event)
+void Channel::read(TRef<IChannelEvent> event)
 {
+	if (m_Running == false) return;
+
 	auto inbounds = m_Pipeline.getInbounds();
 	for (size_t i = 0; i < inbounds.size(); ++i)
 	{
 		try
 		{
-			inbounds[i].Handler->channelRead(&m_Context, event);
+			inbounds[i].Handler->channelRead(&m_Context, event.get());
 		}
 		catch (TException ex)
 		{
@@ -88,41 +91,63 @@ void Channel::read(TRaw<IChannelEvent> event)
 			inbounds[i].Handler->channelCatch(&m_Context, std::move(ex));
 		}
 	}
+
+	auto outbounds = m_Pipeline.getOutbounds();
+	for (size_t i = 0; i < outbounds.size(); ++i)
+	{
+		try
+		{
+			outbounds[i].Handler->channelWrite(&m_Context, event.get());
+		}
+		catch (TException ex)
+		{
+			outbounds[i].Handler->channelCatch(&m_Context, std::move(ex));
+		}
+		catch (...)
+		{
+			auto ex = std::exception("unknown exception caught in " __FILE__ " [ " __FUNCTION__ " ]");
+			outbounds[i].Handler->channelCatch(&m_Context, std::move(ex));
+		}
+	}
 }
 
-TFuture<bool> Channel::read(TRaw<IChannelEvent> event, TPromise<bool>&& promise)
+TFuture<bool> Channel::read(TRef<IChannelEvent> event, TPromise<bool>&& promise)
 {
+	if (m_Running == false) return TFuture<bool>();
 	auto result = promise.get_future();
 	read(event);
 	promise.set_value(true);
 	return result;
 }
 
-void Channel::write(TRaw<IChannelEvent> event)
+void Channel::write(TRef<IChannelEvent> event)
 {
-	auto outbounds = m_Pipeline.getOutbounds();
-	for (size_t i = 0; i < outbounds.size(); ++i)
-	{
-		try
-		{
-			outbounds[i].Handler->channelWrite(&m_Context, event);
-		}
-		catch (TException ex)
-		{
-			outbounds[i].Handler->channelCatch(&m_Context, std::move(ex));
-		}
-		catch (...)
-		{
-			auto ex = std::exception("unknown exception caught in " __FILE__ " [ " __FUNCTION__ " ]");
-			outbounds[i].Handler->channelCatch(&m_Context, std::move(ex));
-		}
-	}
+	if (m_Running == false) return;
+	event->Channel = shared_from_this();
+	m_Reactor->onOutbound(event, false);
 }
 
-TFuture<bool> Channel::write(TRaw<IChannelEvent> event, TPromise<bool>&& promise)
+TFuture<bool> Channel::write(TRef<IChannelEvent> event, TPromise<bool>&& promise)
 {
+	if (m_Running == false) return TFuture<bool>();
 	auto result = promise.get_future();
+	event->UserData = &promise;
 	write(event);
-	promise.set_value(true);
+	return result;
+}
+
+void Channel::writeFlush(TRef<IChannelEvent> event)
+{
+	if (m_Running == false) return;
+	event->Channel = shared_from_this();
+	m_Reactor->onOutbound(event, true);
+}
+
+TFuture<bool> Channel::writeFlush(TRef<IChannelEvent> event, TPromise<bool>&& promise)
+{
+	if (m_Running == false) return TFuture<bool>();
+	auto result = promise.get_future();
+	event->UserData = &promise;
+	writeFlush(event);
 	return result;
 }

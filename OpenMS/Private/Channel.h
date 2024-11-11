@@ -14,7 +14,7 @@
 #include "ChannelPipeline.h"
 class ChannelReactor;
 
-class Channel : public IChannel
+class Channel : public IChannel, std::enable_shared_from_this<Channel>
 {
 public:
 	Channel(TRaw<ChannelReactor> reactor, TRef<IChannelAddress> local, TRef<IChannelAddress> remote);
@@ -27,10 +27,12 @@ public:
 	TRaw<const IChannelPipeline> getPipeline() const override;
 	void close() override;
 	TFuture<bool> close(TPromise<bool>&& promise) override;
-	void read(TRaw<IChannelEvent> event) override;
-	TFuture<bool> read(TRaw<IChannelEvent> event, TPromise<bool>&& promise) override;
-	void write(TRaw<IChannelEvent> event) override;
-	TFuture<bool> write(TRaw<IChannelEvent> event, TPromise<bool>&& promise) override;
+	void read(TRef<IChannelEvent> event);
+	TFuture<bool> read(TRef<IChannelEvent> event, TPromise<bool>&& promise);
+	void write(TRef<IChannelEvent> event) override;
+	TFuture<bool> write(TRef<IChannelEvent> event, TPromise<bool>&& promise) override;
+	void writeFlush(TRef<IChannelEvent> event) override;
+	TFuture<bool> writeFlush(TRef<IChannelEvent> event, TPromise<bool>&& promise) override;
 
 protected:
 	TAtomic<bool> m_Running;

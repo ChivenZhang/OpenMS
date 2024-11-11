@@ -16,7 +16,7 @@ add_subdirectory(OpenMS)
 add_subdirectory(External/libuv)
 
 if(OPENMS_ENABLE_SAMPLE)
-add_executable(Sample Sample/main.cpp )
+add_executable(Sample Sample/main.cpp   "Sample/TestHandler.h")
 add_dependencies(Sample OpenMS)
 target_include_directories(Sample PRIVATE ${CMAKE_SOURCE_DIR}/OpenMS)
 target_link_libraries(Sample OpenMS)

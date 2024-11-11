@@ -16,3 +16,23 @@ ChannelContext::ChannelContext(TRaw<Channel> channel)
 	m_Channel(channel)
 {
 }
+
+void ChannelContext::write(TRef<IChannelEvent> event)
+{
+	m_Channel->write(event);
+}
+
+void ChannelContext::writeAndFlush(TRef<IChannelEvent> event)
+{
+	m_Channel->writeFlush(event);
+}
+
+TFuture<bool> ChannelContext::write(TRef<IChannelEvent> event, TPromise<bool>&& promise)
+{
+	return m_Channel->write(event, std::forward<TPromise<bool>>(promise));
+}
+
+TFuture<bool> ChannelContext::writeAndFlush(TRef<IChannelEvent> event, TPromise<bool>&& promise)
+{
+	return m_Channel->writeFlush(event, std::forward<TPromise<bool>>(promise));
+}

@@ -63,7 +63,7 @@ bool ChannelReactor::running() const
 
 void ChannelReactor::onConnect(TRef<Channel> channel)
 {
-	if (m_Callback.Connect) m_Callback.Connect(channel);
+	if (m_Callback.Connected) m_Callback.Connected(channel);
 }
 
 void ChannelReactor::onDisconnect(TRef<Channel> channel)
@@ -77,6 +77,8 @@ void ChannelReactor::onInbound(TRef<IChannelEvent> event)
 	if (event) m_WorkerList[index]->enqueue(event);
 }
 
-void ChannelReactor::onOutbound(TRef<IChannelEvent> event)
+void ChannelReactor::onOutbound(TRef<IChannelEvent> event, bool flush)
 {
+	TMutexLock lock(m_EventLock);
+	m_EventQueue.push(event);
 }

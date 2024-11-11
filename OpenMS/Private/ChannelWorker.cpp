@@ -19,7 +19,8 @@ ChannelWorker::ChannelWorker(TRaw<ChannelReactor> reactor)
 
 void ChannelWorker::startup()
 {
-	printf("%d startup worker\n", std::this_thread::get_id());
+	TDebug("Startup worker: %d\n", std::this_thread::get_id());
+
 	m_Running = true;
 	while (m_Running == true && m_Reactor->running())
 	{
@@ -32,10 +33,11 @@ void ChannelWorker::startup()
 			auto event = m_EventQueue.front();
 			m_EventQueue.pop();
 			auto channel = event->Channel.lock();
-			if (channel) channel->read(event.get());
+			if (channel) channel->read(event);
 		}
 	}
-	printf("%d shutdown worker\n", std::this_thread::get_id());
+
+	TDebug("Shutdown worker: %d\n", std::this_thread::get_id());
 }
 
 void ChannelWorker::shutdown()

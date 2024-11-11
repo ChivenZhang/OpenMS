@@ -1,18 +1,17 @@
 #include <iostream>
 #include <OpenMS/IService.h>
 #include <OpenMS/Private/ChannelReactor.h>
-#include <OpenMS/Private/ChannelHandler.h>
+#include "TestHandler.h"
 
 int main()
 {
 	ChannelReactor s(4, {
 		[](TRef<IChannel> channel) {	// Connected
-			auto handler = TNew<ChannelInboundHandler>();
-			channel->getPipeline()->addFirst("https", handler);
-			channel->getPipeline()->addAfter("https", "http", handler);
-			channel->getPipeline()->addAfter("http", "auth", handler);
-			channel->getPipeline()->addLast("handler1", handler);
-			channel->getPipeline()->addBefore("handler1", "handler0", handler);
+			auto inbound = TNew<TestInboundHandler>();
+			channel->getPipeline()->addFirst("https", inbound);
+
+			auto outbound = TNew<TestOutboundHandler>();
+			channel->getPipeline()->addFirst("https", outbound);
 		},
 		[](TRef<IChannel> channel) {	// Disconnect
 			// Do something here

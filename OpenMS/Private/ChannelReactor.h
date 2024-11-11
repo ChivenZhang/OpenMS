@@ -26,12 +26,17 @@ protected:
 	void onConnect(TRef<Channel> channel);
 	void onDisconnect(TRef<Channel> channel);
 	void onInbound(TRef<IChannelEvent> event);
-	void onOutbound(TRef<IChannelEvent> event);
+	void onOutbound(TRef<IChannelEvent> event, bool flush = false);
 
 protected:
+	callback_t m_Callback;
 	TThread m_EventThread;
+	TAtomic<bool> m_Running;
 	TVector<TThread> m_WorkerThreads;
 	TVector<TRef<ChannelWorker>> m_WorkerList;
-	callback_t m_Callback;
-	TAtomic<bool> m_Running;
+	TMutex m_EventLock;
+	TQueue<TRef<IChannelEvent>> m_EventQueue;
+
+private:
+	friend class Channel;
 };

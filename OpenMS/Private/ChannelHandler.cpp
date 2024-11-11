@@ -9,6 +9,7 @@
 *
 * =================================================*/
 #include "ChannelHandler.h"
+#include "IChannelContext.h"
 
 void ChannelInboundHandler::channelCatch(TRaw<IChannelContext> context, TException&& exception) const
 {
@@ -16,7 +17,6 @@ void ChannelInboundHandler::channelCatch(TRaw<IChannelContext> context, TExcepti
 
 void ChannelInboundHandler::channelRead(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) const
 {
-	printf("read\n");
 }
 
 void ChannelOutboundHandler::channelCatch(TRaw<IChannelContext> context, TException&& exception) const
