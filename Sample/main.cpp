@@ -1,4 +1,5 @@
 #include <iostream>
+#include <OpenMS/IService.h>
 
 int main()
 {

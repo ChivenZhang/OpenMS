@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 3.8)
 
 add_definitions(
-	-DOPENMS_SHARED_LIBRARY
+	#-DOPENMS_SHARED_LIBRARY
 )
 
 add_library(OpenMS STATIC
