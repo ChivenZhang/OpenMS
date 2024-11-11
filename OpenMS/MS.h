@@ -197,13 +197,13 @@ inline TRef<U> TCast(TRef<T> const& target)
 	return std::dynamic_pointer_cast<U>(target);
 }
 template<typename U, typename T>
-inline THnd<U> CastRef(THnd<T>&& target)
+inline THnd<U> TCast(THnd<T>&& target)
 {
 	if (target == nullptr) return THnd<U>();
 	return std::dynamic_pointer_cast<U>(target.lock());
 }
 template<typename U, typename T>
-inline THnd<U> CastRef(THnd<T> const& target)
+inline THnd<U> TCast(THnd<T> const& target)
 {
 	if (target == nullptr) return THnd<U>();
 	return std::dynamic_pointer_cast<U>(target.lock());
