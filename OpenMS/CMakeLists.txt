@@ -5,37 +5,41 @@ add_definitions(
 )
 
 add_library(OpenMS STATIC
+	HTTP/HTTPReactor.h
 	IChannel.h
+	IChannelAddress.h
+	IChannelBuffer.h
+	IChannelContext.h
 	IChannelEvent.h
 	IChannelHandler.h
 	IChannelPipeline.h
+	IChannelProtocol.h
 	IChannelReactor.h
 	IChannelWorker.h
-	IChannelContext.h
-	IChannelBuffer.h
-	IChannelAddress.h
-	IChannelProtocol.h
-	Private/Channel.h
-	Private/Channel.cpp
-	Private/ChannelProtocol.h
-	Private/ChannelBuffer.h
-	Private/ChannelBuffer.cpp
-	Private/ChannelContext.h
-	Private/ChannelContext.cpp
-	Private/ChannelHandler.h
-	Private/ChannelHandler.cpp
-	Private/ChannelPipeline.h
-	Private/ChannelPipeline.cpp
-	Private/ChannelReactor.h
-	Private/ChannelReactor.cpp
-	Private/ChannelWorker.h
-	Private/ChannelWorker.cpp
 	IService.h
+	KCP/KCPReactor.h
 	MS.h
+	Private/Channel.cpp
+	Private/Channel.h
+	Private/ChannelBuffer.cpp
+	Private/ChannelBuffer.h
+	Private/ChannelContext.cpp
+	Private/ChannelContext.h
+	Private/ChannelHandler.cpp
+	Private/ChannelHandler.h
+	Private/ChannelPipeline.cpp
+	Private/ChannelPipeline.h
+	Private/ChannelProtocol.h
+	Private/ChannelReactor.cpp
+	Private/ChannelReactor.h
+	Private/ChannelWorker.cpp
+	Private/ChannelWorker.h
 	Private/Service.cpp
 	Private/Service.h
-
- "HTTP/HTTPReactor.h" "KCP/KCPReactor.h" "TCP/TCPReactor.h" "UDP/UDPReactor.h")
+	TCP/TCPReactor.h
+	UDP/UDPReactor.h
+	WS/WSReactor.h
+)
 add_dependencies(OpenMS uv_a)
 
 target_include_directories(OpenMS PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
