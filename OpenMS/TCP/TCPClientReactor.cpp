@@ -89,7 +89,7 @@ void TCPClientReactor::startup()
 					break;
 				}
 
-				TPrint("connected on %s:%d", localAddress->getAddress().c_str(), localAddress->getPort());
+				TPrint("listening on %s:%d", localAddress->getAddress().c_str(), localAddress->getPort());
 			}
 
 			// Run the event loop
@@ -159,21 +159,18 @@ void TCPClientReactor::shutdown()
 void TCPClientReactor::onConnect(TRef<Channel> channel)
 {
 	ChannelReactor::onConnect(channel);
-	//auto hashName = THash(channel->getRemote()->getAddress());
 	m_Channel = channel;
 }
 
 void TCPClientReactor::onDisconnect(TRef<Channel> channel)
 {
 	ChannelReactor::onDisconnect(channel);
-	//auto hashName = THash(channel->getRemote()->getAddress());
 	m_Channel = nullptr;
 }
 
 void TCPClientReactor::on_connect(uv_connect_t* req, int status)
 {
 	auto reactor = (TCPClientReactor*)req->handle->loop->data;
-	auto client = (uv_tcp_t*)req->handle;
 
 	if (status < 0)
 	{
@@ -187,6 +184,7 @@ void TCPClientReactor::on_connect(uv_connect_t* req, int status)
 	socklen_t addrlen = sizeof(addr);
 	TRef<IChannelSocketAddress> localAddress, remoteAddress;
 
+	auto client = (uv_tcp_t*)req->handle;
 	auto result = uv_tcp_getsockname((uv_tcp_t*)client, (struct sockaddr*)&addr, &addrlen);
 	if (result == 0)
 	{
@@ -247,7 +245,7 @@ void TCPClientReactor::on_connect(uv_connect_t* req, int status)
 	client->data = channel.get();
 	reactor->onConnect(channel);
 
-	TPrint("connected from %s:%d", remoteAddress->getAddress().c_str(), remoteAddress->getPort());
+	TDebug("accepted from %s:%d", remoteAddress->getAddress().c_str(), remoteAddress->getPort());
 
 	// Start reading data from the server
 

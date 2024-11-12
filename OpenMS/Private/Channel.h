@@ -20,11 +20,10 @@ public:
 	Channel(TRaw<ChannelReactor> reactor, TRef<IChannelAddress> local, TRef<IChannelAddress> remote);
 	~Channel();
 	bool running() const override;
-	TRaw<const IChannelAddress> getLocal() const override;
-	TRaw<const IChannelAddress> getRemote() const override;
-	TRaw<const IChannelContext> getContext() const override;
-	TRaw<IChannelPipeline> getPipeline() override;
-	TRaw<const IChannelPipeline> getPipeline() const override;
+	TRaw<IChannelAddress> getLocal() const override;
+	TRaw<IChannelAddress> getRemote() const override;
+	TRaw<IChannelContext> getContext() const override;
+	TRaw<IChannelPipeline> getPipeline() const override;
 	void close() override;
 	TFuture<bool> close(TPromise<bool>&& promise) override;
 	void read(TRef<IChannelEvent> event);

@@ -263,7 +263,7 @@ void TCPServerReactor::on_connect(uv_stream_t* server, int status)
 		client->data = channel.get();
 		reactor->onConnect(channel);
 
-		TPrint("accepted from %s:%d", remoteAddress->getAddress().c_str(), remoteAddress->getPort());
+		TDebug("accepted from %s:%d", remoteAddress->getAddress().c_str(), remoteAddress->getPort());
 
 		// Start reading data from the client
 

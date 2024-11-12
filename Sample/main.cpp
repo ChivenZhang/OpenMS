@@ -6,15 +6,39 @@
 
 int main()
 {
-	system("pause");
 	if (true)
 	{
-		TCPServerReactor server("127.0.0.1", 6000, 128, 4, {
+		TCPServerReactor server("0.0.0.0", 6000, 128, 4, {
 			[](TRef<IChannel> channel) {	// Connected
-				auto inbound = TNew<TestInboundHandler>();
+				auto ipv4 = TCast<IPv4Address>(channel->getRemote());
+				TPrint("connect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
+
+				auto inbound = TNew<ServerInboundHandler>();
 				channel->getPipeline()->addFirst("https", inbound);
 
-				auto outbound = TNew<TestOutboundHandler>();
+				auto outbound = TNew<ServerOutboundHandler>();
+				channel->getPipeline()->addFirst("https", outbound);
+
+				auto event = TNew<IChannelEvent>();
+				event->Message = "Hello";
+				channel->write(event);
+			},
+			[](TRef<IChannel> channel) {	// Disconnect
+				auto ipv4 = TCast<IPv4Address>(channel->getRemote());
+				TPrint("disconnect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
+			},
+			});
+		server.startup();
+
+		TCPClientReactor client("192.168.1.2", 6000, 1, {
+			[](TRef<IChannel> channel) {	// Connected
+				auto ipv4 = TCast<IPv4Address>(channel->getRemote());
+				TPrint("connect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
+
+				auto inbound = TNew<ClientInboundHandler>();
+				channel->getPipeline()->addFirst("https", inbound);
+
+				auto outbound = TNew<ServerOutboundHandler>();
 				channel->getPipeline()->addFirst("https", outbound);
 
 				auto event = TNew<IChannelEvent>();
@@ -23,25 +47,17 @@ int main()
 			},
 			[](TRef<IChannel> channel) {	// Disconnect
 				// Do something here
-			},
-			});
-		server.startup();
 
-		TCPClientReactor client("127.0.0.1", 6000, 1, {
-			[](TRef<IChannel> channel) {	// Connected
-				auto inbound = TNew<TestInboundHandler>();
-				channel->getPipeline()->addFirst("https", inbound);
-
-				auto outbound = TNew<TestOutboundHandler>();
-				channel->getPipeline()->addFirst("https", outbound);
-			},
-			[](TRef<IChannel> channel) {	// Disconnect
-				// Do something here
+				auto ipv4 = TCast<IPv4Address>(channel->getRemote());
+				TPrint("disconnect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
 			},
 			});
 		client.startup();
 
-		std::this_thread::sleep_for(std::chrono::seconds(2));
+		TMutex mutex;
+		TMutexUnlock unlock;
+		TUniqueLock lock(mutex);
+		unlock.wait(lock);
 	}
 	return 0;
 }

@@ -11,23 +11,52 @@
 * =================================================*/
 #include <OpenMS/Private/ChannelHandler.h>
 
-class TestInboundHandler : public ChannelInboundHandler
+class ServerInboundHandler : public ChannelInboundHandler
 {
 public:
 	void channelRead(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) const override
 	{
-		TPrint("Read: %s\n", event->Message.c_str());
+		TPrint("Read: %s", event->Message.c_str());
 	}
 };
 
-class TestOutboundHandler : public ChannelOutboundHandler
+class ServerOutboundHandler : public ChannelOutboundHandler
 {
 public:
 	void channelWrite(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) const override
 	{
-		TPrint("Write: %s\n", event->Message.c_str());
+		printf(">>");
 
-		auto _event = TNew<IChannelEvent>(IChannelEvent{ "A message!" });
+		auto _event = TNew<IChannelEvent>();
+		_event->Message = event->Message;
 		context->write(_event);
+		TPrint("Write: %s", _event->Message.c_str());
+	}
+};
+
+class ClientInboundHandler : public ChannelInboundHandler
+{
+public:
+	void channelRead(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) const override
+	{
+		TPrint("Read: %s", event->Message.c_str());
+	}
+};
+
+class ClientOutboundHandler : public ChannelOutboundHandler
+{
+public:
+	void channelWrite(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) const override
+	{
+		printf(">>");
+
+		char buffer[1024]{};
+		size_t buflen = 0;
+		while (scanf("%c", buffer + buflen) != EOF && buffer[buflen] != '\n') ++buflen;
+
+		auto _event = TNew<IChannelEvent>();
+		_event->Message = TStringView(buffer, buflen);
+		context->write(_event);
+		TPrint("Write: %s", _event->Message.c_str());
 	}
 };

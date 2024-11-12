@@ -32,29 +32,24 @@ bool Channel::running() const
 	return m_Running;
 }
 
-TRaw<const IChannelAddress> Channel::getLocal() const
+TRaw<IChannelAddress> Channel::getLocal() const
 {
 	return m_LocalAddr.get();
 }
 
-TRaw<const IChannelAddress> Channel::getRemote() const
+TRaw<IChannelAddress> Channel::getRemote() const
 {
 	return m_RemoteAddr.get();
 }
 
-TRaw<const IChannelContext> Channel::getContext() const
+TRaw<IChannelContext> Channel::getContext() const
 {
-	return &m_Context;
+	return (TRaw<IChannelContext>) & m_Context;
 }
 
-TRaw<IChannelPipeline> Channel::getPipeline()
+TRaw<IChannelPipeline> Channel::getPipeline() const
 {
-	return &m_Pipeline;
-}
-
-TRaw<const IChannelPipeline> Channel::getPipeline() const
-{
-	return &m_Pipeline;
+	return (TRaw<IChannelPipeline>) & m_Pipeline;
 }
 
 void Channel::close()

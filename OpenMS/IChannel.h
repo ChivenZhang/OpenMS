@@ -22,15 +22,13 @@ public:
 
 	virtual bool running() const = 0;
 
-	virtual TRaw<const IChannelAddress> getLocal() const = 0;
+	virtual TRaw<IChannelAddress> getLocal() const = 0;
 
-	virtual TRaw<const IChannelAddress> getRemote() const = 0;
+	virtual TRaw<IChannelAddress> getRemote() const = 0;
 
-	virtual TRaw<const IChannelContext> getContext() const = 0;
+	virtual TRaw<IChannelContext> getContext() const = 0;
 
-	virtual TRaw<IChannelPipeline> getPipeline() = 0;
-
-	virtual TRaw<const IChannelPipeline> getPipeline() const = 0;
+	virtual TRaw<IChannelPipeline> getPipeline() const = 0;
 
 	virtual void close() = 0;
 
