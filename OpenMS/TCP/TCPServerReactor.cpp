@@ -10,7 +10,6 @@
 * =================================================*/
 #include "TCPServerReactor.h"
 #include "TCPChannel.h"
-#include <uv.h>
 
 TCPServerReactor::TCPServerReactor(TStringView ip, uint16_t port, uint32_t backlog, size_t workerNum, callback_t callback)
 	:
@@ -19,10 +18,6 @@ TCPServerReactor::TCPServerReactor(TStringView ip, uint16_t port, uint32_t backl
 	m_PortNum(port),
 	m_Backlog(backlog),
 	m_AsyncStop(uv_async_t())
-{
-}
-
-TCPServerReactor::~TCPServerReactor()
 {
 }
 
