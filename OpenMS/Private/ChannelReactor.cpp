@@ -12,9 +12,10 @@
 
 ChannelReactor::ChannelReactor(size_t workerNum, callback_t callback)
 	:
+	m_Running(false),
+	m_Callback(callback),
 	m_WorkerList(std::max(1ULL, workerNum)),
-	m_WorkerThreads(std::max(1ULL, workerNum)),
-	m_Callback(callback)
+	m_WorkerThreads(std::max(1ULL, workerNum))
 {
 }
 
@@ -25,15 +26,12 @@ ChannelReactor::~ChannelReactor()
 
 void ChannelReactor::startup()
 {
-	if (m_Running == true) shutdown();
-
 	m_Running = true;
-	auto workerNum = m_WorkerList.size();
-	for (size_t i = 0; i < workerNum; ++i) m_WorkerList[i] = TNew<ChannelWorker>(this);
-	for (size_t i = 0; i < workerNum; ++i) m_WorkerThreads[i] = TThread([=]() { m_WorkerList[i]->startup(); });
-	for (size_t i = 0; i < workerNum; ++i) while (m_WorkerList[i]->running() == false);
+	for (size_t i = 0; i < m_WorkerList.size(); ++i) m_WorkerList[i] = TNew<ChannelWorker>(this);
+	for (size_t i = 0; i < m_WorkerList.size(); ++i) m_WorkerThreads[i] = TThread([=]() { m_WorkerList[i]->startup(); });
+	for (size_t i = 0; i < m_WorkerList.size(); ++i) while (m_WorkerList[i]->running() == false);
 
-#if 1 // test code
+#if 0 // test code
 	m_EventThread = TThread([=]() {
 		auto channel = TNew<Channel>(this, nullptr, nullptr);
 		onConnect(channel);
@@ -81,4 +79,5 @@ void ChannelReactor::onOutbound(TRef<IChannelEvent> event, bool flush)
 {
 	TMutexLock lock(m_EventLock);
 	m_EventQueue.push(event);
+	m_Sending = true;
 }

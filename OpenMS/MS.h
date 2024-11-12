@@ -246,14 +246,20 @@ inline constexpr uint32_t THash(TCString value)
 	while (*value) hash = hash * 31 + (*value++);
 	return hash;
 }
+inline constexpr uint32_t THash(TString const& value)
+{
+	return THash(value.c_str());
+}
 
 // ============================================
 
-#define TPrint(FORMAT, ...) fprintf(stdout, FORMAT, __VA_ARGS__)
-#define TError(FORMAT, ...) fprintf(stderr, FORMAT, __VA_ARGS__)
-#define TFatal(FORMAT, ...) do{ fprintf(stderr, FORMAT, __VA_ARGS__); exit(1); }while(0)
+#define TAssert(...) assert(__VA_ARGS__)
+
+#define TPrint(FORMAT, ...) fprintf(stdout, FORMAT "\n", __VA_ARGS__)
+#define TError(FORMAT, ...) fprintf(stderr, FORMAT "\n", __VA_ARGS__)
+#define TFatal(FORMAT, ...) do{ fprintf(stderr, FORMAT "\n", __VA_ARGS__); exit(1); }while(0)
 #ifdef OPENMS_DEBUG
-#define TDebug(FORMAT, ...) fprintf(stdout, FORMAT, __VA_ARGS__)
+#define TDebug(FORMAT, ...) fprintf(stdout, FORMAT "\n", __VA_ARGS__)
 #else
 #define TDebug(FORMAT, ...)
 #endif

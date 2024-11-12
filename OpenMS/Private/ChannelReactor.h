@@ -23,18 +23,19 @@ public:
 	bool running() const;
 
 protected:
-	void onConnect(TRef<Channel> channel);
-	void onDisconnect(TRef<Channel> channel);
-	void onInbound(TRef<IChannelEvent> event);
-	void onOutbound(TRef<IChannelEvent> event, bool flush = false);
+	virtual void onConnect(TRef<Channel> channel);
+	virtual void onDisconnect(TRef<Channel> channel);
+	virtual void onInbound(TRef<IChannelEvent> event);
+	virtual void onOutbound(TRef<IChannelEvent> event, bool flush = false);
 
 protected:
 	callback_t m_Callback;
+	TMutex m_EventLock;
 	TThread m_EventThread;
 	TAtomic<bool> m_Running;
+	TAtomic<bool> m_Sending;
 	TVector<TThread> m_WorkerThreads;
 	TVector<TRef<ChannelWorker>> m_WorkerList;
-	TMutex m_EventLock;
 	TQueue<TRef<IChannelEvent>> m_EventQueue;
 
 private:

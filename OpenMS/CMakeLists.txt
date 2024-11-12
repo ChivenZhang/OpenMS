@@ -36,10 +36,10 @@ add_library(OpenMS STATIC
 	Private/ChannelWorker.h
 	Private/Service.cpp
 	Private/Service.h
-	TCP/TCPReactor.h
+	"TCP/TCPServerReactor.h"
 	UDP/UDPReactor.h
 	WS/WSReactor.h
- "Private/ChannelEvent.h")
+ "Private/ChannelEvent.h" "TCP/TCPServerReactor.cpp" "Private/ChannelAddress.h" "Private/ChannelAddress.cpp" "TCP/TCPChannel.h" "TCP/TCPChannel.cpp")
 add_dependencies(OpenMS uv_a)
 
 target_include_directories(OpenMS PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

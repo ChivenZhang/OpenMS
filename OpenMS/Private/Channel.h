@@ -14,7 +14,7 @@
 #include "ChannelPipeline.h"
 class ChannelReactor;
 
-class Channel : public IChannel, std::enable_shared_from_this<Channel>
+class Channel : public IChannel, public std::enable_shared_from_this<Channel>
 {
 public:
 	Channel(TRaw<ChannelReactor> reactor, TRef<IChannelAddress> local, TRef<IChannelAddress> remote);
