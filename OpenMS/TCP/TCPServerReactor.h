@@ -35,6 +35,5 @@ protected:
 	uint16_t m_PortNum;
 	uint32_t m_Backlog;
 	uv_async_t m_AsyncStop;
-	TRef<IChannelSocketAddress> m_SocketAddress;
 	TMap<uint32_t, TRef<Channel>> m_Connections;
 };

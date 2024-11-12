@@ -255,11 +255,11 @@ inline constexpr uint32_t THash(TString const& value)
 
 #define TAssert(...) assert(__VA_ARGS__)
 
-#define TPrint(FORMAT, ...) fprintf(stdout, FORMAT "\n", __VA_ARGS__)
-#define TError(FORMAT, ...) fprintf(stderr, FORMAT "\n", __VA_ARGS__)
-#define TFatal(FORMAT, ...) do{ fprintf(stderr, FORMAT "\n", __VA_ARGS__); exit(1); }while(0)
+#define TPrint(FORMAT, ...) do{ fprintf(stdout, "%s(%d)\t%s\n%.3f s\t[%s]\t" FORMAT "\n\n", __FILE__, __LINE__, __FUNCTION__, ::clock()*0.001f, "INFO", __VA_ARGS__); }while(0)
+#define TError(FORMAT, ...) do{ fprintf(stderr, "%s(%d)\t%s\n%.3f s\t[%s]\t" FORMAT "\n\n", __FILE__, __LINE__, __FUNCTION__, ::clock()*0.001f, "ERROR", __VA_ARGS__); }while(0)
+#define TFatal(FORMAT, ...) do{ fprintf(stderr, "%s(%d)\t%s\n%.3f s\t[%s]\t" FORMAT "\n\n", __FILE__, __LINE__, __FUNCTION__, ::clock()*0.001f, "FATAL", __VA_ARGS__); exit(1); }while(0)
 #ifdef OPENMS_DEBUG
-#define TDebug(FORMAT, ...) fprintf(stdout, FORMAT "\n", __VA_ARGS__)
-#else
+#define TDebug(FORMAT, ...) do{ fprintf(stdout, "%s(%d)\t%s\n%.3f s\t[%s]\t" FORMAT "\n\n", __FILE__, __LINE__, __FUNCTION__, ::clock()*0.001f, "DEBUG", __VA_ARGS__); }while(0)
+#else													
 #define TDebug(FORMAT, ...)
 #endif

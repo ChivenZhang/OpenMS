@@ -25,15 +25,14 @@ protected:
 	void onDisconnect(TRef<Channel> channel) override;
 
 protected:
-	//static void on_connect(uv_stream_t* server, int status);
+	static void on_connect(uv_connect_t* req, int status);
 	static void on_alloc(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf);
 	static void on_read(uv_stream_t* stream, ssize_t nread, const uv_buf_t* buf);
-	static void on_write(uv_write_t* req, int status);
 	static void on_stop(uv_async_t* handle);
 
 protected:
 	TString m_Address;
 	uint16_t m_PortNum;
 	uv_async_t m_AsyncStop;
-	TRef<IChannelSocketAddress> m_SocketAddress;
+	TRef<Channel> m_Channel;
 };

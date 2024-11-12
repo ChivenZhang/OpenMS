@@ -6,6 +6,7 @@
 
 int main()
 {
+	system("pause");
 	if (true)
 	{
 		TCPServerReactor server("127.0.0.1", 6000, 128, 4, {
@@ -15,11 +16,16 @@ int main()
 
 				auto outbound = TNew<TestOutboundHandler>();
 				channel->getPipeline()->addFirst("https", outbound);
+
+				auto event = TNew<IChannelEvent>();
+				event->Message = "Hello";
+				channel->write(event);
 			},
 			[](TRef<IChannel> channel) {	// Disconnect
 				// Do something here
 			},
 			});
+		server.startup();
 
 		TCPClientReactor client("127.0.0.1", 6000, 1, {
 			[](TRef<IChannel> channel) {	// Connected
@@ -33,13 +39,9 @@ int main()
 				// Do something here
 			},
 			});
-
-		server.startup();
 		client.startup();
 
 		std::this_thread::sleep_for(std::chrono::seconds(2));
-		server.shutdown();
-		client.shutdown();
 	}
 	return 0;
 }
