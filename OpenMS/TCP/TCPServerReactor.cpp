@@ -11,6 +11,11 @@
 #include "TCPServerReactor.h"
 #include "TCPChannel.h"
 
+struct uv_write2_t : public uv_write_t
+{
+	void* data2;	// For promise usage
+};
+
 TCPServerReactor::TCPServerReactor(TStringView ip, uint16_t port, uint32_t backlog, size_t workerNum, callback_t callback)
 	:
 	ChannelReactor(workerNum, callback),
@@ -104,22 +109,33 @@ void TCPServerReactor::startup()
 
 					if (event->Channel.expired()) continue;
 					auto channel = TCast<TCPChannel>(event->Channel.lock());
-					if (channel == nullptr || event->Message.empty()) continue;
+					if (channel == nullptr || channel->running() == false) continue;
+					if (event->Message.empty()) continue;
 					auto data_to_send = (char*)::malloc(event->Message.size());
 					if (data_to_send == nullptr) continue;
 
 					auto client = channel->getHandle();
 					auto data_len = (uint32_t)event->Message.size();
 					::memcpy(data_to_send, event->Message.data(), data_len);
-					auto write_req = (uv_write_t*)malloc(sizeof(uv_write_t));
-					if (write_req) write_req->data = data_to_send;
 					uv_buf_t buf = uv_buf_init(data_to_send, data_len);
-					auto result = uv_write(write_req, (uv_stream_t*)client, &buf, 1, on_write);
-					if (result)
+
+					size_t sentNum = 0;
+					while (sentNum < event->Message.size())
 					{
-						free(data_to_send);
-						free(write_req);
-						TError("write error: %s", ::uv_strerror(result));
+						auto buf = uv_buf_init(event->Message.data() + sentNum, (unsigned)(event->Message.size() - sentNum));
+						auto result = uv_try_write((uv_stream_t*)client, &buf, 1);
+						if (result < 0)
+						{
+							this->onDisconnect(channel);
+							break;
+						}
+						else if (result == UV_EAGAIN) continue;
+						else sentNum += result;
+					}
+					if (event->UserData)
+					{
+						auto promise = (TPromise<bool>*)event->UserData;
+						if (promise) promise->set_value(sentNum == event->Message.size());
 					}
 				}
 			}
@@ -266,26 +282,8 @@ void TCPServerReactor::on_read(uv_stream_t* stream, ssize_t nread, const uv_buf_
 	event->Channel = channel->weak_from_this();
 	reactor->onInbound(event);
 
-	// 发送回显数据给客户端
-	uv_write_t req;
-	uv_write(&req, stream, buf, 1, nullptr);
-
 	// 释放缓冲区
 	free(buf->base);
-}
-
-void TCPServerReactor::on_write(uv_write_t* req, int status)
-{
-	if (status)
-	{
-		TError("write error: %s", uv_strerror(status));
-	}
-	else
-	{
-		TDebug("data sent successfully");
-	}
-	free((void*)req->data);
-	free(req);
 }
 
 // 停止事件循环
