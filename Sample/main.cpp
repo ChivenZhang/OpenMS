@@ -18,10 +18,6 @@ int main()
 
 				auto outbound = TNew<ServerOutboundHandler>();
 				channel->getPipeline()->addFirst("https", outbound);
-
-				auto event = TNew<IChannelEvent>();
-				event->Message = "Hello";
-				channel->write(event);
 			},
 			[](TRef<IChannel> channel) {	// Disconnect
 				auto ipv4 = TCast<IPv4Address>(channel->getRemote());
@@ -38,7 +34,7 @@ int main()
 				auto inbound = TNew<ClientInboundHandler>();
 				channel->getPipeline()->addFirst("https", inbound);
 
-				auto outbound = TNew<ServerOutboundHandler>();
+				auto outbound = TNew<ClientOutboundHandler>();
 				channel->getPipeline()->addFirst("https", outbound);
 
 				auto event = TNew<IChannelEvent>();
@@ -46,8 +42,6 @@ int main()
 				channel->write(event);
 			},
 			[](TRef<IChannel> channel) {	// Disconnect
-				// Do something here
-
 				auto ipv4 = TCast<IPv4Address>(channel->getRemote());
 				TPrint("disconnect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
 			},

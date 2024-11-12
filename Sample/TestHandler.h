@@ -25,8 +25,6 @@ class ServerOutboundHandler : public ChannelOutboundHandler
 public:
 	void channelWrite(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) const override
 	{
-		printf(">>");
-
 		auto _event = TNew<IChannelEvent>();
 		_event->Message = event->Message;
 		context->write(_event);
