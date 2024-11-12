@@ -11,11 +11,6 @@
 #include "TCPServerReactor.h"
 #include "TCPChannel.h"
 
-struct uv_write2_t : public uv_write_t
-{
-	void* data2;	// For promise usage
-};
-
 TCPServerReactor::TCPServerReactor(TRef<ISocketAddress> address, uint32_t backlog, size_t workerNum, callback_t callback)
 	:
 	ChannelReactor(workerNum, callback),
