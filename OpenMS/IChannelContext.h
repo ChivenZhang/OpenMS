@@ -12,7 +12,7 @@
 #include "MS.h"
 #include "IChannelEvent.h"
 
-/// @brief Interface for channel
+/// @brief Interface for channel context
 class OPENMS_API IChannelContext
 {
 public:

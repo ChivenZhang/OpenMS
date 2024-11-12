@@ -21,10 +21,13 @@ add_library(OpenMS STATIC
 	MS.h
 	Private/Channel.cpp
 	Private/Channel.h
+	Private/ChannelAddress.cpp 
+	Private/ChannelAddress.h 
 	Private/ChannelBuffer.cpp
 	Private/ChannelBuffer.h
 	Private/ChannelContext.cpp
 	Private/ChannelContext.h
+	Private/ChannelEvent.h 
 	Private/ChannelHandler.cpp
 	Private/ChannelHandler.h
 	Private/ChannelPipeline.cpp
@@ -36,10 +39,18 @@ add_library(OpenMS STATIC
 	Private/ChannelWorker.h
 	Private/Service.cpp
 	Private/Service.h
-	"TCP/TCPServerReactor.h"
+	TCP/TCPChannel.cpp 
+	TCP/TCPChannel.h 
+	TCP/TCPClientReactor.cpp 
+	TCP/TCPClientReactor.h 
+	TCP/TCPServerReactor.cpp 
+	TCP/TCPServerReactor.h
+	UDP/UDPChannel.cpp
+	UDP/UDPChannel.h 
+	UDP/UDPReactor.cpp 
 	UDP/UDPReactor.h
 	WS/WSReactor.h
- "Private/ChannelEvent.h" "TCP/TCPServerReactor.cpp" "Private/ChannelAddress.h" "Private/ChannelAddress.cpp" "TCP/TCPChannel.h" "TCP/TCPChannel.cpp" "TCP/TCPClientReactor.h" "TCP/TCPClientReactor.cpp")
+)
 add_dependencies(OpenMS uv_a)
 
 target_include_directories(OpenMS PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

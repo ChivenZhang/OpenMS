@@ -8,23 +8,23 @@ int main()
 {
 	if (true)
 	{
-		TCPServerReactor server("0.0.0.0", 6000, 128, 4, {
-			[](TRef<IChannel> channel) {	// Connected
-				auto ipv4 = TCast<IPv4Address>(channel->getRemote());
-				TPrint("connect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
+		//TCPServerReactor server("0.0.0.0", 6000, 128, 4, {
+		//	[](TRef<IChannel> channel) {	// Connected
+		//		auto ipv4 = TCast<IPv4Address>(channel->getRemote());
+		//		TPrint("connect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
 
-				auto inbound = TNew<ServerInboundHandler>();
-				channel->getPipeline()->addFirst("https", inbound);
+		//		auto inbound = TNew<ServerInboundHandler>();
+		//		channel->getPipeline()->addFirst("https", inbound);
 
-				auto outbound = TNew<ServerOutboundHandler>();
-				channel->getPipeline()->addFirst("https", outbound);
-			},
-			[](TRef<IChannel> channel) {	// Disconnect
-				auto ipv4 = TCast<IPv4Address>(channel->getRemote());
-				TPrint("disconnect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
-			},
-			});
-		server.startup();
+		//		auto outbound = TNew<ServerOutboundHandler>();
+		//		channel->getPipeline()->addFirst("https", outbound);
+		//	},
+		//	[](TRef<IChannel> channel) {	// Disconnect
+		//		auto ipv4 = TCast<IPv4Address>(channel->getRemote());
+		//		TPrint("disconnect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
+		//	},
+		//	});
+		//server.startup();
 
 		TCPClientReactor client("192.168.1.2", 6000, 1, {
 			[](TRef<IChannel> channel) {	// Connected
