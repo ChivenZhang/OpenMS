@@ -11,13 +11,15 @@
 #include "TCPClientReactor.h"
 #include "TCPChannel.h"
 
-TCPClientReactor::TCPClientReactor(TStringView ip, uint16_t port, size_t workerNum, callback_t callback)
+TCPClientReactor::TCPClientReactor(TRef<ISocketAddress> address, size_t workerNum, callback_t callback)
 	:
 	ChannelReactor(workerNum, callback),
-	m_Address(ip),
-	m_PortNum(port),
+	m_SocketAddress(address),
 	m_AsyncStop(uv_async_t())
 {
+	if (m_SocketAddress == nullptr) m_SocketAddress = TNew<IPv4Address>("0.0.0.0", 0);
+	m_Address = m_SocketAddress->getAddress();
+	m_PortNum = m_SocketAddress->getPort();
 }
 
 void TCPClientReactor::startup()
@@ -41,8 +43,16 @@ void TCPClientReactor::startup()
 			// Set up the client
 
 			{
-				sockaddr_in addr;
-				auto result = uv_ip4_addr(m_Address.data(), m_PortNum, &addr);
+				sockaddr_storage addr;
+				uint32_t result = uv_errno_t::UV_ERRNO_MAX;
+				if (TCast<IPv4Address>(m_SocketAddress))
+				{
+					result = uv_ip4_addr(m_Address.data(), m_PortNum, (sockaddr_in*)&addr);
+				}
+				else if (TCast<IPv6Address>(m_SocketAddress))
+				{
+					result = uv_ip6_addr(m_Address.data(), m_PortNum, (sockaddr_in6*)&addr);
+				}
 				if (result) TError("invalid address: %s", ::uv_strerror(result));
 				if (result) break;
 
@@ -56,7 +66,7 @@ void TCPClientReactor::startup()
 			{
 				sockaddr_storage addr;
 				socklen_t addrlen = sizeof(addr);
-				TRef<IChannelSocketAddress> localAddress;
+				TRef<ISocketAddress> localAddress;
 
 				auto result = uv_tcp_getsockname((uv_tcp_t*)&client, (struct sockaddr*)&addr, &addrlen);
 				if (result == 0)
@@ -182,7 +192,7 @@ void TCPClientReactor::on_connect(uv_connect_t* req, int status)
 
 	sockaddr_storage addr;
 	socklen_t addrlen = sizeof(addr);
-	TRef<IChannelSocketAddress> localAddress, remoteAddress;
+	TRef<ISocketAddress> localAddress, remoteAddress;
 
 	auto client = (uv_tcp_t*)req->handle;
 	auto result = uv_tcp_getsockname((uv_tcp_t*)client, (struct sockaddr*)&addr, &addrlen);

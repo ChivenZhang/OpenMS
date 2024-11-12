@@ -20,8 +20,8 @@ public:
 	virtual TString getHostName() const = 0;
 };
 
-/// @brief Interface for channel socket address
-class OPENMS_API IChannelSocketAddress : public IChannelAddress
+/// @brief Interface for socket address
+class OPENMS_API ISocketAddress : public IChannelAddress
 {
 public:
 	virtual uint16_t getPort() const = 0;

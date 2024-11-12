@@ -16,7 +16,7 @@
 class TCPServerReactor : public ChannelReactor
 {
 public:
-	TCPServerReactor(TStringView ip, uint16_t port, uint32_t backlog, size_t workerNum, callback_t callback);
+	TCPServerReactor(TRef<ISocketAddress> address, uint32_t backlog, size_t workerNum, callback_t callback);
 	void startup() override;
 	void shutdown() override;
 
@@ -35,5 +35,6 @@ protected:
 	uint16_t m_PortNum;
 	uint32_t m_Backlog;
 	uv_async_t m_AsyncStop;
+	TRef<ISocketAddress> m_SocketAddress;
 	TMap<uint32_t, TRef<Channel>> m_Connections;
 };

@@ -13,10 +13,10 @@
 #include "../Private/ChannelAddress.h"
 #include <uv.h>
 
-class TCPClientReactor : public ChannelReactor
+class UDPClientReactor : public ChannelReactor
 {
 public:
-	TCPClientReactor(TRef<ISocketAddress> address, size_t workerNum, callback_t callback);
+	UDPClientReactor(TRef<ISocketAddress> address, bool broadcast, bool multicast, size_t workerNum, callback_t callback);
 	void startup() override;
 	void shutdown() override;
 
@@ -34,6 +34,4 @@ protected:
 	TString m_Address;
 	uint16_t m_PortNum;
 	uv_async_t m_AsyncStop;
-	TRef<Channel> m_Channel;
-	TRef<ISocketAddress> m_SocketAddress;
 };

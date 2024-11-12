@@ -8,7 +8,7 @@ int main()
 {
 	if (true)
 	{
-		TCPServerReactor server("0.0.0.0", 6000, 128, 4, {
+		TCPServerReactor server(TNew<IPv4Address>("0.0.0.0", 6000), 128, 2, {
 			[](TRef<IChannel> channel) {	// Connected
 				auto ipv4 = TCast<IPv4Address>(channel->getRemote());
 				TPrint("connect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
@@ -26,7 +26,7 @@ int main()
 			});
 		server.startup();
 
-		TCPClientReactor client("192.168.1.2", 6000, 1, {
+		TCPClientReactor client(TNew<IPv4Address>("127.0.0.1", 6000), 1, {
 			[](TRef<IChannel> channel) {	// Connected
 				auto ipv4 = TCast<IPv4Address>(channel->getRemote());
 				TPrint("connect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());

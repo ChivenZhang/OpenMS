@@ -16,14 +16,16 @@ struct uv_write2_t : public uv_write_t
 	void* data2;	// For promise usage
 };
 
-TCPServerReactor::TCPServerReactor(TStringView ip, uint16_t port, uint32_t backlog, size_t workerNum, callback_t callback)
+TCPServerReactor::TCPServerReactor(TRef<ISocketAddress> address, uint32_t backlog, size_t workerNum, callback_t callback)
 	:
 	ChannelReactor(workerNum, callback),
-	m_Address(ip),
-	m_PortNum(port),
 	m_Backlog(backlog),
+	m_SocketAddress(address),
 	m_AsyncStop(uv_async_t())
 {
+	if (m_SocketAddress == nullptr) m_SocketAddress = TNew<IPv4Address>("0.0.0.0", 0);
+	m_Address = m_SocketAddress->getAddress();
+	m_PortNum = m_SocketAddress->getPort();
 }
 
 void TCPServerReactor::startup()
@@ -46,8 +48,16 @@ void TCPServerReactor::startup()
 			// Bind and listen to the socket
 
 			{
-				sockaddr_in addr;
-				auto result = uv_ip4_addr(m_Address.data(), m_PortNum, &addr);
+				sockaddr_storage addr;
+				uint32_t result = uv_errno_t::UV_ERRNO_MAX;
+				if (TCast<IPv4Address>(m_SocketAddress))
+				{
+					result = uv_ip4_addr(m_Address.data(), m_PortNum, (sockaddr_in*)&addr);
+				}
+				else if (TCast<IPv6Address>(m_SocketAddress))
+				{
+					result = uv_ip6_addr(m_Address.data(), m_PortNum, (sockaddr_in6*)&addr);
+				}
 				if (result) TError("invalid address: %s", ::uv_strerror(result));
 				if (result) break;
 
@@ -65,7 +75,7 @@ void TCPServerReactor::startup()
 			{
 				sockaddr_storage addr;
 				socklen_t addrlen = sizeof(addr);
-				TRef<IChannelSocketAddress> localAddress;
+				TRef<ISocketAddress> localAddress;
 
 				auto result = uv_tcp_getsockname((uv_tcp_t*)&server, (struct sockaddr*)&addr, &addrlen);
 				if (result == 0)
@@ -200,7 +210,7 @@ void TCPServerReactor::on_connect(uv_stream_t* server, int status)
 
 		sockaddr_storage addr;
 		socklen_t addrlen = sizeof(addr);
-		TRef<IChannelSocketAddress> localAddress, remoteAddress;
+		TRef<ISocketAddress> localAddress, remoteAddress;
 
 		auto result = uv_tcp_getsockname((uv_tcp_t*)client, (struct sockaddr*)&addr, &addrlen);
 		if (result == 0)
