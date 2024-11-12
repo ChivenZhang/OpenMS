@@ -111,13 +111,7 @@ void TCPServerReactor::startup()
 					auto channel = TCast<TCPChannel>(event->Channel.lock());
 					if (channel == nullptr || channel->running() == false) continue;
 					if (event->Message.empty()) continue;
-					auto data_to_send = (char*)::malloc(event->Message.size());
-					if (data_to_send == nullptr) continue;
-
 					auto client = channel->getHandle();
-					auto data_len = (uint32_t)event->Message.size();
-					::memcpy(data_to_send, event->Message.data(), data_len);
-					uv_buf_t buf = uv_buf_init(data_to_send, data_len);
 
 					size_t sentNum = 0;
 					while (sentNum < event->Message.size())
