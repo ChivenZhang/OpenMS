@@ -42,7 +42,7 @@ public:
 
 	virtual TFuture<bool> write(TRef<IChannelEvent> event, TPromise<bool>&& promise) = 0;
 
-	virtual void writeFlush(TRef<IChannelEvent> event) = 0;
+	virtual void writeAndFlush(TRef<IChannelEvent> event) = 0;
 
-	virtual TFuture<bool> writeFlush(TRef<IChannelEvent> event, TPromise<bool>&& promise) = 0;
+	virtual TFuture<bool> writeAndFlush(TRef<IChannelEvent> event, TPromise<bool>&& promise) = 0;
 };

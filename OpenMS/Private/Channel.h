@@ -30,8 +30,8 @@ public:
 	TFuture<bool> read(TRef<IChannelEvent> event, TPromise<bool>&& promise);
 	void write(TRef<IChannelEvent> event) override;
 	TFuture<bool> write(TRef<IChannelEvent> event, TPromise<bool>&& promise) override;
-	void writeFlush(TRef<IChannelEvent> event) override;
-	TFuture<bool> writeFlush(TRef<IChannelEvent> event, TPromise<bool>&& promise) override;
+	void writeAndFlush(TRef<IChannelEvent> event) override;
+	TFuture<bool> writeAndFlush(TRef<IChannelEvent> event, TPromise<bool>&& promise) override;
 
 protected:
 	TAtomic<bool> m_Running;

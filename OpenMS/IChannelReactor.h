@@ -28,4 +28,12 @@ public:
 	virtual void startup() = 0;
 
 	virtual void shutdown() = 0;
+
+	virtual void write(TRef<IChannelEvent> event, TRef<IChannelAddress> address) = 0;
+
+	virtual TFuture<bool> write(TRef<IChannelEvent> event, TRef<IChannelAddress> address, TPromise<bool>&& promise) = 0;
+
+	virtual void writeAndFlush(TRef<IChannelEvent> event, TRef<IChannelAddress> address) = 0;
+
+	virtual TFuture<bool> writeAndFlush(TRef<IChannelEvent> event, TRef<IChannelAddress> address, TPromise<bool>&& promise) = 0;
 };

@@ -126,23 +126,23 @@ TFuture<bool> Channel::write(TRef<IChannelEvent> event, TPromise<bool>&& promise
 {
 	if (m_Running == false) return TFuture<bool>();
 	auto result = promise.get_future();
-	event->UserData = &promise;
+	event->Promise = &promise;
 	write(event);
 	return result;
 }
 
-void Channel::writeFlush(TRef<IChannelEvent> event)
+void Channel::writeAndFlush(TRef<IChannelEvent> event)
 {
 	if (m_Running == false) return;
 	event->Channel = shared_from_this();
 	m_Reactor->onOutbound(event, true);
 }
 
-TFuture<bool> Channel::writeFlush(TRef<IChannelEvent> event, TPromise<bool>&& promise)
+TFuture<bool> Channel::writeAndFlush(TRef<IChannelEvent> event, TPromise<bool>&& promise)
 {
 	if (m_Running == false) return TFuture<bool>();
 	auto result = promise.get_future();
-	event->UserData = &promise;
-	writeFlush(event);
+	event->Promise = &promise;
+	writeAndFlush(event);
 	return result;
 }

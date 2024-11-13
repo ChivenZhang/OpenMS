@@ -24,7 +24,7 @@ void ChannelContext::write(TRef<IChannelEvent> event)
 
 void ChannelContext::writeAndFlush(TRef<IChannelEvent> event)
 {
-	m_Channel->writeFlush(event);
+	m_Channel->writeAndFlush(event);
 }
 
 TFuture<bool> ChannelContext::write(TRef<IChannelEvent> event, TPromise<bool>&& promise)
@@ -34,5 +34,5 @@ TFuture<bool> ChannelContext::write(TRef<IChannelEvent> event, TPromise<bool>&& 
 
 TFuture<bool> ChannelContext::writeAndFlush(TRef<IChannelEvent> event, TPromise<bool>&& promise)
 {
-	return m_Channel->writeFlush(event, std::forward<TPromise<bool>>(promise));
+	return m_Channel->writeAndFlush(event, std::forward<TPromise<bool>>(promise));
 }

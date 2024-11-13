@@ -13,7 +13,6 @@ add_library(OpenMS STATIC
 	IChannelEvent.h
 	IChannelHandler.h
 	IChannelPipeline.h
-	IChannelProtocol.h
 	IChannelReactor.h
 	IChannelWorker.h
 	IService.h
@@ -32,7 +31,6 @@ add_library(OpenMS STATIC
 	Private/ChannelHandler.h
 	Private/ChannelPipeline.cpp
 	Private/ChannelPipeline.h
-	Private/ChannelProtocol.h
 	Private/ChannelReactor.cpp
 	Private/ChannelReactor.h
 	Private/ChannelWorker.cpp

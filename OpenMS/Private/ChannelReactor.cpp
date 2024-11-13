@@ -59,6 +59,32 @@ bool ChannelReactor::running() const
 	return m_Running;
 }
 
+void ChannelReactor::write(TRef<IChannelEvent> event, TRef<IChannelAddress> address)
+{
+}
+
+TFuture<bool> ChannelReactor::write(TRef<IChannelEvent> event, TRef<IChannelAddress> address, TPromise<bool>&& promise)
+{
+	if (m_Running == false) return TFuture<bool>();
+	auto result = promise.get_future();
+	event->Promise = &promise;
+	write(event, address);
+	return result;
+}
+
+void ChannelReactor::writeAndFlush(TRef<IChannelEvent> event, TRef<IChannelAddress> address)
+{
+}
+
+TFuture<bool> ChannelReactor::writeAndFlush(TRef<IChannelEvent> event, TRef<IChannelAddress> address, TPromise<bool>&& promise)
+{
+	if (m_Running == false) return TFuture<bool>();
+	auto result = promise.get_future();
+	event->Promise = &promise;
+	writeAndFlush(event, address);
+	return result;
+}
+
 void ChannelReactor::onConnect(TRef<Channel> channel)
 {
 	if (m_Callback.Connected) m_Callback.Connected(channel);

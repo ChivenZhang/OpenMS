@@ -44,14 +44,14 @@ void TCPClientReactor::startup()
 
 			{
 				sockaddr_storage addr;
-				uint32_t result = uv_errno_t::UV_ERRNO_MAX;
+				uint32_t result = uv_errno_t::UV_EINVAL;
 				if (TCast<IPv4Address>(m_SocketAddress))
 				{
-					result = uv_ip4_addr(m_Address.data(), m_PortNum, (sockaddr_in*)&addr);
+					result = uv_ip4_addr(m_Address.c_str(), m_PortNum, (sockaddr_in*)&addr);
 				}
 				else if (TCast<IPv6Address>(m_SocketAddress))
 				{
-					result = uv_ip6_addr(m_Address.data(), m_PortNum, (sockaddr_in6*)&addr);
+					result = uv_ip6_addr(m_Address.c_str(), m_PortNum, (sockaddr_in6*)&addr);
 				}
 				if (result) TError("invalid address: %s", ::uv_strerror(result));
 				if (result) break;
@@ -85,8 +85,8 @@ void TCPClientReactor::startup()
 						auto in6_addr = (struct sockaddr_in6*)&addr;
 						char ip_str[INET6_ADDRSTRLEN];
 						inet_ntop(AF_INET6, &in6_addr->sin6_addr, ip_str, sizeof(ip_str));
-						auto portNum = ntohs(in6_addr->sin6_port);
 						auto address = ip_str;
+						auto portNum = ntohs(in6_addr->sin6_port);
 						localAddress = TNew<IPv6Address>(address, portNum);
 					}
 					else TError("unknown address family: %d", addr.ss_family);
@@ -108,44 +108,7 @@ void TCPClientReactor::startup()
 				loop.data = this;
 				promise.set_value();
 
-				while (m_Running == true && uv_run(&loop, UV_RUN_NOWAIT))
-				{
-					if (m_Sending == false) continue;
-
-					TMutexLock lock(m_EventLock);
-					m_Sending = false;
-
-					while (m_EventQueue.size())
-					{
-						auto event = m_EventQueue.front();
-						m_EventQueue.pop();
-
-						if (event->Channel.expired()) continue;
-						auto channel = TCast<TCPChannel>(event->Channel.lock());
-						if (channel == nullptr || channel->running() == false) continue;
-						if (event->Message.empty()) continue;
-						auto client = channel->getHandle();
-
-						size_t sentNum = 0;
-						while (sentNum < event->Message.size())
-						{
-							auto buf = uv_buf_init(event->Message.data() + sentNum, (unsigned)(event->Message.size() - sentNum));
-							auto result = uv_try_write((uv_stream_t*)client, &buf, 1);
-							if (result < 0)
-							{
-								this->onDisconnect(channel);
-								break;
-							}
-							else if (result == UV_EAGAIN) continue;
-							else sentNum += result;
-						}
-						if (event->UserData)
-						{
-							auto promise = (TPromise<bool>*)event->UserData;
-							if (promise) promise->set_value(sentNum == event->Message.size());
-						}
-					}
-				}
+				while (m_Running == true && uv_run(&loop, UV_RUN_NOWAIT)) on_send(&client);
 			}
 
 		} while (0);
@@ -262,10 +225,10 @@ void TCPClientReactor::on_connect(uv_connect_t* req, int status)
 	result = uv_read_start((uv_stream_t*)client, on_alloc, on_read);
 	if (result)
 	{
-		reactor->onDisconnect(channel->shared_from_this());
-
 		TError("read start error: %s", ::uv_strerror(result));
 		uv_close((uv_handle_t*)&client, nullptr);
+
+		reactor->onDisconnect(channel->shared_from_this());
 	}
 }
 
@@ -283,19 +246,19 @@ void TCPClientReactor::on_read(uv_stream_t* stream, ssize_t nread, const uv_buf_
 
 	if (nread < 0)
 	{
-		reactor->onDisconnect(channel->shared_from_this());
-
 		uv_close((uv_handle_t*)stream, nullptr);
 		free(buf->base);
+
+		reactor->onDisconnect(channel->shared_from_this());
 		return;
 	}
 
 	if (nread == 0)
 	{
-		reactor->onDisconnect(channel->shared_from_this());
-
 		uv_close((uv_handle_t*)stream, nullptr);
 		free(buf->base);
+
+		reactor->onDisconnect(channel->shared_from_this());
 		return;
 	}
 
@@ -307,6 +270,47 @@ void TCPClientReactor::on_read(uv_stream_t* stream, ssize_t nread, const uv_buf_
 
 	// 释放缓冲区
 	free(buf->base);
+}
+
+void TCPClientReactor::on_send(uv_tcp_t* handle)
+{
+	auto reactor = (TCPClientReactor*)handle->loop->data;
+	auto server = (uv_udp_t*)handle;
+
+	if (reactor->m_Sending == false) return;
+
+	TMutexLock lock(reactor->m_EventLock);
+	reactor->m_Sending = false;
+
+	while (reactor->m_EventQueue.size())
+	{
+		auto event = reactor->m_EventQueue.front();
+		reactor->m_EventQueue.pop();
+
+		if (event->Channel.expired()) continue;
+		auto channel = TCast<TCPChannel>(event->Channel.lock());
+		if (channel == nullptr || channel->running() == false) continue;
+		if (event->Message.empty()) continue;
+		auto client = channel->getHandle();
+
+		size_t sentNum = 0;
+		while (sentNum < event->Message.size())
+		{
+			auto buf = uv_buf_init(event->Message.data() + sentNum, (unsigned)(event->Message.size() - sentNum));
+			auto result = uv_try_write((uv_stream_t*)client, &buf, 1);
+			if (result < 0)
+			{
+				reactor->onDisconnect(channel);
+				break;
+			}
+			else if (result == UV_EAGAIN) continue;
+			else sentNum += result;
+		}
+		if (event->Promise)
+		{
+			event->Promise->set_value(sentNum == event->Message.size());
+		}
+	}
 }
 
 void TCPClientReactor::on_stop(uv_async_t* handle)

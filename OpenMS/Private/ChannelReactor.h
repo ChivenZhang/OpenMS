@@ -21,6 +21,10 @@ public:
 	void startup() override;
 	void shutdown() override;
 	bool running() const;
+	void write(TRef<IChannelEvent> event, TRef<IChannelAddress> address) override;
+	TFuture<bool> write(TRef<IChannelEvent> event, TRef<IChannelAddress> address, TPromise<bool>&& promise) override;
+	void writeAndFlush(TRef<IChannelEvent> event, TRef<IChannelAddress> address) override;
+	TFuture<bool> writeAndFlush(TRef<IChannelEvent> event, TRef<IChannelAddress> address, TPromise<bool>&& promise) override;
 
 protected:
 	virtual void onConnect(TRef<Channel> channel);
