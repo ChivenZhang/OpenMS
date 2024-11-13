@@ -50,10 +50,7 @@ int main()
 			});
 		client.startup();
 
-		TMutex mutex;
-		TMutexUnlock unlock;
-		TUniqueLock lock(mutex);
-		unlock.wait(lock);
+		TMutex mutex; TMutexUnlock unlock; TUniqueLock lock(mutex); unlock.wait(lock);
 	}
 
 	if (true)
@@ -98,10 +95,7 @@ int main()
 			});
 		client.startup();
 
-		TMutex mutex;
-		TMutexUnlock unlock;
-		TUniqueLock lock(mutex);
-		unlock.wait(lock);
+		TMutex mutex; TMutexUnlock unlock; TUniqueLock lock(mutex); unlock.wait(lock);
 	}
 
 	return 0;
