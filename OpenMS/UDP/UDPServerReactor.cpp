@@ -108,6 +108,8 @@ void UDPServerReactor::startup()
 				TPrint("listening on %s:%d", localAddress->getAddress().c_str(), localAddress->getPort());
 			}
 
+			// Start receiving data
+
 			{
 				auto result = uv_udp_recv_start(&server, on_alloc, on_read);
 				if (result) TError("recv start error: %s", ::uv_strerror(result));

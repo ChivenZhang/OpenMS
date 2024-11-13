@@ -139,6 +139,8 @@ void UDPClientReactor::startup()
 				TDebug("accepted from %s:%d", remoteAddress->getAddress().c_str(), remoteAddress->getPort());
 			}
 
+			// Start receiving data
+
 			{
 				auto result = uv_udp_recv_start(&client, on_alloc, on_read);
 				if (result) TError("recv start error: %s", ::uv_strerror(result));
