@@ -152,14 +152,16 @@ void UDPServerReactor::writeAndFlush(TRef<IChannelEvent> event, TRef<IChannelAdd
 void UDPServerReactor::onConnect(TRef<Channel> channel)
 {
 	ChannelReactor::onConnect(channel);
-	auto hashName = THash(channel->getRemote()->getAddress());
+	auto remote = TCast<ISocketAddress>(channel->getRemote());
+	auto hashName = THash(remote->getAddress() + ":" + std::to_string(remote->getPort()));
 	m_Connections[hashName] = channel;
 }
 
 void UDPServerReactor::onDisconnect(TRef<Channel> channel)
 {
 	ChannelReactor::onDisconnect(channel);
-	auto hashName = THash(channel->getRemote()->getAddress());
+	auto remote = TCast<ISocketAddress>(channel->getRemote());
+	auto hashName = THash(remote->getAddress() + ":" + std::to_string(remote->getPort()));
 	m_Connections.erase(hashName);
 }
 
