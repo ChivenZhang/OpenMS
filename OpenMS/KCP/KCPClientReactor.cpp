@@ -10,6 +10,7 @@
 * =================================================*/
 #include "KCPClientReactor.h"
 #include "KCPChannel.h"
+#include "../../External/kcp/ikcp.h"
 
 KCPClientReactor::KCPClientReactor(TRef<ISocketAddress> address, size_t workerNum, callback_t callback)
 	:
@@ -62,7 +63,6 @@ void KCPClientReactor::startup()
 			// Get the actual ip and port number
 
 			{
-
 				sockaddr_storage addr;
 				socklen_t addrlen = sizeof(addr);
 				TRef<ISocketAddress> localAddress, remoteAddress;
@@ -84,8 +84,8 @@ void KCPClientReactor::startup()
 						auto in6_addr = (sockaddr_in6*)&addr;
 						char ip_str[INET6_ADDRSTRLEN];
 						inet_ntop(AF_INET6, &in6_addr->sin6_addr, ip_str, sizeof(ip_str));
-						auto portNum = ntohs(in6_addr->sin6_port);
 						auto address = ip_str;
+						auto portNum = ntohs(in6_addr->sin6_port);
 						localAddress = TNew<IPv6Address>(address, portNum);
 					}
 					else TError("unknown address family: %d", addr.ss_family);

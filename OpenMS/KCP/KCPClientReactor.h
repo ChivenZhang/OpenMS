@@ -12,7 +12,6 @@
 #include "../Private/ChannelReactor.h"
 #include "../Private/ChannelAddress.h"
 #include <uv.h>
-#include "../../External/kcp/ikcp.h"
 
 class KCPClientReactor : public ChannelReactor
 {

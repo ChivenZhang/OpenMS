@@ -23,6 +23,106 @@ KCPServerReactor::KCPServerReactor(TRef<ISocketAddress> address, uint32_t backlo
 
 void KCPServerReactor::startup()
 {
+	if (m_Running == true) return;
+	ChannelReactor::startup();
+
+	TPromise<void> promise;
+	auto future = promise.get_future();
+
+	m_EventThread = TThread([=, &promise]() {
+		uv_loop_t loop;
+		uv_udp_t server;
+
+		uv_loop_init(&loop);
+		uv_udp_init(&loop, &server);
+		uv_async_init(&loop, &m_AsyncStop, on_stop);
+
+		do
+		{
+			// Bind and listen to the socket
+
+			{
+				sockaddr_storage addr;
+				uint32_t result = uv_errno_t::UV_EINVAL;
+				if (auto ipv4 = TCast<IPv4Address>(m_SocketAddress))
+				{
+					result = uv_ip4_addr(ipv4->getAddress().c_str(), ipv4->getPort(), (sockaddr_in*)&addr);
+				}
+				else if (auto ipv6 = TCast<IPv6Address>(m_SocketAddress))
+				{
+					result = uv_ip6_addr(ipv6->getAddress().c_str(), ipv6->getPort(), (sockaddr_in6*)&addr);
+				}
+				if (result) TError("invalid address: %s", ::uv_strerror(result));
+				if (result) break;
+
+				result = uv_udp_bind(&server, (sockaddr*)&addr, 0);
+				if (result) TError("bind error: %s", ::uv_strerror(result));
+				if (result) break;
+			}
+
+			// Get the actual ip and port number
+
+			{
+				sockaddr_storage addr;
+				socklen_t addrlen = sizeof(addr);
+				TRef<ISocketAddress> localAddress;
+
+				auto result = uv_udp_getsockname((uv_udp_t*)&server, (sockaddr*)&addr, &addrlen);
+				if (result == 0)
+				{
+					if (addr.ss_family == AF_INET)
+					{
+						auto in_addr = (sockaddr_in*)&addr;
+						char ip_str[INET_ADDRSTRLEN];
+						inet_ntop(AF_INET, &in_addr->sin_addr, ip_str, sizeof(ip_str));
+						auto address = ip_str;
+						auto portNum = ntohs(in_addr->sin_port);
+						localAddress = TNew<IPv4Address>(address, portNum);
+					}
+					else if (addr.ss_family == AF_INET6)
+					{
+						auto in6_addr = (sockaddr_in6*)&addr;
+						char ip_str[INET6_ADDRSTRLEN];
+						inet_ntop(AF_INET6, &in6_addr->sin6_addr, ip_str, sizeof(ip_str));
+						auto address = ip_str;
+						auto portNum = ntohs(in6_addr->sin6_port);
+						localAddress = TNew<IPv6Address>(address, portNum);
+					}
+					else TError("unknown address family: %d", addr.ss_family);
+				}
+				else TError("failed to get socket name: %s", ::uv_strerror(result));
+
+				if (localAddress == nullptr) break;
+
+				TPrint("listening on %s:%d", localAddress->getAddress().c_str(), localAddress->getPort());
+			}
+
+			// Start receiving data
+
+			{
+				auto result = uv_udp_recv_start(&server, on_alloc, on_read);
+				if (result) TError("recv start error: %s", ::uv_strerror(result));
+				if (result) break;
+			}
+
+			// Run the event loop
+
+			{
+				loop.data = this;
+				promise.set_value();
+
+				while (m_Running == true && uv_run(&loop, UV_RUN_NOWAIT)) on_send(&server);
+			}
+
+		} while (0);
+
+		TPrint("closing server");
+
+		uv_close((uv_handle_t*)&m_AsyncStop, nullptr);
+		uv_close((uv_handle_t*)&server, nullptr);
+		uv_loop_close(&loop);
+		});
+	future.wait();
 }
 
 void KCPServerReactor::shutdown()
@@ -143,8 +243,8 @@ void KCPServerReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 				auto in6_addr = (sockaddr_in6*)&addr;
 				char ip_str[INET6_ADDRSTRLEN];
 				inet_ntop(AF_INET6, &in6_addr->sin6_addr, ip_str, sizeof(ip_str));
-				auto portNum = ntohs(in6_addr->sin6_port);
 				auto address = ip_str;
+				auto portNum = ntohs(in6_addr->sin6_port);
 				localAddress = TNew<IPv6Address>(address, portNum);
 			}
 			else TError("unknown address family: %d", addr.ss_family);
