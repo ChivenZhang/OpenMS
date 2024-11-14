@@ -37,6 +37,6 @@ protected:
 	uint32_t m_Backlog;
 	bool m_Broadcast, m_Multicast;
 	TRef<ISocketAddress> m_Address;
-	TVector<TRef<IChannel>> m_Channels;
+	TVector<TRef<Channel>> m_Channels;
 	TMap<uint32_t, THnd<Channel>> m_ChannelMap;
 };

@@ -333,7 +333,7 @@ void KCPClientReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 		return;
 	}
 
-	// Process the incoming data
+	// Process the incoming data : nread >= 0
 
 	if (nread < 0)
 	{
@@ -396,7 +396,7 @@ void KCPClientReactor::on_send(uv_udp_t* handle)
 
 		char buffer[2048];
 		auto result = ikcp_recv(channel->getSession(), buffer, sizeof(buffer));
-		if (0 <= result)
+		if (0 < result)
 		{
 			auto event = TNew<IChannelEvent>();
 			event->Message = TStringView(buffer, result);

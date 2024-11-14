@@ -178,14 +178,7 @@ void UDPServerReactor::onConnect(TRef<Channel> channel)
 	auto hashName = remote->getHashName();
 	m_Channels.insert(m_Channels.begin(), channel);
 	m_ChannelMap[hashName] = channel;
-	if (m_Backlog < m_Channels.size())
-	{
-		auto channel = m_Channels.back();
-		auto remote = TCast<ISocketAddress>(channel->getRemote());
-		auto hashName = remote->getHashName();
-		m_Channels.pop_back();
-		m_ChannelMap.erase(hashName);
-	}
+	if (m_Backlog < m_Channels.size()) onDisconnect(m_Channels.back());
 }
 
 void UDPServerReactor::onDisconnect(TRef<Channel> channel)
@@ -194,8 +187,7 @@ void UDPServerReactor::onDisconnect(TRef<Channel> channel)
 	auto remote = TCast<ISocketAddress>(channel->getRemote());
 	auto hashName = remote->getHashName();
 	m_ChannelMap.erase(hashName);
-	auto result = std::find(m_Channels.begin(), m_Channels.end(), channel);
-	if (result != m_Channels.end()) m_Channels.erase(result);
+	m_Channels.erase(std::remove(m_Channels.begin(), m_Channels.end(), channel), m_Channels.end());
 }
 
 void UDPServerReactor::on_alloc(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf)

@@ -237,14 +237,7 @@ void KCPServerReactor::onConnect(TRef<Channel> channel)
 	auto hashName = remote->getHashName();
 	m_Channels.insert(m_Channels.begin(), channel);
 	m_ChannelMap[hashName] = channel;
-	if (m_Backlog < m_Channels.size())
-	{
-		auto channel = m_Channels.back();
-		auto remote = TCast<ISocketAddress>(channel->getRemote());
-		auto hashName = remote->getHashName();
-		m_Channels.pop_back();
-		m_ChannelMap.erase(hashName);
-	}
+	if (m_Backlog < m_Channels.size()) onDisconnect(m_Channels.back());
 }
 
 void KCPServerReactor::onDisconnect(TRef<Channel> channel)
@@ -252,10 +245,9 @@ void KCPServerReactor::onDisconnect(TRef<Channel> channel)
 	ChannelReactor::onDisconnect(channel);
 	auto remote = TCast<ISocketAddress>(channel->getRemote());
 	auto hashName = remote->getHashName();
+	m_ChannelsRemoved.push_back(channel);
 	m_ChannelMap.erase(hashName);
-	auto result = std::find(m_Channels.begin(), m_Channels.end(), channel);
-	if (result != m_Channels.end()) m_Channels.erase(result);
-	m_Channels.push_back(channel);
+	m_Channels.erase(std::remove(m_Channels.begin(), m_Channels.end(), channel), m_Channels.end());
 }
 
 void KCPServerReactor::on_alloc(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf)
@@ -379,7 +371,7 @@ void KCPServerReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 		return;
 	}
 
-	// Process the incoming data
+	// Process the incoming data : nread >= 0
 
 	if (nread < 0)
 	{
@@ -454,7 +446,7 @@ void KCPServerReactor::on_send(uv_udp_t* handle)
 
 		char buffer[2048];
 		auto result = ikcp_recv(channel->getSession(), buffer, sizeof(buffer));
-		if (0 <= result)
+		if (0 < result)
 		{
 			auto event = TNew<IChannelEvent>();
 			event->Message = TStringView(buffer, result);
