@@ -20,6 +20,7 @@ public:
 	~KCPChannel();
 	uv_udp_t* getHandle() const;
 	ikcpcb* getSession() const;
+	TRaw<ChannelReactor> getReactor() const;
 
 protected:
 	uv_udp_t* m_Handle;

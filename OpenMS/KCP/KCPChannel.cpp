@@ -32,3 +32,8 @@ ikcpcb* KCPChannel::getSession() const
 {
 	return m_Session;
 }
+
+TRaw<ChannelReactor> KCPChannel::getReactor() const
+{
+	return m_Reactor;
+}

@@ -14,10 +14,10 @@
 TCPClientReactor::TCPClientReactor(TRef<ISocketAddress> address, size_t workerNum, callback_t callback)
 	:
 	ChannelReactor(workerNum, callback),
-	m_SocketAddress(address),
+	m_Address(address),
 	m_AsyncStop(uv_async_t())
 {
-	if (m_SocketAddress == nullptr) m_SocketAddress = TNew<IPv4Address>("0.0.0.0", 0);
+	if (m_Address == nullptr) m_Address = TNew<IPv4Address>("0.0.0.0", 0);
 }
 
 void TCPClientReactor::startup()
@@ -43,11 +43,11 @@ void TCPClientReactor::startup()
 			{
 				sockaddr_storage addr;
 				uint32_t result = uv_errno_t::UV_EINVAL;
-				if (auto ipv4 = TCast<IPv4Address>(m_SocketAddress))
+				if (auto ipv4 = TCast<IPv4Address>(m_Address))
 				{
 					result = uv_ip4_addr(ipv4->getAddress().c_str(), ipv4->getPort(), (sockaddr_in*)&addr);
 				}
-				else if (auto ipv6 = TCast<IPv6Address>(m_SocketAddress))
+				else if (auto ipv6 = TCast<IPv6Address>(m_Address))
 				{
 					result = uv_ip6_addr(ipv6->getAddress().c_str(), ipv6->getPort(), (sockaddr_in6*)&addr);
 				}
@@ -125,6 +125,7 @@ void TCPClientReactor::shutdown()
 {
 	if (m_Running == false) return;
 	ChannelReactor::shutdown();
+	m_Channel = nullptr;
 }
 
 void TCPClientReactor::onConnect(TRef<Channel> channel)

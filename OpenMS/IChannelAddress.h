@@ -18,6 +18,10 @@ public:
 	virtual TString getAddress() const = 0;
 
 	virtual TString getHostName() const = 0;
+
+	virtual uint32_t getHashName() const = 0;
+
+	virtual TString getString() const = 0;
 };
 
 /// @brief Interface for socket address

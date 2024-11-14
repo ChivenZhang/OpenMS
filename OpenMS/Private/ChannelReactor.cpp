@@ -13,7 +13,8 @@
 ChannelReactor::ChannelReactor(size_t workerNum, callback_t callback)
 	:
 	m_Running(false),
-	m_Callback(callback),
+	m_OnConnected(callback.Connected),
+	m_OnDisconnect(callback.Disconnect),
 	m_WorkerList(std::max(1ULL, workerNum)),
 	m_WorkerThreads(std::max(1ULL, workerNum))
 {
@@ -87,12 +88,12 @@ TFuture<bool> ChannelReactor::writeAndFlush(TRef<IChannelEvent> event, TRef<ICha
 
 void ChannelReactor::onConnect(TRef<Channel> channel)
 {
-	if (m_Callback.Connected) m_Callback.Connected(channel);
+	if (m_OnConnected) m_OnConnected(channel);
 }
 
 void ChannelReactor::onDisconnect(TRef<Channel> channel)
 {
-	if (m_Callback.Disconnect) m_Callback.Disconnect(channel);
+	if (m_OnDisconnect) m_OnDisconnect(channel);
 }
 
 void ChannelReactor::onInbound(TRef<IChannelEvent> event)

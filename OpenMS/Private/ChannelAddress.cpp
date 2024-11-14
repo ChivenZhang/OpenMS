@@ -33,6 +33,16 @@ TString IPv4Address::getHostName() const
 	return m_HostName;
 }
 
+uint32_t IPv4Address::getHashName() const
+{
+	return THash(getString());
+}
+
+TString IPv4Address::getString() const
+{
+	return m_Address + ":" + std::to_string(m_PortNum);
+}
+
 uint16_t IPv4Address::getPort() const
 {
 	return m_PortNum;
@@ -59,6 +69,16 @@ TString IPv6Address::getAddress() const
 TString IPv6Address::getHostName() const
 {
 	return m_HostName;
+}
+
+uint32_t IPv6Address::getHashName() const
+{
+	return THash(getString());
+}
+
+TString IPv6Address::getString() const
+{
+	return m_Address + ":" + std::to_string(m_PortNum);
 }
 
 uint16_t IPv6Address::getPort() const

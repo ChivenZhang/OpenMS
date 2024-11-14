@@ -34,5 +34,5 @@ protected:
 protected:
 	uv_async_t m_AsyncStop;
 	TRef<Channel> m_Channel;
-	TRef<ISocketAddress> m_SocketAddress;
+	TRef<ISocketAddress> m_Address;
 };

@@ -15,10 +15,10 @@ TCPServerReactor::TCPServerReactor(TRef<ISocketAddress> address, uint32_t backlo
 	:
 	ChannelReactor(workerNum, callback),
 	m_Backlog(backlog ? backlog : 128),
-	m_SocketAddress(address),
+	m_Address(address),
 	m_AsyncStop(uv_async_t())
 {
-	if (m_SocketAddress == nullptr) m_SocketAddress = TNew<IPv4Address>("0.0.0.0", 0);
+	if (m_Address == nullptr) m_Address = TNew<IPv4Address>("0.0.0.0", 0);
 }
 
 void TCPServerReactor::startup()
@@ -44,11 +44,11 @@ void TCPServerReactor::startup()
 			{
 				sockaddr_storage addr;
 				uint32_t result = uv_errno_t::UV_ERRNO_MAX;
-				if (auto ipv4 = TCast<IPv4Address>(m_SocketAddress))
+				if (auto ipv4 = TCast<IPv4Address>(m_Address))
 				{
 					result = uv_ip4_addr(ipv4->getAddress().c_str(), ipv4->getPort(), (sockaddr_in*)&addr);
 				}
-				else if (auto ipv6 = TCast<IPv6Address>(m_SocketAddress))
+				else if (auto ipv6 = TCast<IPv6Address>(m_Address))
 				{
 					result = uv_ip6_addr(ipv6->getAddress().c_str(), ipv6->getPort(), (sockaddr_in6*)&addr);
 				}
@@ -127,22 +127,23 @@ void TCPServerReactor::shutdown()
 	if (m_Running == false) return;
 	uv_async_send(&m_AsyncStop);
 	ChannelReactor::shutdown();
+	m_ChannelMap.clear();
 }
 
 void TCPServerReactor::onConnect(TRef<Channel> channel)
 {
 	ChannelReactor::onConnect(channel);
 	auto remote = TCast<ISocketAddress>(channel->getRemote());
-	auto hashName = THash(remote->getAddress() + ":" + std::to_string(remote->getPort()));
-	m_Connections[hashName] = channel;
+	auto hashName = remote->getHashName();
+	m_ChannelMap[hashName] = channel;
 }
 
 void TCPServerReactor::onDisconnect(TRef<Channel> channel)
 {
 	ChannelReactor::onDisconnect(channel);
 	auto remote = TCast<ISocketAddress>(channel->getRemote());
-	auto hashName = THash(remote->getAddress() + ":" + std::to_string(remote->getPort()));
-	m_Connections.erase(hashName);
+	auto hashName = remote->getHashName();
+	m_ChannelMap.erase(hashName);
 }
 
 void TCPServerReactor::on_connect(uv_stream_t* server, int status)

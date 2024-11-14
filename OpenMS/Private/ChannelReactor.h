@@ -16,6 +16,13 @@
 class ChannelReactor : public IChannelReactor
 {
 public:
+	struct callback_t
+	{
+		TLambda<void(TRef<IChannel>)> Connected;
+		TLambda<void(TRef<IChannel>)> Disconnect;
+	};
+
+public:
 	ChannelReactor(size_t workerNum, callback_t callback);
 	~ChannelReactor();
 	void startup() override;
@@ -33,7 +40,6 @@ protected:
 	virtual void onOutbound(TRef<IChannelEvent> event, bool flush = false);
 
 protected:
-	callback_t m_Callback;
 	TMutex m_EventLock;
 	TThread m_EventThread;
 	TAtomic<bool> m_Running;
@@ -41,6 +47,8 @@ protected:
 	TVector<TThread> m_WorkerThreads;
 	TVector<TRef<ChannelWorker>> m_WorkerList;
 	TQueue<TRef<IChannelEvent>> m_EventQueue;
+	TLambda<void(TRef<IChannel>)> m_OnConnected;
+	TLambda<void(TRef<IChannel>)> m_OnDisconnect;
 
 private:
 	friend class Channel;

@@ -20,6 +20,8 @@ public:
 	IPv4Address(TStringView ip, uint16_t port, TStringView host = TStringView());
 	TString getAddress() const override;
 	TString getHostName() const override;
+	uint32_t getHashName() const override;
+	TString getString() const override;
 	uint16_t getPort() const override;
 
 protected:
@@ -36,6 +38,8 @@ public:
 	IPv6Address(TStringView ip, uint16_t port, TStringView host = TStringView());
 	TString getAddress() const override;
 	TString getHostName() const override;
+	uint32_t getHashName() const override;
+	TString getString() const override;
 	uint16_t getPort() const override;
 
 protected:

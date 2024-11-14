@@ -36,7 +36,7 @@ protected:
 	uv_async_t m_AsyncStop;
 	uint32_t m_Backlog;
 	bool m_Broadcast, m_Multicast;
-	TRef<ISocketAddress> m_SocketAddress;
+	TRef<ISocketAddress> m_Address;
 	TVector<TRef<IChannel>> m_Channels;
-	TMap<uint32_t, THnd<Channel>> m_Connections;
+	TMap<uint32_t, THnd<Channel>> m_ChannelMap;
 };
