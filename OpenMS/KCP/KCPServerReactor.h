@@ -17,7 +17,7 @@
 class KCPServerReactor : public ChannelReactor
 {
 public:
-	KCPServerReactor(TRef<ISocketAddress> address, size_t workerNum, callback_t callback);
+	KCPServerReactor(TRef<ISocketAddress> address, uint32_t backlog, size_t workerNum, callback_t callback);
 	void startup() override;
 	void shutdown() override;
 	void write(TRef<IChannelEvent> event, TRef<IChannelAddress> address) override;
@@ -35,6 +35,8 @@ protected:
 
 protected:
 	uv_async_t m_AsyncStop;
+	uint32_t m_Backlog;
 	TRef<ISocketAddress> m_SocketAddress;
+	TVector<TRef<IChannel>> m_Channels;
 	TMap<uint32_t, TRef<Channel>> m_Connections;
 };

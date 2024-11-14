@@ -11,9 +11,10 @@
 #include "KCPServerReactor.h"
 #include "KCPChannel.h"
 
-KCPServerReactor::KCPServerReactor(TRef<ISocketAddress> address, size_t workerNum, callback_t callback)
+KCPServerReactor::KCPServerReactor(TRef<ISocketAddress> address, uint32_t backlog, size_t workerNum, callback_t callback)
 	:
 	ChannelReactor(workerNum, callback),
+	m_Backlog(backlog ? backlog : 128),
 	m_SocketAddress(address),
 	m_AsyncStop(uv_async_t())
 {
@@ -60,7 +61,16 @@ void KCPServerReactor::onConnect(TRef<Channel> channel)
 	ChannelReactor::onConnect(channel);
 	auto remote = TCast<ISocketAddress>(channel->getRemote());
 	auto hashName = THash(remote->getAddress() + ":" + std::to_string(remote->getPort()));
+	m_Channels.insert(m_Channels.begin(), channel);
 	m_Connections[hashName] = channel;
+	if (m_Backlog < m_Channels.size())
+	{
+		auto channel = m_Channels.back();
+		auto remote = TCast<ISocketAddress>(channel->getRemote());
+		auto hashName = THash(remote->getAddress() + ":" + std::to_string(remote->getPort()));
+		m_Channels.pop_back();
+		m_Connections.erase(hashName);
+	}
 }
 
 void KCPServerReactor::onDisconnect(TRef<Channel> channel)
@@ -69,6 +79,8 @@ void KCPServerReactor::onDisconnect(TRef<Channel> channel)
 	auto remote = TCast<ISocketAddress>(channel->getRemote());
 	auto hashName = THash(remote->getAddress() + ":" + std::to_string(remote->getPort()));
 	m_Connections.erase(hashName);
+	auto result = std::find(m_Channels.begin(), m_Channels.end(), channel);
+	if (result != m_Channels.end()) m_Channels.erase(result);
 }
 
 void KCPServerReactor::on_alloc(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf)

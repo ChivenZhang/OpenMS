@@ -16,7 +16,7 @@
 class UDPServerReactor : public ChannelReactor
 {
 public:
-	UDPServerReactor(TRef<ISocketAddress> address, bool broadcast, bool multicast, size_t workerNum, callback_t callback);
+	UDPServerReactor(TRef<ISocketAddress> address, uint32_t backlog, bool broadcast, bool multicast, size_t workerNum, callback_t callback);
 	void startup() override;
 	void shutdown() override;
 	void write(TRef<IChannelEvent> event, TRef<IChannelAddress> address) override;
@@ -34,7 +34,9 @@ protected:
 
 protected:
 	uv_async_t m_AsyncStop;
+	uint32_t m_Backlog;
 	bool m_Broadcast, m_Multicast;
 	TRef<ISocketAddress> m_SocketAddress;
-	TMap<uint32_t, TRef<Channel>> m_Connections;
+	TVector<TRef<IChannel>> m_Channels;
+	TMap<uint32_t, THnd<Channel>> m_Connections;
 };

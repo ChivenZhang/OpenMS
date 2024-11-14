@@ -14,7 +14,7 @@
 TCPServerReactor::TCPServerReactor(TRef<ISocketAddress> address, uint32_t backlog, size_t workerNum, callback_t callback)
 	:
 	ChannelReactor(workerNum, callback),
-	m_Backlog(backlog),
+	m_Backlog(backlog ? backlog : 128),
 	m_SocketAddress(address),
 	m_AsyncStop(uv_async_t())
 {

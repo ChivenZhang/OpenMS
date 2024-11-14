@@ -11,9 +11,10 @@
 #include "UDPServerReactor.h"
 #include "UDPChannel.h"
 
-UDPServerReactor::UDPServerReactor(TRef<ISocketAddress> address, bool broadcast, bool multicast, size_t workerNum, callback_t callback)
+UDPServerReactor::UDPServerReactor(TRef<ISocketAddress> address, uint32_t backlog, bool broadcast, bool multicast, size_t workerNum, callback_t callback)
 	:
 	ChannelReactor(workerNum, callback),
+	m_Backlog(backlog ? backlog : 128),
 	m_Broadcast(broadcast),
 	m_Multicast(multicast),
 	m_SocketAddress(address),
@@ -148,9 +149,9 @@ void UDPServerReactor::write(TRef<IChannelEvent> event, TRef<IChannelAddress> ad
 	if (remote == nullptr) return;
 	auto hashName = THash(remote->getAddress() + ":" + std::to_string(remote->getPort()));
 	auto result = m_Connections.find(hashName);
-	if (result == m_Connections.end() && result->second == nullptr) return;
-	auto channel = result->second;
-	channel->write(event);
+	if (result == m_Connections.end()) return;
+	auto channel = result->second.lock();
+	if (channel) channel->write(event);
 }
 
 void UDPServerReactor::writeAndFlush(TRef<IChannelEvent> event, TRef<IChannelAddress> address)
@@ -160,9 +161,9 @@ void UDPServerReactor::writeAndFlush(TRef<IChannelEvent> event, TRef<IChannelAdd
 	if (remote == nullptr) return;
 	auto hashName = THash(remote->getAddress() + ":" + std::to_string(remote->getPort()));
 	auto result = m_Connections.find(hashName);
-	if (result == m_Connections.end() && result->second == nullptr) return;
-	auto channel = result->second;
-	channel->writeAndFlush(event);
+	if (result == m_Connections.end()) return;
+	auto channel = result->second.lock();
+	if (channel) channel->writeAndFlush(event);
 }
 
 void UDPServerReactor::onConnect(TRef<Channel> channel)
@@ -170,7 +171,16 @@ void UDPServerReactor::onConnect(TRef<Channel> channel)
 	ChannelReactor::onConnect(channel);
 	auto remote = TCast<ISocketAddress>(channel->getRemote());
 	auto hashName = THash(remote->getAddress() + ":" + std::to_string(remote->getPort()));
+	m_Channels.insert(m_Channels.begin(), channel);
 	m_Connections[hashName] = channel;
+	if (m_Backlog < m_Channels.size())
+	{
+		auto channel = m_Channels.back();
+		auto remote = TCast<ISocketAddress>(channel->getRemote());
+		auto hashName = THash(remote->getAddress() + ":" + std::to_string(remote->getPort()));
+		m_Channels.pop_back();
+		m_Connections.erase(hashName);
+	}
 }
 
 void UDPServerReactor::onDisconnect(TRef<Channel> channel)
@@ -179,6 +189,8 @@ void UDPServerReactor::onDisconnect(TRef<Channel> channel)
 	auto remote = TCast<ISocketAddress>(channel->getRemote());
 	auto hashName = THash(remote->getAddress() + ":" + std::to_string(remote->getPort()));
 	m_Connections.erase(hashName);
+	auto result = std::find(m_Channels.begin(), m_Channels.end(), channel);
+	if (result != m_Channels.end()) m_Channels.erase(result);
 }
 
 void UDPServerReactor::on_alloc(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf)
@@ -215,7 +227,7 @@ void UDPServerReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 	}
 	else TError("unknown address family: %d", peer->sa_family);
 
-	auto channel = reactor->m_Connections[hashName];
+	auto channel = reactor->m_Connections[hashName].lock();
 	if (channel == nullptr)
 	{
 		// Get the actual ip and port number

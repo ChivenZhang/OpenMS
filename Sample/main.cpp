@@ -55,9 +55,9 @@ int main()
 		TMutex mutex; TMutexUnlock unlock; TUniqueLock lock(mutex); unlock.wait(lock);
 	}
 
-	if (false)
+	if (true)
 	{
-		UDPServerReactor server(IPv4Address::New("0.0.0.0", 6000), false, false, 2, {
+		UDPServerReactor server(IPv4Address::New("0.0.0.0", 6000), 0, false, false, 2, {
 			[](TRef<IChannel> channel) {	// Connected
 				auto ipv4 = TCast<IPv4Address>(channel->getRemote());
 				TPrint("connect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
@@ -100,9 +100,9 @@ int main()
 		TMutex mutex; TMutexUnlock unlock; TUniqueLock lock(mutex); unlock.wait(lock);
 	}
 
-	if (true)
+	if (false)
 	{
-		KCPServerReactor server(IPv4Address::New("0.0.0.0", 6000), 2, {
+		KCPServerReactor server(IPv4Address::New("0.0.0.0", 6000), 0, 2, {
 			[](TRef<IChannel> channel) {	// Connected
 				auto ipv4 = TCast<IPv4Address>(channel->getRemote());
 				TPrint("connect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
