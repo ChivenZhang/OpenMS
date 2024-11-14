@@ -18,8 +18,6 @@ TCPClientReactor::TCPClientReactor(TRef<ISocketAddress> address, size_t workerNu
 	m_AsyncStop(uv_async_t())
 {
 	if (m_SocketAddress == nullptr) m_SocketAddress = TNew<IPv4Address>("0.0.0.0", 0);
-	m_Address = m_SocketAddress->getAddress();
-	m_PortNum = m_SocketAddress->getPort();
 }
 
 void TCPClientReactor::startup()
@@ -45,13 +43,13 @@ void TCPClientReactor::startup()
 			{
 				sockaddr_storage addr;
 				uint32_t result = uv_errno_t::UV_EINVAL;
-				if (TCast<IPv4Address>(m_SocketAddress))
+				if (auto ipv4 = TCast<IPv4Address>(m_SocketAddress))
 				{
-					result = uv_ip4_addr(m_Address.c_str(), m_PortNum, (sockaddr_in*)&addr);
+					result = uv_ip4_addr(ipv4->getAddress().c_str(), ipv4->getPort(), (sockaddr_in*)&addr);
 				}
-				else if (TCast<IPv6Address>(m_SocketAddress))
+				else if (auto ipv6 = TCast<IPv6Address>(m_SocketAddress))
 				{
-					result = uv_ip6_addr(m_Address.c_str(), m_PortNum, (sockaddr_in6*)&addr);
+					result = uv_ip6_addr(ipv6->getAddress().c_str(), ipv6->getPort(), (sockaddr_in6*)&addr);
 				}
 				if (result) TError("invalid address: %s", ::uv_strerror(result));
 				if (result) break;

@@ -12,6 +12,7 @@
 #include "../Private/ChannelReactor.h"
 #include "../Private/ChannelAddress.h"
 #include <uv.h>
+#include "../../External/kcp/ikcp.h"
 
 class KCPServerReactor : public ChannelReactor
 {
@@ -33,8 +34,6 @@ protected:
 	static void on_stop(uv_async_t* handle);
 
 protected:
-	TString m_Address;
-	uint16_t m_PortNum;
 	uv_async_t m_AsyncStop;
 	TRef<ISocketAddress> m_SocketAddress;
 	TMap<uint32_t, TRef<Channel>> m_Connections;

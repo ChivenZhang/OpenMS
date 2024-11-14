@@ -20,8 +20,6 @@ UDPClientReactor::UDPClientReactor(TRef<ISocketAddress> address, bool broadcast,
 	m_AsyncStop(uv_async_t())
 {
 	if (m_SocketAddress == nullptr) m_SocketAddress = TNew<IPv4Address>("0.0.0.0", 0);
-	m_Address = m_SocketAddress->getAddress();
-	m_PortNum = m_SocketAddress->getPort();
 }
 
 void UDPClientReactor::startup()
@@ -47,13 +45,13 @@ void UDPClientReactor::startup()
 			{
 				sockaddr_storage addr;
 				uint32_t result = uv_errno_t::UV_EINVAL;
-				if (TCast<IPv4Address>(m_SocketAddress))
+				if (auto ipv4 = TCast<IPv4Address>(m_SocketAddress))
 				{
-					result = uv_ip4_addr(m_Address.c_str(), m_PortNum, (sockaddr_in*)&addr);
+					result = uv_ip4_addr(ipv4->getAddress().c_str(), ipv4->getPort(), (sockaddr_in*)&addr);
 				}
-				else if (TCast<IPv6Address>(m_SocketAddress))
+				else if (auto ipv6 = TCast<IPv6Address>(m_SocketAddress))
 				{
-					result = uv_ip6_addr(m_Address.c_str(), m_PortNum, (sockaddr_in6*)&addr);
+					result = uv_ip6_addr(ipv6->getAddress().c_str(), ipv6->getPort(), (sockaddr_in6*)&addr);
 				}
 				if (result) TError("invalid address: %s", ::uv_strerror(result));
 				if (result) break;
@@ -69,13 +67,11 @@ void UDPClientReactor::startup()
 				result = uv_udp_set_multicast_loop(&client, m_Multicast ? 1 : 0);
 				if (result) TError("set multicast loop error: %s", ::uv_strerror(result));
 				if (result) break;
-
 			}
 
 			// Get the actual ip and port number
 
 			{
-
 				sockaddr_storage addr;
 				socklen_t addrlen = sizeof(addr);
 				TRef<ISocketAddress> localAddress, remoteAddress;
@@ -105,7 +101,7 @@ void UDPClientReactor::startup()
 				}
 				else TError("failed to get socket name: %s", ::uv_strerror(result));
 
-				result = uv_tcp_getsockname((uv_tcp_t*)&client, (sockaddr*)&addr, &addrlen);
+				result = uv_tcp_getpeername((uv_tcp_t*)&client, (sockaddr*)&addr, &addrlen);
 				if (result == 0)
 				{
 					if (addr.ss_family == AF_INET)

@@ -4,7 +4,14 @@ add_definitions(
 	#-DOPENMS_SHARED_LIBRARY
 )
 
+include_directories(
+	${CMAKE_SOURCE_DIR}/External/kcp
+)
+
+message(${CMAKE_SOURCE_DIR}/External/kcp)
 add_library(OpenMS STATIC
+	${CMAKE_SOURCE_DIR}/External/kcp/ikcp.c
+	${CMAKE_SOURCE_DIR}/External/kcp/ikcp.h
 	HTTP/HTTPReactor.h
 	IChannel.h
 	IChannelAddress.h

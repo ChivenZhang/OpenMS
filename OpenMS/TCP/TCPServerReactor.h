@@ -32,8 +32,6 @@ protected:
 	static void on_stop(uv_async_t* handle);
 
 protected:
-	TString m_Address;
-	uint16_t m_PortNum;
 	uint32_t m_Backlog;
 	uv_async_t m_AsyncStop;
 	TRef<ISocketAddress> m_SocketAddress;

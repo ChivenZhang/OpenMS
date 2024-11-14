@@ -33,10 +33,8 @@ protected:
 	static void on_stop(uv_async_t* handle);
 
 protected:
-	TString m_Address;
-	uint16_t m_PortNum;
-	bool m_Broadcast, m_Multicast;
 	uv_async_t m_AsyncStop;
+	bool m_Broadcast, m_Multicast;
 	TRef<ISocketAddress> m_SocketAddress;
 	TMap<uint32_t, TRef<Channel>> m_Connections;
 };

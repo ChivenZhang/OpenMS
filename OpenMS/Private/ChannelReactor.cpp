@@ -97,12 +97,14 @@ void ChannelReactor::onDisconnect(TRef<Channel> channel)
 
 void ChannelReactor::onInbound(TRef<IChannelEvent> event)
 {
+	if (event == nullptr || event->Channel.expired()) return;
 	auto index = (rand() % m_WorkerList.size());
 	if (event) m_WorkerList[index]->enqueue(event);
 }
 
 void ChannelReactor::onOutbound(TRef<IChannelEvent> event, bool flush)
 {
+	if (event == nullptr || event->Channel.expired()) return;
 	TMutexLock lock(m_EventLock);
 	m_EventQueue.push(event);
 	m_Sending = true;
