@@ -367,7 +367,8 @@ void KCPServerReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 		ikcp_setoutput(session, on_output);
 		ikcp_wndsize(session, 128, 128);
 		ikcp_nodelay(session, 1, 20, 2, 1);
-		result = ikcp_send(session, "", 0);
+		// Pass the session id to remote client
+		result = ikcp_send(session, nullptr, 0);
 		if (result < 0) free(buf->base);
 		if (result < 0)return;
 		reactor->onConnect(channel);
