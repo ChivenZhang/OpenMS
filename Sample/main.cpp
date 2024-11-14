@@ -102,7 +102,7 @@ int main()
 
 	if (true)
 	{
-		KCPServerReactor server(IPv4Address::New("0.0.0.0", 8080), 1, 2, {
+		KCPServerReactor server(IPv4Address::New("0.0.0.0", 8080), 0, 2, {
 			[](TRef<IChannel> channel) {	// Connected
 				auto ipv4 = TCast<IPv4Address>(channel->getRemote());
 				TPrint("connect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
