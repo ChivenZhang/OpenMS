@@ -390,7 +390,7 @@ void KCPServerReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 	}
 
 	auto _channel = TCast<KCPChannel>(channel);
-	auto result = ikcp_input(_channel->getSession(), (char*)buf->base, nread);
+	auto result = ikcp_input(_channel->getSession(), (char*)buf->base, (uint32_t)nread);
 	if (result < 0)
 	{
 		reactor->onDisconnect(channel);
