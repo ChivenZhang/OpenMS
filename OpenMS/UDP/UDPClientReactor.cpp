@@ -281,7 +281,6 @@ void UDPClientReactor::on_send(uv_udp_t* handle)
 		auto event = reactor->m_EventQueue.front();
 		reactor->m_EventQueue.pop();
 
-		if (event->Channel.expired()) continue;
 		auto channel = TCast<UDPChannel>(event->Channel.lock());
 		if (channel == nullptr || channel->running() == false) continue;
 		if (event->Message.empty()) continue;

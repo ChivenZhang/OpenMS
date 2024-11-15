@@ -303,7 +303,6 @@ void TCPServerReactor::on_send(uv_tcp_t* handle)
 		auto event = reactor->m_EventQueue.front();
 		reactor->m_EventQueue.pop();
 
-		if (event->Channel.expired()) continue;
 		auto channel = TCast<TCPChannel>(event->Channel.lock());
 		if (channel == nullptr || channel->running() == false) continue;
 		if (event->Message.empty()) continue;
