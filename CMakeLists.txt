@@ -14,6 +14,7 @@ include_directories(${OPENMS_SOURCE_DIR})
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/External/libuv)
 add_subdirectory(${CMAKE_SOURCE_DIR}/OpenMS)
+add_subdirectory(${CMAKE_SOURCE_DIR}/Service)
 
 if(OPENMS_ENABLE_SAMPLE)
 add_executable(Sample Sample/main.cpp Sample/TestHandler.h)

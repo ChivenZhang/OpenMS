@@ -10,3 +10,11 @@
 * =================================================*/
 
 #include "Service.h"
+
+void Service::startup()
+{
+}
+
+void Service::shutdown()
+{
+}

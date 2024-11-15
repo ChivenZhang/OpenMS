@@ -17,6 +17,9 @@ class OPENMS_API IService
 public:
 	virtual ~IService() = default;
 
+	virtual void startup() = 0;
+
+	virtual void shutdown() = 0;
 };
 
 /// @brief Interface for provider service

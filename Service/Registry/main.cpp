@@ -1,4 +1,3 @@
-#pragma once
 /*=================================================
 * Copyright © 2020-2024 ChivenZhang.
 * All Rights Reserved.
@@ -9,11 +8,18 @@
 * Created by ChivenZhang.
 *
 * =================================================*/
-#include "../IService.h"
+#include "RegistryService.h"
+#include <csignal>
 
-class Service : public IService
+RegistryService service;
+
+static void on_signal(int signal)
 {
-public:
-	void startup() override;
-	void shutdown() override;
-};
+	service.shutdown();
+}
+
+int main()
+{
+	::signal(SIGINT, on_signal);
+	service.startup();
+}

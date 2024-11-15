@@ -9,11 +9,10 @@
 * Created by ChivenZhang.
 *
 * =================================================*/
-#include "../IService.h"
+#include "OpenMS/Private/Service.h"
 
-class Service : public IService
+class RegistryService : public Service
 {
 public:
-	void startup() override;
-	void shutdown() override;
+
 };
