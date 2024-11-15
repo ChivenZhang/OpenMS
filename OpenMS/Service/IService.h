@@ -29,7 +29,7 @@ public:
 	T property(TStringView name, T const& value = T()) const
 	{
 		T result;
-		if (TText<T>::from_string(property(name), result)) return result;
+		if (TTypeC(property(name), result)) return result;
 		return value;
 	}
 };

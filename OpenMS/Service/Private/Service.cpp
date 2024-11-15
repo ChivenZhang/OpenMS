@@ -45,6 +45,7 @@ void Service::startup(int argc, char** argv)
 				else
 					parse_func(name + "[" + std::to_string(i) + "]", depth + 1, raw);
 			}
+			m_PropertyMap[THash(name)] = value.dump();
 			break;
 		case nlohmann::ordered_json::value_t::object:
 			for (auto field : value.items())
@@ -55,21 +56,22 @@ void Service::startup(int argc, char** argv)
 				else
 					parse_func(name + "." + field.key(), depth + 1, raw);
 			}
+			m_PropertyMap[THash(name)] = value.dump();
 			break;
 		case nlohmann::ordered_json::value_t::boolean:
-			m_PropertyMap[THash(name)] = value.get<bool>() ? "true" : "false";
+			m_PropertyMap[THash(name)] = TTextC<bool>::to_string(value.get<bool>());
 			break;
 		case nlohmann::ordered_json::value_t::string:
 			m_PropertyMap[THash(name)] = value.get<std::string>();
 			break;
 		case nlohmann::ordered_json::value_t::number_float:
-			m_PropertyMap[THash(name)] = value.get<float>();
+			m_PropertyMap[THash(name)] = TTextC<float>::to_string(value.get<float>());
 			break;
 		case nlohmann::ordered_json::value_t::number_integer:
-			m_PropertyMap[THash(name)] = value.get<int32_t>();
+			m_PropertyMap[THash(name)] = TTextC<int32_t>::to_string(value.get<int32_t>());
 			break;
 		case nlohmann::ordered_json::value_t::number_unsigned:
-			m_PropertyMap[THash(name)] = value.get<uint32_t>();
+			m_PropertyMap[THash(name)] = TTextC<uint32_t>::to_string(value.get<uint32_t>());
 			break;
 		}
 		};

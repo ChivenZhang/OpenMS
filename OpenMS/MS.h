@@ -255,138 +255,167 @@ inline constexpr uint32_t THash(TStringView value)
 	return THash(value.data());
 }
 
+// ============================================
+
+template <class T, class U>
+inline bool TTypeC(T const& value, U& result)
+{
+	TString string;
+	return TTypeC(value, string) && TTypeC(string, result);
+}
+
 template <class T>
-struct TText
+struct TTextC
 {
-	static bool to_string(T const& value, TString& string)
+	static TString to_string(T const& value, TString const& string = TString())
 	{
-		return false;
+		TString result;
+		if (TTypeC(value, result)) return result;
+		return string;
 	}
-	static bool from_string(TString const& string, T& value)
+	static T from_string(TString const& string, T const& value = T())
 	{
-		return false;
+		T result;
+		if (TTypeC(string, result)) return result;
+		return value;
 	}
 };
 
 template <>
-struct TText<bool>
+inline bool TTypeC(bool const& value, TString& string)
 {
-	static bool to_string(bool const& value, TString& string)
-	{
-		string = value ? "true" : "false";
-		return true;
-	}
-	static bool from_string(TString const& string, bool& value)
-	{
-		value = (string == "true");
-		return true;
-	}
-};
+	string = value ? "true" : "false";
+	return true;
+}
+template <>
+inline bool TTypeC(TString const& string, bool& value)
+{
+	value = (string == "true");
+	return true;
+}
 
 template <>
-struct TText<int16_t>
+inline bool TTypeC(int16_t const& value, TString& string)
 {
-	static bool to_string(int16_t const& value, TString& string)
-	{
-		string = std::to_string(value);
-		return true;
-	}
-	static bool from_string(TString const& string, int16_t& value)
-	{
-		value = (int16_t)std::strtol(string.c_str(), nullptr, 10);
-		return true;
-	}
-};
+	string = std::to_string(value);
+	return true;
+}
+template <>
+inline bool TTypeC(TString const& string, int16_t& value)
+{
+	value = (int16_t)std::strtol(string.c_str(), nullptr, 10);
+	return true;
+}
 
 template <>
-struct TText<uint16_t>
+inline bool TTypeC(uint16_t const& value, TString& string)
 {
-	static bool to_string(uint16_t const& value, TString& string)
-	{
-		string = std::to_string(value);
-		return true;
-	}
-	static bool from_string(TString const& string, uint16_t& value)
-	{
-		value = (uint16_t)std::strtoul(string.c_str(), nullptr, 10);
-		return true;
-	}
-};
+	string = std::to_string(value);
+	return true;
+}
+template <>
+inline bool TTypeC(TString const& string, uint16_t& value)
+{
+	value = (uint16_t)std::strtol(string.c_str(), nullptr, 10);
+	return true;
+}
 
 template <>
-struct TText<int32_t>
+inline bool TTypeC(int32_t const& value, TString& string)
 {
-	static bool to_string(int32_t const& value, TString& string)
-	{
-		string = std::to_string(value);
-		return true;
-	}
-	static bool from_string(TString const& string, int32_t& value)
-	{
-		value = std::strtol(string.c_str(), nullptr, 10);
-		return true;
-	}
-};
+	string = std::to_string(value);
+	return true;
+}
+template <>
+inline bool TTypeC(TString const& string, int32_t& value)
+{
+	value = std::strtol(string.c_str(), nullptr, 10);
+	return true;
+}
 
 template <>
-struct TText<uint32_t>
+inline bool TTypeC(uint32_t const& value, TString& string)
 {
-	static bool to_string(uint32_t const& value, TString& string)
-	{
-		string = std::to_string(value);
-		return true;
-	}
-	static bool from_string(TString const& string, uint32_t& value)
-	{
-		value = std::strtoul(string.c_str(), nullptr, 10);
-		return true;
-	}
-};
+	string = std::to_string(value);
+	return true;
+}
+template <>
+inline bool TTypeC(TString const& string, uint32_t& value)
+{
+	value = std::strtoul(string.c_str(), nullptr, 10);
+	return true;
+}
 
 template <>
-struct TText<float>
+inline bool TTypeC(float const& value, TString& string)
 {
-	static bool to_string(float const& value, TString& string)
-	{
-		string = std::to_string(value);
-		return true;
-	}
-	static bool from_string(TString const& string, float& value)
-	{
-		value = std::strtof(string.c_str(), nullptr);
-		return true;
-	}
-};
+	string = std::to_string(value);
+	return true;
+}
+template <>
+inline bool TTypeC(TString const& string, float& value)
+{
+	value = std::strtof(string.c_str(), nullptr);
+	return true;
+}
 
 template <>
-struct TText<double>
+inline bool TTypeC(double const& value, TString& string)
 {
-	static bool to_string(double const& value, TString& string)
-	{
-		string = std::to_string(value);
-		return true;
-	}
-	static bool from_string(TString const& string, double& value)
-	{
-		value = std::strtod(string.c_str(), nullptr);
-		return true;
-	}
-};
+	string = std::to_string(value);
+	return true;
+}
+template <>
+inline bool TTypeC(TString const& string, double& value)
+{
+	value = std::strtod(string.c_str(), nullptr);
+	return true;
+}
 
 template <>
-struct TText<std::string>
+inline bool TTypeC(TString const& value, TString& string)
 {
-	static bool to_string(std::string const& value, TString& string)
+	string = value;
+	return true;
+}
+
+template <class T, class U>
+inline bool TTypeC(TVector<T> const& value, TVector<U>& result)
+{
+	result.clear();
+	for (auto& e : value)
 	{
-		string = value;
-		return true;
+		U item; TTypeC(e, item);
+		result.emplace_back(item);
 	}
-	static bool from_string(TString const& string, std::string& value)
+	return true;
+}
+
+template <class T, class U>
+inline bool TTypeC(TSet<T> const& value, TSet<U>& result)
+{
+	result.clear();
+	for (auto& e : value)
 	{
-		value = string;
-		return true;
+		U item; TTypeC(e, item);
+		result.emplace(item);
 	}
-};
+	return true;
+}
+
+template <class K, class T, class K2, class T2>
+inline bool TTypeC(TMap<K, T> const& value, TMap<K2, T2>& result)
+{
+	result.clear();
+	for (auto& e : value)
+	{
+		K2 key; T2 item;
+		TTypeC(e.first, key);
+		TTypeC(e.second, item);
+		result.emplace(key, item);
+	}
+	return true;
+}
 
 // ============================================
 

@@ -1,11 +1,11 @@
 {
 	"registry": {
-		"server": {
-			"port": "8080"
-		},
 		"user": {
 			"name": "admin",
 			"password": "password"
+		},
+		"server": {
+			"port": "8080"
 		},
 		"handlers": {
 
