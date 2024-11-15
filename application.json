@@ -4,6 +4,16 @@
 			"name": "admin",
 			"password": "password"
 		},
+		"users": [
+			{
+				"name": "admin1",
+				"password": "password1"
+			},
+			{
+				"name": "admin2",
+				"password": "password2"
+			}
+		],
 		"server": {
 			"port": "8080"
 		},

@@ -10,7 +10,6 @@
 * =================================================*/
 #include "RegistryService.h"
 #include <csignal>
-#include <nlohmann/json.hpp>
 
 struct User
 {
@@ -42,11 +41,17 @@ int main(int argc, char* argv[])
 	signal(SIGINT, on_signal);
 	service.startup(argc, argv);
 
-	auto username = service.property<std::string>("registry.user.name");
-	auto password = service.property<std::string>("registry.user.password");
-	TPrint("1 user: %s pass: %s\n", username.c_str(), password.c_str());
 	auto user = service.property<User>("registry.user");
-	TPrint("2 user: %s pass: %s\n", user.name.c_str(), user.password.c_str());
+	TPrint("1 user: %s pass: %s\n", user.name.c_str(), user.password.c_str());
+
+	auto userMap = service.property<TMap<TString, TString>>("registry.user");
+	for (auto& e : userMap)
+		TPrint("2 user: %s pass: %s\n", e.first.c_str(), e.second.c_str());
+
+	auto users = service.property<TVector<User>>("registry.users");
+	for (auto& user : users)
+		TPrint("3 user: %s pass: %s\n", user.name.c_str(), user.password.c_str());
+
 }
 
 void on_signal(int signal)

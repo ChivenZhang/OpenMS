@@ -379,6 +379,43 @@ inline bool TTypeC(TString const& value, TString& string)
 	return true;
 }
 
+#include <nlohmann/json.hpp>
+
+template<class T>
+inline bool TTypeC(TVector<T> const& v, TString& s)
+{
+	nlohmann::json j;
+	for (auto& e : v)
+	{
+		TString item; TTypeC(e, item);
+		nlohmann::json jj = nlohmann::json::parse(item);
+		j.push_back(jj);
+	}
+	s = j.dump();
+	return true;
+}
+template<class T>
+inline bool TTypeC(TString const& s, TVector<T>& v)
+{
+	nlohmann::json j = nlohmann::json::parse(s);
+	if (j.is_array())
+	{
+		for (size_t i = 0; i < j.size(); ++i)
+		{
+			T item;
+			auto& value = j[i];
+			if (value.is_string()) TTypeC(value.get<std::string>(), item);
+			else if (value.is_boolean()) TTypeC(value.get<bool>(), item);
+			else if (value.is_number_float()) TTypeC(value.get<float>(), item);
+			else if (value.is_number_integer()) TTypeC(value.get<int32_t>(), item);
+			else if (value.is_number_unsigned()) TTypeC(value.get<uint32_t>(), item);
+			else TTypeC(value.dump(), item);
+			v.emplace_back(item);
+		}
+		return true;
+	}
+	return false;
+}
 template <class T, class U>
 inline bool TTypeC(TVector<T> const& value, TVector<U>& result)
 {
@@ -391,6 +428,41 @@ inline bool TTypeC(TVector<T> const& value, TVector<U>& result)
 	return true;
 }
 
+template<class T>
+inline bool TTypeC(TSet<T> const& v, TString& s)
+{
+	nlohmann::json j;
+	for (auto& e : v)
+	{
+		TString item; TTypeC(e, item);
+		nlohmann::json jj = nlohmann::json::parse(item);
+		j.push_back(jj);
+	}
+	s = j.dump();
+	return true;
+}
+template<class T>
+inline bool TTypeC(TString const& s, TSet<T>& v)
+{
+	nlohmann::json j = nlohmann::json::parse(s);
+	if (j.is_array())
+	{
+		for (size_t i = 0; i < j.size(); ++i)
+		{
+			T item;
+			auto& value = j[i];
+			if (value.is_string()) TTypeC(value.get<std::string>(), item);
+			else if (value.is_boolean()) TTypeC(value.get<bool>(), item);
+			else if (value.is_number_float()) TTypeC(value.get<float>(), item);
+			else if (value.is_number_integer()) TTypeC(value.get<int32_t>(), item);
+			else if (value.is_number_unsigned()) TTypeC(value.get<uint32_t>(), item);
+			else TTypeC(value.dump(), item);
+			v.emplace(item);
+		}
+		return true;
+	}
+	return false;
+}
 template <class T, class U>
 inline bool TTypeC(TSet<T> const& value, TSet<U>& result)
 {
@@ -403,6 +475,44 @@ inline bool TTypeC(TSet<T> const& value, TSet<U>& result)
 	return true;
 }
 
+template<class K, class T>
+inline bool TTypeC(TMap<K, T> const& v, TString& s)
+{
+	nlohmann::json j;
+	for (auto& e : v)
+	{
+		TString key, item;
+		TTypeC(e.first, key);
+		TTypeC(e.second, item);
+		nlohmann::json jj = nlohmann::json::parse(item);
+		j[key] = jj;
+	}
+	s = j.dump();
+	return true;
+}
+template<class K, class T>
+inline bool TTypeC(TString const& s, TMap<K, T>& v)
+{
+	nlohmann::json j = nlohmann::json::parse(s);
+	if (j.is_object())
+	{
+		for (auto& e : j.items())
+		{
+			K key; T item;
+			TTypeC(e.key(), key);
+			auto& value = e.value();
+			if (value.is_string()) TTypeC(value.get<std::string>(), item);
+			else if (value.is_boolean()) TTypeC(value.get<bool>(), item);
+			else if (value.is_number_float()) TTypeC(value.get<float>(), item);
+			else if (value.is_number_integer()) TTypeC(value.get<int32_t>(), item);
+			else if (value.is_number_unsigned()) TTypeC(value.get<uint32_t>(), item);
+			else TTypeC(value.dump(), item);
+			v.emplace(key, item);
+		}
+		return true;
+	}
+	return false;
+}
 template <class K, class T, class K2, class T2>
 inline bool TTypeC(TMap<K, T> const& value, TMap<K2, T2>& result)
 {
