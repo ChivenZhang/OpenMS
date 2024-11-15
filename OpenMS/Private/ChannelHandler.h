@@ -14,13 +14,13 @@
 class ChannelInboundHandler : public IChannelInboundHandler
 {
 public:
-	void channelCatch(TRaw<IChannelContext> context, TException&& exception) const override;
-	void channelRead(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) const override;
+	void channelError(TRaw<IChannelContext> context, TException&& exception) const override;
+	bool channelRead(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) const override;
 };
 
 class ChannelOutboundHandler : public IChannelOutboundHandler
 {
 public:
-	void channelCatch(TRaw<IChannelContext> context, TException&& exception) const override;
-	void channelWrite(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) const override;
+	void channelError(TRaw<IChannelContext> context, TException&& exception) const override;
+	bool channelWrite(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) const override;
 };

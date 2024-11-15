@@ -14,37 +14,40 @@
 class ServerInboundHandler : public ChannelInboundHandler
 {
 public:
-	void channelRead(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) const override
+	bool channelRead(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) const override
 	{
 		TPrint("Read: %s", event->Message.c_str());
+		return true;
 	}
 };
 
 class ServerOutboundHandler : public ChannelOutboundHandler
 {
 public:
-	void channelWrite(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) const override
+	bool channelWrite(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) const override
 	{
 		auto _event = TNew<IChannelEvent>();
 		_event->Message = event->Message;
 		context->write(_event);
 		TPrint("Write: %s", _event->Message.c_str());
+		return true;
 	}
 };
 
 class ClientInboundHandler : public ChannelInboundHandler
 {
 public:
-	void channelRead(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) const override
+	bool channelRead(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) const override
 	{
 		TPrint("Read: %s", event->Message.c_str());
+		return true;
 	}
 };
 
 class ClientOutboundHandler : public ChannelOutboundHandler
 {
 public:
-	void channelWrite(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) const override
+	bool channelWrite(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) const override
 	{
 		printf(">>");
 
@@ -56,5 +59,6 @@ public:
 		_event->Message = TStringView(buffer, buflen);
 		context->write(_event);
 		TPrint("Write: %s", _event->Message.c_str());
+		return true;
 	}
 };

@@ -11,18 +11,20 @@
 #include "ChannelHandler.h"
 #include "IChannelContext.h"
 
-void ChannelInboundHandler::channelCatch(TRaw<IChannelContext> context, TException&& exception) const
+void ChannelInboundHandler::channelError(TRaw<IChannelContext> context, TException&& exception) const
 {
 }
 
-void ChannelInboundHandler::channelRead(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) const
+bool ChannelInboundHandler::channelRead(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) const
+{
+	return false;
+}
+
+void ChannelOutboundHandler::channelError(TRaw<IChannelContext> context, TException&& exception) const
 {
 }
 
-void ChannelOutboundHandler::channelCatch(TRaw<IChannelContext> context, TException&& exception) const
+bool ChannelOutboundHandler::channelWrite(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) const
 {
-}
-
-void ChannelOutboundHandler::channelWrite(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) const
-{
+	return false;
 }

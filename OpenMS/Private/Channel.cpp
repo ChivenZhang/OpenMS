@@ -74,16 +74,17 @@ void Channel::read(TRef<IChannelEvent> event)
 	{
 		try
 		{
-			inbounds[i].Handler->channelRead(&m_Context, event.get());
+			auto result = inbounds[i].Handler->channelRead(&m_Context, event.get());
+			if (result == false) break;
 		}
 		catch (TException ex)
 		{
-			inbounds[i].Handler->channelCatch(&m_Context, std::move(ex));
+			inbounds[i].Handler->channelError(&m_Context, std::move(ex));
 		}
 		catch (...)
 		{
 			auto ex = std::exception("unknown exception caught in " __FILE__ " [ " __FUNCTION__ " ]");
-			inbounds[i].Handler->channelCatch(&m_Context, std::move(ex));
+			inbounds[i].Handler->channelError(&m_Context, std::move(ex));
 		}
 	}
 
@@ -92,16 +93,17 @@ void Channel::read(TRef<IChannelEvent> event)
 	{
 		try
 		{
-			outbounds[i].Handler->channelWrite(&m_Context, event.get());
+			auto result = outbounds[i].Handler->channelWrite(&m_Context, event.get());
+			if (result == false) break;
 		}
 		catch (TException ex)
 		{
-			outbounds[i].Handler->channelCatch(&m_Context, std::move(ex));
+			outbounds[i].Handler->channelError(&m_Context, std::move(ex));
 		}
 		catch (...)
 		{
 			auto ex = std::exception("unknown exception caught in " __FILE__ " [ " __FUNCTION__ " ]");
-			outbounds[i].Handler->channelCatch(&m_Context, std::move(ex));
+			outbounds[i].Handler->channelError(&m_Context, std::move(ex));
 		}
 	}
 }
