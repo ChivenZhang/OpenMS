@@ -257,7 +257,14 @@ inline constexpr uint32_t THash(TStringView value)
 
 // ============================================
 
-template <class T, class U>
+template <class T, class U, std::enable_if_t<std::is_same_v<T, U>, int> = 0>
+inline bool TTypeC(T const& value, U& result)
+{
+	result = value;
+	return true;
+}
+
+template <class T, class U, std::enable_if_t<!std::is_same_v<T, U>, int> = 0>
 inline bool TTypeC(T const& value, U& result)
 {
 	TString string;
@@ -372,14 +379,23 @@ inline bool TTypeC(TString const& string, double& value)
 	return true;
 }
 
-template <>
-inline bool TTypeC(TString const& value, TString& string)
+#include <nlohmann/json.hpp>
+#define OPENMS_TYPE NLOHMANN_DEFINE_TYPE_INTRUSIVE
+
+template <class T, std::enable_if_t<!std::is_scalar_v<T> && !std::is_same_v<T, TString>, int> = 0>
+inline bool TTypeC(T const& value, TString& result)
 {
-	string = value;
+	nlohmann::json j = value;
+	result = j.dump();
 	return true;
 }
-
-#include <nlohmann/json.hpp>
+template <class T, std::enable_if_t<!std::is_scalar_v<T> && !std::is_same_v<T, TString>, int> = 0>
+inline bool TTypeC(TString const& value, T& result)
+{
+	nlohmann::json j = nlohmann::json::parse(value.c_str(), nullptr, false);
+	result = j.get<T>();
+	return true;
+}
 
 template<class T>
 inline bool TTypeC(TVector<T> const& v, TString& s)
@@ -388,7 +404,7 @@ inline bool TTypeC(TVector<T> const& v, TString& s)
 	for (auto& e : v)
 	{
 		TString item; TTypeC(e, item);
-		nlohmann::json jj = nlohmann::json::parse(item);
+		nlohmann::json jj = nlohmann::json::parse(item, nullptr, false);
 		j.push_back(jj);
 	}
 	s = j.dump();
@@ -397,7 +413,7 @@ inline bool TTypeC(TVector<T> const& v, TString& s)
 template<class T>
 inline bool TTypeC(TString const& s, TVector<T>& v)
 {
-	nlohmann::json j = nlohmann::json::parse(s);
+	nlohmann::json j = nlohmann::json::parse(s, nullptr, false);
 	if (j.is_array())
 	{
 		for (size_t i = 0; i < j.size(); ++i)
@@ -435,7 +451,7 @@ inline bool TTypeC(TSet<T> const& v, TString& s)
 	for (auto& e : v)
 	{
 		TString item; TTypeC(e, item);
-		nlohmann::json jj = nlohmann::json::parse(item);
+		nlohmann::json jj = nlohmann::json::parse(item, nullptr, false);
 		j.push_back(jj);
 	}
 	s = j.dump();
@@ -444,7 +460,7 @@ inline bool TTypeC(TSet<T> const& v, TString& s)
 template<class T>
 inline bool TTypeC(TString const& s, TSet<T>& v)
 {
-	nlohmann::json j = nlohmann::json::parse(s);
+	nlohmann::json j = nlohmann::json::parse(s, nullptr, false);
 	if (j.is_array())
 	{
 		for (size_t i = 0; i < j.size(); ++i)
@@ -484,7 +500,7 @@ inline bool TTypeC(TMap<K, T> const& v, TString& s)
 		TString key, item;
 		TTypeC(e.first, key);
 		TTypeC(e.second, item);
-		nlohmann::json jj = nlohmann::json::parse(item);
+		nlohmann::json jj = nlohmann::json::parse(item, nullptr, false);
 		j[key] = jj;
 	}
 	s = j.dump();
@@ -493,7 +509,7 @@ inline bool TTypeC(TMap<K, T> const& v, TString& s)
 template<class K, class T>
 inline bool TTypeC(TString const& s, TMap<K, T>& v)
 {
-	nlohmann::json j = nlohmann::json::parse(s);
+	nlohmann::json j = nlohmann::json::parse(s, nullptr, false);
 	if (j.is_object())
 	{
 		for (auto& e : j.items())

@@ -15,22 +15,8 @@ struct User
 {
 	std::string name;
 	std::string password;
+	OPENMS_TYPE(User, name, password)
 };
-template<>
-bool TTypeC(TString const& s, User& u)
-{
-	nlohmann::json j = nlohmann::json::parse(s.c_str());
-	u.name = j.at("name").get<std::string>();
-	u.password = j.at("password").get<std::string>();
-	return true;
-}
-template<>
-bool TTypeC(User const& u, TString& s)
-{
-	nlohmann::json j = { { "name", u.name },{ "password", u.password } };
-	s = j.dump();
-	return true;
-}
 
 void on_signal(int signal);
 
@@ -41,17 +27,20 @@ int main(int argc, char* argv[])
 	signal(SIGINT, on_signal);
 	service.startup(argc, argv);
 
+#if 1 // test code
+
+	TPrint("%d", service.property<uint16_t>("registry.server.port"));
+
 	auto user = service.property<User>("registry.user");
 	TPrint("1 user: %s pass: %s\n", user.name.c_str(), user.password.c_str());
 
-	auto userMap = service.property<TMap<TString, TString>>("registry.user");
-	for (auto& e : userMap)
-		TPrint("2 user: %s pass: %s\n", e.first.c_str(), e.second.c_str());
-
 	auto users = service.property<TVector<User>>("registry.users");
 	for (auto& user : users)
-		TPrint("3 user: %s pass: %s\n", user.name.c_str(), user.password.c_str());
+	{
+		TPrint("2 user: %s pass: %s\n", user.name.c_str(), user.password.c_str());
+	}
 
+#endif
 }
 
 void on_signal(int signal)
