@@ -11,15 +11,17 @@
 #include "RegistryService.h"
 #include <csignal>
 
-RegistryService service;
+void on_signal(int signal);
 
-static void on_signal(int signal)
-{
-	service.shutdown();
-}
+RegistryService service;
 
 int main()
 {
 	::signal(SIGINT, on_signal);
 	service.startup();
+}
+
+void on_signal(int signal)
+{
+	service.shutdown();
 }
