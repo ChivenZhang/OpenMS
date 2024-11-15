@@ -9,7 +9,7 @@
 * Created by ChivenZhang.
 *
 * =================================================*/
-#include "OpenMS/Private/Service.h"
+#include "OpenMS/Service/Private/Service.h"
 
 class RegistryService : public Service
 {

@@ -9,7 +9,7 @@
 * Created by ChivenZhang.
 *
 * =================================================*/
-#include "IChannelWorker.h"
+#include "../IChannelWorker.h"
 class ChannelReactor;
 
 class ChannelWorker : public IChannelWorker

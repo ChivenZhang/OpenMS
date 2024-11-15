@@ -9,7 +9,7 @@
 * Created by ChivenZhang.
 *
 * =================================================*/
-#include "IChannelAddress.h"
+#include "../IChannelAddress.h"
 
 class IPv4Address : public ISocketAddress
 {

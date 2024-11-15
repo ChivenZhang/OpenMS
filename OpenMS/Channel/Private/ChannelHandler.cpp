@@ -9,7 +9,6 @@
 *
 * =================================================*/
 #include "ChannelHandler.h"
-#include "IChannelContext.h"
 
 void ChannelInboundHandler::channelError(TRaw<IChannelContext> context, TException&& exception) const
 {

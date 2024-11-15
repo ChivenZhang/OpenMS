@@ -9,7 +9,7 @@
 * Created by ChivenZhang.
 *
 * =================================================*/
-#include "IChannelHandler.h"
+#include "../IChannelHandler.h"
 
 class ChannelInboundHandler : public IChannelInboundHandler
 {

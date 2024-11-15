@@ -9,7 +9,7 @@
 * Created by ChivenZhang.
 *
 * =================================================*/
-#include "IChannelPipeline.h"
+#include "../IChannelPipeline.h"
 class Channel;
 
 class ChannelPipeline : public IChannelPipeline

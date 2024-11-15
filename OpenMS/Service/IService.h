@@ -21,15 +21,15 @@ public:
 
 	virtual void shutdown() = 0;
 
-	virtual bool hasProperty(TStringView name) const = 0;
+	virtual bool contains(TStringView name) const = 0;
 
-	virtual TString getProperty(TStringView name) const = 0;
+	virtual TString property(TStringView name) const = 0;
 
 	template <class T>
-	T getProperty(TStringView name, T const& value = T()) const
+	T property(TStringView name, T const& value = T()) const
 	{
 		T result;
-		if (TText<T>::from_string(getProperty(name), result)) return result;
+		if (TText<T>::from_string(property(name), result)) return result;
 		return value;
 	}
 };

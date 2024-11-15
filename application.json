@@ -1,0 +1,15 @@
+{
+	"registry": {
+		"server": {
+			"port": "8080"
+		},
+		"user": {
+			"name": "admin",
+			"password": "password"
+		},
+		"handlers": {
+
+		},
+		"endpoints": []
+	}
+}

@@ -9,7 +9,7 @@
 * Created by ChivenZhang.
 *
 * =================================================*/
-#include "IChannelContext.h"
+#include "../IChannelContext.h"
 class Channel;
 
 class ChannelContext : public IChannelContext

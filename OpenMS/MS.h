@@ -250,6 +250,10 @@ inline constexpr uint32_t THash(TString const& value)
 {
 	return THash(value.c_str());
 }
+inline constexpr uint32_t THash(TStringView value)
+{
+	return THash(value.data());
+}
 
 template <class T>
 struct TText
@@ -264,15 +268,135 @@ struct TText
 	}
 };
 
+template <>
+struct TText<bool>
+{
+	static bool to_string(bool const& value, TString& string)
+	{
+		string = value ? "true" : "false";
+		return true;
+	}
+	static bool from_string(TString const& string, bool& value)
+	{
+		value = (string == "true");
+		return true;
+	}
+};
+
+template <>
+struct TText<int16_t>
+{
+	static bool to_string(int16_t const& value, TString& string)
+	{
+		string = std::to_string(value);
+		return true;
+	}
+	static bool from_string(TString const& string, int16_t& value)
+	{
+		value = (int16_t)std::strtol(string.c_str(), nullptr, 10);
+		return true;
+	}
+};
+
+template <>
+struct TText<uint16_t>
+{
+	static bool to_string(uint16_t const& value, TString& string)
+	{
+		string = std::to_string(value);
+		return true;
+	}
+	static bool from_string(TString const& string, uint16_t& value)
+	{
+		value = (uint16_t)std::strtoul(string.c_str(), nullptr, 10);
+		return true;
+	}
+};
+
+template <>
+struct TText<int32_t>
+{
+	static bool to_string(int32_t const& value, TString& string)
+	{
+		string = std::to_string(value);
+		return true;
+	}
+	static bool from_string(TString const& string, int32_t& value)
+	{
+		value = std::strtol(string.c_str(), nullptr, 10);
+		return true;
+	}
+};
+
+template <>
+struct TText<uint32_t>
+{
+	static bool to_string(uint32_t const& value, TString& string)
+	{
+		string = std::to_string(value);
+		return true;
+	}
+	static bool from_string(TString const& string, uint32_t& value)
+	{
+		value = std::strtoul(string.c_str(), nullptr, 10);
+		return true;
+	}
+};
+
+template <>
+struct TText<float>
+{
+	static bool to_string(float const& value, TString& string)
+	{
+		string = std::to_string(value);
+		return true;
+	}
+	static bool from_string(TString const& string, float& value)
+	{
+		value = std::strtof(string.c_str(), nullptr);
+		return true;
+	}
+};
+
+template <>
+struct TText<double>
+{
+	static bool to_string(double const& value, TString& string)
+	{
+		string = std::to_string(value);
+		return true;
+	}
+	static bool from_string(TString const& string, double& value)
+	{
+		value = std::strtod(string.c_str(), nullptr);
+		return true;
+	}
+};
+
+template <>
+struct TText<std::string>
+{
+	static bool to_string(std::string const& value, TString& string)
+	{
+		string = value;
+		return true;
+	}
+	static bool from_string(TString const& string, std::string& value)
+	{
+		value = string;
+		return true;
+	}
+};
+
 // ============================================
 
 #define TAssert(...) assert(__VA_ARGS__)
 
-#define TPrint(FORMAT, ...) do{ fprintf(stdout, "%s(%d)\t%s\n%.3f s\t[%s]\t" FORMAT "\n\n", __FILE__, __LINE__, __FUNCTION__, ::clock()*0.001f, "INFO", __VA_ARGS__); }while(0)
-#define TError(FORMAT, ...) do{ fprintf(stderr, "%s(%d)\t%s\n%.3f s\t[%s]\t" FORMAT "\n\n", __FILE__, __LINE__, __FUNCTION__, ::clock()*0.001f, "ERROR", __VA_ARGS__); }while(0)
-#define TFatal(FORMAT, ...) do{ fprintf(stderr, "%s(%d)\t%s\n%.3f s\t[%s]\t" FORMAT "\n\n", __FILE__, __LINE__, __FUNCTION__, ::clock()*0.001f, "FATAL", __VA_ARGS__); exit(1); }while(0)
+#define TPrint(FORMAT, ...) do{ fprintf(stdout, "%s(%d)\n%.3f s\t[%s]\t" FORMAT "\n\n", __FILE__, __LINE__, ::clock()*0.001f, "INFO", __VA_ARGS__); }while(0)
+#define TError(FORMAT, ...) do{ fprintf(stderr, "%s(%d)\n%.3f s\t[%s]\t" FORMAT "\n\n", __FILE__, __LINE__, ::clock()*0.001f, "ERROR", __VA_ARGS__); }while(0)
+#define TFatal(FORMAT, ...) do{ fprintf(stderr, "%s(%d)\n%.3f s\t[%s]\t" FORMAT "\n\n", __FILE__, __LINE__, ::clock()*0.001f, "FATAL", __VA_ARGS__); exit(1); }while(0)
 #ifdef OPENMS_DEBUG
-#define TDebug(FORMAT, ...) do{ fprintf(stdout, "%s(%d)\t%s\n%.3f s\t[%s]\t" FORMAT "\n\n", __FILE__, __LINE__, __FUNCTION__, ::clock()*0.001f, "DEBUG", __VA_ARGS__); }while(0)
+#define TDebug(FORMAT, ...) do{ fprintf(stdout, "%s(%d)\n%.3f s\t[%s]\t" FORMAT "\n\n", __FILE__, __LINE__, ::clock()*0.001f, "DEBUG", __VA_ARGS__); }while(0)
 #else													
 #define TDebug(FORMAT, ...)
 #endif

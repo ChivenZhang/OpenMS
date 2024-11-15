@@ -9,7 +9,7 @@
 * Created by ChivenZhang.
 *
 * =================================================*/
-#include "IChannel.h"
+#include "../IChannel.h"
 #include "ChannelContext.h"
 #include "ChannelPipeline.h"
 class ChannelReactor;
