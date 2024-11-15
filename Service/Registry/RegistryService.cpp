@@ -10,12 +10,12 @@
 * =================================================*/
 #include "RegistryService.h"
 
-void RegistryService::startup()
+void RegistryService::startup(int argc, char** argv)
 {
-
+	Service::startup(argc, argv);
 }
 
 void RegistryService::shutdown()
 {
-
+	Service::shutdown();
 }

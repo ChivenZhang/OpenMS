@@ -10,11 +10,10 @@
 *
 * =================================================*/
 #include "OpenMS/Private/Service.h"
-#include <csignal>
 
 class RegistryService : public Service
 {
 public:
-	void startup() override;
+	void startup(int argc, char** argv) override;
 	void shutdown() override;
 };

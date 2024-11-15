@@ -251,6 +251,19 @@ inline constexpr uint32_t THash(TString const& value)
 	return THash(value.c_str());
 }
 
+template <class T>
+struct TText
+{
+	static bool to_string(T const& value, TString& string)
+	{
+		return false;
+	}
+	static bool from_string(TString const& string, T& value)
+	{
+		return false;
+	}
+};
+
 // ============================================
 
 #define TAssert(...) assert(__VA_ARGS__)

@@ -14,6 +14,8 @@
 class Service : public IService
 {
 public:
-	void startup() override;
+	void startup(int argc, char** argv) override;
 	void shutdown() override;
+	bool hasProperty(TStringView name) const override;
+	TString getProperty(TStringView name) const override;
 };

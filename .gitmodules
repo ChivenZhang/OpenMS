@@ -4,3 +4,6 @@
 [submodule "External/kcp"]
 	path = External/kcp
 	url = https://github.com/skywind3000/kcp.git
+[submodule "External/nlohmann"]
+	path = External/nlohmann
+	url = https://github.com/nlohmann/json.git

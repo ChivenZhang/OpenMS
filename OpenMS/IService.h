@@ -17,9 +17,21 @@ class OPENMS_API IService
 public:
 	virtual ~IService() = default;
 
-	virtual void startup() = 0;
+	virtual void startup(int argc, char** argv) = 0;
 
 	virtual void shutdown() = 0;
+
+	virtual bool hasProperty(TStringView name) const = 0;
+
+	virtual TString getProperty(TStringView name) const = 0;
+
+	template <class T>
+	T getProperty(TStringView name, T const& value = T()) const
+	{
+		T result;
+		if (TText<T>::from_string(getProperty(name), result)) return result;
+		return value;
+	}
 };
 
 /// @brief Interface for provider service
