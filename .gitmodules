@@ -7,3 +7,4 @@
 [submodule "External/nlohmann"]
 	path = External/nlohmann
 	url = https://github.com/nlohmann/json.git
+	branch = master
