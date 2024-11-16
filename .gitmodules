@@ -8,3 +8,6 @@
 	path = External/nlohmann
 	url = https://github.com/nlohmann/json.git
 	branch = master
+[submodule "External/http-parser"]
+	path = External/http-parser
+	url = https://github.com/nodejs/http-parser.git
