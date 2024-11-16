@@ -61,7 +61,7 @@ add_library(OpenMS STATIC
 	Service/IService.h
 	Service/Private/Service.cpp
 	Service/Private/Service.h
-)
+ "Remote/IRemoteFunction.h")
 add_dependencies(OpenMS uv_a)
 
 target_include_directories(OpenMS PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

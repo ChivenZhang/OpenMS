@@ -17,13 +17,12 @@ class Service : public IService
 public:
 	void startup(int argc, char** argv) override;
 	void shutdown() override;
-	bool contains(TStringView name) const;
-	TString property(TStringView name) const;
+	using IService::property;
+	TString property(TStringView name) const override;
 
-	template <class T>
-	T property(TStringView name, T const& value = T()) const
+	bool execute(TStringView service, TStringView method)
 	{
-		return TTextC<T>::from_string(property(name), value);
+		return false;
 	}
 
 protected:
