@@ -22,7 +22,7 @@ void RegistryService::shutdown()
 
 #include <OpenMS/Service/Bootstrap.h>
 
-TRef<IService> openms_service()
+TRef<IService> openms_bootstrap()
 {
 	return TNew<RegistryService>();
 }
