@@ -10,6 +10,7 @@
 *
 * =================================================*/
 #include "MS.h"
+#define OPENMS_CONFIG_FILE "application.json"
 
 /// @brief Interface for service
 class OPENMS_API IService
@@ -20,18 +21,6 @@ public:
 	virtual void startup(int argc, char** argv) = 0;
 
 	virtual void shutdown() = 0;
-
-	virtual bool contains(TStringView name) const = 0;
-
-	virtual TString property(TStringView name) const = 0;
-
-	template <class T>
-	T property(TStringView name, T const& value = T()) const
-	{
-		T result;
-		if (TTypeC(property(name), result)) return result;
-		return value;
-	}
 };
 
 /// @brief Interface for provider service

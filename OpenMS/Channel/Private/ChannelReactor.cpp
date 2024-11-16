@@ -22,7 +22,7 @@ ChannelReactor::ChannelReactor(size_t workerNum, callback_t callback)
 
 ChannelReactor::~ChannelReactor()
 {
-	this->shutdown();
+	for (size_t i = 0; i < m_WorkerList.size(); ++i) if (m_WorkerThreads[i].joinable()) m_WorkerThreads[i].join();
 }
 
 void ChannelReactor::startup()

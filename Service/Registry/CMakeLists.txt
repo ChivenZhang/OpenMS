@@ -1,6 +1,6 @@
 
 add_executable(RegistryService
-	main.cpp
+	
 	${CMAKE_CURRENT_SOURCE_DIR}/RegistryService.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/RegistryService.h
 )

@@ -19,3 +19,10 @@ void RegistryService::shutdown()
 {
 	Service::shutdown();
 }
+
+#include <OpenMS/Service/Bootstrap.h>
+
+TRef<IService> openms_service()
+{
+	return TNew<RegistryService>();
+}

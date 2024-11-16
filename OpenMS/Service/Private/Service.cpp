@@ -12,14 +12,13 @@
 #include "Service.h"
 #include <fstream>
 #include <filesystem>
-#include <nlohmann/json.hpp>
 
 void Service::startup(int argc, char** argv)
 {
 	// Get config file path
 
 	auto directory = std::filesystem::path(argv[0]).parent_path().generic_string();
-	auto configFile = directory + "/" + "application.json";
+	auto configFile = directory + "/" + OPENMS_CONFIG_FILE;
 	if (std::filesystem::exists(configFile) == false) TFatal("config file not found: %s", configFile.c_str());
 
 	// Load config file
@@ -77,10 +76,28 @@ void Service::startup(int argc, char** argv)
 		};
 	auto document = nlohmann::ordered_json::parse(text, nullptr, false, true);
 	parse_func(TString(), 0, document);
+
+	// Initialize reactor
+
+	auto address = property("registry.server.ip");
+	auto portNum = property<uint16_t>("registry.server.port");
+	auto backlog = property<uint32_t>("registry.server.backlog");
+	auto workers = property<uint32_t>("registry.server.workers");
+	m_Reactor = TNew<TCPServerReactor>(IPv4Address::New(address, portNum), backlog, workers, TCPServerReactor::callback_t{
+		[=](TRef<IChannel> channel) {
+
+		},
+		[=](TRef<IChannel> channel) {
+
+		},
+		});
+	m_Reactor->startup();
+	if (m_Reactor->running() == false) TFatal("Failed to start reactor");
 }
 
 void Service::shutdown()
 {
+	m_Reactor->shutdown();
 	m_PropertyMap.clear();
 }
 
