@@ -224,7 +224,7 @@ void TCPServerReactor::on_connect(uv_stream_t* server, int status)
 			return;
 		}
 
-		auto channel = TNew<TCPChannel>(reactor, localAddress, remoteAddress, client);
+		auto channel = TNew<TCPChannel>(reactor, localAddress, remoteAddress, (uint32_t)(rand() % reactor->m_WorkerList.size()), client);
 		client->data = channel.get();
 		reactor->onConnect(channel);
 

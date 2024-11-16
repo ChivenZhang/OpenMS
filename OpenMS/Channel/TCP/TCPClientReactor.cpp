@@ -213,7 +213,7 @@ void TCPClientReactor::on_connect(uv_connect_t* req, int status)
 		return;
 	}
 
-	auto channel = TNew<TCPChannel>(reactor, localAddress, remoteAddress, client);
+	auto channel = TNew<TCPChannel>(reactor, localAddress, remoteAddress, (uint32_t)(rand() % reactor->m_WorkerList.size()), client);
 	client->data = channel.get();
 	reactor->onConnect(channel);
 

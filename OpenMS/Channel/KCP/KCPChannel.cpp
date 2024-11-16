@@ -10,9 +10,9 @@
 * =================================================*/
 #include "KCPChannel.h"
 
-KCPChannel::KCPChannel(TRaw<ChannelReactor> reactor, TRef<IChannelAddress> local, TRef<IChannelAddress> remote, uv_udp_t* handle, ikcpcb* session)
+KCPChannel::KCPChannel(TRaw<ChannelReactor> reactor, TRef<IChannelAddress> local, TRef<IChannelAddress> remote, uint32_t workID, uv_udp_t* handle, ikcpcb* session)
 	:
-	Channel(reactor, local, remote),
+	Channel(reactor, local, remote, workID),
 	m_Handle(handle),
 	m_Session(session)
 {

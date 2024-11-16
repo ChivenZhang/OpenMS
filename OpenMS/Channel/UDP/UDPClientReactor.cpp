@@ -128,7 +128,7 @@ void UDPClientReactor::startup()
 
 				if (localAddress == nullptr || remoteAddress == nullptr) break;
 
-				auto channel = TNew<UDPChannel>(this, localAddress, remoteAddress, &client);
+				auto channel = TNew<UDPChannel>(this, localAddress, remoteAddress, (uint32_t)(rand() % m_WorkerList.size()), &client);
 				client.data = channel.get();
 				onConnect(channel);
 

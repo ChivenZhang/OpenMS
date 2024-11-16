@@ -22,6 +22,8 @@ public:
 
 	virtual bool running() const = 0;
 
+	virtual uint32_t getWorkID() const = 0;
+
 	virtual TRaw<IChannelAddress> getLocal() const = 0;
 
 	virtual TRaw<IChannelAddress> getRemote() const = 0;

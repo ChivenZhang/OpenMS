@@ -12,7 +12,7 @@
 #include "KCPChannel.h"
 #include "../../External/kcp/ikcp.h"
 
-#if 1 // From official kcp demo
+#if 1 // From official kcp demo: https://github.com/skywind3000/kcp/blob/master/test.h
 
 #if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)
 #include <windows.h>
@@ -354,7 +354,7 @@ void KCPServerReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 
 		auto sessionID = reactor->m_OnSession(remoteAddress);
 		auto session = ikcp_create(sessionID, nullptr);
-		channel = TNew<KCPChannel>(reactor, localAddress, remoteAddress, server, session);
+		channel = TNew<KCPChannel>(reactor, localAddress, remoteAddress, (uint32_t)(rand() % reactor->m_WorkerList.size()), server, session);
 		session->user = channel.get();
 		ikcp_setoutput(session, on_output);
 		ikcp_wndsize(session, 128, 128);
@@ -442,7 +442,10 @@ void KCPServerReactor::on_send(uv_udp_t* handle)
 		auto channel = TCast<KCPChannel>(reactor->m_Channels[i]);
 		if (channel == nullptr || channel->running() == false) continue;
 		auto session = channel->getSession();
-		ikcp_update(session, iclock());
+
+		auto nowTime = iclock();
+		auto nextTime = ikcp_check(session, nowTime);
+		if (nextTime <= nowTime) ikcp_update(session, nowTime);
 
 		char buffer[2048];
 		auto result = ikcp_recv(channel->getSession(), buffer, sizeof(buffer));

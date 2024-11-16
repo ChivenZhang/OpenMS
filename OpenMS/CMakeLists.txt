@@ -11,7 +11,14 @@ include_directories(
 add_library(OpenMS STATIC
 	${CMAKE_SOURCE_DIR}/External/kcp/ikcp.c
 	${CMAKE_SOURCE_DIR}/External/kcp/ikcp.h
-	Channel/HTTP/HTTPReactor.h
+	${CMAKE_SOURCE_DIR}/External/http-parser/http_parser.c
+	${CMAKE_SOURCE_DIR}/External/http-parser/http_parser.h
+	Channel/HTTP/HTTPChannel.cpp
+	Channel/HTTP/HTTPChannel.h
+	Channel/HTTP/HTTPClientReactor.cpp
+	Channel/HTTP/HTTPClientReactor.h
+	Channel/HTTP/HTTPServerReactor.cpp
+	Channel/HTTP/HTTPServerReactor.h
 	Channel/IChannel.h
 	Channel/IChannelAddress.h
 	Channel/IChannelBuffer.h
@@ -56,15 +63,22 @@ add_library(OpenMS STATIC
 	Channel/UDP/UDPClientReactor.h 
 	Channel/UDP/UDPServerReactor.cpp 
 	Channel/UDP/UDPServerReactor.h
-	Channel/WS/WSReactor.h
+	Channel/WS/WSChannel.cpp
+	Channel/WS/WSChannel.h
+	Channel/WS/WSClientReactor.cpp
+	Channel/WS/WSClientReactor.h
+	Channel/WS/WSServerReactor.cpp
+	Channel/WS/WSServerReactor.h
 	MS.h
+	Remote/IRemoteFunction.h
 	Service/IService.h
 	Service/Private/Service.cpp
 	Service/Private/Service.h
- "Remote/IRemoteFunction.h")
+)
 add_dependencies(OpenMS uv_a)
 
 target_include_directories(OpenMS PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(OpenMS PUBLIC ${CMAKE_SOURCE_DIR}/External/http-parser)
 target_include_directories(OpenMS PUBLIC ${CMAKE_SOURCE_DIR}/External/libuv/include)
 target_include_directories(OpenMS PUBLIC ${CMAKE_SOURCE_DIR}/External/nlohmann/single_include)
 target_link_libraries(OpenMS uv_a)

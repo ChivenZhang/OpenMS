@@ -288,7 +288,7 @@ void UDPServerReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 			return;
 		}
 
-		channel = TNew<UDPChannel>(reactor, localAddress, remoteAddress, server);
+		channel = TNew<UDPChannel>(reactor, localAddress, remoteAddress, (uint32_t)(rand() % reactor->m_WorkerList.size()), server);
 		server->data = channel.get();
 		reactor->onConnect(channel);
 

@@ -93,14 +93,15 @@ void ChannelReactor::onConnect(TRef<Channel> channel)
 
 void ChannelReactor::onDisconnect(TRef<Channel> channel)
 {
+	channel->close();
 	if (m_OnDisconnect) m_OnDisconnect(channel);
 }
 
 void ChannelReactor::onInbound(TRef<IChannelEvent> event)
 {
-	if (event == nullptr || event->Channel.expired()) return;
-	auto index = (rand() % m_WorkerList.size());
-	if (event) m_WorkerList[index]->enqueue(event);
+	auto channel = event->Channel.lock();
+	if (event == nullptr || channel == nullptr) return;
+	m_WorkerList[channel->getWorkID()]->enqueue(event);
 }
 
 void ChannelReactor::onOutbound(TRef<IChannelEvent> event, bool flush)

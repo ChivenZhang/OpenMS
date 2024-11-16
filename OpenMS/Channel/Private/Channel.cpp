@@ -1,3 +1,4 @@
+#include "Channel.h"
 /*=================================================
 * Copyright © 2020-2024 ChivenZhang.
 * All Rights Reserved.
@@ -11,9 +12,10 @@
 #include "Channel.h"
 #include "ChannelReactor.h"
 
-Channel::Channel(TRaw<ChannelReactor> reactor, TRef<IChannelAddress> local, TRef<IChannelAddress> remote)
+Channel::Channel(TRaw<ChannelReactor> reactor, TRef<IChannelAddress> local, TRef<IChannelAddress> remote, uint32_t workID)
 	:
 	m_Running(true),
+	m_WorkID(workID),
 	m_Context(this),
 	m_Pipeline(this),
 	m_Reactor(reactor),
@@ -30,6 +32,11 @@ Channel::~Channel()
 bool Channel::running() const
 {
 	return m_Running;
+}
+
+uint32_t Channel::getWorkID() const
+{
+	return m_WorkID;
 }
 
 TRaw<IChannelAddress> Channel::getLocal() const

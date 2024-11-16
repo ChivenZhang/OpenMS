@@ -16,7 +16,7 @@
 class KCPChannel : public Channel
 {
 public:
-	KCPChannel(TRaw<ChannelReactor> reactor, TRef<IChannelAddress> local, TRef<IChannelAddress> remote, uv_udp_t* handle, ikcpcb* session);
+	KCPChannel(TRaw<ChannelReactor> reactor, TRef<IChannelAddress> local, TRef<IChannelAddress> remote, uint32_t workID, uv_udp_t* handle, ikcpcb* session);
 	~KCPChannel();
 	uv_udp_t* getHandle() const;
 	ikcpcb* getSession() const;

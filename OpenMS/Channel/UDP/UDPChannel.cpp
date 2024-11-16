@@ -10,9 +10,9 @@
 * =================================================*/
 #include "UDPChannel.h"
 
-UDPChannel::UDPChannel(TRaw<ChannelReactor> reactor, TRef<IChannelAddress> local, TRef<IChannelAddress> remote, uv_udp_t* handle)
+UDPChannel::UDPChannel(TRaw<ChannelReactor> reactor, TRef<IChannelAddress> local, TRef<IChannelAddress> remote, uint32_t workID, uv_udp_t* handle)
 	:
-	Channel(reactor, local, remote),
+	Channel(reactor, local, remote, workID),
 	m_Handle(handle)
 {
 }

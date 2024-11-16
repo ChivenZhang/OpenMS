@@ -16,6 +16,8 @@ class ChannelContext : public IChannelContext
 {
 public:
 	ChannelContext(TRaw<Channel> channel);
+	void close() override;
+	TFuture<bool> close(TPromise<bool>&& promise) override;
 	void write(TRef<IChannelEvent> event) override;
 	TFuture<bool> write(TRef<IChannelEvent> event, TPromise<bool>&& promise) override;
 	void writeAndFlush(TRef<IChannelEvent> event) override;

@@ -18,6 +18,10 @@ class OPENMS_API IChannelContext
 public:
 	virtual ~IChannelContext() = default;
 
+	virtual void close() = 0;
+
+	virtual TFuture<bool> close(TPromise<bool>&& promise) = 0;
+
 	virtual void write(TRef<IChannelEvent> event) = 0;
 
 	virtual TFuture<bool> write(TRef<IChannelEvent> event, TPromise<bool>&& promise) = 0;
