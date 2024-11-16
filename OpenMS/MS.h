@@ -250,10 +250,12 @@ inline constexpr uint32_t THash(TString const& value)
 {
 	return THash(value.c_str());
 }
+#if 20 <= OPENMS_CPP_VERSION
 inline constexpr uint32_t THash(TStringView value)
 {
 	return THash(value.data());
 }
+#endif
 
 // ============================================
 
