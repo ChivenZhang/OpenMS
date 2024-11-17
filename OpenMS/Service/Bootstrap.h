@@ -6,7 +6,7 @@
 *
 *
 *=====================History========================
-* Created by ChivenZhang.
+* Created by chivenzhang@gmail.com.
 *
 * =================================================*/
 #ifndef OPENMS_SHARED_LIBRARY

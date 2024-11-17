@@ -7,7 +7,7 @@
 *
 *
 *=====================History========================
-* Created by ChivenZhang.
+* Created by chivenzhang@gmail.com.
 *
 * =================================================*/
 #include "ChannelContext.h"
