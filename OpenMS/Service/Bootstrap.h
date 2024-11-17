@@ -13,7 +13,7 @@
 #include <OpenMS/Service/IService.h>
 #include <OpenMS/Service/Autowired.h>
 #include <OpenMS/Service/IEnvironment.h>
-#include <OpenMS/Service/Private/PropertySource.h>
+#include <OpenMS/Service/Private/Property.h>
 #include <csignal>
 
 TMutex mutex;

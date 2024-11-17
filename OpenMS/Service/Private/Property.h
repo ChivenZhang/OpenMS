@@ -9,15 +9,25 @@
 * Created by ChivenZhang.
 *
 * =================================================*/
-#include "../IPropertySource.h"
+#include "../IProperty.h"
 #include "../Autowired.h"
 
-class PropertySource : public IPropertySource
+class Value : public IValue
 {
 public:
-	PropertySource();
+	TString value() const override;
+	void setValue(TString const& value);
+
+protected:
+	TString m_Value;
+};
+
+class Property : public IProperty
+{
+public:
+	Property();
 	TString property(TStringView name) const override;
 
 protected:
-	TMap<uint32_t, TString> m_PropertyMap;
+	TMap<TString, TString> m_PropertyMap;
 };

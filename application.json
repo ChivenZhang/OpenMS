@@ -1,14 +1,14 @@
 {
 	"registry": {
-		"server": {
-			"ip": "127.0.0.1",
-			"port": "8080",
-			"backlog": "0",
-			"workers": "1"
-		},
 		"user": {
 			"name": "admin",
 			"password": "password"
+		},
+		"server": {
+			"ip": "127.0.0.1",
+			"port": 8080,
+			"backlog": 0,
+			"workers": 1
 		},
 		"users": [
 			{

@@ -1,3 +1,4 @@
+#include "Property.h"
 /*=================================================
 * Copyright © 2020-2024 ChivenZhang.
 * All Rights Reserved.
@@ -8,13 +9,23 @@
 * Created by ChivenZhang.
 *
 * =================================================*/
-#include "PropertySource.h"
+#include "Property.h"
 #include "../IEnvironment.h"
 #include <fstream>
 #include <filesystem>
 #define OPENMS_CONFIG_FILE "application.json"
 
-PropertySource::PropertySource()
+TString Value::value() const
+{
+	return m_Value;
+}
+
+void Value::setValue(TString const& value)
+{
+	m_Value = value;
+}
+
+Property::Property()
 {
 	auto argc = IEnvironment::argc;
 	auto argv = IEnvironment::argv;
@@ -48,7 +59,7 @@ PropertySource::PropertySource()
 				else
 					parse_func(name + "[" + std::to_string(i) + "]", depth + 1, raw);
 			}
-			m_PropertyMap[THash(name)] = value.dump();
+			m_PropertyMap[name] = value.dump();
 			break;
 		case nlohmann::ordered_json::value_t::object:
 			for (auto field : value.items())
@@ -59,32 +70,37 @@ PropertySource::PropertySource()
 				else
 					parse_func(name + "." + field.key(), depth + 1, raw);
 			}
-			m_PropertyMap[THash(name)] = value.dump();
+			m_PropertyMap[name] = value.dump();
 			break;
 		case nlohmann::ordered_json::value_t::boolean:
-			m_PropertyMap[THash(name)] = TTextC<bool>::to_string(value.get<bool>());
+			m_PropertyMap[name] = TTextC<bool>::to_string(value.get<bool>());
 			break;
 		case nlohmann::ordered_json::value_t::string:
-			m_PropertyMap[THash(name)] = value.get<std::string>();
+			m_PropertyMap[name] = value.get<std::string>();
 			break;
 		case nlohmann::ordered_json::value_t::number_float:
-			m_PropertyMap[THash(name)] = TTextC<float>::to_string(value.get<float>());
+			m_PropertyMap[name] = TTextC<float>::to_string(value.get<float>());
 			break;
 		case nlohmann::ordered_json::value_t::number_integer:
-			m_PropertyMap[THash(name)] = TTextC<int32_t>::to_string(value.get<int32_t>());
+			m_PropertyMap[name] = TTextC<int32_t>::to_string(value.get<int32_t>());
 			break;
 		case nlohmann::ordered_json::value_t::number_unsigned:
-			m_PropertyMap[THash(name)] = TTextC<uint32_t>::to_string(value.get<uint32_t>());
+			m_PropertyMap[name] = TTextC<uint32_t>::to_string(value.get<uint32_t>());
 			break;
 		}
 		};
 	auto document = nlohmann::ordered_json::parse(text, nullptr, false, true);
 	parse_func(TString(), 0, document);
+
+	for (auto& value : m_PropertyMap)
+	{
+		RESOURCE2_THIS(Value, IValue, value.first).bean()->setValue(value.second);
+	}
 }
 
-TString PropertySource::property(TStringView name) const
+TString Property::property(TStringView name) const
 {
-	auto result = m_PropertyMap.find(THash(name));
+	auto result = m_PropertyMap.find(TString(name));
 	if (result == m_PropertyMap.end()) return TString();
 	return result->second;
 }

@@ -10,9 +10,9 @@
 *
 * =================================================*/
 #include "OpenMS/Service/Private/Service.h"
-#include "OpenMS/Service/Private/PropertySource.h"
+#include "OpenMS/Service/Private/Property.h"
 
-class RegistryService : public Service, public RESOURCE2(PropertySource, IPropertySource, "application")
+class RegistryService : public Service, public RESOURCE2(Property, IProperty, "application")
 {
 public:
 	void startup(int argc, char** argv) override;

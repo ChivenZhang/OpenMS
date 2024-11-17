@@ -81,13 +81,13 @@ add_library(OpenMS STATIC
 	Remote/IRemoteFunction.h
 	Service/Autowired.h
 	Service/IService.h
-	Service/IPropertySource.h
+	Service/IProperty.h
 	Service/Private/Service.cpp
 	Service/Private/Service.h
 	Service/Private/Autowired.cpp
-	Service/Private/PropertySource.h
-	Service/Private/PropertySource.cpp
- "Service/IEnvironment.h")
+	"Service/Private/Property.h"
+	"Service/Private/Property.cpp"
+ "Service/IEnvironment.h"     )
 add_dependencies(OpenMS uv_a)
 
 target_include_directories(OpenMS PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

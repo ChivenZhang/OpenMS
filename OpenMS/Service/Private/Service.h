@@ -11,10 +11,10 @@
 * =================================================*/
 #include "../IService.h"
 #include "../Autowired.h"
-#include "../IPropertySource.h"
+#include "../IProperty.h"
 #include "OpenMS/Reactor/TCP/TCPServerReactor.h"
 
-class Service : public IService, public AUTOWIRE(IPropertySource, "application")
+class Service : public IService, public AUTOWIRE(IProperty)
 {
 public:
 	void startup(int argc, char** argv) override;
