@@ -12,7 +12,7 @@
 #include "OpenMS/Service/Private/Service.h"
 #include "OpenMS/Service/Private/PropertySource.h"
 
-class RegistryService : public Service, RESOURCE2(PropertySource, IPropertySource, "application")
+class RegistryService : public Service, public RESOURCE2(PropertySource, IPropertySource, "application")
 {
 public:
 	void startup(int argc, char** argv) override;
