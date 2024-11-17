@@ -43,6 +43,7 @@ void LambdaInboundHandler::channelError(TRaw<IChannelContext> context, TExceptio
 bool LambdaInboundHandler::channelRead(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) const
 {
 	if (m_OnRead) return m_OnRead(context, event);
+	return false;
 }
 
 LambdaOutboundHandler::LambdaOutboundHandler(callback_t const& callback)
@@ -60,4 +61,5 @@ void LambdaOutboundHandler::channelError(TRaw<IChannelContext> context, TExcepti
 bool LambdaOutboundHandler::channelWrite(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) const
 {
 	if (m_OnWrite) return m_OnWrite(context, event);
+	return false;
 }
