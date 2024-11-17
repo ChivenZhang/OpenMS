@@ -5,7 +5,7 @@
 *
 *
 *=====================History========================
-* Created by chivenzhang@gmail.com.
+* Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
 #include "Service.h"
