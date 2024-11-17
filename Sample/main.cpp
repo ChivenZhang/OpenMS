@@ -1,11 +1,11 @@
 #include <iostream>
 #include <OpenMS/Service/IService.h>
-#include <OpenMS/Channel/TCP/TCPServerReactor.h>
-#include <OpenMS/Channel/TCP/TCPClientReactor.h>
-#include <OpenMS/Channel/UDP/UDPServerReactor.h>
-#include <OpenMS/Channel/UDP/UDPClientReactor.h>
-#include <OpenMS/Channel/KCP/KCPServerReactor.h>
-#include <OpenMS/Channel/KCP/KCPClientReactor.h>
+#include <OpenMS/Reactor/TCP/TCPServerReactor.h>
+#include <OpenMS/Reactor/TCP/TCPClientReactor.h>
+#include <OpenMS/Reactor/UDP/UDPServerReactor.h>
+#include <OpenMS/Reactor/UDP/UDPClientReactor.h>
+#include <OpenMS/Reactor/KCP/KCPServerReactor.h>
+#include <OpenMS/Reactor/KCP/KCPClientReactor.h>
 #include "TestHandler.h"
 
 int main()

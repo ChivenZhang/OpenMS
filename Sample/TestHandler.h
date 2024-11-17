@@ -9,7 +9,7 @@
 * Created by ChivenZhang.
 *
 * =================================================*/
-#include <OpenMS/Channel/Private/ChannelHandler.h>
+#include <OpenMS/Reactor/Private/ChannelHandler.h>
 
 class ServerInboundHandler : public ChannelInboundHandler
 {

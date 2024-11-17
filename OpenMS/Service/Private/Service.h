@@ -10,7 +10,7 @@
 *
 * =================================================*/
 #include "../IService.h"
-#include "OpenMS/Channel/TCP/TCPServerReactor.h"
+#include "OpenMS/Reactor/TCP/TCPServerReactor.h"
 
 class Service : public IService
 {
