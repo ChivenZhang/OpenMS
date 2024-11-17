@@ -13,12 +13,8 @@
 
 int IEnvironment::argc = 0;
 char** IEnvironment::argv = nullptr;
-
-TRaw<IService> IService::Instance()
-{
-	return m_Instance;
-}
 TRaw<IService> IService::m_Instance = nullptr;
+TRaw<IService> IService::Instance() { return m_Instance; }
 
 struct ServerConfig
 {

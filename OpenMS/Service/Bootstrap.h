@@ -13,7 +13,6 @@
 #include <OpenMS/Service/IService.h>
 #include <OpenMS/Service/Autowired.h>
 #include <OpenMS/Service/IEnvironment.h>
-#include <OpenMS/Service/Private/Property.h>
 #include <csignal>
 
 TMutex mutex;
@@ -26,7 +25,6 @@ int main(int argc, char** argv)
 {
 	IEnvironment::argc = argc;
 	IEnvironment::argv = argv;
-
 	signal(SIGINT, openms_signal);
 
 	service = openms_bootstrap();
