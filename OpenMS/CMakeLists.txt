@@ -13,6 +13,27 @@ add_library(OpenMS STATIC
 	${CMAKE_SOURCE_DIR}/External/kcp/ikcp.h
 	${CMAKE_SOURCE_DIR}/External/http-parser/http_parser.c
 	${CMAKE_SOURCE_DIR}/External/http-parser/http_parser.h
+	Endpoint/HTTP/HTTPClient.cpp
+	Endpoint/HTTP/HTTPClient.h
+	Endpoint/HTTP/HTTPServer.cpp
+	Endpoint/HTTP/HTTPServer.h 
+	Endpoint/IEndpoint.h 
+	Endpoint/KCP/KCPClient.cpp 
+	Endpoint/KCP/KCPClient.h 
+	Endpoint/KCP/KCPServer.cpp 
+	Endpoint/KCP/KCPServer.h 
+	Endpoint/TCP/TCPClient.cpp 
+	Endpoint/TCP/TCPClient.h 
+	Endpoint/TCP/TCPServer.cpp 
+	Endpoint/UDP/UDPClient.cpp 
+	Endpoint/UDP/UDPClient.h 
+	Endpoint/UDP/UDPServer.cpp
+	Endpoint/UDP/UDPServer.h 
+	Endpoint/WS/WSClient.cpp 
+	Endpoint/WS/WSClient.h 
+	Endpoint/WS/WSServer.cpp 
+	Endpoint/WS/WSServer.h 
+	MS.h
 	Reactor/IChannel.h
 	Reactor/IChannelAddress.h
 	Reactor/IChannelBuffer.h
@@ -57,12 +78,16 @@ add_library(OpenMS STATIC
 	Reactor/UDP/UDPClientReactor.h 
 	Reactor/UDP/UDPServerReactor.cpp 
 	Reactor/UDP/UDPServerReactor.h
-	MS.h
 	Remote/IRemoteFunction.h
+	Service/Autowired.h
 	Service/IService.h
+	Service/IPropertySource.h
 	Service/Private/Service.cpp
 	Service/Private/Service.h
- "Endpoint/IEndpoint.h")
+	Service/Private/Autowired.cpp
+	Service/Private/PropertySource.h
+	Service/Private/PropertySource.cpp
+ "Service/IEnvironment.h")
 add_dependencies(OpenMS uv_a)
 
 target_include_directories(OpenMS PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

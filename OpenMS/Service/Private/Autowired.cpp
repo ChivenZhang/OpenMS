@@ -1,4 +1,3 @@
-#pragma once
 /*=================================================
 * Copyright © 2020-2024 ChivenZhang.
 * All Rights Reserved.
@@ -9,12 +8,10 @@
 * Created by ChivenZhang.
 *
 * =================================================*/
-#include "OpenMS/Service/Private/Service.h"
-#include "OpenMS/Service/Private/PropertySource.h"
+#include "../Autowired.h"
 
-class RegistryService : public Service, RESOURCE2(PropertySource, IPropertySource, "application")
+TRaw<BeanManager> BeanManager::Instance()
 {
-public:
-	void startup(int argc, char** argv) override;
-	void shutdown() override;
-};
+	static BeanManager s_Instance;
+	return &s_Instance;
+}

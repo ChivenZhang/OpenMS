@@ -9,12 +9,17 @@
 * Created by ChivenZhang.
 *
 * =================================================*/
-#include "OpenMS/Service/Private/Service.h"
-#include "OpenMS/Service/Private/PropertySource.h"
+#include "MS.h"
 
-class RegistryService : public Service, RESOURCE2(PropertySource, IPropertySource, "application")
+/// @brief Interface for classes that provide properties
+class OPENMS_API IPropertySource
 {
 public:
-	void startup(int argc, char** argv) override;
-	void shutdown() override;
+	virtual TString property(TStringView name) const = 0;
+
+	template <class T>
+	T property(TStringView name, T const& value = T()) const
+	{
+		return TTextC<T>::from_string(property(name), value);
+	}
 };

@@ -9,12 +9,10 @@
 * Created by ChivenZhang.
 *
 * =================================================*/
-#include "OpenMS/Service/Private/Service.h"
-#include "OpenMS/Service/Private/PropertySource.h"
 
-class RegistryService : public Service, RESOURCE2(PropertySource, IPropertySource, "application")
+class IEnvironment
 {
 public:
-	void startup(int argc, char** argv) override;
-	void shutdown() override;
+	static int argc;
+	static char** argv;
 };

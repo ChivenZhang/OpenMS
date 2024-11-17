@@ -10,9 +10,11 @@
 *
 * =================================================*/
 #include "../IService.h"
+#include "../Autowired.h"
+#include "../IPropertySource.h"
 #include "OpenMS/Reactor/TCP/TCPServerReactor.h"
 
-class Service : public IService
+class Service : public IService, public AUTOWIRE(IPropertySource, "application")
 {
 public:
 	void startup(int argc, char** argv) override;
@@ -20,12 +22,6 @@ public:
 	using IService::property;
 	TString property(TStringView name) const override;
 
-	bool execute(TStringView service, TStringView method)
-	{
-		return false;
-	}
-
 protected:
 	TRef<TCPServerReactor> m_Reactor;
-	TMap<uint32_t, TString> m_PropertyMap;
 };

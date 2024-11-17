@@ -10,7 +10,6 @@
 *
 * =================================================*/
 #include "MS.h"
-#define OPENMS_CONFIG_FILE "application.json"
 
 /// @brief Interface for service
 class OPENMS_API IService

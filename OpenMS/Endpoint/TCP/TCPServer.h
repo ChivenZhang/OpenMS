@@ -9,12 +9,13 @@
 * Created by ChivenZhang.
 *
 * =================================================*/
-#include "OpenMS/Service/Private/Service.h"
-#include "OpenMS/Service/Private/PropertySource.h"
+#include "../IEndpoint.h"
+#include "../Reactor/TCP/TCPServerReactor.h"
 
-class RegistryService : public Service, RESOURCE2(PropertySource, IPropertySource, "application")
+class TCPServer : public IEndpoint
 {
 public:
-	void startup(int argc, char** argv) override;
-	void shutdown() override;
+
+protected:
+	TRef<ISocketAddress> m_Address;
 };

@@ -9,12 +9,15 @@
 * Created by ChivenZhang.
 *
 * =================================================*/
-#include "OpenMS/Service/Private/Service.h"
-#include "OpenMS/Service/Private/PropertySource.h"
+#include "../IPropertySource.h"
+#include "../Autowired.h"
 
-class RegistryService : public Service, RESOURCE2(PropertySource, IPropertySource, "application")
+class PropertySource : public IPropertySource
 {
 public:
-	void startup(int argc, char** argv) override;
-	void shutdown() override;
+	PropertySource();
+	TString property(TStringView name) const override;
+
+protected:
+	TMap<uint32_t, TString> m_PropertyMap;
 };

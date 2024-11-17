@@ -27,3 +27,37 @@ bool ChannelOutboundHandler::channelWrite(TRaw<IChannelContext> context, TRaw<IC
 {
 	return false;
 }
+
+LambdaInboundHandler::LambdaInboundHandler(callback_t const& callback)
+	:
+	m_OnError(callback.OnError),
+	m_OnRead(callback.OnRead)
+{
+}
+
+void LambdaInboundHandler::channelError(TRaw<IChannelContext> context, TException&& exception) const
+{
+	if (m_OnError) m_OnError(context, std::forward<TException>(exception));
+}
+
+bool LambdaInboundHandler::channelRead(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) const
+{
+	if (m_OnRead) return m_OnRead(context, event);
+}
+
+LambdaOutboundHandler::LambdaOutboundHandler(callback_t const& callback)
+	:
+	m_OnError(callback.OnError),
+	m_OnWrite(callback.OnWrite)
+{
+}
+
+void LambdaOutboundHandler::channelError(TRaw<IChannelContext> context, TException&& exception) const
+{
+	if (m_OnError) m_OnError(context, std::forward<TException>(exception));
+}
+
+bool LambdaOutboundHandler::channelWrite(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) const
+{
+	if (m_OnWrite) return m_OnWrite(context, event);
+}

@@ -11,6 +11,9 @@
 * =================================================*/
 #ifndef OPENMS_SHARED_LIBRARY
 #include <OpenMS/Service/IService.h>
+#include <OpenMS/Service/Autowired.h>
+#include <OpenMS/Service/IEnvironment.h>
+#include <OpenMS/Service/Private/PropertySource.h>
 #include <csignal>
 
 TMutex mutex;
@@ -21,6 +24,9 @@ extern TRef<IService> openms_bootstrap();
 
 int main(int argc, char** argv)
 {
+	IEnvironment::argc = argc;
+	IEnvironment::argv = argv;
+
 	signal(SIGINT, openms_signal);
 
 	service = openms_bootstrap();
