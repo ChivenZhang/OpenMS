@@ -94,7 +94,7 @@ Property::Property()
 
 	for (auto& value : m_PropertyMap)
 	{
-		RESOURCE2_THIS(Value, IValue, value.first).bean()->setValue(value.second);
+		RESOURCE2_THIS(Value, IValue, value.first)->setValue(value.second);
 	}
 }
 

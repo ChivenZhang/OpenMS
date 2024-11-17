@@ -176,15 +176,15 @@ private:
 // Autowire(Type or Interface of Type, Name)
 #define AUTOWIRE2(T, N) Autowire<T, THash(N)>
 // Autowire(Type or Interface of Type)
-#define AUTOWIRE_THIS(T) AutowireThis<T>(0)
+#define AUTOWIRE_THIS(T) AutowireThis<T>(0).bean()
 // Autowire(Type or Interface of Type, Name)
-#define AUTOWIRE2_THIS(T, N) AutowireThis<T>(THash(N))
+#define AUTOWIRE2_THIS(T, N) AutowireThis<T>(THash(N)).bean()
 
 // Resource(Type, Name)
 #define RESOURCE(T, N) Resource<T, T, THash(N)>
 // Resource(Type, Interface of Type, Name)
 #define RESOURCE2(T, I, N) Resource<T, I, THash(N)>
 // Resource(Type, Name)
-#define RESOURCE_THIS(T, N) ResourceThis<T, T>(THash(N))
+#define RESOURCE_THIS(T, N) ResourceThis<T, T>(THash(N)).bean()
 // Resource(Type, Interface of Type, Name)
-#define RESOURCE2_THIS(T, I, N) ResourceThis<T, I>(THash(N))
+#define RESOURCE2_THIS(T, I, N) ResourceThis<T, I>(THash(N)).bean()
