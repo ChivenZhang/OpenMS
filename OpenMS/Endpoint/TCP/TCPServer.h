@@ -9,13 +9,27 @@
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
-#include "../IEndpoint.h"
-#include "../Reactor/TCP/TCPServerReactor.h"
+#include "../Private/Endpoint.h"
+#include "OpenMS/Service/IProperty.h"
+#include "OpenMS/Reactor/TCP/TCPServerReactor.h"
 
-class TCPServer : public IEndpoint
+class TCPServer : public Endpoint
 {
 public:
+	struct config_t
+	{
+		std::string Address;
+		uint16_t PortNum;
+		uint32_t Backlog;
+		size_t WorkerNum;
+		TCPServerReactor::callback_tcp_t Callback;
+	};
+
+public:
+	void startup() override;
+	void shutdown() override;
+	virtual void configureEndpoint(config_t& config) = 0;
 
 protected:
-	TRef<ISocketAddress> m_Address;
+	TRef<TCPServerReactor> m_Reactor;
 };

@@ -15,5 +15,6 @@ class OPENMS_API IEndpoint
 {
 public:
 	virtual ~IEndpoint() = default;
-
+	virtual void startup() = 0;
+	virtual void shutdown() = 0;
 };

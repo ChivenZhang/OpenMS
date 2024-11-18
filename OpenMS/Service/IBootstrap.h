@@ -28,7 +28,9 @@ int main(int argc, char** argv)
 
 	service = openms_bootstrap();
 	if (service == nullptr) return 1;
-	service->startup(argc, argv);
+	service->startup();
+
+	TPrint("press Ctrl+C to quit");
 	TUniqueLock lock(mutex);
 	unlock.wait(lock);
 	service->shutdown();

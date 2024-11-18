@@ -11,7 +11,7 @@
 #include "TCPServerReactor.h"
 #include "TCPChannel.h"
 
-TCPServerReactor::TCPServerReactor(TRef<ISocketAddress> address, uint32_t backlog, size_t workerNum, callback_t callback)
+TCPServerReactor::TCPServerReactor(TRef<ISocketAddress> address, uint32_t backlog, size_t workerNum, callback_tcp_t callback)
 	:
 	ChannelReactor(workerNum, callback),
 	m_Backlog(backlog ? backlog : 128),
@@ -132,18 +132,18 @@ void TCPServerReactor::shutdown()
 
 void TCPServerReactor::onConnect(TRef<Channel> channel)
 {
-	ChannelReactor::onConnect(channel);
 	auto remote = TCast<ISocketAddress>(channel->getRemote());
 	auto hashName = remote->getHashName();
 	m_ChannelMap[hashName] = channel;
+	ChannelReactor::onConnect(channel);
 }
 
 void TCPServerReactor::onDisconnect(TRef<Channel> channel)
 {
-	ChannelReactor::onDisconnect(channel);
 	auto remote = TCast<ISocketAddress>(channel->getRemote());
 	auto hashName = remote->getHashName();
 	m_ChannelMap.erase(hashName);
+	ChannelReactor::onDisconnect(channel);
 }
 
 void TCPServerReactor::on_connect(uv_stream_t* server, int status)

@@ -20,7 +20,7 @@ public:
 public:
 	virtual ~IService() = default;
 
-	virtual void startup(int argc, char** argv) = 0;
+	virtual void startup() = 0;
 
 	virtual void shutdown() = 0;
 

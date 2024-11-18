@@ -232,22 +232,22 @@ void KCPServerReactor::writeAndFlush(TRef<IChannelEvent> event, TRef<IChannelAdd
 
 void KCPServerReactor::onConnect(TRef<Channel> channel)
 {
-	ChannelReactor::onConnect(channel);
 	auto remote = TCast<ISocketAddress>(channel->getRemote());
 	auto hashName = remote->getHashName();
 	m_Channels.insert(m_Channels.begin(), channel);
 	m_ChannelMap[hashName] = channel;
 	if (m_Backlog < m_Channels.size()) onDisconnect(m_Channels.back());
+	ChannelReactor::onConnect(channel);
 }
 
 void KCPServerReactor::onDisconnect(TRef<Channel> channel)
 {
-	ChannelReactor::onDisconnect(channel);
 	auto remote = TCast<ISocketAddress>(channel->getRemote());
 	auto hashName = remote->getHashName();
 	m_ChannelsRemoved.push_back(channel);
 	m_ChannelMap.erase(hashName);
 	m_Channels.erase(std::remove(m_Channels.begin(), m_Channels.end(), channel), m_Channels.end());
+	ChannelReactor::onDisconnect(channel);
 }
 
 void KCPServerReactor::on_alloc(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf)

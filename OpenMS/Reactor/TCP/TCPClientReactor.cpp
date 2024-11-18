@@ -130,14 +130,14 @@ void TCPClientReactor::shutdown()
 
 void TCPClientReactor::onConnect(TRef<Channel> channel)
 {
-	ChannelReactor::onConnect(channel);
 	m_Channel = channel;
+	ChannelReactor::onConnect(channel);
 }
 
 void TCPClientReactor::onDisconnect(TRef<Channel> channel)
 {
-	ChannelReactor::onDisconnect(channel);
 	m_Channel = nullptr;
+	ChannelReactor::onDisconnect(channel);
 }
 
 void TCPClientReactor::on_connect(uv_connect_t* req, int status)

@@ -25,6 +25,7 @@ add_library(OpenMS STATIC
 	Endpoint/TCP/TCPClient.cpp 
 	Endpoint/TCP/TCPClient.h 
 	Endpoint/TCP/TCPServer.cpp 
+	Endpoint/TCP/TCPServer.h
 	Endpoint/UDP/UDPClient.cpp 
 	Endpoint/UDP/UDPClient.h 
 	Endpoint/UDP/UDPServer.cpp
@@ -79,15 +80,14 @@ add_library(OpenMS STATIC
 	Reactor/UDP/UDPServerReactor.cpp 
 	Reactor/UDP/UDPServerReactor.h
 	Remote/IRemoteFunction.h
-	
-	Service/IService.h
+	Service/IEnvironment.h
 	Service/IProperty.h
+	Service/IService.h
+	Service/Private/Property.cpp
+	Service/Private/Property.h
 	Service/Private/Service.cpp
 	Service/Private/Service.h
-	
-	"Service/Private/Property.h"
-	"Service/Private/Property.cpp"
- "Service/IEnvironment.h"     )
+ "Endpoint/Private/Endpoint.h" "Endpoint/Private/Endpoint.cpp")
 add_dependencies(OpenMS uv_a)
 
 target_include_directories(OpenMS PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

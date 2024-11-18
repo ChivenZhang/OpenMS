@@ -51,6 +51,7 @@ Property::Property()
 		switch (value.type())
 		{
 		case nlohmann::ordered_json::value_t::array:
+			m_PropertyMap[name] = value.dump();
 			for (size_t i = 0, n = value.size(); i < n; ++i)
 			{
 				auto& raw = value.at(i);
@@ -59,9 +60,9 @@ Property::Property()
 				else
 					parse_func(name + "[" + std::to_string(i) + "]", depth + 1, raw);
 			}
-			m_PropertyMap[name] = value.dump();
 			break;
 		case nlohmann::ordered_json::value_t::object:
+			m_PropertyMap[name] = value.dump();
 			for (auto field : value.items())
 			{
 				auto& raw = field.value();
@@ -70,7 +71,6 @@ Property::Property()
 				else
 					parse_func(name + "." + field.key(), depth + 1, raw);
 			}
-			m_PropertyMap[name] = value.dump();
 			break;
 		case nlohmann::ordered_json::value_t::boolean:
 			m_PropertyMap[name] = TTextC<bool>::to_string(value.get<bool>());
@@ -94,7 +94,7 @@ Property::Property()
 
 	for (auto& value : m_PropertyMap)
 	{
-		RESOURCE2_THIS(Value, IValue, value.first)->setValue(value.second);
+		RESOURCE2_DATA(Value, IValue, value.first)->setValue(value.second);
 	}
 }
 

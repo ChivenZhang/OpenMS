@@ -227,15 +227,15 @@ void KCPClientReactor::writeAndFlush(TRef<IChannelEvent> event, TRef<IChannelAdd
 
 void KCPClientReactor::onConnect(TRef<Channel> channel)
 {
-	ChannelReactor::onConnect(channel);
 	m_Channel = channel;
+	ChannelReactor::onConnect(channel);
 }
 
 void KCPClientReactor::onDisconnect(TRef<Channel> channel)
 {
-	ChannelReactor::onDisconnect(channel);
 	m_Channel = nullptr;
 	m_ChannelRemoved = channel;
+	ChannelReactor::onDisconnect(channel);
 }
 
 void KCPClientReactor::on_alloc(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf)

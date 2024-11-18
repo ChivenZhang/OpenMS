@@ -9,17 +9,12 @@
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
-#include "OpenMS/Service/Private/Service.h"
-#include "OpenMS/Service/Private/Property.h"
-#include "RegistryServer.h"
+#include "OpenMS/Endpoint/TCP/TCPServer.h"
 
-class RegistryService
-	:
-	public Service,
-	public RESOURCE2(Property, IProperty, "application"),
-	public RESOURCE(RegistryServer, "registryServer")
+class RegistryServer : public TCPServer, public AUTOWIRE(IProperty)
 {
 public:
-	void startup() override;
-	void shutdown() override;
+	RegistryServer();
+	~RegistryServer();
+	void configureEndpoint(config_t & config) override;
 };

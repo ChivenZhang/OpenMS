@@ -3,7 +3,7 @@ add_executable(RegistryService
 	
 	${CMAKE_CURRENT_SOURCE_DIR}/RegistryService.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/RegistryService.h
-)
+ "RegistryServer.h" "RegistryServer.cpp")
 add_dependencies(RegistryService OpenMS)
 
 target_include_directories(RegistryService PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

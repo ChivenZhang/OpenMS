@@ -10,19 +10,19 @@
 * =================================================*/
 #include "RegistryService.h"
 
-void RegistryService::startup(int argc, char** argv)
+#include <OpenMS/Service/IBootstrap.h>
+
+TRef<IService> openms_bootstrap()
 {
-	Service::startup(argc, argv);
+	return TNew<RegistryService>();
+}
+
+void RegistryService::startup()
+{
+	Service::startup();
 }
 
 void RegistryService::shutdown()
 {
 	Service::shutdown();
-}
-
-#include <OpenMS/Service/Bootstrap.h>
-
-TRef<IService> openms_bootstrap()
-{
-	return TNew<RegistryService>();
 }

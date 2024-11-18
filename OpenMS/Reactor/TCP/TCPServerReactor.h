@@ -16,7 +16,12 @@
 class TCPServerReactor : public ChannelReactor
 {
 public:
-	TCPServerReactor(TRef<ISocketAddress> address, uint32_t backlog, size_t workerNum, callback_t callback);
+	struct callback_tcp_t : public callback_t
+	{
+	};
+
+public:
+	TCPServerReactor(TRef<ISocketAddress> address, uint32_t backlog, size_t workerNum, callback_tcp_t callback);
 	void startup() override;
 	void shutdown() override;
 

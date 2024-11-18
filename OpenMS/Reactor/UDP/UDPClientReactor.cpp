@@ -227,14 +227,14 @@ void UDPClientReactor::writeAndFlush(TRef<IChannelEvent> event, TRef<IChannelAdd
 
 void UDPClientReactor::onConnect(TRef<Channel> channel)
 {
-	ChannelReactor::onConnect(channel);
 	m_Channel = channel;
+	ChannelReactor::onConnect(channel);
 }
 
 void UDPClientReactor::onDisconnect(TRef<Channel> channel)
 {
-	ChannelReactor::onDisconnect(channel);
 	m_Channel = nullptr;
+	ChannelReactor::onDisconnect(channel);
 }
 
 void UDPClientReactor::on_alloc(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf)
