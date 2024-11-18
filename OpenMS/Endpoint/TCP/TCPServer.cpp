@@ -15,7 +15,7 @@ void TCPServer::startup()
 	config_t config;
 	configureEndpoint(config);
 	m_Reactor = TNew<TCPServerReactor>(
-		IPv4Address::New(config.Address, config.PortNum),
+		IPv4Address::New(config.IP, config.PortNum),
 		config.Backlog,
 		config.WorkerNum,
 		config.Callback

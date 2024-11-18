@@ -18,7 +18,7 @@ class TCPClient : public Endpoint
 public:
 	struct config_t
 	{
-		std::string Address;
+		std::string IP;
 		uint16_t PortNum;
 		size_t WorkerNum;
 		TCPClientReactor::callback_tcp_t Callback;

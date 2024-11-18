@@ -28,6 +28,10 @@ public:
 		uint32_t HashName;
 	};
 
+	using inconfig_t = IChannelInboundHandler::callback_t;
+
+	using outconfig_t = IChannelOutboundHandler::callback_t;
+
 public:
 	virtual ~IChannelPipeline() = default;
 
@@ -50,4 +54,20 @@ public:
 	virtual bool addBefore(TStringView which, TStringView name, TRef<IChannelOutboundHandler> handler) = 0;
 
 	virtual bool addAfter(TStringView which, TStringView name, TRef<IChannelOutboundHandler> handler) = 0;
+
+	virtual bool addFirst(TStringView name, inconfig_t config) = 0;
+
+	virtual bool addLast(TStringView name, inconfig_t config) = 0;
+
+	virtual bool addBefore(TStringView which, TStringView name, inconfig_t config) = 0;
+
+	virtual bool addAfter(TStringView which, TStringView name, inconfig_t config) = 0;
+
+	virtual bool addFirst(TStringView name, outconfig_t config) = 0;
+
+	virtual bool addLast(TStringView name, outconfig_t config) = 0;
+
+	virtual bool addBefore(TStringView which, TStringView name, outconfig_t config) = 0;
+
+	virtual bool addAfter(TStringView which, TStringView name, outconfig_t config) = 0;
 };

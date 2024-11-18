@@ -9,7 +9,7 @@
 *
 * =================================================*/
 #include "GatewayServer.h"
-#include "GatewayHandler.h"
+#include <OpenMS/Reactor/Private/ChannelHandler.h>
 
 struct GatewayServerConfig
 {
@@ -34,18 +34,26 @@ void GatewayServer::configureEndpoint(config_t& config)
 {
 	auto properties = AUTOWIRE_DATA(IProperty);
 	auto configInfo = properties->property<GatewayServerConfig>("gateway.server");
-	config.Address = configInfo.ip;
+	config.IP = configInfo.ip;
 	config.PortNum = configInfo.port;
 	config.Backlog = configInfo.backlog;
-	config.WorkerNum = configInfo.workers;
+	config.WorkerNum = 1; // single thread for safety
 	config.Callback = {
 		[=](TRef<IChannel> channel) {
-			TPrint("new connection");
-			channel->getPipeline()->addFirst("", TNew<GatewayInboundHandler>());
-			channel->getPipeline()->addFirst("", TNew<GatewayOutboundHandler>());
-		},
-		[=](TRef<IChannel> channel) {
-			TPrint("disconnection ");
-		},
+			channel->getPipeline()->addFirst("", IChannelInboundHandler::callback_t{
+				[=](TRaw<IChannelContext> context, TRaw<IChannelEvent> event)->bool {
+					TPRINT("read %s", event->Message.c_str());
+					return false;
+				}
+				});
+			channel->getPipeline()->addFirst("", IChannelOutboundHandler::callback_t{
+				[=](TRaw<IChannelContext> context, TRaw<IChannelEvent> event)->bool {
+					auto _event = TNew<IChannelEvent>();
+					_event->Message = "Echo " + event->Message;
+					context->write(_event);
+					return false;
+				}
+				});
+		}
 	};
 }

@@ -1,3 +1,11 @@
+#include "ChannelPipeline.h"
+#include "ChannelPipeline.h"
+#include "ChannelPipeline.h"
+#include "ChannelPipeline.h"
+#include "ChannelPipeline.h"
+#include "ChannelPipeline.h"
+#include "ChannelPipeline.h"
+#include "ChannelPipeline.h"
 /*=================================================
 * Copyright © 2020-2024 ChivenZhang.
 * All Rights Reserved.
@@ -10,6 +18,7 @@
 * =================================================*/
 #include "ChannelPipeline.h"
 #include "Channel.h"
+#include "ChannelHandler.h"
 
 ChannelPipeline::ChannelPipeline(TRaw<Channel> channel)
 	:
@@ -117,4 +126,44 @@ bool ChannelPipeline::addAfter(TStringView which, TStringView name, TRef<IChanne
 	if (result2 != m_Outbounds.end()) return false;
 	m_Outbounds.insert(result + 1, { handler, THash(name.data()) });
 	return true;
+}
+
+bool ChannelPipeline::addFirst(TStringView name, inconfig_t config)
+{
+	return addFirst(name, TNew<LambdaInboundHandler>(LambdaInboundHandler::callback_t{ config.OnRead, config.OnError, }));
+}
+
+bool ChannelPipeline::addLast(TStringView name, inconfig_t config)
+{
+	return addLast(name, TNew<LambdaInboundHandler>(LambdaInboundHandler::callback_t{ config.OnRead, config.OnError, }));
+}
+
+bool ChannelPipeline::addBefore(TStringView which, TStringView name, inconfig_t config)
+{
+	return addBefore(which, name, TNew<LambdaInboundHandler>(LambdaInboundHandler::callback_t{ config.OnRead, config.OnError, }));
+}
+
+bool ChannelPipeline::addAfter(TStringView which, TStringView name, inconfig_t config)
+{
+	return addAfter(which, name, TNew<LambdaInboundHandler>(LambdaInboundHandler::callback_t{ config.OnRead, config.OnError, }));
+}
+
+bool ChannelPipeline::addFirst(TStringView name, outconfig_t config)
+{
+	return addFirst(name, TNew<LambdaOutboundHandler>(LambdaOutboundHandler::callback_t{ config.OnWrite, config.OnError, }));
+}
+
+bool ChannelPipeline::addLast(TStringView name, outconfig_t config)
+{
+	return addLast(name, TNew<LambdaOutboundHandler>(LambdaOutboundHandler::callback_t{ config.OnWrite, config.OnError, }));
+}
+
+bool ChannelPipeline::addBefore(TStringView which, TStringView name, outconfig_t config)
+{
+	return addBefore(which, name, TNew<LambdaOutboundHandler>(LambdaOutboundHandler::callback_t{ config.OnWrite, config.OnError, }));
+}
+
+bool ChannelPipeline::addAfter(TStringView which, TStringView name, outconfig_t config)
+{
+	return addAfter(which, name, TNew<LambdaOutboundHandler>(LambdaOutboundHandler::callback_t{ config.OnWrite, config.OnError, }));
 }

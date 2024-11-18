@@ -1,7 +1,7 @@
 
 add_executable(GatewayService
-	GatewayHandler.cpp
-	GatewayHandler.h
+	
+	
 	GatewayServer.cpp
 	GatewayServer.h
 	GatewayService.cpp

@@ -64,7 +64,7 @@ void Channel::close()
 	m_Running = false;
 }
 
-TFuture<bool> Channel::close(TPromise<bool>&& promise)
+TFuture<bool> Channel::close(TPromise<bool>& promise)
 {
 	auto result = promise.get_future();
 	close();
@@ -115,7 +115,7 @@ void Channel::read(TRef<IChannelEvent> event)
 	}
 }
 
-TFuture<bool> Channel::read(TRef<IChannelEvent> event, TPromise<bool>&& promise)
+TFuture<bool> Channel::read(TRef<IChannelEvent> event, TPromise<bool>& promise)
 {
 	if (m_Running == false) return TFuture<bool>();
 	auto result = promise.get_future();
@@ -131,7 +131,7 @@ void Channel::write(TRef<IChannelEvent> event)
 	m_Reactor->onOutbound(event, false);
 }
 
-TFuture<bool> Channel::write(TRef<IChannelEvent> event, TPromise<bool>&& promise)
+TFuture<bool> Channel::write(TRef<IChannelEvent> event, TPromise<bool>& promise)
 {
 	if (m_Running == false) return TFuture<bool>();
 	auto result = promise.get_future();
@@ -147,7 +147,7 @@ void Channel::writeAndFlush(TRef<IChannelEvent> event)
 	m_Reactor->onOutbound(event, true);
 }
 
-TFuture<bool> Channel::writeAndFlush(TRef<IChannelEvent> event, TPromise<bool>&& promise)
+TFuture<bool> Channel::writeAndFlush(TRef<IChannelEvent> event, TPromise<bool>& promise)
 {
 	if (m_Running == false) return TFuture<bool>();
 	auto result = promise.get_future();
