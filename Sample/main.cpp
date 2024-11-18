@@ -10,7 +10,7 @@
 
 int main()
 {
-	if (true)
+	if (false)
 	{
 		TCPServerReactor server(IPv4Address::New("0.0.0.0", 8080), 128, 2, {
 			[](TRef<IChannel> channel) {	// Connected
@@ -145,7 +145,7 @@ int main()
 		TMutex mutex; TMutexUnlock unlock; TUniqueLock lock(mutex); unlock.wait(lock);
 	}
 
-	if (false)
+	if (true)
 	{
 		TCPClientReactor client(IPv4Address::New("127.0.0.1", 8080), 1, {
 			[](TRef<IChannel> channel) {	// Connected

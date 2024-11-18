@@ -30,7 +30,7 @@ int main(int argc, char** argv)
 	if (service == nullptr) return 1;
 	service->startup();
 
-	TPrint("press Ctrl+C to quit");
+	TPrint("press ctrl+c to quit");
 	TUniqueLock lock(mutex);
 	unlock.wait(lock);
 	service->shutdown();

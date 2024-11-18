@@ -15,17 +15,11 @@ void TCPServer::startup()
 	config_t config;
 	configureEndpoint(config);
 	m_Reactor = TNew<TCPServerReactor>(
-		IPv4Address::New(config.Address, config.PortNum), config.Backlog, config.WorkerNum,
-		TCPServerReactor::callback_tcp_t{
-		[=](TRef<IChannel> channel) {
-			TPrint("New connection!");
-
-		},
-		[=](TRef<IChannel> channel) {
-			TPrint("Disconnection !");
-
-		},
-		});
+		IPv4Address::New(config.Address, config.PortNum),
+		config.Backlog,
+		config.WorkerNum,
+		config.Callback
+	);
 	m_Reactor->startup();
 	if (m_Reactor->running() == false) TFatal("failed to start reactor");
 }

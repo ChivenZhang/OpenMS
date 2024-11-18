@@ -37,4 +37,12 @@ void RegistryServer::configureEndpoint(config_t& config)
 	config.PortNum = configInfo.port;
 	config.Backlog = configInfo.backlog;
 	config.WorkerNum = configInfo.workers;
+	config.Callback = {
+		[=](TRef<IChannel> channel) {
+			TPrint("new connection");
+		},
+		[=](TRef<IChannel> channel) {
+			TPrint("disconnection ");
+		},
+	};
 }
