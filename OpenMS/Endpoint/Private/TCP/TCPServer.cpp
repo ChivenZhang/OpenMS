@@ -8,14 +8,15 @@
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
-#include "TCPClient.h"
+#include "TCPServer.h"
 
-void TCPClient::startup()
+void TCPServer::startup()
 {
 	config_t config;
 	configureEndpoint(config);
-	m_Reactor = TNew<TCPClientReactor>(
+	m_Reactor = TNew<TCPServerReactor>(
 		IPv4Address::New(config.Address, config.PortNum),
+		config.Backlog,
 		config.WorkerNum,
 		config.Callback
 	);
@@ -23,7 +24,7 @@ void TCPClient::startup()
 	if (m_Reactor->running() == false) TFatal("failed to start reactor");
 }
 
-void TCPClient::shutdown()
+void TCPServer::shutdown()
 {
 	m_Reactor->shutdown();
 }

@@ -20,6 +20,7 @@ public:
 	{
 		std::string Address;
 		uint16_t PortNum;
+		uint32_t Backlog;
 		size_t WorkerNum;
 		TCPClientReactor::callback_tcp_t Callback;
 	};

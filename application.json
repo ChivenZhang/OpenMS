@@ -5,24 +5,14 @@
 			"port": 8080,
 			"backlog": 0,
 			"workers": 1
-		},
-		"user": {
-			"name": "admin",
-			"password": "password"
-		},
-		"users": [
-			{
-				"name": "admin1",
-				"password": "password1"
-			},
-			{
-				"name": "admin2",
-				"password": "password2"
-			}
-		],
-		"handlers": {
-
-		},
-		"endpoints": []
+		}
+	},
+	"gateway": {
+		"server": {
+			"ip": "127.0.0.1",
+			"port": 8089,
+			"backlog": 0,
+			"workers": 1
+		}
 	}
 }

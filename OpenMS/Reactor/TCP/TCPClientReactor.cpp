@@ -11,7 +11,7 @@
 #include "TCPClientReactor.h"
 #include "TCPChannel.h"
 
-TCPClientReactor::TCPClientReactor(TRef<ISocketAddress> address, size_t workerNum, callback_t callback)
+TCPClientReactor::TCPClientReactor(TRef<ISocketAddress> address, size_t workerNum, callback_tcp_t callback)
 	:
 	ChannelReactor(workerNum, callback),
 	m_Address(address),

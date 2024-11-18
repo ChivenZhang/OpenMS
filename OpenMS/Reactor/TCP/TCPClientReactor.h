@@ -16,7 +16,12 @@
 class TCPClientReactor : public ChannelReactor
 {
 public:
-	TCPClientReactor(TRef<ISocketAddress> address, size_t workerNum, callback_t callback);
+	struct callback_tcp_t : public callback_t
+	{
+	};
+
+public:
+	TCPClientReactor(TRef<ISocketAddress> address, size_t workerNum, callback_tcp_t callback);
 	void startup() override;
 	void shutdown() override;
 	void write(TRef<IChannelEvent> event, TRef<IChannelAddress> address) override;

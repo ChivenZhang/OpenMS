@@ -11,17 +11,18 @@
 * =================================================*/
 #include "../Private/Endpoint.h"
 #include "OpenMS/Service/IProperty.h"
-#include "OpenMS/Reactor/TCP/TCPClientReactor.h"
+#include "OpenMS/Reactor/TCP/TCPServerReactor.h"
 
-class TCPClient : public Endpoint
+class TCPServer : public Endpoint
 {
 public:
 	struct config_t
 	{
 		std::string Address;
 		uint16_t PortNum;
+		uint32_t Backlog;
 		size_t WorkerNum;
-		TCPClientReactor::callback_tcp_t Callback;
+		TCPServerReactor::callback_tcp_t Callback;
 	};
 
 public:
@@ -30,5 +31,5 @@ public:
 	virtual void configureEndpoint(config_t& config) = 0;
 
 protected:
-	TRef<TCPClientReactor> m_Reactor;
+	TRef<TCPServerReactor> m_Reactor;
 };
