@@ -158,7 +158,7 @@ int main()
 				channel->getPipeline()->addFirst("test", outbound);
 
 				auto event = TNew<IChannelEvent>();
-				event->Message = "Hello";
+				event->Message = "Hello, Server!";
 				channel->write(event);
 			},
 			[](TRef<IChannel> channel) {	// Disconnect
@@ -167,7 +167,6 @@ int main()
 			},
 			});
 		client.startup();
-
 
 		TMutex mutex; TMutexUnlock unlock; TUniqueLock lock(mutex); unlock.wait(lock);
 	}
