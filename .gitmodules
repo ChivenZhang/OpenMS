@@ -11,3 +11,6 @@
 [submodule "External/http-parser"]
 	path = External/http-parser
 	url = https://github.com/nodejs/http-parser.git
+[submodule "External/iocpp"]
+	path = External/iocpp
+	url = https://github.com/ChivenZhang/iocpp.git
