@@ -128,6 +128,22 @@ void TCPClientReactor::shutdown()
 	m_Channel = nullptr;
 }
 
+void TCPClientReactor::write(TRef<IChannelEvent> event, TRef<IChannelAddress> address)
+{
+	if (m_Running == false) return;
+	auto channel = m_Channel;
+	event->Channel = channel;
+	if (channel && channel->running()) channel->write(event);
+}
+
+void TCPClientReactor::writeAndFlush(TRef<IChannelEvent> event, TRef<IChannelAddress> address)
+{
+	if (m_Running == false) return;
+	auto channel = m_Channel;
+	event->Channel = channel;
+	if (channel && channel->running()) channel->writeAndFlush(event);
+}
+
 void TCPClientReactor::onConnect(TRef<Channel> channel)
 {
 	m_Channel = channel;

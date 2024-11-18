@@ -19,6 +19,8 @@ public:
 	TCPClientReactor(TRef<ISocketAddress> address, size_t workerNum, callback_t callback);
 	void startup() override;
 	void shutdown() override;
+	void write(TRef<IChannelEvent> event, TRef<IChannelAddress> address) override;
+	void writeAndFlush(TRef<IChannelEvent> event, TRef<IChannelAddress> address) override;
 
 protected:
 	void onConnect(TRef<Channel> channel) override;

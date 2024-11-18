@@ -153,10 +153,9 @@ int main()
 				TPrint("connect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
 
 				auto inbound = TNew<ClientInboundHandler>();
-				channel->getPipeline()->addFirst("https", inbound);
-
+				channel->getPipeline()->addFirst("test", inbound);
 				auto outbound = TNew<ClientOutboundHandler>();
-				channel->getPipeline()->addFirst("https", outbound);
+				channel->getPipeline()->addFirst("test", outbound);
 
 				auto event = TNew<IChannelEvent>();
 				event->Message = "Hello";
@@ -168,6 +167,7 @@ int main()
 			},
 			});
 		client.startup();
+
 
 		TMutex mutex; TMutexUnlock unlock; TUniqueLock lock(mutex); unlock.wait(lock);
 	}
