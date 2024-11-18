@@ -10,7 +10,6 @@
 *
 * =================================================*/
 #include "../IService.h"
-#include "../Autowired.h"
 #include "../IProperty.h"
 #include "OpenMS/Reactor/TCP/TCPServerReactor.h"
 

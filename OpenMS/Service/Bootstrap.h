@@ -11,7 +11,6 @@
 * =================================================*/
 #ifndef OPENMS_SHARED_LIBRARY
 #include <OpenMS/Service/IService.h>
-#include <OpenMS/Service/Autowired.h>
 #include <OpenMS/Service/IEnvironment.h>
 #include <csignal>
 

@@ -79,19 +79,20 @@ add_library(OpenMS STATIC
 	Reactor/UDP/UDPServerReactor.cpp 
 	Reactor/UDP/UDPServerReactor.h
 	Remote/IRemoteFunction.h
-	Service/Autowired.h
+	
 	Service/IService.h
 	Service/IProperty.h
 	Service/Private/Service.cpp
 	Service/Private/Service.h
-	Service/Private/Autowired.cpp
+	
 	"Service/Private/Property.h"
 	"Service/Private/Property.cpp"
  "Service/IEnvironment.h"     )
 add_dependencies(OpenMS uv_a)
 
 target_include_directories(OpenMS PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(OpenMS PUBLIC ${CMAKE_SOURCE_DIR}/External/iocpp)
 target_include_directories(OpenMS PUBLIC ${CMAKE_SOURCE_DIR}/External/http-parser)
 target_include_directories(OpenMS PUBLIC ${CMAKE_SOURCE_DIR}/External/libuv/include)
 target_include_directories(OpenMS PUBLIC ${CMAKE_SOURCE_DIR}/External/nlohmann/single_include)
-target_link_libraries(OpenMS uv_a)
+target_link_libraries(OpenMS uv_a iocpp)

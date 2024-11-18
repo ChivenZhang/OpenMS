@@ -10,7 +10,6 @@
 *
 * =================================================*/
 #include "../IProperty.h"
-#include "../Autowired.h"
 
 class Value : public IValue
 {

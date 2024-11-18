@@ -10,6 +10,7 @@
 *
 * =================================================*/
 #include "MS.h"
+#include <iocpp.h>
 
 /// @brief Interface for value
 class OPENMS_API IValue

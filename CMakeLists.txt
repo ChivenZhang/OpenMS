@@ -13,6 +13,7 @@ include_directories(${CMAKE_SOURCE_DIR})
 include_directories(${OPENMS_SOURCE_DIR})
 
 add_subdirectory(${CMAKE_SOURCE_DIR}/External/libuv)
+add_subdirectory(${CMAKE_SOURCE_DIR}/External/iocpp)
 add_subdirectory(${CMAKE_SOURCE_DIR}/OpenMS)
 add_subdirectory(${CMAKE_SOURCE_DIR}/Service)
 
