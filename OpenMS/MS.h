@@ -558,3 +558,8 @@ inline bool TTypeC(TMap<K, T> const& value, TMap<K2, T2>& result)
 #else													
 #define TDebug(FORMAT, ...)
 #endif
+
+#define TPRINT TPrint
+#define TERROR TError
+#define TFATAL TFatal
+#define TDEBUG TDebug

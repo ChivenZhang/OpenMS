@@ -29,7 +29,6 @@ public:
 		auto _event = TNew<IChannelEvent>();
 		_event->Message = event->Message;
 		context->write(_event);
-		TPrint("Write: %s", _event->Message.c_str());
 		return true;
 	}
 };
@@ -58,7 +57,6 @@ public:
 		auto _event = TNew<IChannelEvent>();
 		_event->Message = TStringView(buffer, buflen);
 		context->write(_event);
-		TPrint("Write: %s", _event->Message.c_str());
 		return true;
 	}
 };

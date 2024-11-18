@@ -9,6 +9,7 @@
 *
 * =================================================*/
 #include "RegistryServer.h"
+#include "RegistryHandler.h"
 
 struct RegistryServerConfig
 {
@@ -40,6 +41,8 @@ void RegistryServer::configureEndpoint(config_t& config)
 	config.Callback = {
 		[=](TRef<IChannel> channel) {
 			TPrint("new connection");
+			channel->getPipeline()->addFirst("", TNew<RegistryInboundHandler>());
+			channel->getPipeline()->addFirst("", TNew<RegistryOutboundHandler>());
 		},
 		[=](TRef<IChannel> channel) {
 			TPrint("disconnection ");
