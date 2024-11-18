@@ -11,7 +11,7 @@
 * =================================================*/
 #include "OpenMS/Service/Private/Service.h"
 #include "OpenMS/Service/Private/Property.h"
-#include "RegistryServer.h"
+#include "Endpoint/RegistryServer.h"
 
 class RegistryService
 	:
