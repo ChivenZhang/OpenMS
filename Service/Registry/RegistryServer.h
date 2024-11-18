@@ -10,8 +10,13 @@
 *
 * =================================================*/
 #include "OpenMS/Endpoint/TCP/TCPServer.h"
+#include "RegistryHandler.h"
 
-class RegistryServer : public TCPServer, public AUTOWIRE(IProperty)
+class RegistryServer :
+	public TCPServer,
+	public AUTOWIRE(IProperty),
+	public RESOURCE(RegistryInboundHandler),
+	public RESOURCE(RegistryOutboundHandler)
 {
 public:
 	RegistryServer();

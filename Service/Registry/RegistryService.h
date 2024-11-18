@@ -11,13 +11,13 @@
 * =================================================*/
 #include "OpenMS/Service/Private/Service.h"
 #include "OpenMS/Service/Private/Property.h"
-#include "Endpoint/RegistryServer.h"
+#include "RegistryServer.h"
 
 class RegistryService
 	:
 	public Service,
-	public RESOURCE2(Property, IProperty, "application"),
-	public RESOURCE(RegistryServer, "registryServer")
+	public RESOURCE2(Property, IProperty),
+	public RESOURCE(RegistryServer)
 {
 public:
 	void startup() override;

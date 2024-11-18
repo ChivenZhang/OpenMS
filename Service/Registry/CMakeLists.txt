@@ -2,10 +2,10 @@
 add_executable(RegistryService
 	RegistryService.cpp
 	RegistryService.h
-	"Endpoint/RegistryServer.h"
-	"Endpoint/RegistryServer.cpp"
-	"Handler/RegistryHandler.h"
-	"Handler/RegistryHandler.cpp"
+	"RegistryServer.h"
+	"RegistryServer.cpp"
+	"RegistryHandler.h"
+	"RegistryHandler.cpp"
 )
 add_dependencies(RegistryService OpenMS)
 
