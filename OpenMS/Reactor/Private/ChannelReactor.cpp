@@ -1,3 +1,4 @@
+#include "ChannelReactor.h"
 /*=================================================
 * Copyright © 2020-2024 ChivenZhang.
 * All Rights Reserved.
@@ -13,6 +14,8 @@
 ChannelReactor::ChannelReactor(size_t workerNum, callback_t callback)
 	:
 	m_Running(false),
+	m_Sending(false),
+	m_Connect(false),
 	m_OnConnected(callback.Connected),
 	m_OnDisconnect(callback.Disconnect),
 	m_WorkerList(std::max(1ULL, workerNum)),
@@ -58,6 +61,11 @@ void ChannelReactor::shutdown()
 bool ChannelReactor::running() const
 {
 	return m_Running;
+}
+
+bool ChannelReactor::connect() const
+{
+	return m_Connect;
 }
 
 void ChannelReactor::write(TRef<IChannelEvent> event, TRef<IChannelAddress> address)

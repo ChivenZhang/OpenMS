@@ -28,6 +28,7 @@ public:
 	void startup() override;
 	void shutdown() override;
 	bool running() const;
+	bool connect() const;
 	void write(TRef<IChannelEvent> event, TRef<IChannelAddress> address) override;
 	TFuture<bool> write(TRef<IChannelEvent> event, TRef<IChannelAddress> address, TPromise<bool>&& promise) override;
 	void writeAndFlush(TRef<IChannelEvent> event, TRef<IChannelAddress> address) override;
@@ -44,6 +45,7 @@ protected:
 	TThread m_EventThread;
 	TAtomic<bool> m_Running;
 	TAtomic<bool> m_Sending;
+	TAtomic<bool> m_Connect;
 	TVector<TThread> m_WorkerThreads;
 	TVector<TRef<ChannelWorker>> m_WorkerList;
 	TQueue<TRef<IChannelEvent>> m_EventQueue;

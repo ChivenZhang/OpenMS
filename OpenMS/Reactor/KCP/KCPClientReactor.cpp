@@ -178,6 +178,7 @@ void KCPClientReactor::startup()
 
 			{
 				loop.data = this;
+				m_Connect = true;
 				promise.set_value();
 
 				while (m_Running == true && uv_run(&loop, UV_RUN_NOWAIT))
@@ -185,6 +186,7 @@ void KCPClientReactor::startup()
 					on_send(&client);
 					if (m_ChannelRemoved) m_ChannelRemoved = nullptr;
 				}
+				m_Connect = false;
 			}
 
 			// Close all channels
