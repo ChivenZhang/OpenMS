@@ -12,12 +12,10 @@
 #include "OpenMS/Service/Private/Service.h"
 #include "AuthorityConfig.h"
 
-#define OPENMS_SERVICE_NAME "authority"
-
 class AuthorityService :
 	public Service,
 	public RESOURCE(AuthorityConfig),
-	public AUTOWIREN(IEndpoint, OPENMS_SERVICE_NAME)
+	public AUTOWIREN(IEndpoint, "authority")
 {
 public:
 	void startup() override;
