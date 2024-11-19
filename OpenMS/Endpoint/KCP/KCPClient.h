@@ -18,7 +18,7 @@ class KCPClient : public Endpoint
 public:
 	struct config_t
 	{
-		std::string IP;
+		TString IP;
 		uint16_t PortNum = 0;
 		uint32_t Workers = 0;
 		KCPClientReactor::callback_kcp_t Callback;

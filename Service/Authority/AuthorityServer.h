@@ -11,7 +11,8 @@
 * =================================================*/
 #include "OpenMS/Endpoint/TCP/TCPServer.h"
 
-class AuthorityServer : public TCPServer,
+class AuthorityServer :
+	public TCPServer,
 	public AUTOWIRE(IProperty)
 {
 public:

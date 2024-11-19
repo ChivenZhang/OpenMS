@@ -15,8 +15,7 @@ TCPServerReactor::TCPServerReactor(TRef<ISocketAddress> address, uint32_t backlo
 	:
 	ChannelReactor(workerNum, callback),
 	m_Backlog(backlog ? backlog : 128),
-	m_Address(address),
-	m_AsyncStop(uv_async_t())
+	m_Address(address)
 {
 	if (m_Address == nullptr) m_Address = TNew<IPv4Address>("0.0.0.0", 0);
 }
@@ -35,7 +34,6 @@ void TCPServerReactor::startup()
 
 		uv_loop_init(&loop);
 		uv_tcp_init(&loop, &server);
-		uv_async_init(&loop, &m_AsyncStop, on_stop);
 
 		do
 		{
@@ -107,16 +105,29 @@ void TCPServerReactor::startup()
 				loop.data = this;
 				promise.set_value();
 
-				while (m_Running == true && uv_run(&loop, UV_RUN_NOWAIT)) on_send(&server);
+				while (m_Running == true && uv_run(&loop, UV_RUN_NOWAIT))
+				{
+					on_send(&server);
+				}
+			}
+
+			// Close all channels
+
+			{
+				auto channels = m_ChannelMap;
+				for (auto channel : channels)
+				{
+					if (channel.second) onDisconnect(channel.second);
+				}
+				m_ChannelMap.clear();
 			}
 
 		} while (0);
 
-		TPrint("closing server");
-
-		uv_close((uv_handle_t*)&m_AsyncStop, nullptr);
 		uv_close((uv_handle_t*)&server, nullptr);
 		uv_loop_close(&loop);
+
+		TPrint("closed server");
 		});
 
 	future.wait();
@@ -125,7 +136,6 @@ void TCPServerReactor::startup()
 void TCPServerReactor::shutdown()
 {
 	if (m_Running == false) return;
-	uv_async_send(&m_AsyncStop);
 	ChannelReactor::shutdown();
 	m_ChannelMap.clear();
 }

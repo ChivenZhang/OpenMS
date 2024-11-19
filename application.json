@@ -2,19 +2,13 @@
 	"registry": {
 		"server": {
 			"ip": "127.0.0.1",
-			"port": 8089
+			"port": 8080
 		}
 	},
 	"authority": {
 		"server": {
 			"ip": "127.0.0.1",
 			"port": 8090
-		}
-	},
-	"gateway": {
-		"server": {
-			"ip": "127.0.0.1",
-			"port": 8080
 		}
 	}
 }

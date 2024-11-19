@@ -14,8 +14,7 @@
 TCPClientReactor::TCPClientReactor(TRef<ISocketAddress> address, size_t workerNum, callback_tcp_t callback)
 	:
 	ChannelReactor(workerNum, callback),
-	m_Address(address),
-	m_AsyncStop(uv_async_t())
+	m_Address(address)
 {
 	if (m_Address == nullptr) m_Address = TNew<IPv4Address>("0.0.0.0", 0);
 }
@@ -34,7 +33,6 @@ void TCPClientReactor::startup()
 
 		uv_loop_init(&loop);
 		uv_tcp_init(&loop, &client);
-		uv_async_init(&loop, &m_AsyncStop, on_stop);
 
 		do
 		{
@@ -106,16 +104,25 @@ void TCPClientReactor::startup()
 				loop.data = this;
 				promise.set_value();
 
-				while (m_Running == true && uv_run(&loop, UV_RUN_NOWAIT)) on_send(&client);
+				while (m_Running == true && uv_run(&loop, UV_RUN_NOWAIT))
+				{
+					on_send(&client);
+				}
+			}
+
+			// Close all channels
+
+			{
+				if (m_Channel) onDisconnect(m_Channel);
+				m_Channel = nullptr;
 			}
 
 		} while (0);
 
-		TPrint("closing client");
-
-		uv_close((uv_handle_t*)&m_AsyncStop, nullptr);
 		uv_close((uv_handle_t*)&client, nullptr);
 		uv_loop_close(&loop);
+
+		TPrint("closed client");
 		});
 
 	future.wait();
@@ -326,9 +333,4 @@ void TCPClientReactor::on_send(uv_tcp_t* handle)
 			event->Promise->set_value(sentNum == event->Message.size());
 		}
 	}
-}
-
-void TCPClientReactor::on_stop(uv_async_t* handle)
-{
-	uv_stop(handle->loop);
 }

@@ -78,8 +78,7 @@ KCPServerReactor::KCPServerReactor(TRef<ISocketAddress> address, uint32_t backlo
 	m_Backlog(backlog ? backlog : 128),
 	m_Session(1),
 	m_Address(address),
-	m_OnSession(callback.Session),
-	m_AsyncStop(uv_async_t())
+	m_OnSession(callback.Session)
 {
 	if (m_Address == nullptr) m_Address = TNew<IPv4Address>("0.0.0.0", 0);
 	if (m_OnSession == nullptr) m_OnSession = [=](TRef<IChannelAddress>) { return m_Session++; };
@@ -99,7 +98,6 @@ void KCPServerReactor::startup()
 
 		uv_loop_init(&loop);
 		uv_udp_init(&loop, &server);
-		uv_async_init(&loop, &m_AsyncStop, on_stop);
 
 		do
 		{
@@ -182,13 +180,25 @@ void KCPServerReactor::startup()
 				}
 			}
 
+			// Close all channels
+
+			{
+				auto channels = m_Channels;
+				for (auto channel : channels)
+				{
+					if (channel) onDisconnect(channel);
+				}
+				m_Channels.clear();
+				m_ChannelMap.clear();
+				m_ChannelsRemoved.clear();
+			}
+
 		} while (0);
 
-		TPrint("closing server");
-
-		uv_close((uv_handle_t*)&m_AsyncStop, nullptr);
 		uv_close((uv_handle_t*)&server, nullptr);
 		uv_loop_close(&loop);
+
+		TPrint("closed server");
 		});
 
 	future.wait();
@@ -197,7 +207,6 @@ void KCPServerReactor::startup()
 void KCPServerReactor::shutdown()
 {
 	if (m_Running == false) return;
-	uv_async_send(&m_AsyncStop);
 	ChannelReactor::shutdown();
 	m_Channels.clear();
 	m_ChannelMap.clear();
@@ -501,9 +510,4 @@ void KCPServerReactor::on_send(uv_udp_t* handle)
 			event->Promise->set_value(sentNum == event->Message.size());
 		}
 	}
-}
-
-void KCPServerReactor::on_stop(uv_async_t* handle)
-{
-	uv_stop(handle->loop);
 }

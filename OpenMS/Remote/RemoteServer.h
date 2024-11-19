@@ -9,14 +9,13 @@
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
-#include "OpenMS/Endpoint/TCP/TCPServer.h"
+#include "OpenMS/Endpoint/IEndpoint.h"
 
-class RegistryServer :
-	public TCPServer,
-	public AUTOWIRE(IProperty)
+class RemoteServer : public IEndpoint
 {
 public:
-	RegistryServer();
-	~RegistryServer();
-	void configureEndpoint(config_t & config) override;
+
+
+protected:
+	TRef<IEndpoint> m_Endpoint;
 };

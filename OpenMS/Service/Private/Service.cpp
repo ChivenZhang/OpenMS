@@ -16,15 +16,6 @@ char** IEnvironment::argv = nullptr;
 TRaw<IService> IService::m_Instance = nullptr;
 TRaw<IService> IService::Instance() { return m_Instance; }
 
-struct ServerConfig
-{
-	std::string ip;
-	uint16_t port;
-	uint32_t backlog;
-	uint32_t workers;
-	OPENMS_TYPE(ServerConfig, ip, port, backlog, workers)
-};
-
 void Service::startup()
 {
 	if (IService::Instance()) return;

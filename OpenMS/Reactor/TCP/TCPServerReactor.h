@@ -38,7 +38,6 @@ protected:
 
 protected:
 	uint32_t m_Backlog;
-	uv_async_t m_AsyncStop;
 	TRef<ISocketAddress> m_Address;
 	TMap<uint32_t, TRef<Channel>> m_ChannelMap;
 };

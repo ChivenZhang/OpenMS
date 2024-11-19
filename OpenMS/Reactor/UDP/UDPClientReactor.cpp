@@ -16,8 +16,7 @@ UDPClientReactor::UDPClientReactor(TRef<ISocketAddress> address, bool broadcast,
 	ChannelReactor(workerNum, callback),
 	m_Broadcast(broadcast),
 	m_Multicast(multicast),
-	m_Address(address),
-	m_AsyncStop(uv_async_t())
+	m_Address(address)
 {
 	if (m_Address == nullptr) m_Address = TNew<IPv4Address>("0.0.0.0", 0);
 }
@@ -36,7 +35,6 @@ void UDPClientReactor::startup()
 
 		uv_loop_init(&loop);
 		uv_udp_init(&loop, &client);
-		uv_async_init(&loop, &m_AsyncStop, on_stop);
 
 		do
 		{
@@ -189,13 +187,19 @@ void UDPClientReactor::startup()
 				while (m_Running == true && uv_run(&loop, UV_RUN_NOWAIT)) on_send(&client);
 			}
 
+			// Close all channels
+
+			{
+				if (m_Channel) onDisconnect(m_Channel);
+				m_Channel = nullptr;
+			}
+
 		} while (0);
 
-		TPrint("closing client");
-
-		uv_close((uv_handle_t*)&m_AsyncStop, nullptr);
 		uv_close((uv_handle_t*)&client, nullptr);
 		uv_loop_close(&loop);
+
+		TPrint("closed client");
 		});
 
 	future.wait();
@@ -204,7 +208,6 @@ void UDPClientReactor::startup()
 void UDPClientReactor::shutdown()
 {
 	if (m_Running == false) return;
-	uv_async_send(&m_AsyncStop);
 	ChannelReactor::shutdown();
 	m_Channel = nullptr;
 }
@@ -304,9 +307,4 @@ void UDPClientReactor::on_send(uv_udp_t* handle)
 			event->Promise->set_value(sentNum == event->Message.size());
 		}
 	}
-}
-
-void UDPClientReactor::on_stop(uv_async_t* handle)
-{
-	uv_stop(handle->loop);
 }
