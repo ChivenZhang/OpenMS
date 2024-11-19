@@ -11,7 +11,8 @@
 * =================================================*/
 #include "OpenMS/Endpoint/TCP/TCPServer.h"
 
-class RegistryServer : public TCPServer, public AUTOWIRE(IProperty)
+class RegistryServer : public TCPServer,
+	public AUTOWIRE(IProperty)
 {
 public:
 	RegistryServer();

@@ -11,7 +11,7 @@
 #include "UDPServerReactor.h"
 #include "UDPChannel.h"
 
-UDPServerReactor::UDPServerReactor(TRef<ISocketAddress> address, uint32_t backlog, bool broadcast, bool multicast, size_t workerNum, callback_t callback)
+UDPServerReactor::UDPServerReactor(TRef<ISocketAddress> address, uint32_t backlog, bool broadcast, bool multicast, size_t workerNum, callback_udp_t callback)
 	:
 	ChannelReactor(workerNum, callback),
 	m_Backlog(backlog ? backlog : 128),

@@ -10,14 +10,12 @@
 *
 * =================================================*/
 #include "OpenMS/Service/Private/Service.h"
-#include "OpenMS/Service/Private/Property.h"
-#include "RegistryServer.h"
+#include "RegistryConfig.h"
 
-class RegistryService
-	:
+class RegistryService :
 	public Service,
-	public RESOURCE2(Property, IProperty),
-	public RESOURCE(RegistryServer)
+	public RESOURCE(RegistryConfig),
+	public AUTOWIREN(IEndpoint, "registry")
 {
 public:
 	void startup() override;

@@ -16,7 +16,7 @@ void TCPClient::startup()
 	configureEndpoint(config);
 	m_Reactor = TNew<TCPClientReactor>(
 		IPv4Address::New(config.IP, config.PortNum),
-		config.WorkerNum,
+		config.Workers,
 		config.Callback
 	);
 	m_Reactor->startup();

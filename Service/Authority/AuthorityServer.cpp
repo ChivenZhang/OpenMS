@@ -8,36 +8,34 @@
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
-#include "GatewayServer.h"
+#include "AuthorityServer.h"
 #include <OpenMS/Reactor/Private/ChannelHandler.h>
 
-struct GatewayServerConfig
+struct AuthorityServerConfig
 {
 	std::string ip;
 	uint16_t port;
 	uint32_t backlog;
-	uint32_t workers;
-	OPENMS_TYPE(GatewayServerConfig, ip, port, backlog, workers)
+	OPENMS_TYPE(AuthorityServerConfig, ip, port, backlog)
 };
 
-GatewayServer::GatewayServer()
+AuthorityServer::AuthorityServer()
 {
 	startup();
 }
 
-GatewayServer::~GatewayServer()
+AuthorityServer::~AuthorityServer()
 {
 	shutdown();
 }
 
-void GatewayServer::configureEndpoint(config_t& config)
+void AuthorityServer::configureEndpoint(config_t& config)
 {
-	auto properties = AUTOWIRE_DATA(IProperty);
-	auto configInfo = properties->property<GatewayServerConfig>("gateway.server");
+	auto properties = AUTOWIRE(IProperty)::bean();
+	auto configInfo = properties->property<AuthorityServerConfig>("authority.server");
 	config.IP = configInfo.ip;
 	config.PortNum = configInfo.port;
 	config.Backlog = configInfo.backlog;
-	config.WorkerNum = 1; // single thread for safety
 	config.Callback = {
 		[=](TRef<IChannel> channel) {
 			channel->getPipeline()->addFirst("", IChannelInboundHandler::callback_t{

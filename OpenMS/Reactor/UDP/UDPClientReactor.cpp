@@ -11,7 +11,7 @@
 #include "UDPClientReactor.h"
 #include "UDPChannel.h"
 
-UDPClientReactor::UDPClientReactor(TRef<ISocketAddress> address, bool broadcast, bool multicast, size_t workerNum, callback_t callback)
+UDPClientReactor::UDPClientReactor(TRef<ISocketAddress> address, bool broadcast, bool multicast, size_t workerNum, callback_udp_t callback)
 	:
 	ChannelReactor(workerNum, callback),
 	m_Broadcast(broadcast),

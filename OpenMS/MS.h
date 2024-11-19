@@ -383,7 +383,7 @@ inline bool TTypeC(TString const& string, double& value)
 }
 
 #include <nlohmann/json.hpp>
-#define OPENMS_TYPE NLOHMANN_DEFINE_TYPE_INTRUSIVE
+#define OPENMS_TYPE NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT
 
 template <class T, std::enable_if_t<!std::is_scalar_v<T> && !std::is_same_v<T, TString>, int> = 0>
 inline bool TTypeC(T const& value, TString& result)

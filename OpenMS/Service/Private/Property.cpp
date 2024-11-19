@@ -98,9 +98,9 @@ Property::Property()
 	}
 }
 
-TString Property::property(TStringView name) const
+TString Property::property(TString const& name) const
 {
-	auto result = m_PropertyMap.find(TString(name));
+	auto result = m_PropertyMap.find(name);
 	if (result == m_PropertyMap.end()) return TString();
 	return result->second;
 }

@@ -19,9 +19,9 @@ public:
 	struct config_t
 	{
 		std::string IP;
-		uint16_t PortNum;
-		uint32_t Backlog;
-		size_t WorkerNum;
+		uint16_t PortNum = 0;
+		uint32_t Backlog = 0;
+		uint32_t Workers = 0;
 		TCPServerReactor::callback_tcp_t Callback;
 	};
 

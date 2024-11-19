@@ -1,3 +1,4 @@
+#pragma once
 /*=================================================
 * Copyright © 2020-2024 ChivenZhang.
 * All Rights Reserved.
@@ -8,20 +9,17 @@
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
-#include "GatewayService.h"
-#include <OpenMS/Service/IBootstrap.h>
+#include "OpenMS/Service/Private/Service.h"
+#include "AuthorityConfig.h"
 
-TRef<IService> openms_bootstrap()
-{
-	return TNew<GatewayService>();
-}
+#define OPENMS_SERVICE_NAME "authority"
 
-void GatewayService::startup()
+class AuthorityService :
+	public Service,
+	public RESOURCE(AuthorityConfig),
+	public AUTOWIREN(IEndpoint, OPENMS_SERVICE_NAME)
 {
-	Service::startup();
-}
-
-void GatewayService::shutdown()
-{
-	Service::shutdown();
-}
+public:
+	void startup() override;
+	void shutdown() override;
+};

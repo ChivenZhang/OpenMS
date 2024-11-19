@@ -1,4 +1,3 @@
-#pragma once
 /*=================================================
 * Copyright © 2020-2024 ChivenZhang.
 * All Rights Reserved.
@@ -9,14 +8,20 @@
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
-#include "../IService.h"
-#include "../IProperty.h"
+#include "AuthorityService.h"
+#include <OpenMS/Service/IBootstrap.h>
 
-class Service : public IService, public AUTOWIRE(IProperty)
+TRef<IService> openms_bootstrap()
 {
-public:
-	void startup() override;
-	void shutdown() override;
-	using IService::property;
-	TString property(TString const& name) const override;
-};
+	return TNew<AuthorityService>();
+}
+
+void AuthorityService::startup()
+{
+	Service::startup();
+}
+
+void AuthorityService::shutdown()
+{
+	Service::shutdown();
+}

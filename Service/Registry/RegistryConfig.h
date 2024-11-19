@@ -9,17 +9,11 @@
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
-#include "OpenMS/Service/Private/Service.h"
 #include "OpenMS/Service/Private/Property.h"
-#include "GatewayServer.h"
+#include "RegistryServer.h"
 
-class GatewayService
-	:
-	public Service,
+class RegistryConfig :
 	public RESOURCE2(Property, IProperty),
-	public RESOURCE(GatewayServer)
+	public RESOURCE2N(RegistryServer, IEndpoint, "registry")
 {
-public:
-	void startup() override;
-	void shutdown() override;
 };

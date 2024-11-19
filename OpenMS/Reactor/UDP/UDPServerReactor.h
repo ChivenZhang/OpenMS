@@ -16,7 +16,12 @@
 class UDPServerReactor : public ChannelReactor
 {
 public:
-	UDPServerReactor(TRef<ISocketAddress> address, uint32_t backlog, bool broadcast, bool multicast, size_t workerNum, callback_t callback);
+	struct callback_udp_t : public callback_t
+	{
+	};
+
+public:
+	UDPServerReactor(TRef<ISocketAddress> address, uint32_t backlog, bool broadcast, bool multicast, size_t workerNum, callback_udp_t callback);
 	void startup() override;
 	void shutdown() override;
 	void write(TRef<IChannelEvent> event, TRef<IChannelAddress> address) override;

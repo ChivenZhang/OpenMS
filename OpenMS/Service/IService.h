@@ -24,10 +24,10 @@ public:
 
 	virtual void shutdown() = 0;
 
-	virtual TString property(TStringView name) const = 0;
+	virtual TString property(TString const& name) const = 0;
 
 	template <class T>
-	T property(TStringView name, T const& value = T()) const
+	T property(TString const& name, T const& value = T()) const
 	{
 		return TTextC<T>::from_string(property(name), value);
 	}

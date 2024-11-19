@@ -37,7 +37,7 @@ void Service::shutdown()
 	m_Instance = nullptr;
 }
 
-TString Service::property(TStringView name) const
+TString Service::property(TString const& name) const
 {
 	auto source = AUTOWIRE_DATA(IProperty);
 	if (source == nullptr) return TString();

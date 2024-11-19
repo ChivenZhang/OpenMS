@@ -9,12 +9,11 @@
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
-#include "OpenMS/Endpoint/TCP/TCPServer.h"
+#include "OpenMS/Service/Private/Property.h"
+#include "AuthorityServer.h"
 
-class GatewayServer : public TCPServer, public AUTOWIRE(IProperty)
+class AuthorityConfig :
+	public RESOURCE2(Property, IProperty),
+	public RESOURCE2N(AuthorityServer, IEndpoint, "authority")
 {
-public:
-	GatewayServer();
-	~GatewayServer();
-	void configureEndpoint(config_t & config) override;
 };

@@ -72,7 +72,7 @@ static inline IUINT32 iclock()
 
 #endif
 
-KCPClientReactor::KCPClientReactor(TRef<ISocketAddress> address, size_t workerNum, callback_t callback)
+KCPClientReactor::KCPClientReactor(TRef<ISocketAddress> address, size_t workerNum, callback_kcp_t callback)
 	:
 	ChannelReactor(workerNum, callback),
 	m_Address(address),

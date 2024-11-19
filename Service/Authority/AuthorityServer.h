@@ -9,14 +9,13 @@
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
-#include "../IService.h"
-#include "../IProperty.h"
+#include "OpenMS/Endpoint/TCP/TCPServer.h"
 
-class Service : public IService, public AUTOWIRE(IProperty)
+class AuthorityServer : public TCPServer,
+	public AUTOWIRE(IProperty)
 {
 public:
-	void startup() override;
-	void shutdown() override;
-	using IService::property;
-	TString property(TString const& name) const override;
+	AuthorityServer();
+	~AuthorityServer();
+	void configureEndpoint(config_t & config) override;
 };

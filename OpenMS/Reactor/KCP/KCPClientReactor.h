@@ -16,7 +16,12 @@
 class KCPClientReactor : public ChannelReactor
 {
 public:
-	KCPClientReactor(TRef<ISocketAddress> address, size_t workerNum, callback_t callback);
+	struct callback_kcp_t : public callback_t
+	{
+	};
+
+public:
+	KCPClientReactor(TRef<ISocketAddress> address, size_t workerNum, callback_kcp_t callback);
 	void startup() override;
 	void shutdown() override;
 	void write(TRef<IChannelEvent> event, TRef<IChannelAddress> address) override;

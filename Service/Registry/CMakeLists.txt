@@ -1,11 +1,10 @@
 
 add_executable(RegistryService
+	RegistryConfig.h
+	RegistryServer.cpp
+	RegistryServer.h
 	RegistryService.cpp
 	RegistryService.h
-	"RegistryServer.h"
-	"RegistryServer.cpp"
-	
-	
 )
 add_dependencies(RegistryService OpenMS)
 

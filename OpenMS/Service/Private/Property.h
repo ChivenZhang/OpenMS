@@ -25,7 +25,7 @@ class Property : public IProperty
 {
 public:
 	Property();
-	TString property(TStringView name) const override;
+	TString property(TString const& name) const override;
 
 protected:
 	TMap<TString, TString> m_PropertyMap;
