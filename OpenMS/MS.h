@@ -416,6 +416,19 @@ bool TTypeC(TString const& src, double& dst)
 	return true;
 }
 
+template <class T = const char*, class U = TString, OPENMS_NOT_SAME(T, U)>
+bool TTypeC(const char* const& src, TString& dst)
+{
+	dst = (src) ? TString(src) : TString();
+	return true;
+}
+template <class T = TString, class U = const char*, OPENMS_NOT_SAME(T, U)>
+bool TTypeC(TString const& src, const char*& dst)
+{
+	dst = src.c_str();
+	return true;
+}
+
 template <class T>
 struct TTextC
 {

@@ -13,6 +13,7 @@
 #include "OpenMS/Service/IProperty.h"
 #include "OpenMS/Service/Private/Property.h"
 #include "OpenMS/Reactor/TCP/TCPClientReactor.h"
+#include "OpenMS/Reactor/Private/ChannelHandler.h"
 
 struct RemoteClientRequest
 {
@@ -87,5 +88,17 @@ public:
 	}
 
 protected:
+	friend class RemoteClientInboundHandler;
 	TRef<TCPClientReactor> m_Reactor;
+};
+
+class RemoteClientInboundHandler : public ChannelInboundHandler
+{
+public:
+	RemoteClientInboundHandler(TRaw<RemoteClient> server);
+	bool channelRead(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) override;
+
+protected:
+	TString m_Buffer;
+	TRaw<RemoteClient> m_Client;
 };

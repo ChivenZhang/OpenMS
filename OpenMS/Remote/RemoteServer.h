@@ -12,8 +12,8 @@
 #include "OpenMS/Endpoint/IEndpoint.h"
 #include "OpenMS/Service/IProperty.h"
 #include "OpenMS/Service/Private/Property.h"
-#include "OpenMS/Reactor/Private/ChannelHandler.h"
 #include "OpenMS/Reactor/TCP/TCPServerReactor.h"
+#include "OpenMS/Reactor/Private/ChannelHandler.h"
 
 class RemoteServer :
 	public IEndpoint,

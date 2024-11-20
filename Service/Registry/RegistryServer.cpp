@@ -21,10 +21,6 @@ struct RegistryServerConfig
 
 RegistryServer::RegistryServer()
 {
-	bind(TString("print"), TLambda([=](TString request) {
-		TPrint("%s", request.c_str());
-		}));
-
 	startup();
 }
 
