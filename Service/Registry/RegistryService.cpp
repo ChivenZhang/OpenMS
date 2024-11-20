@@ -23,12 +23,12 @@ void RegistryService::startup()
 	auto server = AUTOWIREN(RegistryServer, "registry-server")::bean();
 	auto client = AUTOWIREN(RegistryClient, "registry-client")::bean();
 
-	server->bind(TString("print"), TLambda([=](TString request) {
+	server->bind("print", TLambda([=](TString request) {
 		TPrint("%s", request.c_str());
 		return "执行成功！";
 		}));
 
-	client->invoke<TString>("print", "你好，服务器！");
+	auto result = client->invoke<TString>("print", "你好，服务器！");
 }
 
 void RegistryService::shutdown()
