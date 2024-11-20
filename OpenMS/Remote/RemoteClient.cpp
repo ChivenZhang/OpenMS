@@ -35,6 +35,7 @@ void RemoteClient::shutdown()
 {
 	m_Reactor->shutdown();
 	m_Reactor = nullptr;
+	m_Packages.clear();
 }
 
 RemoteClientInboundHandler::RemoteClientInboundHandler(TRaw<RemoteClient> client)

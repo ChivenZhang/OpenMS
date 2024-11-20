@@ -58,6 +58,8 @@ public:
 	template<class T, class... Args, OPENMS_NOT_SAME(T, void)>
 	T call(TStringView name, Args... args)
 	{
+		if (m_Reactor == nullptr || m_Reactor->connect() == false) return T();
+
 		// Convert arguments to string
 
 		TString input, output;
@@ -103,6 +105,8 @@ public:
 	template<class T, class... Args, OPENMS_IS_SAME(T, void)>
 	T call(TStringView name, Args... args)
 	{
+		if (m_Reactor == nullptr || m_Reactor->connect() == false) return T();
+
 		// Convert arguments to string
 
 		TString input;
@@ -130,6 +134,10 @@ public:
 		// Wait for result and return
 
 		future.wait_for(std::chrono::milliseconds(m_ReadTimeout));
+		{
+			TMutexLock lock(m_Lock);
+			m_Packages.erase(request.indx);
+		}
 	}
 
 protected:
