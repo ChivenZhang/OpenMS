@@ -75,6 +75,7 @@ protected:
 
 protected:
 	friend class RemoteServerInboundHandler;
+	TMutex m_Lock;
 	TRef<TCPServerReactor> m_Reactor;
 	TMap<TString, TLambda<bool(TString const&, TString&)>> m_Methods;
 };

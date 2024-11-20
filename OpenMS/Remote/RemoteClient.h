@@ -143,8 +143,8 @@ public:
 protected:
 	friend class RemoteClientInboundHandler;
 	uint32_t m_PackageID = 0;
-	uint32_t m_ReadTimeout = 2000;	// milliseconds
-	uint32_t m_WriteTimeout = 2000;	// milliseconds
+	uint32_t m_ReadTimeout = 2000;	// ms from property
+	uint32_t m_WriteTimeout = 2000;	// ms from property
 	TMutex m_Lock;
 	TRef<TCPClientReactor> m_Reactor;
 	TMap<uint32_t, invoke_t> m_Packages;

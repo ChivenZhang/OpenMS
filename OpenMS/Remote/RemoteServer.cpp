@@ -41,23 +41,27 @@ void RemoteServer::shutdown()
 
 bool RemoteServer::bind_internal(TStringView name, TLambda<bool(TString const&, TString&)> method)
 {
+	TMutexLock lock(m_Lock);
 	return m_Methods.emplace(name, method).second;
 }
 
 bool RemoteServer::unbind(TStringView name)
 {
+	TMutexLock lock(m_Lock);
 	return m_Methods.erase(TString(name));
 }
 
 bool RemoteServer::invoke(TStringView name, TString const& input, TString& output)
 {
-	auto result = m_Methods.find(TString(name));
-	if (result == m_Methods.end()) return false;
-
-	auto method = result->second;
-	if (method(input, output) == false) return false;
-
-	return true;
+	TLambda<bool(TString const&, TString&)> method;
+	{
+		TMutexLock lock(m_Lock);
+		auto result = m_Methods.find(TString(name));
+		if (result == m_Methods.end()) return false;
+		method = result->second;
+	}
+	if (method && method(input, output)) return true;
+	return false;
 }
 
 struct RemoteServerRequest
