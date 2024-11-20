@@ -60,6 +60,13 @@ bool RemoteServer::invoke(TStringView name, TString const& input, TString& outpu
 	return true;
 }
 
+struct RemoteServerRequest
+{
+	TString name;
+	TString args;
+	OPENMS_TYPE(RemoteServerRequest, name, args)
+};
+
 RemoteServerInboundHandler::RemoteServerInboundHandler(TRaw<RemoteServer> server)
 	:
 	m_Server(server)

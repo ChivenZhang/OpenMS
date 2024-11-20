@@ -15,13 +15,6 @@
 #include "OpenMS/Reactor/Private/ChannelHandler.h"
 #include "OpenMS/Reactor/TCP/TCPServerReactor.h"
 
-struct RemoteServerRequest
-{
-	TString name;
-	TString args;
-	OPENMS_TYPE(RemoteServerRequest, name, args)
-};
-
 class RemoteServer :
 	public IEndpoint,
 	public AUTOWIRE(IProperty),
