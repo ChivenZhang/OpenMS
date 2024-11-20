@@ -262,10 +262,10 @@ inline constexpr uint32_t THash(TStringView value)
 
 #include <nlohmann/json.hpp>
 #define OPENMS_TYPE NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT
+#define OPENMS_IS_SCALAR(T) std::enable_if_t<std::is_scalar_v<T>, int> = 0
+#define OPENMS_NOT_SCALAR(T) std::enable_if_t<!std::is_scalar_v<T>, int> = 0
 #define OPENMS_IS_SAME(T, U) std::enable_if_t<std::is_same_v<T, U>, int> = 0
 #define OPENMS_NOT_SAME(T, U) std::enable_if_t<!std::is_same_v<T, U>, int> = 0
-#define OPENMS_IS_SCALER(T) std::enable_if_t<std::is_scalar_v<T>, int> = 0
-#define OPENMS_NOT_SCALER(T) std::enable_if_t<!std::is_scalar_v<T>, int> = 0
 #define OPENMS_IS_TEXT(T) std::enable_if_t<std::is_same_v<T, std::string>, int> = 0
 #define OPENMS_NOT_TEXT(T) std::enable_if_t<!std::is_same_v<T, std::string>, int> = 0
 
@@ -276,7 +276,7 @@ inline bool TTypeC(T const& src, U& dst)
 	return true;
 }
 
-template<class T, class U, OPENMS_NOT_SAME(T, U), OPENMS_IS_TEXT(T), OPENMS_NOT_SCALER(T)>
+template<class T, class U, OPENMS_NOT_SAME(T, U), OPENMS_IS_TEXT(T), OPENMS_NOT_SCALAR(T)>
 bool TTypeC(T const& src, U& dst)
 {
 	nlohmann::json json = nlohmann::json::parse(src, nullptr, false, true);
@@ -284,14 +284,14 @@ bool TTypeC(T const& src, U& dst)
 	return true;
 }
 
-template<class T, class U, OPENMS_NOT_SAME(T, U), OPENMS_NOT_TEXT(T), OPENMS_IS_SCALER(T)>
+template<class T, class U, OPENMS_NOT_SAME(T, U), OPENMS_NOT_TEXT(T), OPENMS_IS_SCALAR(T)>
 bool TTypeC(T const& src, U& dst)
 {
 	TString str;
 	return TTypeC(src, str) && TTypeC(str, dst);
 }
 
-template<class T, class U, OPENMS_NOT_SAME(T, U), OPENMS_NOT_TEXT(T), OPENMS_NOT_SCALER(T)>
+template<class T, class U, OPENMS_NOT_SAME(T, U), OPENMS_NOT_TEXT(T), OPENMS_NOT_SCALAR(T)>
 bool TTypeC(T const& src, U& dst)
 {
 	nlohmann::json json = src;
