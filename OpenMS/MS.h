@@ -284,19 +284,18 @@ bool TTypeC(T const& src, U& dst)
 	return true;
 }
 
-template<class T, class U, OPENMS_NOT_SAME(T, U), OPENMS_NOT_TEXT(T)>
+template<class T, class U, OPENMS_NOT_SAME(T, U), OPENMS_NOT_TEXT(T), OPENMS_IS_SCALER(T)>
 bool TTypeC(T const& src, U& dst)
 {
-	if (std::is_scalar_v<T>)
-	{
-		TString str;
-		return TTypeC(src, str) && TTypeC(str, dst);
-	}
-	else
-	{
-		nlohmann::json json = src;
-		return TTypeC(json.dump(), dst);
-	}
+	TString str;
+	return TTypeC(src, str) && TTypeC(str, dst);
+}
+
+template<class T, class U, OPENMS_NOT_SAME(T, U), OPENMS_NOT_TEXT(T), OPENMS_NOT_SCALER(T)>
+bool TTypeC(T const& src, U& dst)
+{
+	nlohmann::json json = src;
+	return TTypeC(json.dump(), dst);
 }
 
 template <class T = bool, class U = TString, OPENMS_NOT_SAME(T, U)>
@@ -351,7 +350,7 @@ bool TTypeC(TString const& src, int32_t& dst)
 	return true;
 }
 
-template<class T = uint32_t, class U = TString, OPENMS_NOT_SAME(T, U), OPENMS_NOT_TEXT(T)>
+template<class T = uint32_t, class U = TString, OPENMS_NOT_SAME(T, U)>
 bool TTypeC(uint32_t const& src, TString& dst)
 {
 	dst = std::to_string(src);
@@ -404,7 +403,7 @@ struct TTextC
 		T result;
 		if (TTypeC(string, result)) return result;
 		return value;
-}
+	}
 };
 
 // ============================================
