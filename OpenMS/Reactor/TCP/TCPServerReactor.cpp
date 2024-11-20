@@ -339,8 +339,3 @@ void TCPServerReactor::on_send(uv_tcp_t* handle)
 		}
 	}
 }
-
-void TCPServerReactor::on_stop(uv_async_t* handle)
-{
-	uv_stop(handle->loop);
-}

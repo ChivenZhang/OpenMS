@@ -14,7 +14,7 @@
 class ServerInboundHandler : public ChannelInboundHandler
 {
 public:
-	bool channelRead(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) const override
+	bool channelRead(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) override
 	{
 		TPrint("Read: %s", event->Message.c_str());
 		return true;
@@ -24,7 +24,7 @@ public:
 class ServerOutboundHandler : public ChannelOutboundHandler
 {
 public:
-	bool channelWrite(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) const override
+	bool channelWrite(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) override
 	{
 		auto _event = TNew<IChannelEvent>();
 		_event->Message = event->Message;
@@ -36,7 +36,7 @@ public:
 class ClientInboundHandler : public ChannelInboundHandler
 {
 public:
-	bool channelRead(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) const override
+	bool channelRead(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) override
 	{
 		TPrint("Read: %s", event->Message.c_str());
 		return true;
@@ -46,7 +46,7 @@ public:
 class ClientOutboundHandler : public ChannelOutboundHandler
 {
 public:
-	bool channelWrite(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) const override
+	bool channelWrite(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) override
 	{
 		printf(">>");
 

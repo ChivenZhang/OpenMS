@@ -16,6 +16,7 @@
 class RegistryConfig :
 	public RESOURCE2(Property, IProperty),
 	public RESOURCE2N(Value, IValue, "iptable"),
-	public RESOURCE2N(RegistryServer, IEndpoint, "registry")
+	public RESOURCE2N(RegistryServer, IEndpoint, "registry-server"),
+	public RESOURCE2N(RegistryClient, RemoteClient, "registry-client")
 {
 };

@@ -21,6 +21,10 @@ struct RegistryServerConfig
 
 RegistryServer::RegistryServer()
 {
+	bind(TString("print"), TLambda([=](TString request) {
+		TPrint("%s", request.c_str());
+		}));
+
 	startup();
 }
 
@@ -36,29 +40,22 @@ void RegistryServer::configureEndpoint(config_t& config)
 	config.IP = configInfo.ip;
 	config.PortNum = configInfo.port;
 	config.Backlog = configInfo.backlog;
-	config.Callback = {
-		[=](TRef<IChannel> channel) {
-			auto ipv4 = TCast<IPv4Address>(channel->getRemote());
-			TPrint("accept %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
+}
 
-			channel->getPipeline()->addFirst("", IChannelInboundHandler::callback_t{
-				[=](TRaw<IChannelContext> context, TRaw<IChannelEvent> event)->bool {
-					TPRINT("read %s", event->Message.c_str());
-					return false;
-				}
-				});
-			channel->getPipeline()->addFirst("", IChannelOutboundHandler::callback_t{
-				[=](TRaw<IChannelContext> context, TRaw<IChannelEvent> event)->bool {
-					auto _event = TNew<IChannelEvent>();
-					_event->Message = "Echo " + event->Message;
-					context->write(_event);
-					return false;
-				}
-				});
-		},
-		[=](TRef<IChannel> channel) {
-			auto ipv4 = TCast<IPv4Address>(channel->getRemote());
-			TPrint("closed %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
-		}
-	};
+RegistryClient::RegistryClient()
+{
+	startup();
+}
+
+RegistryClient::~RegistryClient()
+{
+	shutdown();
+}
+
+void RegistryClient::configureEndpoint(config_t& config)
+{
+	auto properties = AUTOWIRE(IProperty)::bean();
+	auto configInfo = properties->property<RegistryServerConfig>("registry.master");
+	config.IP = configInfo.ip;
+	config.PortNum = configInfo.port;
 }

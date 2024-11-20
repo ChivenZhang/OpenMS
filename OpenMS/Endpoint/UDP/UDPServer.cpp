@@ -29,4 +29,5 @@ void UDPServer::startup()
 void UDPServer::shutdown()
 {
 	m_Reactor->shutdown();
+	m_Reactor = nullptr;
 }

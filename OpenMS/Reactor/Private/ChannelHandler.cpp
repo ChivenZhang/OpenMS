@@ -10,20 +10,20 @@
 * =================================================*/
 #include "ChannelHandler.h"
 
-void ChannelInboundHandler::channelError(TRaw<IChannelContext> context, TException&& exception) const
+void ChannelInboundHandler::channelError(TRaw<IChannelContext> context, TException&& exception)
 {
 }
 
-bool ChannelInboundHandler::channelRead(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) const
+bool ChannelInboundHandler::channelRead(TRaw<IChannelContext> context, TRaw<IChannelEvent> event)
 {
 	return false;
 }
 
-void ChannelOutboundHandler::channelError(TRaw<IChannelContext> context, TException&& exception) const
+void ChannelOutboundHandler::channelError(TRaw<IChannelContext> context, TException&& exception)
 {
 }
 
-bool ChannelOutboundHandler::channelWrite(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) const
+bool ChannelOutboundHandler::channelWrite(TRaw<IChannelContext> context, TRaw<IChannelEvent> event)
 {
 	return false;
 }
@@ -35,12 +35,12 @@ LambdaInboundHandler::LambdaInboundHandler(callback_t const& callback)
 {
 }
 
-void LambdaInboundHandler::channelError(TRaw<IChannelContext> context, TException&& exception) const
+void LambdaInboundHandler::channelError(TRaw<IChannelContext> context, TException&& exception)
 {
 	if (m_OnError) m_OnError(context, std::forward<TException>(exception));
 }
 
-bool LambdaInboundHandler::channelRead(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) const
+bool LambdaInboundHandler::channelRead(TRaw<IChannelContext> context, TRaw<IChannelEvent> event)
 {
 	if (m_OnRead) return m_OnRead(context, event);
 	return false;
@@ -53,12 +53,12 @@ LambdaOutboundHandler::LambdaOutboundHandler(callback_t const& callback)
 {
 }
 
-void LambdaOutboundHandler::channelError(TRaw<IChannelContext> context, TException&& exception) const
+void LambdaOutboundHandler::channelError(TRaw<IChannelContext> context, TException&& exception)
 {
 	if (m_OnError) m_OnError(context, std::forward<TException>(exception));
 }
 
-bool LambdaOutboundHandler::channelWrite(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) const
+bool LambdaOutboundHandler::channelWrite(TRaw<IChannelContext> context, TRaw<IChannelEvent> event)
 {
 	if (m_OnWrite) return m_OnWrite(context, event);
 	return false;

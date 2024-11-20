@@ -157,6 +157,7 @@ template <class T, class U>
 using TBinary = std::pair<T, U>;
 template <class ...TS>
 using TTuple = std::tuple<TS...>;
+using TAny = std::any;
 using TException = std::exception;
 template <class T>
 using TLambda = std::function<T>;

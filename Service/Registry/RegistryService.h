@@ -15,7 +15,8 @@
 class RegistryService :
 	public Service,
 	public RESOURCE(RegistryConfig),
-	public AUTOWIREN(IEndpoint, "registry")
+	public AUTOWIREN(IEndpoint, "registry-server"),
+	public AUTOWIREN(RegistryClient, "registry-client")
 {
 public:
 	void startup() override;

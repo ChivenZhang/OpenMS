@@ -10,32 +10,26 @@
 * =================================================*/
 #include "RemoteClient.h"
 
-using IPTable = TMap<TString, TVector<TString>>;
-
-RemoteClient::RemoteClient()
-{
-	AUTOWIREN(Value, "iptable")::bean()->setValue(R"({"authority":["127.0.0.1:8080"],"gateway":["127.0.0.1:8081"]})");
-	startup();
-}
-
-RemoteClient::~RemoteClient()
-{
-	shutdown();
-}
-
 void RemoteClient::startup()
 {
-	auto iptable = AUTOWIREN(Value, "iptable")::bean()->value<IPTable>();
-	for (auto& item : iptable)
+	config_t config;
+	configureEndpoint(config);
+	config.Workers = 0;
+	config.Callback =
 	{
-		std::cout << item.first << std::endl;
-		for (auto& ip : item.second)
-		{
-			std::cout << ip << std::endl;
-		}
-	}
+		// TODO: implement callback functions
+	};
+	m_Reactor = TNew<TCPClientReactor>(
+		IPv4Address::New(config.IP, config.PortNum),
+		config.Workers,
+		config.Callback
+	);
+	m_Reactor->startup();
+	if (m_Reactor->running() == false) TFatal("failed to start reactor");
 }
 
 void RemoteClient::shutdown()
 {
+	m_Reactor->shutdown();
+	m_Reactor = nullptr;
 }

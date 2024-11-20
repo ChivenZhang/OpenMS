@@ -26,9 +26,9 @@ public:
 public:
 	virtual ~IChannelInboundHandler() = default;
 
-	virtual void channelError(TRaw<IChannelContext> context, TException&& exception) const = 0;
+	virtual bool channelRead(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) = 0;
 
-	virtual bool channelRead(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) const = 0;
+	virtual void channelError(TRaw<IChannelContext> context, TException&& exception) = 0;
 };
 
 /// @brief Interface for outbound handler
@@ -44,7 +44,7 @@ public:
 public:
 	virtual ~IChannelOutboundHandler() = default;
 
-	virtual void channelError(TRaw<IChannelContext> context, TException&& exception) const = 0;
+	virtual bool channelWrite(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) = 0;
 
-	virtual bool channelWrite(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) const = 0;
+	virtual void channelError(TRaw<IChannelContext> context, TException&& exception) = 0;
 };

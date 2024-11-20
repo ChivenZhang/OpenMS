@@ -28,4 +28,5 @@ void UDPClient::startup()
 void UDPClient::shutdown()
 {
 	m_Reactor->shutdown();
+	m_Reactor = nullptr;
 }

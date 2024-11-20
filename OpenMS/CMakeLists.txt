@@ -88,7 +88,15 @@ add_library(OpenMS STATIC
 	Service/Private/Service.h
 	Endpoint/Private/Endpoint.h
 	Endpoint/Private/Endpoint.cpp
- "Remote/RemoteServer.h" "Remote/RemoteServer.cpp" "Remote/RemoteClient.h" "Remote/RemoteClient.cpp" "Endpoint/RPC/RPCServer.h" "Endpoint/RPC/RPCServer.cpp" "Endpoint/RPC/RPCClient.h" "Endpoint/RPC/RPCClient.cpp")
+	Remote/RemoteServer.h
+	Remote/RemoteServer.cpp
+	Remote/RemoteClient.h
+	Remote/RemoteClient.cpp
+	Endpoint/RPC/RPCServer.h
+	Endpoint/RPC/RPCServer.cpp
+	Endpoint/RPC/RPCClient.h
+	Endpoint/RPC/RPCClient.cpp
+)
 add_dependencies(OpenMS uv_a)
 
 target_include_directories(OpenMS PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
