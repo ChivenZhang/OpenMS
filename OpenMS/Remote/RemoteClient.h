@@ -40,7 +40,7 @@ public:
 	void shutdown() override;
 	virtual void configureEndpoint(config_t & config) = 0;
 
-	template<class T, class... Args, std::enable_if_t<!std::is_same_v<T, void>, int> = 0>
+	template<class T, class... Args, OPENMS_NOT_SAME(T, void)>
 	T invoke(TStringView name, Args... args)
 	{
 		// Convert input arguments to string
@@ -65,7 +65,7 @@ public:
 		return result;
 	}
 
-	template<class T, class... Args, std::enable_if_t<std::is_same_v<T, void>, int> = 0>
+	template<class T, class... Args, OPENMS_IS_SAME(T, void)>
 	T invoke(TStringView name, Args... args)
 	{
 		// Convert input arguments to string

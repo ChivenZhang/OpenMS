@@ -37,7 +37,7 @@ public:
 	bool invoke(TStringView name, TString const& input, TString & output);
 	virtual void configureEndpoint(config_t & config) = 0;
 
-	template<class T, class... Args, std::enable_if_t<!std::is_same_v<T, void>, int> = 0>
+	template<class T, class... Args, OPENMS_NOT_SAME(T, void)>
 	bool bind(TStringView name, TLambda<T(Args...)> method)
 	{
 		auto callback = [method](TString const& input, TString& output) -> bool {
@@ -54,7 +54,7 @@ public:
 		return bind_internal(name, callback);
 	}
 
-	template<class T, class... Args, std::enable_if_t<std::is_same_v<T, void>, int> = 0>
+	template<class T, class... Args, OPENMS_IS_SAME(T, void)>
 	bool bind(TStringView name, TLambda<T(Args...)> method)
 	{
 		auto callback = [method](TString const& input, TString& output) -> bool {
