@@ -62,9 +62,17 @@ bool RemoteServer::invoke(TStringView name, TString const& input, TString& outpu
 
 struct RemoteServerRequest
 {
+	uint32_t indx;
 	TString name;
 	TString args;
-	OPENMS_TYPE(RemoteServerRequest, name, args)
+	OPENMS_TYPE(RemoteServerRequest, indx, name, args)
+};
+
+struct RemoteServerResponse
+{
+	uint32_t indx;
+	TString args;
+	OPENMS_TYPE(RemoteServerResponse, indx, args)
 };
 
 RemoteServerInboundHandler::RemoteServerInboundHandler(TRaw<RemoteServer> server)
@@ -82,17 +90,26 @@ bool RemoteServerInboundHandler::channelRead(TRaw<IChannelContext> context, TRaw
 
 	if (index != TString::npos)
 	{
+		// Handle the request message
+
 		TString output;
 		RemoteServerRequest package;
 		if (TTypeC(m_Buffer, package))
 		{
 			m_Server->invoke(package.name, package.args, output);
 		}
+
+		// Send the response message
+
+		RemoteServerResponse response;
+		response.indx = package.indx;
+		response.args = output;
 		auto _event = TNew<IChannelEvent>();
-		_event->Message = output + '\0';
+		TTypeC(response, _event->Message);
+		_event->Message += '\0';
 		context->writeAndFlush(_event);
 
-		m_Buffer = m_Buffer.substr(index + 1);
+		m_Buffer = event->Message.substr(index + 1);
 	}
 	return false;
 }

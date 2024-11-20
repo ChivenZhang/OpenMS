@@ -25,10 +25,16 @@ void RegistryService::startup()
 
 	server->bind("print", TLambda([=](TString text) {
 		TPrint("%s", text.c_str());
-		return "执行成功！";
+		}));
+	server->bind("add", TLambda([=](int a, int b) {
+		return a + b;
 		}));
 
-	auto result = client->invoke<TString>("print", "你好，服务器！");
+	client->call<TString>("print", "你好，服务器！");
+
+	auto result = client->call<int>("add", 234, 432);
+	TPrint("计算结果：%d", result);
+
 }
 
 void RegistryService::shutdown()

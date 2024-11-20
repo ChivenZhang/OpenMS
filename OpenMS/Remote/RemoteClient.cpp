@@ -37,9 +37,9 @@ void RemoteClient::shutdown()
 	m_Reactor = nullptr;
 }
 
-RemoteClientInboundHandler::RemoteClientInboundHandler(TRaw<RemoteClient> server)
+RemoteClientInboundHandler::RemoteClientInboundHandler(TRaw<RemoteClient> client)
 	:
-	m_Client(server)
+	m_Client(client)
 {
 }
 
@@ -52,12 +52,22 @@ bool RemoteClientInboundHandler::channelRead(TRaw<IChannelContext> context, TRaw
 
 	if (index != TString::npos)
 	{
-		TString output = m_Buffer;
+		// Handle the response message
 
-		// TODO: async message handling
-		TPrint("recv: %s", output.c_str());
+		RemoteClientResponse response;
+		if (TTypeC(m_Buffer, response))
+		{
+			TMutexLock lock(m_Client->m_Lock);
+			auto result = m_Client->m_Packages.find(response.indx);
+			if (result != m_Client->m_Packages.end())
+			{
+				result->second.OnResult(std::move(response.args));
+				result->second.Promise->set_value(true);
+				m_Client->m_Packages.erase(result);
+			}
+		}
 
-		m_Buffer = m_Buffer.substr(index + 1);
+		m_Buffer = event->Message.substr(index + 1);
 	}
 	return false;
 }

@@ -17,9 +17,17 @@
 
 struct RemoteClientRequest
 {
+	uint32_t indx;
 	TString name;
 	TString args;
-	OPENMS_TYPE(RemoteClientRequest, name, args)
+	OPENMS_TYPE(RemoteClientRequest, indx, name, args)
+};
+
+struct RemoteClientResponse
+{
+	uint32_t indx;
+	TString args;
+	OPENMS_TYPE(RemoteClientResponse, indx, args)
 };
 
 class RemoteClient :
@@ -36,22 +44,39 @@ public:
 		TCPClientReactor::callback_tcp_t Callback;
 	};
 
+	struct invoke_t
+	{
+		TRaw<TPromise<bool>> Promise;
+		TLambda<void(TString&&)> OnResult;
+	};
+
 public:
 	void startup() override;
 	void shutdown() override;
 	virtual void configureEndpoint(config_t & config) = 0;
 
 	template<class T, class... Args, OPENMS_NOT_SAME(T, void)>
-	T invoke(TStringView name, Args... args)
+	T call(TStringView name, Args... args)
 	{
-		// Convert input arguments to string
+		// Convert arguments to string
 
 		TString input, output;
 		if (TTypeC(std::make_tuple(args...), input) == false) return T();
-		RemoteClientRequest package;
-		package.name = name;
-		package.args = input;
-		TTypeC(package, input);
+		RemoteClientRequest request;
+		request.indx = ++m_PackageID;
+		request.name = name;
+		request.args = input;
+		if (TTypeC(request, input) == false) return T();
+
+		// Set up promise and callback
+
+		TPromise<bool> promise;
+		auto& package = m_Packages[request.indx];
+		package.Promise = &promise;
+		package.OnResult = [&](TString&& response) {
+			output = response;
+			};
+		TFuture<bool> future = promise.get_future();
 
 		// Send input to remote server
 
@@ -59,24 +84,42 @@ public:
 		event->Message = input + '\0';
 		m_Reactor->writeAndFlush(event, nullptr);
 
-		// TODO: Wait for result (Aysnc)
+		// Wait for result and return
 
-		T result;
-		if (TTypeC(output, result) == false) return T();
-		return result;
+		auto status = future.wait_for(std::chrono::milliseconds(m_ReadTimeout));
+		{
+			TMutexLock lock(m_Lock);
+			m_Packages.erase(request.indx);
+		}
+		if (status == std::future_status::ready)
+		{
+			T result;
+			if (TTypeC(output, result) == false) return T();
+			return result;
+		}
+		return T();
 	}
 
 	template<class T, class... Args, OPENMS_IS_SAME(T, void)>
-	T invoke(TStringView name, Args... args)
+	T call(TStringView name, Args... args)
 	{
-		// Convert input arguments to string
+		// Convert arguments to string
 
-		TString input, output;
-		if (TTypeC(std::make_tuple(args...), input) == false) return;
-		RemoteClientRequest package;
-		package.name = name;
-		package.args = input;
-		TTypeC(package, input);
+		TString input;
+		if (TTypeC(std::make_tuple(args...), input) == false) return T();
+		RemoteClientRequest request;
+		request.indx = ++m_PackageID;
+		request.name = name;
+		request.args = input;
+		if (TTypeC(request, input) == false) return T();
+
+		// Set up promise and callback
+
+		TPromise<bool> promise;
+		auto& package = m_Packages[request.indx];
+		package.Promise = &promise;
+		package.OnResult = [](TString&& response) {};
+		TFuture<bool> future = promise.get_future();
 
 		// Send input to remote server
 
@@ -84,18 +127,25 @@ public:
 		event->Message = input + '\0';
 		m_Reactor->writeAndFlush(event, nullptr);
 
-		// TODO: Wait for result (Aysnc)
+		// Wait for result and return
+
+		future.wait_for(std::chrono::milliseconds(m_ReadTimeout));
 	}
 
 protected:
 	friend class RemoteClientInboundHandler;
+	uint32_t m_PackageID = 0;
+	uint32_t m_ReadTimeout = 2000;	// milliseconds
+	uint32_t m_WriteTimeout = 2000;	// milliseconds
+	TMutex m_Lock;
 	TRef<TCPClientReactor> m_Reactor;
+	TMap<uint32_t, invoke_t> m_Packages;
 };
 
 class RemoteClientInboundHandler : public ChannelInboundHandler
 {
 public:
-	RemoteClientInboundHandler(TRaw<RemoteClient> server);
+	RemoteClientInboundHandler(TRaw<RemoteClient> client);
 	bool channelRead(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) override;
 
 protected:
