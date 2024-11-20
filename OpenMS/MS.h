@@ -270,13 +270,13 @@ inline constexpr uint32_t THash(TStringView value)
 #define OPENMS_NOT_TEXT(T) std::enable_if_t<!std::is_same_v<T, std::string>, int> = 0
 
 template<class T, class U, OPENMS_IS_SAME(T, U)>
-bool TTypeC(T const& src, U& dst)
+inline bool TTypeC(T const& src, U& dst)
 {
 	dst = src;
 	return true;
 }
 
-template<class T, class U, OPENMS_NOT_SAME(T, U), OPENMS_IS_TEXT(T)>
+template<class T, class U, OPENMS_NOT_SAME(T, U), OPENMS_IS_TEXT(T), OPENMS_NOT_SCALER(T)>
 bool TTypeC(T const& src, U& dst)
 {
 	nlohmann::json json = nlohmann::json::parse(src, nullptr, false, true);
@@ -324,13 +324,13 @@ bool TTypeC(TString const& src, int16_t& dst)
 	return true;
 }
 
-template <class T = TString, class U = int16_t, OPENMS_NOT_SAME(T, U)>
+template <class T = TString, class U = uint16_t, OPENMS_NOT_SAME(T, U)>
 bool TTypeC(uint16_t const& src, TString& dst)
 {
 	dst = std::to_string(src);
 	return true;
 }
-template <class T = TString, class U = int16_t, OPENMS_NOT_SAME(T, U)>
+template <class T = TString, class U = uint16_t, OPENMS_NOT_SAME(T, U)>
 bool TTypeC(TString const& src, uint16_t& dst)
 {
 	dst = (uint16_t)std::strtol(src.c_str(), nullptr, 10);
@@ -360,6 +360,32 @@ template <class T = TString, class U = uint32_t, OPENMS_NOT_SAME(T, U)>
 bool TTypeC(TString const& src, uint32_t& dst)
 {
 	dst = std::strtoul(src.c_str(), nullptr, 10);
+	return true;
+}
+
+template <class T = int64_t, class U = TString, OPENMS_NOT_SAME(T, U)>
+bool TTypeC(int64_t const& src, TString& dst)
+{
+	dst = std::to_string(src);
+	return true;
+}
+template <class T = TString, class U = int64_t, OPENMS_NOT_SAME(T, U)>
+bool TTypeC(TString const& src, int64_t& dst)
+{
+	dst = std::strtoll(src.c_str(), nullptr, 10);
+	return true;
+}
+
+template<class T = uint64_t, class U = TString, OPENMS_NOT_SAME(T, U)>
+bool TTypeC(uint64_t const& src, TString& dst)
+{
+	dst = std::to_string(src);
+	return true;
+}
+template <class T = TString, class U = uint64_t, OPENMS_NOT_SAME(T, U)>
+bool TTypeC(TString const& src, uint64_t& dst)
+{
+	dst = std::strtoull(src.c_str(), nullptr, 10);
 	return true;
 }
 
