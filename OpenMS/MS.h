@@ -260,18 +260,134 @@ inline constexpr uint32_t THash(TStringView value)
 
 // ============================================
 
-template <class T, class U, std::enable_if_t<std::is_same_v<T, U>, int> = 0>
-inline bool TTypeC(T const& value, U& result)
+#include <nlohmann/json.hpp>
+#define OPENMS_TYPE NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT
+#define OPENMS_IS_SAME(T, U) std::enable_if_t<std::is_same_v<T, U>, int> = 0
+#define OPENMS_NOT_SAME(T, U) std::enable_if_t<!std::is_same_v<T, U>, int> = 0
+#define OPENMS_IS_SCALER(T) std::enable_if_t<std::is_scalar_v<T>, int> = 0
+#define OPENMS_NOT_SCALER(T) std::enable_if_t<!std::is_scalar_v<T>, int> = 0
+#define OPENMS_IS_TEXT(T) std::enable_if_t<std::is_same_v<T, std::string>, int> = 0
+#define OPENMS_NOT_TEXT(T) std::enable_if_t<!std::is_same_v<T, std::string>, int> = 0
+
+template<class T, class U, OPENMS_IS_SAME(T, U)>
+bool TTypeC(T const& src, U& dst)
 {
-	result = value;
+	dst = src;
 	return true;
 }
 
-template <class T, class U, std::enable_if_t<!std::is_same_v<T, U>, int> = 0>
-inline bool TTypeC(T const& value, U& result)
+template<class T, class U, OPENMS_NOT_SAME(T, U), OPENMS_IS_TEXT(T)>
+bool TTypeC(T const& src, U& dst)
 {
-	TString string;
-	return TTypeC(value, string) && TTypeC(string, result);
+	nlohmann::json json = nlohmann::json::parse(src, nullptr, false, true);
+	dst = json.get<U>();
+	return true;
+}
+
+template<class T, class U, OPENMS_NOT_SAME(T, U), OPENMS_NOT_TEXT(T)>
+bool TTypeC(T const& src, U& dst)
+{
+	if (std::is_scalar_v<T>)
+	{
+		TString str;
+		return TTypeC(src, str) && TTypeC(str, dst);
+	}
+	else
+	{
+		nlohmann::json json = src;
+		return TTypeC(json.dump(), dst);
+	}
+}
+
+template <class T = bool, class U = TString, OPENMS_NOT_SAME(T, U)>
+bool TTypeC(bool const& src, TString& dst)
+{
+	dst = src ? "true" : "false";
+	return true;
+}
+template <class T = TString, class U = bool, OPENMS_NOT_SAME(T, U)>
+bool TTypeC(TString const& src, bool& dst)
+{
+	dst = (src == "true");
+	return true;
+}
+
+template <class T = int16_t, class U = TString, OPENMS_NOT_SAME(T, U)>
+bool TTypeC(int16_t const& src, TString& dst)
+{
+	dst = std::to_string(src);
+	return true;
+}
+template <class T = TString, class U = int16_t, OPENMS_NOT_SAME(T, U)>
+bool TTypeC(TString const& src, int16_t& dst)
+{
+	dst = (int16_t)std::strtol(src.c_str(), nullptr, 10);
+	return true;
+}
+
+template <class T = TString, class U = int16_t, OPENMS_NOT_SAME(T, U)>
+bool TTypeC(uint16_t const& src, TString& dst)
+{
+	dst = std::to_string(src);
+	return true;
+}
+template <class T = TString, class U = int16_t, OPENMS_NOT_SAME(T, U)>
+bool TTypeC(TString const& src, uint16_t& dst)
+{
+	dst = (uint16_t)std::strtol(src.c_str(), nullptr, 10);
+	return true;
+}
+
+template <class T = int32_t, class U = TString, OPENMS_NOT_SAME(T, U)>
+bool TTypeC(int32_t const& src, TString& dst)
+{
+	dst = std::to_string(src);
+	return true;
+}
+template <class T = TString, class U = int32_t, OPENMS_NOT_SAME(T, U)>
+bool TTypeC(TString const& src, int32_t& dst)
+{
+	dst = std::strtol(src.c_str(), nullptr, 10);
+	return true;
+}
+
+template<class T = uint32_t, class U = TString, OPENMS_NOT_SAME(T, U), OPENMS_NOT_TEXT(T)>
+bool TTypeC(uint32_t const& src, TString& dst)
+{
+	dst = std::to_string(src);
+	return true;
+}
+template <class T = TString, class U = uint32_t, OPENMS_NOT_SAME(T, U)>
+bool TTypeC(TString const& src, uint32_t& dst)
+{
+	dst = std::strtoul(src.c_str(), nullptr, 10);
+	return true;
+}
+
+template <class T = float, class U = TString, OPENMS_NOT_SAME(T, U)>
+bool TTypeC(float const& src, TString& dst)
+{
+	dst = std::to_string(src);
+	return true;
+}
+template <class T = TString, class U = float, OPENMS_NOT_SAME(T, U)>
+bool TTypeC(TString const& src, float& dst)
+{
+	dst = std::strtof(src.c_str(), nullptr);
+	return true;
+}
+
+template <class T = double, class U = TString, OPENMS_NOT_SAME(T, U)>
+bool TTypeC(double const& src, TString& dst)
+{
+	dst = std::to_string(src);
+	return true;
+}
+template <class T = TString, class U = double, OPENMS_NOT_SAME(T, U)>
+bool TTypeC(TString const& src, double& dst)
+{
+	dst = std::strtod(src.c_str(), nullptr);
+	return true;
 }
 
 template <class T>
@@ -288,263 +404,8 @@ struct TTextC
 		T result;
 		if (TTypeC(string, result)) return result;
 		return value;
-	}
+}
 };
-
-template <>
-inline bool TTypeC(bool const& value, TString& string)
-{
-	string = value ? "true" : "false";
-	return true;
-}
-template <>
-inline bool TTypeC(TString const& string, bool& value)
-{
-	value = (string == "true");
-	return true;
-}
-
-template <>
-inline bool TTypeC(int16_t const& value, TString& string)
-{
-	string = std::to_string(value);
-	return true;
-}
-template <>
-inline bool TTypeC(TString const& string, int16_t& value)
-{
-	value = (int16_t)std::strtol(string.c_str(), nullptr, 10);
-	return true;
-}
-
-template <>
-inline bool TTypeC(uint16_t const& value, TString& string)
-{
-	string = std::to_string(value);
-	return true;
-}
-template <>
-inline bool TTypeC(TString const& string, uint16_t& value)
-{
-	value = (uint16_t)std::strtol(string.c_str(), nullptr, 10);
-	return true;
-}
-
-template <>
-inline bool TTypeC(int32_t const& value, TString& string)
-{
-	string = std::to_string(value);
-	return true;
-}
-template <>
-inline bool TTypeC(TString const& string, int32_t& value)
-{
-	value = std::strtol(string.c_str(), nullptr, 10);
-	return true;
-}
-
-template <>
-inline bool TTypeC(uint32_t const& value, TString& string)
-{
-	string = std::to_string(value);
-	return true;
-}
-template <>
-inline bool TTypeC(TString const& string, uint32_t& value)
-{
-	value = std::strtoul(string.c_str(), nullptr, 10);
-	return true;
-}
-
-template <>
-inline bool TTypeC(float const& value, TString& string)
-{
-	string = std::to_string(value);
-	return true;
-}
-template <>
-inline bool TTypeC(TString const& string, float& value)
-{
-	value = std::strtof(string.c_str(), nullptr);
-	return true;
-}
-
-template <>
-inline bool TTypeC(double const& value, TString& string)
-{
-	string = std::to_string(value);
-	return true;
-}
-template <>
-inline bool TTypeC(TString const& string, double& value)
-{
-	value = std::strtod(string.c_str(), nullptr);
-	return true;
-}
-
-#include <nlohmann/json.hpp>
-#define OPENMS_TYPE NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT
-
-template <class T, std::enable_if_t<!std::is_scalar_v<T> && !std::is_same_v<T, TString>, int> = 0>
-inline bool TTypeC(T const& value, TString& result)
-{
-	nlohmann::json j = value;
-	result = j.dump();
-	return true;
-}
-template <class T, std::enable_if_t<!std::is_scalar_v<T> && !std::is_same_v<T, TString>, int> = 0>
-inline bool TTypeC(TString const& value, T& result)
-{
-	nlohmann::json j = nlohmann::json::parse(value.c_str(), nullptr, false);
-	result = j.get<T>();
-	return true;
-}
-
-template<class T>
-inline bool TTypeC(TVector<T> const& v, TString& s)
-{
-	nlohmann::json j;
-	for (auto& e : v)
-	{
-		TString item; TTypeC(e, item);
-		nlohmann::json jj = nlohmann::json::parse(item, nullptr, false);
-		j.push_back(jj);
-	}
-	s = j.dump();
-	return true;
-}
-template<class T>
-inline bool TTypeC(TString const& s, TVector<T>& v)
-{
-	nlohmann::json j = nlohmann::json::parse(s, nullptr, false);
-	if (j.is_array())
-	{
-		for (size_t i = 0; i < j.size(); ++i)
-		{
-			T item;
-			auto& value = j[i];
-			if (value.is_string()) TTypeC(value.get<std::string>(), item);
-			else if (value.is_boolean()) TTypeC(value.get<bool>(), item);
-			else if (value.is_number_float()) TTypeC(value.get<float>(), item);
-			else if (value.is_number_integer()) TTypeC(value.get<int32_t>(), item);
-			else if (value.is_number_unsigned()) TTypeC(value.get<uint32_t>(), item);
-			else TTypeC(value.dump(), item);
-			v.emplace_back(item);
-		}
-		return true;
-	}
-	return false;
-}
-template <class T, class U>
-inline bool TTypeC(TVector<T> const& value, TVector<U>& result)
-{
-	result.clear();
-	for (auto& e : value)
-	{
-		U item; TTypeC(e, item);
-		result.emplace_back(item);
-	}
-	return true;
-}
-
-template<class T>
-inline bool TTypeC(TSet<T> const& v, TString& s)
-{
-	nlohmann::json j;
-	for (auto& e : v)
-	{
-		TString item; TTypeC(e, item);
-		nlohmann::json jj = nlohmann::json::parse(item, nullptr, false);
-		j.push_back(jj);
-	}
-	s = j.dump();
-	return true;
-}
-template<class T>
-inline bool TTypeC(TString const& s, TSet<T>& v)
-{
-	nlohmann::json j = nlohmann::json::parse(s, nullptr, false);
-	if (j.is_array())
-	{
-		for (size_t i = 0; i < j.size(); ++i)
-		{
-			T item;
-			auto& value = j[i];
-			if (value.is_string()) TTypeC(value.get<std::string>(), item);
-			else if (value.is_boolean()) TTypeC(value.get<bool>(), item);
-			else if (value.is_number_float()) TTypeC(value.get<float>(), item);
-			else if (value.is_number_integer()) TTypeC(value.get<int32_t>(), item);
-			else if (value.is_number_unsigned()) TTypeC(value.get<uint32_t>(), item);
-			else TTypeC(value.dump(), item);
-			v.emplace(item);
-		}
-		return true;
-	}
-	return false;
-}
-template <class T, class U>
-inline bool TTypeC(TSet<T> const& value, TSet<U>& result)
-{
-	result.clear();
-	for (auto& e : value)
-	{
-		U item; TTypeC(e, item);
-		result.emplace(item);
-	}
-	return true;
-}
-
-template<class K, class T>
-inline bool TTypeC(TMap<K, T> const& v, TString& s)
-{
-	nlohmann::json j;
-	for (auto& e : v)
-	{
-		TString key, item;
-		TTypeC(e.first, key);
-		TTypeC(e.second, item);
-		nlohmann::json jj = nlohmann::json::parse(item, nullptr, false);
-		j[key] = jj;
-	}
-	s = j.dump();
-	return true;
-}
-template<class K, class T>
-inline bool TTypeC(TString const& s, TMap<K, T>& v)
-{
-	nlohmann::json j = nlohmann::json::parse(s, nullptr, false);
-	if (j.is_object())
-	{
-		for (auto& e : j.items())
-		{
-			K key; T item;
-			TTypeC(e.key(), key);
-			auto& value = e.value();
-			if (value.is_string()) TTypeC(value.get<std::string>(), item);
-			else if (value.is_boolean()) TTypeC(value.get<bool>(), item);
-			else if (value.is_number_float()) TTypeC(value.get<float>(), item);
-			else if (value.is_number_integer()) TTypeC(value.get<int32_t>(), item);
-			else if (value.is_number_unsigned()) TTypeC(value.get<uint32_t>(), item);
-			else TTypeC(value.dump(), item);
-			v.emplace(key, item);
-		}
-		return true;
-	}
-	return false;
-}
-template <class K, class T, class K2, class T2>
-inline bool TTypeC(TMap<K, T> const& value, TMap<K2, T2>& result)
-{
-	result.clear();
-	for (auto& e : value)
-	{
-		K2 key; T2 item;
-		TTypeC(e.first, key);
-		TTypeC(e.second, item);
-		result.emplace(key, item);
-	}
-	return true;
-}
 
 // ============================================
 

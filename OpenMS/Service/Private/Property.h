@@ -14,6 +14,7 @@
 class Value : public IValue
 {
 public:
+	using IValue::value;
 	TString value() const override;
 	void setValue(TString const& value);
 
