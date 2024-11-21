@@ -272,29 +272,39 @@ void TCPServerReactor::on_read(uv_stream_t* stream, ssize_t nread, const uv_buf_
 {
 	auto reactor = (TCPServerReactor*)stream->loop->data;
 	auto client = (uv_tcp_t*)stream;
-	auto channel = (Channel*)client->data;
+	auto channel = ((Channel*)client->data)->shared_from_this();
+	if (channel == nullptr) return;
 
 	if (nread < 0)
 	{
 		uv_close((uv_handle_t*)stream, nullptr);
 		free(buf->base);
 
-		reactor->onDisconnect(channel->shared_from_this());
+		reactor->onDisconnect(channel);
 		return;
 	}
 
 	if (nread == 0)
 	{
-		reactor->onDisconnect(channel->shared_from_this());
-
 		uv_close((uv_handle_t*)stream, nullptr);
 		free(buf->base);
+
+		reactor->onDisconnect(channel);
+		return;
+	}
+
+	if (channel->running() == false)
+	{
+		uv_close((uv_handle_t*)stream, nullptr);
+		free(buf->base);
+
+		reactor->onDisconnect(channel);
 		return;
 	}
 
 	auto event = TNew<IChannelEvent>();
 	event->Message = TString((char*)buf->base, nread);
-	event->Channel = channel->weak_from_this();
+	event->Channel = channel;
 	reactor->onInbound(event);
 
 	free(buf->base);
@@ -316,7 +326,9 @@ void TCPServerReactor::on_send(uv_tcp_t* handle)
 		reactor->m_EventQueue.pop();
 
 		auto channel = TCast<TCPChannel>(event->Channel.lock());
-		if (channel == nullptr || channel->running() == false) continue;
+		if (channel == nullptr) continue;
+		if (channel->running() == false) reactor->onDisconnect(channel);
+		if (channel->running() == false) continue;
 		if (event->Message.empty()) continue;
 		auto client = channel->getHandle();
 

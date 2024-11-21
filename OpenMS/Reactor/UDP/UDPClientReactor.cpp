@@ -260,9 +260,17 @@ void UDPClientReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 
 	if (nread < 0)
 	{
-		reactor->onDisconnect(channel);
-
 		free(buf->base);
+
+		reactor->onDisconnect(channel);
+		return;
+	}
+
+	if (channel->running() == false)
+	{
+		free(buf->base);
+
+		reactor->onDisconnect(channel);
 		return;
 	}
 
@@ -290,7 +298,9 @@ void UDPClientReactor::on_send(uv_udp_t* handle)
 		reactor->m_EventQueue.pop();
 
 		auto channel = TCast<UDPChannel>(event->Channel.lock());
-		if (channel == nullptr || channel->running() == false) continue;
+		if (channel == nullptr) continue;
+		if (channel->running() == false) reactor->onDisconnect(channel);
+		if (channel->running() == false) continue;
 		if (event->Message.empty()) continue;
 		auto client = channel->getHandle();
 

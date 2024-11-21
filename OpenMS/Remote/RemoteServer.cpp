@@ -98,10 +98,10 @@ bool RemoteServerInboundHandler::channelRead(TRaw<IChannelContext> context, TRaw
 		// Handle the request message
 
 		TString output;
-		RemoteServerRequest package;
-		if (TTypeC(m_Buffer, package))
+		RemoteServerRequest request;
+		if (TTypeC(m_Buffer, request))
 		{
-			if (m_Server->invoke(package.name, package.args, output) == false)
+			if (m_Server->invoke(request.name, request.args, output) == false)
 			{
 				context->close();
 			}
@@ -110,7 +110,7 @@ bool RemoteServerInboundHandler::channelRead(TRaw<IChannelContext> context, TRaw
 		// Send the response message
 
 		RemoteServerResponse response;
-		response.indx = package.indx;
+		response.indx = request.indx;
 		response.args = output;
 		auto _event = TNew<IChannelEvent>();
 		TTypeC(response, _event->Message);

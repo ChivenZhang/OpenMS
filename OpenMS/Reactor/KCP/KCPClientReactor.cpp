@@ -344,9 +344,17 @@ void KCPClientReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 
 	if (nread < 0)
 	{
-		reactor->onDisconnect(channel);
-
 		free(buf->base);
+
+		reactor->onDisconnect(channel);
+		return;
+	}
+
+	if (channel->running() == false)
+	{
+		free(buf->base);
+
+		reactor->onDisconnect(channel);
 		return;
 	}
 
@@ -354,9 +362,9 @@ void KCPClientReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 	auto result = ikcp_input(_channel->getSession(), (char*)buf->base, (uint32_t)nread);
 	if (result < 0)
 	{
-		reactor->onDisconnect(channel);
-
 		free(buf->base);
+
+		reactor->onDisconnect(channel);
 		return;
 	}
 
@@ -432,7 +440,9 @@ void KCPClientReactor::on_send(uv_udp_t* handle)
 		reactor->m_EventQueue.pop();
 
 		auto channel = TCast<KCPChannel>(event->Channel.lock());
-		if (channel == nullptr || channel->running() == false) continue;
+		if (channel == nullptr) continue;
+		if (channel->running() == false) reactor->onDisconnect(channel);
+		if (channel->running() == false) continue;
 		if (event->Message.empty()) continue;
 		auto server = channel->getHandle();
 		auto session = channel->getSession();

@@ -18,14 +18,12 @@ TCPChannel::TCPChannel(TRaw<ChannelReactor> reactor, TRef<IChannelAddress> local
 {
 }
 
+TCPChannel::~TCPChannel()
+{
+	uv_close((uv_handle_t*)m_Handle, nullptr); m_Handle = nullptr;
+}
+
 uv_tcp_t* TCPChannel::getHandle() const
 {
 	return m_Handle;
-}
-
-void TCPChannel::close()
-{
-	if (m_Reactor->running() == false) return;
-	uv_close((uv_handle_t*)m_Handle, nullptr);
-	Channel::close();
 }
