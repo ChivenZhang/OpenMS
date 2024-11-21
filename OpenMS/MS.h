@@ -109,13 +109,13 @@ using TCString = const char*;
 using TWString = std::wstring;
 #if 20 <= OPENMS_CPP_VERSION
 using TString8 = std::u8string;
-#else
-using TString8 = std::string;
 #endif
 using TString16 = std::u16string;
 using TString32 = std::u32string;
-#if 20 <= OPENMS_CPP_VERSION
+#if 17 <= OPENMS_CPP_VERSION
 using TStringView = std::string_view;
+#endif
+#if 20 <= OPENMS_CPP_VERSION
 using TString8View = std::u8string_view;
 using TWStringView = std::wstring_view;
 using TString16View = std::u16string_view;
@@ -174,15 +174,19 @@ using TUniqueLock = std::unique_lock<TMutex>;
 using TMutexUnlock = std::condition_variable_any;
 using TStringList = TVector<TString>;
 using TWStringList = TVector<TWString>;
+#if 20 <= OPENMS_CPP_VERSION
 using TString8List = TVector<TString8>;
+#endif
 using TString16List = TVector<TString16>;
 using TString32List = TVector<TString32>;
 template<class T>
 using TStringMap = TMap<TString, T>;
 template<class T>
 using TWStringMap = TMap<TWString, T>;
+#if 20 <= OPENMS_CPP_VERSION
 template<class T>
 using TString8Map = TMap<TString8, T>;
+#endif
 template<class T>
 using TString16Map = TMap<TString16, T>;
 template<class T>
@@ -191,8 +195,10 @@ template<class T>
 using TStringHashMap = THashMap<TString, T>;
 template<class T>
 using TWStringHashMap = THashMap<TWString, T>;
+#if 20 <= OPENMS_CPP_VERSION
 template<class T>
 using TString8HashMap = THashMap<TString8, T>;
+#endif
 template<class T>
 using TString16HashMap = THashMap<TString16, T>;
 template<class T>
@@ -254,21 +260,50 @@ inline TRaw<U> TCast(TRaw<T> const& target)
 	if (target == nullptr) return nullptr;
 	return const_cast<U*>(dynamic_cast<const U*>((const T*)target));
 }
-inline constexpr uint32_t THash(TCString value)
+
+inline constexpr uint32_t THash32(const char* const first, const size_t count) noexcept
 {
-	uint32_t hash = 0; // From JDK 8
-	if (value == nullptr) return hash;
-	while (*value) hash = hash * 31 + (*value++);
-	return hash;
+	// These FNV-1a utility functions are extremely performance sensitive,
+	// check examples like that in VSO-653642 before making changes.
+	constexpr uint32_t _FNV_offset_basis = 2166136261U;
+	constexpr uint32_t _FNV_prime = 16777619U;
+	auto result = _FNV_offset_basis;
+	// accumulate range [_First, _First + _Count) into partial FNV-1a hash _Val
+	for (size_t i = 0; i < count; ++i)
+	{
+		result ^= (uint32_t)first[i];
+		result *= _FNV_prime;
+	}
+	return result;
 }
-inline constexpr uint32_t THash(TString const& value)
+inline constexpr uint64_t THash64(const char* const first, const size_t count) noexcept
 {
-	return THash(value.c_str());
+	// These FNV-1a utility functions are extremely performance sensitive,
+	// check examples like that in VSO-653642 before making changes.
+	constexpr uint64_t _FNV_offset_basis = 14695981039346656037ULL;
+	constexpr uint64_t _FNV_prime = 1099511628211ULL;
+	auto result = _FNV_offset_basis;
+	// accumulate range [_First, _First + _Count) into partial FNV-1a hash _Val
+	for (size_t i = 0; i < count; ++i)
+	{
+		result ^= (uint64_t)first[i];
+		result *= _FNV_prime;
+	}
+	return result;
 }
-#if 20 <= OPENMS_CPP_VERSION
-inline constexpr uint32_t THash(TStringView value)
+inline constexpr uint32_t THash(TCString value) noexcept
 {
-	return THash(value.data());
+	size_t count = 0; for (size_t i = 0; value[i]; ++i) ++count;
+	return THash32(value, count);
+}
+inline const uint32_t THash(TString const& value) noexcept
+{
+	return THash32(value.c_str(), value.size());
+}
+#if 17 <= OPENMS_CPP_VERSION
+inline const uint32_t THash(TStringView value) noexcept
+{
+	return THash32(value.data(), value.size());
 }
 #endif
 

@@ -63,21 +63,6 @@ bool RPCServer::invoke(TStringView name, TString const& input, TString& output)
 	return false;
 }
 
-struct RPCServerRequest
-{
-	uint32_t indx;
-	TString name;
-	TString args;
-	OPENMS_TYPE(RPCServerRequest, indx, name, args)
-};
-
-struct RPCServerResponse
-{
-	uint32_t indx;
-	TString args;
-	OPENMS_TYPE(RPCServerResponse, indx, args)
-};
-
 RPCServerInboundHandler::RPCServerInboundHandler(TRaw<RPCServer> server)
 	:
 	m_Server(server)

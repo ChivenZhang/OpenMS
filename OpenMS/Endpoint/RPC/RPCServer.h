@@ -15,6 +15,21 @@
 #include "OpenMS/Reactor/TCP/TCPServerReactor.h"
 #include "OpenMS/Reactor/Private/ChannelHandler.h"
 
+struct RPCServerRequest
+{
+	uint32_t indx;
+	TString name;
+	TString args;
+	OPENMS_TYPE(RPCServerRequest, indx, name, args)
+};
+
+struct RPCServerResponse
+{
+	uint32_t indx;
+	TString args;
+	OPENMS_TYPE(RPCServerResponse, indx, args)
+};
+
 class RPCServer : public IEndpoint
 {
 public:
@@ -39,6 +54,7 @@ public:
 	bool bind(TStringView name, F method)
 	{
 		auto callback = [method](TString const& input, TString& output) -> bool {
+
 			// Convert input to tuple
 
 			typename std::function_traits<F>::argument_tuple args;
@@ -64,6 +80,7 @@ public:
 	bool bind(TStringView name, F method)
 	{
 		auto callback = [method](TString const& input, TString& output) -> bool {
+
 			// Convert input to tuple
 
 			typename std::function_traits<F>::argument_tuple args;
