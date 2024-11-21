@@ -30,13 +30,13 @@ void RegistryService::startup()
 		return a + b;
 		});
 
-	client->call<TString>("echo", "计算1+2+...+100");
+	client->call<void>("echo", "计算1+2+...+100");
 	auto sum = 0;
 	for (auto i = 1; i <= 100; ++i)
 	{
 		sum = client->call<int>("add", sum, i);
 	}
-	client->call<TString>("echo", std::to_string(sum));
+	client->call<void>("echo", std::to_string(sum));
 }
 
 void RegistryService::shutdown()
