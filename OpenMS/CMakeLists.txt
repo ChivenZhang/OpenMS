@@ -22,6 +22,12 @@ add_library(OpenMS STATIC
 	Endpoint/KCP/KCPClient.h 
 	Endpoint/KCP/KCPServer.cpp 
 	Endpoint/KCP/KCPServer.h 
+	Endpoint/Private/Endpoint.cpp
+	Endpoint/Private/Endpoint.h
+	Endpoint/RPC/RPCClient.cpp
+	Endpoint/RPC/RPCClient.h
+	Endpoint/RPC/RPCServer.cpp
+	Endpoint/RPC/RPCServer.h
 	Endpoint/TCP/TCPClient.cpp 
 	Endpoint/TCP/TCPClient.h 
 	Endpoint/TCP/TCPServer.cpp 
@@ -86,16 +92,6 @@ add_library(OpenMS STATIC
 	Service/Private/Property.h
 	Service/Private/Service.cpp
 	Service/Private/Service.h
-	Endpoint/Private/Endpoint.h
-	Endpoint/Private/Endpoint.cpp
-	Remote/RemoteServer.h
-	Remote/RemoteServer.cpp
-	Remote/RemoteClient.h
-	Remote/RemoteClient.cpp
-	Endpoint/RPC/RPCServer.h
-	Endpoint/RPC/RPCServer.cpp
-	Endpoint/RPC/RPCClient.h
-	Endpoint/RPC/RPCClient.cpp
 )
 add_dependencies(OpenMS uv_a)
 

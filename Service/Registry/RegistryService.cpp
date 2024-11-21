@@ -43,13 +43,11 @@ void RegistryService::startup()
 	}
 	client->call<void>("echo", std::to_string(sum));
 
-	client->call<void>("echo", "进入睡眠");
+	/*client->call<void>("echo", "进入睡眠");
 	client->async<void>("sleep", std::tuple{ 1000 }, []() {
 		TPrint("1 second passed");
 		});
-	client->call<void>("echo", "结束睡眠");
-
-#endif
+	client->call<void>("echo", "结束睡眠");*/
 
 	auto iptable = client->call<RegistryIPTable>("registry/query");
 	for (auto& [ip, services] : iptable)
@@ -57,6 +55,8 @@ void RegistryService::startup()
 		TPrint("%s: ", ip.c_str());
 		for (auto& service : services) TPrint("%s ", service.c_str());
 	}
+
+#endif
 }
 
 void RegistryService::shutdown()

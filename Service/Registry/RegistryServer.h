@@ -9,13 +9,13 @@
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
-#include "OpenMS/Remote/RemoteServer.h"
-#include "OpenMS/Remote/RemoteClient.h"
+#include "OpenMS/Endpoint/RPC/RPCServer.h"
+#include "OpenMS/Endpoint/RPC/RPCClient.h"
 
 using RegistryIPTable = TMap<TString, TVector<TString>>;
 
 class RegistryServer :
-	public RemoteServer,
+	public RPCServer,
 	public AUTOWIRE(IProperty),
 	public AUTOWIREN(Value, "iptable")
 {
@@ -30,7 +30,7 @@ protected:
 };
 
 class RegistryClient :
-	public RemoteClient,
+	public RPCClient,
 	public AUTOWIRE(IProperty)
 {
 public:
