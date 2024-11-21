@@ -19,7 +19,7 @@ void RemoteClient::startup()
 	{
 		[=](TRef<IChannel> channel)
 		{
-			channel->getPipeline()->addFirst("", TNew<RemoteClientInboundHandler>(this));
+			channel->getPipeline()->addFirst("rpc", TNew<RemoteClientInboundHandler>(this));
 		},
 	};
 	m_Buffers = config.Buffers;
@@ -47,6 +47,8 @@ RemoteClientInboundHandler::RemoteClientInboundHandler(TRaw<RemoteClient> client
 
 bool RemoteClientInboundHandler::channelRead(TRaw<IChannelContext> context, TRaw<IChannelEvent> event)
 {
+	// Use '\0' to split the message
+
 	auto index = event->Message.find('\0');
 	if (index == TString::npos) m_Buffer += event->Message;
 	else m_Buffer += event->Message.substr(0, index);

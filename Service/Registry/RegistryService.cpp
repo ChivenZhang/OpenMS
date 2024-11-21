@@ -53,8 +53,8 @@ void RegistryService::startup()
 
 	client->call<void>("echo", "进入睡眠");
 	client->async<TString>("sleep2", std::tuple{ 1000 }, [](TString result) {
-		TPrint("result: %s", result.c_str());
 		TPrint("1 second passed");
+		TPrint("返回结果: %s", result.c_str());
 		});
 	client->call<void>("echo", "结束睡眠");
 }
