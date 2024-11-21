@@ -88,8 +88,7 @@ RemoteServerInboundHandler::RemoteServerInboundHandler(TRaw<RemoteServer> server
 bool RemoteServerInboundHandler::channelRead(TRaw<IChannelContext> context, TRaw<IChannelEvent> event)
 {
 	// Use '\0' to split the message
-
-	auto index = event->Message.find('\0');
+	auto index = event->Message.find(char());
 	if (index == TString::npos) m_Buffer += event->Message;
 	else m_Buffer += event->Message.substr(0, index);
 	if (m_Server->m_Buffers <= m_Buffer.size()) context->close();
@@ -115,7 +114,8 @@ bool RemoteServerInboundHandler::channelRead(TRaw<IChannelContext> context, TRaw
 		response.args = output;
 		auto _event = TNew<IChannelEvent>();
 		TTypeC(response, _event->Message);
-		_event->Message += '\0';
+		// Use '\0' to split the message
+		_event->Message += char();
 		context->writeAndFlush(_event);
 
 		m_Buffer = event->Message.substr(index + 1);

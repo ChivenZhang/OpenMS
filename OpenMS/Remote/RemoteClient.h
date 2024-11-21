@@ -83,7 +83,8 @@ public:
 		// Send input to remote server
 
 		auto event = TNew<IChannelEvent>();
-		event->Message = input + '\0';
+		// Use '\0' to split the message
+		event->Message = input + char();
 		m_Reactor->writeAndFlush(event, nullptr);
 
 		// Wait for result and return
@@ -132,7 +133,8 @@ public:
 		// Send input to remote server
 
 		auto event = TNew<IChannelEvent>();
-		event->Message = input + '\0';
+		// Use '\0' to split the message
+		event->Message = input + char();
 		m_Reactor->writeAndFlush(event, nullptr);
 
 		// Wait for result and return
@@ -175,7 +177,8 @@ public:
 		// Send input to remote server
 
 		auto event = TNew<IChannelEvent>();
-		event->Message = input + '\0';
+		// Use '\0' to split the message
+		event->Message = input + char();
 		m_Reactor->writeAndFlush(event, nullptr);
 		return true;
 	}
@@ -209,7 +212,8 @@ public:
 		// Send input to remote server
 
 		auto event = TNew<IChannelEvent>();
-		event->Message = input + '\0';
+		// Use '\0' to split the message
+		event->Message = input + char();
 		m_Reactor->writeAndFlush(event, nullptr);
 		return true;
 	}
