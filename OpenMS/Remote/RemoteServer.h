@@ -37,16 +37,13 @@ public:
 	bool invoke(TStringView name, TString const& input, TString & output);
 	virtual void configureEndpoint(config_t & config) = 0;
 
-	template<class T, class... Args, OPENMS_NOT_SAME(T, void)>
-	bool bind(TStringView name, TLambda<T(Args...)> method)
+	template<class F, OPENMS_NOT_SAME(typename std::function_traits<F>::result_type, void)>
+	bool bind(TStringView name, F method)
 	{
 		auto callback = [method](TString const& input, TString& output) -> bool {
-			TTuple<Args...> args;
+			typename std::function_traits<F>::argument_tuple args;
 			if (TTypeC(input, args) == false) return false;
-
-			if (method == nullptr) return false;
 			auto result = std::apply(method, args);
-
 			if (TTypeC(result, output) == false) return false;
 			return true;
 			};
@@ -54,16 +51,13 @@ public:
 		return bind_internal(name, callback);
 	}
 
-	template<class T, class... Args, OPENMS_IS_SAME(T, void)>
-	bool bind(TStringView name, TLambda<T(Args...)> method)
+	template<class F, OPENMS_IS_SAME(typename std::function_traits<F>::result_type, void)>
+	bool bind(TStringView name, F method)
 	{
 		auto callback = [method](TString const& input, TString& output) -> bool {
-			TTuple<Args...> args;
+			typename std::function_traits<F>::argument_tuple args;
 			if (TTypeC(input, args) == false) return false;
-
-			if (method == nullptr) return false;
 			std::apply(method, args);
-
 			return true;
 			};
 

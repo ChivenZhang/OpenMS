@@ -23,12 +23,12 @@ void RegistryService::startup()
 	auto server = AUTOWIREN(RegistryServer, "registry-server")::bean();
 	auto client = AUTOWIREN(RegistryClient, "registry-client")::bean();
 
-	server->bind("echo", TLambda([=](TString text) {
+	server->bind("echo", [=](TString text) {
 		TPrint("%s", text.c_str());
-		}));
-	server->bind("add", TLambda([=](int a, int b) {
+		});
+	server->bind("add", [=](int a, int b) {
 		return a + b;
-		}));
+		});
 
 	client->call<TString>("echo", "计算1+2+...+100");
 	auto sum = 0;

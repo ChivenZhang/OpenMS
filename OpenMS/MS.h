@@ -198,6 +198,19 @@ using TString16HashMap = THashMap<TString16, T>;
 template<class T>
 using TString32HashMap = THashMap<TString32, T>;
 
+namespace std
+{
+	template <typename T>
+	struct function_traits : public function_traits<decltype(&T::operator())> {};
+
+	template <typename F, typename T, typename... Args>
+	struct function_traits<T(F::*)(Args...) const>
+	{
+		using result_type = T;
+		using argument_tuple = std::tuple<Args...>;
+	};
+}
+
 // ============================================
 
 template<typename T, typename ... Args>
