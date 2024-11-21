@@ -14,8 +14,6 @@
 void RemoteServer::startup()
 {
 	config_t config;
-	configureEndpoint(config);
-	config.Workers = 0;
 	config.Callback =
 	{
 		[=](TRef<IChannel> channel)
@@ -23,6 +21,7 @@ void RemoteServer::startup()
 			channel->getPipeline()->addFirst("rpc", TNew<RemoteServerInboundHandler>(this));
 		},
 	};
+	configureEndpoint(config);
 	m_Buffers = config.Buffers;
 	m_Reactor = TNew<TCPServerReactor>(
 		IPv4Address::New(config.IP, config.PortNum),

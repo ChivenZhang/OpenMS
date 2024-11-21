@@ -25,7 +25,7 @@ public:
 	}
 };
 
-/// @brief Interface for property
+/// @brief Interface for properties
 class OPENMS_API IProperty
 {
 public:
