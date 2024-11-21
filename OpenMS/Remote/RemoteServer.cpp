@@ -102,7 +102,10 @@ bool RemoteServerInboundHandler::channelRead(TRaw<IChannelContext> context, TRaw
 		RemoteServerRequest package;
 		if (TTypeC(m_Buffer, package))
 		{
-			m_Server->invoke(package.name, package.args, output);
+			if (m_Server->invoke(package.name, package.args, output) == false)
+			{
+				context->close();
+			}
 		}
 
 		// Send the response message
