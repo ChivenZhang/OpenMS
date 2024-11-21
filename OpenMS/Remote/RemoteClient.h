@@ -60,7 +60,10 @@ public:
 		// Convert arguments to string
 
 		TString input, output;
-		if (TTypeC(std::make_tuple(args...), input) == false) return T();
+		if (std::is_same_v<TTuple<Args...>, TTuple<>> == false)
+		{
+			if (TTypeC(std::make_tuple(args...), input) == false) return T();
+		}
 		RemoteClientRequest request;
 		request.indx = ++m_PackageID;
 		request.name = name;
@@ -69,7 +72,7 @@ public:
 
 		// Set up promise and callback
 
-		auto promise = TNew<TPromise<T>>();
+		auto promise = TNew<TPromise<bool>>();
 		auto future = promise->get_future();
 		auto& package = m_Packages[request.indx];
 		package.OnResult = [promise, &output](TString&& response) {
@@ -107,7 +110,10 @@ public:
 		// Convert arguments to string
 
 		TString input;
-		if (TTypeC(std::make_tuple(args...), input) == false) return T();
+		if (std::is_same_v<TTuple<Args...>, TTuple<>> == false)
+		{
+			if (TTypeC(std::make_tuple(args...), input) == false) return T();
+		}
 		RemoteClientRequest request;
 		request.indx = ++m_PackageID;
 		request.name = name;
@@ -116,11 +122,11 @@ public:
 
 		// Set up promise and callback
 
-		auto promise = TNew<TPromise<T>>();
+		auto promise = TNew<TPromise<bool>>();
 		auto future = promise->get_future();
 		auto& package = m_Packages[request.indx];
 		package.OnResult = [promise](TString&& response) {
-			promise->set_value();
+			promise->set_value(true);
 			};
 
 		// Send input to remote server
@@ -146,7 +152,10 @@ public:
 		// Convert arguments to string
 
 		TString input;
-		if (TTypeC(args, input) == false) return false;
+		if (std::is_same_v<TTuple<Args...>, TTuple<>> == false)
+		{
+			if (TTypeC(args, input) == false) return false;
+		}
 		RemoteClientRequest request;
 		request.indx = ++m_PackageID;
 		request.name = name;
@@ -179,7 +188,10 @@ public:
 		// Convert arguments to string
 
 		TString input;
-		if (TTypeC(args, input) == false) return false;
+		if (std::is_same_v<TTuple<Args...>, TTuple<>> == false)
+		{
+			if (TTypeC(args, input) == false) return false;
+		}
 		RemoteClientRequest request;
 		request.indx = ++m_PackageID;
 		request.name = name;

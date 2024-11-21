@@ -42,7 +42,10 @@ public:
 			// Convert input to tuple
 
 			typename std::function_traits<F>::argument_tuple args;
-			if (TTypeC(input, args) == false) return false;
+			if (std::is_same_v<decltype(args), TTuple<>> == false)
+			{
+				if (TTypeC(input, args) == false) return false;
+			}
 
 			// Call method with tuple
 
@@ -64,7 +67,10 @@ public:
 			// Convert input to tuple
 
 			typename std::function_traits<F>::argument_tuple args;
-			if (TTypeC(input, args) == false) return false;
+			if (std::is_same_v<decltype(args), TTuple<>> == false)
+			{
+				if (TTypeC(input, args) == false) return false;
+			}
 
 			// Call method with tuple
 

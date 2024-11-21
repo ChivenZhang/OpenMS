@@ -21,6 +21,11 @@ struct RegistryServerConfig
 
 RegistryServer::RegistryServer()
 {
+	m_IPTables = {
+		{"service0", {"127.0.0.1:8080"}},
+		{"service1", {"127.0.0.1:8081"}},
+		{"service2", {"127.0.0.1:8082"}},
+	};
 	startup();
 }
 
@@ -39,10 +44,9 @@ void RegistryServer::configureEndpoint(config_t& config)
 
 	// See https://github.com/Netflix/eureka/wiki/Eureka-REST-operations fore more details
 
-	using iptable_t = TMap<TString, TVector<TString>>;
-	bind("registry/query", [=]()->iptable_t {
-
-		return {};
+	bind("registry/query", [=]()->RegistryIPTable {
+		TMutexLock lock(m_Lock);
+		return m_IPTables;
 		});
 
 	bind("registry/register", [=](TString ip, uint16_t port)->TString {

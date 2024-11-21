@@ -19,7 +19,7 @@ ChannelWorker::ChannelWorker(TRaw<ChannelReactor> reactor)
 
 void ChannelWorker::startup()
 {
-	TDebug("Startup worker: %d", std::this_thread::get_id());
+	TDebug("startup worker: %d", std::this_thread::get_id());
 
 	m_Running = true;
 	while (m_Running == true && m_Reactor->running())
@@ -37,7 +37,7 @@ void ChannelWorker::startup()
 		}
 	}
 
-	TDebug("Shutdown worker: %d", std::this_thread::get_id());
+	TDebug("shutdown worker: %d", std::this_thread::get_id());
 }
 
 void ChannelWorker::shutdown()

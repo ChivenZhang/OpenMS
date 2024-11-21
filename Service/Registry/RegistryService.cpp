@@ -20,21 +20,19 @@ void RegistryService::startup()
 {
 	Service::startup();
 
+#ifdef OPENMS_TEST
+
 	auto server = AUTOWIREN(RegistryServer, "registry-server")::bean();
 	auto client = AUTOWIREN(RegistryClient, "registry-client")::bean();
 
-	server->bind("sleep", [=](uint32_t ms) {
-		std::this_thread::sleep_for(std::chrono::milliseconds(ms));
-		});
-	server->bind("sleep2", [=](uint32_t ms)->TString {
-		std::this_thread::sleep_for(std::chrono::milliseconds(ms));
-		return "success";
-		});
 	server->bind("echo", [=](TString text) {
 		TPrint("%s", text.c_str());
 		});
 	server->bind("add", [=](int a, int b) {
 		return a + b;
+		});
+	server->bind("sleep", [=](uint32_t ms) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(ms));
 		});
 
 	client->call<void>("echo", "计算1+2+...+100");
@@ -51,12 +49,14 @@ void RegistryService::startup()
 		});
 	client->call<void>("echo", "结束睡眠");
 
-	client->call<void>("echo", "进入睡眠");
-	client->async<TString>("sleep2", std::tuple{ 1000 }, [](TString result) {
-		TPrint("1 second passed");
-		TPrint("返回结果: %s", result.c_str());
-		});
-	client->call<void>("echo", "结束睡眠");
+#endif
+
+	auto iptable = client->call<RegistryIPTable>("registry/query");
+	for (auto& [ip, services] : iptable)
+	{
+		TPrint("%s: ", ip.c_str());
+		for (auto& service : services) TPrint("%s ", service.c_str());
+	}
 }
 
 void RegistryService::shutdown()

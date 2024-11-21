@@ -12,6 +12,7 @@
 
 void ChannelInboundHandler::channelError(TRaw<IChannelContext> context, TException&& exception)
 {
+	TError("%s", exception.what());
 }
 
 bool ChannelInboundHandler::channelRead(TRaw<IChannelContext> context, TRaw<IChannelEvent> event)
@@ -21,6 +22,7 @@ bool ChannelInboundHandler::channelRead(TRaw<IChannelContext> context, TRaw<ICha
 
 void ChannelOutboundHandler::channelError(TRaw<IChannelContext> context, TException&& exception)
 {
+	TError("%s", exception.what());
 }
 
 bool ChannelOutboundHandler::channelWrite(TRaw<IChannelContext> context, TRaw<IChannelEvent> event)
