@@ -22,6 +22,7 @@ void RemoteClient::startup()
 			channel->getPipeline()->addFirst("", TNew<RemoteClientInboundHandler>(this));
 		},
 	};
+	m_Buffers = config.Buffers;
 	m_Reactor = TNew<TCPClientReactor>(
 		IPv4Address::New(config.IP, config.PortNum),
 		config.Workers,
@@ -49,7 +50,7 @@ bool RemoteClientInboundHandler::channelRead(TRaw<IChannelContext> context, TRaw
 	auto index = event->Message.find('\0');
 	if (index == TString::npos) m_Buffer += event->Message;
 	else m_Buffer += event->Message.substr(0, index);
-	if (UINT_MAX <= m_Buffer.size()) context->close();
+	if (m_Client->m_Buffers <= m_Buffer.size()) context->close();
 
 	if (index != TString::npos)
 	{
@@ -63,7 +64,6 @@ bool RemoteClientInboundHandler::channelRead(TRaw<IChannelContext> context, TRaw
 			if (result != m_Client->m_Packages.end())
 			{
 				result->second.OnResult(std::move(response.args));
-				result->second.Promise->set_value(true);
 				m_Client->m_Packages.erase(result);
 			}
 		}

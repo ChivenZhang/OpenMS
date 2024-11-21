@@ -23,6 +23,13 @@ void RegistryService::startup()
 	auto server = AUTOWIREN(RegistryServer, "registry-server")::bean();
 	auto client = AUTOWIREN(RegistryClient, "registry-client")::bean();
 
+	server->bind("sleep", [=](uint32_t ms) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+		});
+	server->bind("sleep2", [=](uint32_t ms)->TString {
+		std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+		return "success";
+		});
 	server->bind("echo", [=](TString text) {
 		TPrint("%s", text.c_str());
 		});
@@ -37,6 +44,19 @@ void RegistryService::startup()
 		sum = client->call<int>("add", sum, i);
 	}
 	client->call<void>("echo", std::to_string(sum));
+
+	client->call<void>("echo", "进入睡眠");
+	client->async<void>("sleep", std::tuple{ 1000 }, []() {
+		TPrint("1 second passed");
+		});
+	client->call<void>("echo", "结束睡眠");
+
+	client->call<void>("echo", "进入睡眠");
+	client->async<TString>("sleep2", std::tuple{ 1000 }, [](TString result) {
+		TPrint("result: %s", result.c_str());
+		TPrint("1 second passed");
+		});
+	client->call<void>("echo", "结束睡眠");
 }
 
 void RegistryService::shutdown()
