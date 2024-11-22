@@ -29,3 +29,18 @@ void KCPServer::shutdown()
 	m_Reactor->shutdown();
 	m_Reactor = nullptr;
 }
+
+bool KCPServer::running() const
+{
+	return m_Reactor ? m_Reactor->running() : false;
+}
+
+bool KCPServer::connect() const
+{
+	return m_Reactor ? m_Reactor->connect() : false;
+}
+
+THnd<IChannelAddress> KCPServer::address() const
+{
+	return m_Reactor ? m_Reactor->address() : THnd<IChannelAddress>();
+}

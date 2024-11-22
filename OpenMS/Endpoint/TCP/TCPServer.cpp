@@ -29,3 +29,18 @@ void TCPServer::shutdown()
 	m_Reactor->shutdown();
 	m_Reactor = nullptr;
 }
+
+bool TCPServer::running() const
+{
+	return m_Reactor ? m_Reactor->running() : false;
+}
+
+bool TCPServer::connect() const
+{
+	return m_Reactor ? m_Reactor->connect() : false;
+}
+
+THnd<IChannelAddress> TCPServer::address() const
+{
+	return m_Reactor ? m_Reactor->address() : THnd<IChannelAddress>();
+}

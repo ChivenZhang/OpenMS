@@ -22,6 +22,12 @@ public:
 
 	virtual void shutdown() = 0;
 
+	virtual bool running() const = 0;
+
+	virtual bool connect() const = 0;
+
+	virtual THnd<IChannelAddress> address() const = 0;
+
 	virtual void write(TRef<IChannelEvent> event, TRef<IChannelAddress> address) = 0;
 
 	virtual TFuture<bool> write(TRef<IChannelEvent> event, TRef<IChannelAddress> address, TPromise<bool>&& promise) = 0;

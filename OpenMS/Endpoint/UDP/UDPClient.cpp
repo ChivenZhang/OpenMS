@@ -30,3 +30,18 @@ void UDPClient::shutdown()
 	m_Reactor->shutdown();
 	m_Reactor = nullptr;
 }
+
+bool UDPClient::running() const
+{
+	return m_Reactor ? m_Reactor->running() : false;
+}
+
+bool UDPClient::connect() const
+{
+	return m_Reactor ? m_Reactor->connect() : false;
+}
+
+THnd<IChannelAddress> UDPClient::address() const
+{
+	return m_Reactor ? m_Reactor->address() : THnd<IChannelAddress>();
+}

@@ -28,13 +28,3 @@ protected:
 	TMutex m_Lock;
 	RegistryIPTable m_IPTables;
 };
-
-class RegistryClient :
-	public RPCClient,
-	public AUTOWIRE(IProperty)
-{
-public:
-	RegistryClient();
-	~RegistryClient();
-	void configureEndpoint(config_t & config) override;
-};

@@ -22,39 +22,10 @@ void RegistryService::startup()
 
 #ifdef OPENMS_TEST
 
-	auto server = AUTOWIREN(RegistryServer, "registry-server")::bean();
-	auto client = AUTOWIREN(RegistryClient, "registry-client")::bean();
-
+	auto server = RESOURCE(RegistryServer)::bean();
 	server->bind("echo", [=](TString text) {
 		TPrint("%s", text.c_str());
 		});
-	server->bind("add", [=](int a, int b) {
-		return a + b;
-		});
-	server->bind("sleep", [=](uint32_t ms) {
-		std::this_thread::sleep_for(std::chrono::milliseconds(ms));
-		});
-
-	client->call<void>("echo", "计算1+2+...+100");
-	auto sum = 0;
-	for (auto i = 1; i <= 100; ++i)
-	{
-		sum = client->call<int>("add", sum, i);
-	}
-	client->call<void>("echo", std::to_string(sum));
-
-	/*client->call<void>("echo", "进入睡眠");
-	client->async<void>("sleep", std::tuple{ 1000 }, []() {
-		TPrint("1 second passed");
-		});
-	client->call<void>("echo", "结束睡眠");*/
-
-	auto iptable = client->call<RegistryIPTable>("registry/query");
-	for (auto& [ip, services] : iptable)
-	{
-		TPrint("%s: ", ip.c_str());
-		for (auto& service : services) TPrint("%s ", service.c_str());
-	}
 
 #endif
 }

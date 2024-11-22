@@ -125,12 +125,13 @@ void UDPClientReactor::startup()
 				else TError("failed to get socket name: %s", ::uv_strerror(result));
 
 				if (localAddress == nullptr || remoteAddress == nullptr) break;
+				m_LocalAddress = localAddress;
 
 				auto channel = TNew<UDPChannel>(this, localAddress, remoteAddress, (uint32_t)(rand() % m_WorkerList.size()), &client);
 				client.data = channel.get();
 				onConnect(channel);
 
-				TDebug("accepted from %s:%d", remoteAddress->getAddress().c_str(), remoteAddress->getPort());
+				TPrint("listening on %s:%d", localAddress->getAddress().c_str(), localAddress->getPort());
 			}
 
 			// Start receiving data
@@ -139,43 +140,6 @@ void UDPClientReactor::startup()
 				auto result = uv_udp_recv_start(&client, on_alloc, on_read);
 				if (result) TError("recv start error: %s", ::uv_strerror(result));
 				if (result) break;
-			}
-
-			// Get the actual ip and port number
-
-			{
-				sockaddr_storage addr;
-				socklen_t addrlen = sizeof(addr);
-				TRef<ISocketAddress> localAddress;
-
-				auto result = uv_udp_getsockname((uv_udp_t*)&client, (sockaddr*)&addr, &addrlen);
-				if (result == 0)
-				{
-					if (addr.ss_family == AF_INET)
-					{
-						auto in_addr = (sockaddr_in*)&addr;
-						char ip_str[INET_ADDRSTRLEN];
-						inet_ntop(AF_INET, &in_addr->sin_addr, ip_str, sizeof(ip_str));
-						auto address = ip_str;
-						auto portNum = ntohs(in_addr->sin_port);
-						localAddress = TNew<IPv4Address>(address, portNum);
-					}
-					else if (addr.ss_family == AF_INET6)
-					{
-						auto in6_addr = (sockaddr_in6*)&addr;
-						char ip_str[INET6_ADDRSTRLEN];
-						inet_ntop(AF_INET6, &in6_addr->sin6_addr, ip_str, sizeof(ip_str));
-						auto address = ip_str;
-						auto portNum = ntohs(in6_addr->sin6_port);
-						localAddress = TNew<IPv6Address>(address, portNum);
-					}
-					else TError("unknown address family: %d", addr.ss_family);
-				}
-				else TError("failed to get socket name: %s", ::uv_strerror(result));
-
-				if (localAddress == nullptr) break;
-
-				TPrint("listening on %s:%d", localAddress->getAddress().c_str(), localAddress->getPort());
 			}
 
 			// Run the event loop
@@ -215,6 +179,11 @@ void UDPClientReactor::shutdown()
 	if (m_Running == false) return;
 	ChannelReactor::shutdown();
 	m_Channel = nullptr;
+}
+
+THnd<IChannelAddress> UDPClientReactor::address() const
+{
+	return m_Connect ? m_LocalAddress : THnd<IChannelAddress>();
 }
 
 void UDPClientReactor::write(TRef<IChannelEvent> event, TRef<IChannelAddress> address)

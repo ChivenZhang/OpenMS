@@ -12,7 +12,9 @@
 #include "../IService.h"
 #include "../IProperty.h"
 
-class Service : public IService, public AUTOWIRE(IProperty)
+class Service :
+	public IService,
+	public AUTOWIRE(IProperty)
 {
 public:
 	void startup() override;

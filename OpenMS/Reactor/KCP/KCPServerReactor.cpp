@@ -155,6 +155,7 @@ void KCPServerReactor::startup()
 				else TError("failed to get socket name: %s", ::uv_strerror(result));
 
 				if (localAddress == nullptr) break;
+				m_LocalAddress = localAddress;
 
 				TPrint("listening on %s:%d", localAddress->getAddress().c_str(), localAddress->getPort());
 			}
@@ -215,35 +216,14 @@ void KCPServerReactor::shutdown()
 	m_ChannelsRemoved.clear();
 }
 
-void KCPServerReactor::write(TRef<IChannelEvent> event, TRef<IChannelAddress> address)
+THnd<IChannelAddress> KCPServerReactor::address() const
 {
-	if (m_Running == false) return;
-	auto remote = TCast<ISocketAddress>(address);
-	if (remote == nullptr || event == nullptr) return;
-	auto hashName = remote->getHashName();
-	auto result = m_ChannelMap.find(hashName);
-	if (result == m_ChannelMap.end() && result->second == nullptr) return;
-	auto channel = result->second;
-	event->Channel = channel;
-	if (channel && channel->running()) channel->write(event);
-}
-
-void KCPServerReactor::writeAndFlush(TRef<IChannelEvent> event, TRef<IChannelAddress> address)
-{
-	if (m_Running == false) return;
-	auto remote = TCast<ISocketAddress>(address);
-	if (remote == nullptr || event == nullptr) return;
-	auto hashName = remote->getHashName();
-	auto result = m_ChannelMap.find(hashName);
-	if (result == m_ChannelMap.end() && result->second == nullptr) return;
-	auto channel = result->second;
-	event->Channel = channel;
-	if (channel && channel->running()) channel->writeAndFlush(event);
+	return m_Connect ? m_LocalAddress : THnd<IChannelAddress>();
 }
 
 void KCPServerReactor::onConnect(TRef<Channel> channel)
 {
-	auto remote = TCast<ISocketAddress>(channel->getRemote());
+	auto remote = TCast<ISocketAddress>(channel->getRemote().lock());
 	auto hashName = remote->getHashName();
 	m_Channels.insert(m_Channels.begin(), channel);
 	m_ChannelMap[hashName] = channel;
@@ -253,7 +233,7 @@ void KCPServerReactor::onConnect(TRef<Channel> channel)
 
 void KCPServerReactor::onDisconnect(TRef<Channel> channel)
 {
-	auto remote = TCast<ISocketAddress>(channel->getRemote());
+	auto remote = TCast<ISocketAddress>(channel->getRemote().lock());
 	auto hashName = remote->getHashName();
 	m_ChannelsRemoved.push_back(channel);
 	m_ChannelMap.erase(hashName);
@@ -418,7 +398,7 @@ int KCPServerReactor::on_output(const char* buf, int len, IKCPCB* kcp, void* use
 	auto channel = (KCPChannel*)user;
 	auto reactor = TCast<KCPServerReactor>(channel->getReactor());
 	auto server = (uv_udp_t*)channel->getHandle();
-	auto remote = channel->getRemote();
+	auto remote = channel->getRemote().lock();
 
 	sockaddr_storage addr;
 	int result = uv_errno_t::UV_EINVAL;

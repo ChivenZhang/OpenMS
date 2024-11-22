@@ -12,12 +12,23 @@
 #include "OpenMS/Service/Private/Service.h"
 #include "AuthorityConfig.h"
 
+using RegistryIPTable = TMap<TString, TVector<TString>>;
+
 class AuthorityService :
 	public Service,
 	public RESOURCE(AuthorityConfig),
-	public AUTOWIREN(IEndpoint, "authority")
+	public RESOURCE(AuthorityServer),
+	public RESOURCE(AuthorityClient),
+	public AUTOWIREN(Value, "iptable")
 {
 public:
 	void startup() override;
 	void shutdown() override;
+
+protected:
+	TMutex m_Lock;
+	TThread m_Thread;
+	TMutexUnlock m_Unlock;
+	TAtomic<bool> m_Running;
+	RegistryIPTable m_IPTables;
 };

@@ -24,9 +24,9 @@ public:
 
 	virtual uint32_t getWorkID() const = 0;
 
-	virtual TRaw<IChannelAddress> getLocal() const = 0;
+	virtual THnd<IChannelAddress> getLocal() const = 0;
 
-	virtual TRaw<IChannelAddress> getRemote() const = 0;
+	virtual THnd<IChannelAddress> getRemote() const = 0;
 
 	virtual TRaw<IChannelContext> getContext() const = 0;
 

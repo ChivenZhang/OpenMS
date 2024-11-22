@@ -24,6 +24,7 @@ public:
 	UDPClientReactor(TRef<ISocketAddress> address, bool broadcast, bool multicast, size_t workerNum, callback_udp_t callback);
 	void startup() override;
 	void shutdown() override;
+	THnd<IChannelAddress> address() const override;
 	void write(TRef<IChannelEvent> event, TRef<IChannelAddress> address) override;
 	void writeAndFlush(TRef<IChannelEvent> event, TRef<IChannelAddress> address) override;
 
@@ -40,4 +41,5 @@ protected:
 	bool m_Broadcast, m_Multicast;
 	TRef<Channel> m_Channel;
 	TRef<ISocketAddress> m_Address;
+	TRef<ISocketAddress> m_LocalAddress;
 };

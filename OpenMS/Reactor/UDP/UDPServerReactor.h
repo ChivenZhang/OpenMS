@@ -24,8 +24,7 @@ public:
 	UDPServerReactor(TRef<ISocketAddress> address, uint32_t backlog, bool broadcast, bool multicast, size_t workerNum, callback_udp_t callback);
 	void startup() override;
 	void shutdown() override;
-	void write(TRef<IChannelEvent> event, TRef<IChannelAddress> address) override;
-	void writeAndFlush(TRef<IChannelEvent> event, TRef<IChannelAddress> address) override;
+	THnd<IChannelAddress> address() const override;
 
 protected:
 	void onConnect(TRef<Channel> channel) override;
@@ -40,6 +39,7 @@ protected:
 	uint32_t m_Backlog;
 	bool m_Broadcast, m_Multicast;
 	TRef<ISocketAddress> m_Address;
+	TRef<ISocketAddress> m_LocalAddress;
 	TVector<TRef<Channel>> m_Channels;
 	TMap<uint32_t, THnd<Channel>> m_ChannelMap;
 };

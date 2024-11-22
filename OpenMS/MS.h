@@ -114,12 +114,12 @@ using TString16 = std::u16string;
 using TString32 = std::u32string;
 #if 17 <= OPENMS_CPP_VERSION
 using TStringView = std::string_view;
-#endif
-#if 20 <= OPENMS_CPP_VERSION
-using TString8View = std::u8string_view;
 using TWStringView = std::wstring_view;
 using TString16View = std::u16string_view;
 using TString32View = std::u32string_view;
+#endif
+#if 20 <= OPENMS_CPP_VERSION
+using TString8View = std::u8string_view;
 #endif
 template <class T, size_t N>
 using TArray = std::array<T, N>;

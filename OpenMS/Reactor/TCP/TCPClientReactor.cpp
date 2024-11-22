@@ -1,3 +1,4 @@
+#include "TCPClientReactor.h"
 /*=================================================
 * Copyright © 2020-2024 ChivenZhang.
 * All Rights Reserved.
@@ -89,11 +90,8 @@ void TCPClientReactor::startup()
 				}
 				else TError("failed to get socket name: %s", ::uv_strerror(result));
 
-				if (localAddress == nullptr)
-				{
-					uv_close((uv_handle_t*)&client, nullptr);
-					break;
-				}
+				if (localAddress == nullptr) break;
+				m_LocalAddress = localAddress;
 
 				TPrint("listening on %s:%d", localAddress->getAddress().c_str(), localAddress->getPort());
 			}
@@ -135,6 +133,11 @@ void TCPClientReactor::shutdown()
 	if (m_Running == false) return;
 	ChannelReactor::shutdown();
 	m_Channel = nullptr;
+}
+
+THnd<IChannelAddress> TCPClientReactor::address() const
+{
+	return m_Connect ? m_LocalAddress : THnd<IChannelAddress>();
 }
 
 void TCPClientReactor::write(TRef<IChannelEvent> event, TRef<IChannelAddress> address)

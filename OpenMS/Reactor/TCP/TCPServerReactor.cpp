@@ -1,3 +1,4 @@
+#include "TCPServerReactor.h"
 /*=================================================
 * Copyright © 2020-2024 ChivenZhang.
 * All Rights Reserved.
@@ -95,6 +96,7 @@ void TCPServerReactor::startup()
 				else TError("failed to get socket name: %s", ::uv_strerror(result));
 
 				if (localAddress == nullptr) break;
+				m_LocalAddress = localAddress;
 
 				TPrint("listening on %s:%d", localAddress->getAddress().c_str(), localAddress->getPort());
 			}
@@ -142,9 +144,14 @@ void TCPServerReactor::shutdown()
 	m_ChannelMap.clear();
 }
 
+THnd<IChannelAddress> TCPServerReactor::address() const
+{
+	return m_Connect ? m_LocalAddress : THnd<IChannelAddress>();
+}
+
 void TCPServerReactor::onConnect(TRef<Channel> channel)
 {
-	auto remote = TCast<ISocketAddress>(channel->getRemote());
+	auto remote = TCast<ISocketAddress>(channel->getRemote().lock());
 	auto hashName = remote->getHashName();
 	m_ChannelMap[hashName] = channel;
 	ChannelReactor::onConnect(channel);
@@ -152,7 +159,7 @@ void TCPServerReactor::onConnect(TRef<Channel> channel)
 
 void TCPServerReactor::onDisconnect(TRef<Channel> channel)
 {
-	auto remote = TCast<ISocketAddress>(channel->getRemote());
+	auto remote = TCast<ISocketAddress>(channel->getRemote().lock());
 	auto hashName = remote->getHashName();
 	m_ChannelMap.erase(hashName);
 	ChannelReactor::onDisconnect(channel);

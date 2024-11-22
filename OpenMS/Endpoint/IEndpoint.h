@@ -9,7 +9,7 @@
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
-#include "MS.h"
+#include "OpenMS/Reactor/IChannelAddress.h"
 
 class OPENMS_API IEndpoint
 {
@@ -17,4 +17,7 @@ public:
 	virtual ~IEndpoint() = default;
 	virtual void startup() = 0;
 	virtual void shutdown() = 0;
+	virtual bool running() const = 0;
+	virtual bool connect() const = 0;
+	virtual THnd<IChannelAddress> address() const = 0;
 };

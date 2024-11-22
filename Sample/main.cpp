@@ -14,7 +14,7 @@ int main()
 	{
 		TCPServerReactor server(IPv4Address::New("0.0.0.0", 8080), 128, 2, {
 			[](TRef<IChannel> channel) {	// Connected
-				auto ipv4 = TCast<IPv4Address>(channel->getRemote());
+				auto ipv4 = TCast<IPv4Address>(channel->getRemote().lock());
 				TPrint("connect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
 
 				auto inbound = TNew<ServerInboundHandler>();
@@ -24,7 +24,7 @@ int main()
 				channel->getPipeline()->addFirst("https", outbound);
 			},
 			[](TRef<IChannel> channel) {	// Disconnect
-				auto ipv4 = TCast<IPv4Address>(channel->getRemote());
+				auto ipv4 = TCast<IPv4Address>(channel->getRemote().lock());
 				TPrint("disconnect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
 			},
 			});
@@ -32,7 +32,7 @@ int main()
 
 		TCPClientReactor client(IPv4Address::New("127.0.0.1", 8080), 1, {
 			[](TRef<IChannel> channel) {	// Connected
-				auto ipv4 = TCast<IPv4Address>(channel->getRemote());
+				auto ipv4 = TCast<IPv4Address>(channel->getRemote().lock());
 				TPrint("connect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
 
 				auto inbound = TNew<ClientInboundHandler>();
@@ -46,7 +46,7 @@ int main()
 				channel->write(event);
 			},
 			[](TRef<IChannel> channel) {	// Disconnect
-				auto ipv4 = TCast<IPv4Address>(channel->getRemote());
+				auto ipv4 = TCast<IPv4Address>(channel->getRemote().lock());
 				TPrint("disconnect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
 			},
 			});
@@ -59,7 +59,7 @@ int main()
 	{
 		UDPServerReactor server(IPv4Address::New("0.0.0.0", 8080), 0, false, false, 2, {
 			[](TRef<IChannel> channel) {	// Connected
-				auto ipv4 = TCast<IPv4Address>(channel->getRemote());
+				auto ipv4 = TCast<IPv4Address>(channel->getRemote().lock());
 				TPrint("connect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
 
 				auto inbound = TNew<ServerInboundHandler>();
@@ -69,7 +69,7 @@ int main()
 				channel->getPipeline()->addFirst("https", outbound);
 			},
 			[](TRef<IChannel> channel) {	// Disconnect
-				auto ipv4 = TCast<IPv4Address>(channel->getRemote());
+				auto ipv4 = TCast<IPv4Address>(channel->getRemote().lock());
 				TPrint("disconnect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
 			},
 			});
@@ -77,7 +77,7 @@ int main()
 
 		UDPClientReactor client(IPv4Address::New("127.0.0.1", 8080), false, false, 1, {
 			[](TRef<IChannel> channel) {	// Connected
-				auto ipv4 = TCast<IPv4Address>(channel->getRemote());
+				auto ipv4 = TCast<IPv4Address>(channel->getRemote().lock());
 				TPrint("connect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
 
 				auto inbound = TNew<ClientInboundHandler>();
@@ -91,7 +91,7 @@ int main()
 				channel->write(event);
 			},
 			[](TRef<IChannel> channel) {	// Disconnect
-				auto ipv4 = TCast<IPv4Address>(channel->getRemote());
+				auto ipv4 = TCast<IPv4Address>(channel->getRemote().lock());
 				TPrint("disconnect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
 			},
 			});
@@ -104,7 +104,7 @@ int main()
 	{
 		KCPServerReactor server(IPv4Address::New("0.0.0.0", 8080), 0, 2, {
 			[](TRef<IChannel> channel) {	// Connected
-				auto ipv4 = TCast<IPv4Address>(channel->getRemote());
+				auto ipv4 = TCast<IPv4Address>(channel->getRemote().lock());
 				TPrint("connect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
 
 				auto inbound = TNew<ServerInboundHandler>();
@@ -114,7 +114,7 @@ int main()
 				channel->getPipeline()->addFirst("https", outbound);
 			},
 			[](TRef<IChannel> channel) {	// Disconnect
-				auto ipv4 = TCast<IPv4Address>(channel->getRemote());
+				auto ipv4 = TCast<IPv4Address>(channel->getRemote().lock());
 				TPrint("disconnect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
 			},
 			});
@@ -122,7 +122,7 @@ int main()
 
 		KCPClientReactor client(IPv4Address::New("127.0.0.1", 8080), 1, {
 			[](TRef<IChannel> channel) {	// Connected
-				auto ipv4 = TCast<IPv4Address>(channel->getRemote());
+				auto ipv4 = TCast<IPv4Address>(channel->getRemote().lock());
 				TPrint("connect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
 
 				auto inbound = TNew<ClientInboundHandler>();
@@ -136,7 +136,7 @@ int main()
 				channel->write(event);
 			},
 			[](TRef<IChannel> channel) {	// Disconnect
-				auto ipv4 = TCast<IPv4Address>(channel->getRemote());
+				auto ipv4 = TCast<IPv4Address>(channel->getRemote().lock());
 				TPrint("disconnect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
 			},
 			});
@@ -149,7 +149,7 @@ int main()
 	{
 		TCPClientReactor client(IPv4Address::New("127.0.0.1", 8080), 1, {
 			[](TRef<IChannel> channel) {	// Connected
-				auto ipv4 = TCast<IPv4Address>(channel->getRemote());
+				auto ipv4 = TCast<IPv4Address>(channel->getRemote().lock());
 				TPrint("connect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
 
 				auto inbound = TNew<ClientInboundHandler>();
@@ -162,7 +162,7 @@ int main()
 				channel->write(event);
 			},
 			[](TRef<IChannel> channel) {	// Disconnect
-				auto ipv4 = TCast<IPv4Address>(channel->getRemote());
+				auto ipv4 = TCast<IPv4Address>(channel->getRemote().lock());
 				TPrint("disconnect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
 			},
 			});

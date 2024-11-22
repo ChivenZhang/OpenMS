@@ -31,3 +31,18 @@ void UDPServer::shutdown()
 	m_Reactor->shutdown();
 	m_Reactor = nullptr;
 }
+
+bool UDPServer::running() const
+{
+	return m_Reactor ? m_Reactor->running() : false;
+}
+
+bool UDPServer::connect() const
+{
+	return m_Reactor ? m_Reactor->connect() : false;
+}
+
+THnd<IChannelAddress> UDPServer::address() const
+{
+	return m_Reactor ? m_Reactor->address() : THnd<IChannelAddress>();
+}

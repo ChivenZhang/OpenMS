@@ -14,15 +14,15 @@
 class ChannelInboundHandler : public IChannelInboundHandler
 {
 public:
-	void channelError(TRaw<IChannelContext> context, TException&& exception) override;
 	bool channelRead(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) override;
+	void channelError(TRaw<IChannelContext> context, TException&& exception) override;
 };
 
 class ChannelOutboundHandler : public IChannelOutboundHandler
 {
 public:
-	void channelError(TRaw<IChannelContext> context, TException&& exception) override;
 	bool channelWrite(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) override;
+	void channelError(TRaw<IChannelContext> context, TException&& exception) override;
 };
 
 class LambdaInboundHandler : public ChannelInboundHandler
@@ -36,8 +36,8 @@ public:
 
 public:
 	LambdaInboundHandler(callback_t const& callback);
-	void channelError(TRaw<IChannelContext> context, TException&& exception) override;
 	bool channelRead(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) override;
+	void channelError(TRaw<IChannelContext> context, TException&& exception) override;
 
 protected:
 	TLambda<bool(TRaw<IChannelContext> context, TRaw<IChannelEvent> event)> m_OnRead;
@@ -55,8 +55,8 @@ public:
 
 public:
 	LambdaOutboundHandler(callback_t const& callback);
-	void channelError(TRaw<IChannelContext> context, TException&& exception) override;
 	bool channelWrite(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) override;
+	void channelError(TRaw<IChannelContext> context, TException&& exception) override;
 
 protected:
 	TLambda<bool(TRaw<IChannelContext> context, TRaw<IChannelEvent> event)> m_OnWrite;

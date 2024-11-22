@@ -1,3 +1,6 @@
+#include "RPCClient.h"
+#include "RPCClient.h"
+#include "RPCClient.h"
 /*=================================================
 * Copyright © 2020-2024 ChivenZhang.
 * All Rights Reserved.
@@ -36,6 +39,21 @@ void RPCClient::shutdown()
 	m_Reactor->shutdown();
 	m_Reactor = nullptr;
 	m_Packages.clear();
+}
+
+bool RPCClient::running() const
+{
+	return m_Reactor ? m_Reactor->running() : false;
+}
+
+bool RPCClient::connect() const
+{
+	return m_Reactor ? m_Reactor->connect() : false;
+}
+
+THnd<IChannelAddress> RPCClient::address() const
+{
+	return m_Reactor ? m_Reactor->address() : THnd<IChannelAddress>();
 }
 
 RPCClientInboundHandler::RPCClientInboundHandler(TRaw<RPCClient> client)

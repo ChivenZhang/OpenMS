@@ -21,8 +21,8 @@ public:
 	~Channel();
 	bool running() const override;
 	uint32_t getWorkID() const override;
-	TRaw<IChannelAddress> getLocal() const override;
-	TRaw<IChannelAddress> getRemote() const override;
+	THnd<IChannelAddress> getLocal() const override;
+	THnd<IChannelAddress> getRemote() const override;
 	TRaw<IChannelContext> getContext() const override;
 	TRaw<IChannelPipeline> getPipeline() const override;
 	void close() override;

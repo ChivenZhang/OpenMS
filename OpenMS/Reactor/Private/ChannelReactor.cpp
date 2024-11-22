@@ -1,4 +1,5 @@
 #include "ChannelReactor.h"
+#include "ChannelReactor.h"
 /*=================================================
 * Copyright © 2020-2024 ChivenZhang.
 * All Rights Reserved.
@@ -66,6 +67,11 @@ bool ChannelReactor::running() const
 bool ChannelReactor::connect() const
 {
 	return m_Connect;
+}
+
+THnd<IChannelAddress> ChannelReactor::address() const
+{
+	return THnd<IChannelAddress>();
 }
 
 void ChannelReactor::write(TRef<IChannelEvent> event, TRef<IChannelAddress> address)

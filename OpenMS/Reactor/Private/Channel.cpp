@@ -39,14 +39,14 @@ uint32_t Channel::getWorkID() const
 	return m_WorkID;
 }
 
-TRaw<IChannelAddress> Channel::getLocal() const
+THnd<IChannelAddress> Channel::getLocal() const
 {
-	return m_LocalAddr.get();
+	return m_LocalAddr;
 }
 
-TRaw<IChannelAddress> Channel::getRemote() const
+THnd<IChannelAddress> Channel::getRemote() const
 {
-	return m_RemoteAddr.get();
+	return m_RemoteAddr;
 }
 
 TRaw<IChannelContext> Channel::getContext() const

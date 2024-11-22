@@ -24,6 +24,7 @@ public:
 	TCPServerReactor(TRef<ISocketAddress> address, uint32_t backlog, size_t workerNum, callback_tcp_t callback);
 	void startup() override;
 	void shutdown() override;
+	THnd<IChannelAddress> address() const override;
 
 protected:
 	void onConnect(TRef<Channel> channel) override;
@@ -38,5 +39,6 @@ protected:
 protected:
 	uint32_t m_Backlog;
 	TRef<ISocketAddress> m_Address;
+	TRef<ISocketAddress> m_LocalAddress;
 	TMap<uint32_t, TRef<Channel>> m_ChannelMap;
 };

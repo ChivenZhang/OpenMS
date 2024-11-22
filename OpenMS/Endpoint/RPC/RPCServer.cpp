@@ -1,3 +1,6 @@
+#include "RPCServer.h"
+#include "RPCServer.h"
+#include "RPCServer.h"
 /*=================================================
 * Copyright © 2020-2024 ChivenZhang.
 * All Rights Reserved.
@@ -36,6 +39,21 @@ void RPCServer::shutdown()
 {
 	m_Reactor->shutdown();
 	m_Reactor = nullptr;
+}
+
+bool RPCServer::running() const
+{
+	return m_Reactor ? m_Reactor->running() : false;
+}
+
+bool RPCServer::connect() const
+{
+	return m_Reactor ? m_Reactor->connect() : false;
+}
+
+THnd<IChannelAddress> RPCServer::address() const
+{
+	return m_Reactor ? m_Reactor->address() : THnd<IChannelAddress>();
 }
 
 bool RPCServer::bind_internal(TStringView name, TLambda<bool(TString const&, TString&)> method)

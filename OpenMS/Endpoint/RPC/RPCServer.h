@@ -46,6 +46,9 @@ public:
 public:
 	void startup() override;
 	void shutdown() override;
+	bool running() const override;
+	bool connect() const override;
+	THnd<IChannelAddress> address() const override;
 	bool unbind(TStringView name);
 	bool invoke(TStringView name, TString const& input, TString& output);
 	virtual void configureEndpoint(config_t& config) = 0;
@@ -93,7 +96,7 @@ public:
 
 			std::apply(method, args);
 
-			// Return empty output
+			// Return void output
 			return true;
 			};
 

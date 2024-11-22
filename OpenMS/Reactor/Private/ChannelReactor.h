@@ -27,8 +27,9 @@ public:
 	~ChannelReactor();
 	void startup() override;
 	void shutdown() override;
-	bool running() const;
-	bool connect() const;
+	bool running() const override;
+	bool connect() const override;
+	THnd<IChannelAddress> address() const override;
 	void write(TRef<IChannelEvent> event, TRef<IChannelAddress> address) override;
 	TFuture<bool> write(TRef<IChannelEvent> event, TRef<IChannelAddress> address, TPromise<bool>&& promise) override;
 	void writeAndFlush(TRef<IChannelEvent> event, TRef<IChannelAddress> address) override;

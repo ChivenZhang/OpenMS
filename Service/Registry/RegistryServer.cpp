@@ -21,11 +21,6 @@ struct RegistryServerConfig
 
 RegistryServer::RegistryServer()
 {
-	m_IPTables = {
-		{"service0", {"127.0.0.1:8080"}},
-		{"service1", {"127.0.0.1:8081"}},
-		{"service2", {"127.0.0.1:8082"}},
-	};
 	startup();
 }
 
@@ -49,36 +44,19 @@ void RegistryServer::configureEndpoint(config_t& config)
 		return m_IPTables;
 		});
 
-	bind("registry/register", [=](TString ip, uint16_t port)->TString {
-
+	bind("registry/register", [=](TString service, TString address)->TString {
+		TMutexLock lock(m_Lock);
+		m_IPTables[service].push_back(address);
 		return "ok";
 		});
 
-	bind("registry/renew", [=](TString ip, uint16_t port)->TString {
-
+	bind("registry/renew", [=](TString service, TString address)->TString {
+		TPrint("renew %s:%s", service.c_str(), address.c_str());
 		return "ok";
 		});
 
-	bind("registry/cancel", [=](TString ip, uint16_t port)->TString {
+	bind("registry/cancel", [=](TString service, TString address)->TString {
 
 		return "ok";
 		});
-}
-
-RegistryClient::RegistryClient()
-{
-	startup();
-}
-
-RegistryClient::~RegistryClient()
-{
-	shutdown();
-}
-
-void RegistryClient::configureEndpoint(config_t& config)
-{
-	auto property = AUTOWIRE(IProperty)::bean();
-	auto configInfo = property->property<RegistryServerConfig>("registry.master");
-	config.IP = configInfo.ip;
-	config.PortNum = configInfo.port;
 }

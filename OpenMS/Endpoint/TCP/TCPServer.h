@@ -28,6 +28,9 @@ public:
 public:
 	void startup() override;
 	void shutdown() override;
+	bool running() const override;
+	bool connect() const override;
+	THnd<IChannelAddress> address() const override;
 	virtual void configureEndpoint(config_t& config) = 0;
 
 protected:

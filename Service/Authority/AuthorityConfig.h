@@ -14,7 +14,6 @@
 
 class AuthorityConfig :
 	public RESOURCE2(Property, IProperty),
-	public RESOURCE2N(Value, IValue, "iptable"),
-	public RESOURCE2N(AuthorityServer, IEndpoint, "authority")
+	public RESOURCE2N(Value, IValue, "iptable")
 {
 };

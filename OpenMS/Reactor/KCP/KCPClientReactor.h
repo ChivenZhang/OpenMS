@@ -24,6 +24,7 @@ public:
 	KCPClientReactor(TRef<ISocketAddress> address, size_t workerNum, callback_kcp_t callback);
 	void startup() override;
 	void shutdown() override;
+	THnd<IChannelAddress> address() const override;
 	void write(TRef<IChannelEvent> event, TRef<IChannelAddress> address) override;
 	void writeAndFlush(TRef<IChannelEvent> event, TRef<IChannelAddress> address) override;
 
@@ -41,4 +42,5 @@ protected:
 	TRef<Channel> m_Channel;
 	TRef<Channel> m_ChannelRemoved;
 	TRef<ISocketAddress> m_Address;
+	TRef<ISocketAddress> m_LocalAddress;
 };

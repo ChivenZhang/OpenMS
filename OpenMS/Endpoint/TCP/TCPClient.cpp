@@ -28,3 +28,18 @@ void TCPClient::shutdown()
 	m_Reactor->shutdown();
 	m_Reactor = nullptr;
 }
+
+bool TCPClient::running() const
+{
+	return m_Reactor ? m_Reactor->running() : false;
+}
+
+bool TCPClient::connect() const
+{
+	return m_Reactor ? m_Reactor->connect() : false;
+}
+
+THnd<IChannelAddress> TCPClient::address() const
+{
+	return m_Reactor ? m_Reactor->address() : THnd<IChannelAddress>();
+}

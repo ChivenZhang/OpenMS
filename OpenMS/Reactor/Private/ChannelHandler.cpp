@@ -10,17 +10,12 @@
 * =================================================*/
 #include "ChannelHandler.h"
 
-void ChannelInboundHandler::channelError(TRaw<IChannelContext> context, TException&& exception)
-{
-	TError("%s", exception.what());
-}
-
 bool ChannelInboundHandler::channelRead(TRaw<IChannelContext> context, TRaw<IChannelEvent> event)
 {
 	return false;
 }
 
-void ChannelOutboundHandler::channelError(TRaw<IChannelContext> context, TException&& exception)
+void ChannelInboundHandler::channelError(TRaw<IChannelContext> context, TException&& exception)
 {
 	TError("%s", exception.what());
 }
@@ -30,6 +25,11 @@ bool ChannelOutboundHandler::channelWrite(TRaw<IChannelContext> context, TRaw<IC
 	return false;
 }
 
+void ChannelOutboundHandler::channelError(TRaw<IChannelContext> context, TException&& exception)
+{
+	TError("%s", exception.what());
+}
+
 LambdaInboundHandler::LambdaInboundHandler(callback_t const& callback)
 	:
 	m_OnError(callback.OnError),
@@ -37,15 +37,15 @@ LambdaInboundHandler::LambdaInboundHandler(callback_t const& callback)
 {
 }
 
-void LambdaInboundHandler::channelError(TRaw<IChannelContext> context, TException&& exception)
-{
-	if (m_OnError) m_OnError(context, std::forward<TException>(exception));
-}
-
 bool LambdaInboundHandler::channelRead(TRaw<IChannelContext> context, TRaw<IChannelEvent> event)
 {
 	if (m_OnRead) return m_OnRead(context, event);
 	return false;
+}
+
+void LambdaInboundHandler::channelError(TRaw<IChannelContext> context, TException&& exception)
+{
+	if (m_OnError) m_OnError(context, std::forward<TException>(exception));
 }
 
 LambdaOutboundHandler::LambdaOutboundHandler(callback_t const& callback)
@@ -55,13 +55,13 @@ LambdaOutboundHandler::LambdaOutboundHandler(callback_t const& callback)
 {
 }
 
-void LambdaOutboundHandler::channelError(TRaw<IChannelContext> context, TException&& exception)
-{
-	if (m_OnError) m_OnError(context, std::forward<TException>(exception));
-}
-
 bool LambdaOutboundHandler::channelWrite(TRaw<IChannelContext> context, TRaw<IChannelEvent> event)
 {
 	if (m_OnWrite) return m_OnWrite(context, event);
 	return false;
+}
+
+void LambdaOutboundHandler::channelError(TRaw<IChannelContext> context, TException&& exception)
+{
+	if (m_OnError) m_OnError(context, std::forward<TException>(exception));
 }

@@ -155,6 +155,7 @@ void KCPClientReactor::startup()
 				else TError("failed to get socket name: %s", ::uv_strerror(result));
 
 				if (localAddress == nullptr) break;
+				m_LocalAddress = localAddress;
 
 				TPrint("listening on %s:%d", localAddress->getAddress().c_str(), localAddress->getPort());
 			}
@@ -214,6 +215,11 @@ void KCPClientReactor::shutdown()
 	ChannelReactor::shutdown();
 	m_Channel = nullptr;
 	m_ChannelRemoved = nullptr;
+}
+
+THnd<IChannelAddress> KCPClientReactor::address() const
+{
+	return m_Connect ? m_LocalAddress : THnd<IChannelAddress>();
 }
 
 void KCPClientReactor::write(TRef<IChannelEvent> event, TRef<IChannelAddress> address)
@@ -376,7 +382,7 @@ int KCPClientReactor::on_output(const char* buf, int len, IKCPCB* kcp, void* use
 	auto channel = (KCPChannel*)user;
 	auto reactor = TCast<KCPClientReactor>(channel->getReactor());
 	auto client = (uv_udp_t*)channel->getHandle();
-	auto remote = channel->getRemote();
+	auto remote = channel->getRemote().lock();
 
 	// Send the data
 
@@ -418,7 +424,7 @@ void KCPClientReactor::on_send(uv_udp_t* handle)
 		{
 			auto event = TNew<IChannelEvent>();
 			event->Message = TStringView(buffer, result);
-			event->Channel = channel->weak_from_this();
+			event->Channel = channel;
 			while (0 <= result)
 			{
 				result = ikcp_recv(channel->getSession(), buffer, sizeof(buffer));
@@ -444,9 +450,7 @@ void KCPClientReactor::on_send(uv_udp_t* handle)
 		if (channel->running() == false) reactor->onDisconnect(channel);
 		if (channel->running() == false) continue;
 		if (event->Message.empty()) continue;
-		auto server = channel->getHandle();
 		auto session = channel->getSession();
-		auto remote = channel->getRemote();
 
 		size_t sentNum = 0;
 		while (sentNum < event->Message.size())
