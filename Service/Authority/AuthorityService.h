@@ -24,12 +24,7 @@ class AuthorityService :
 {
 public:
 	void startup() override;
-	void shutdown() override;
 
 protected:
-	TMutex m_Lock;
-	TThread m_Thread;
-	TMutexUnlock m_Unlock;
-	TAtomic<bool> m_Running;
 	RegistryIPTable m_IPTables;
 };

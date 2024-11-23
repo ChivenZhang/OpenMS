@@ -14,26 +14,17 @@
 #include <OpenMS/Service/IEnvironment.h>
 #include <csignal>
 
-TMutex mutex;
-TMutexUnlock unlock;
 TRef<IService> service;
-extern void openms_signal(int signal) { unlock.notify_all(); }
 extern TRef<IService> openms_startup();
 
 int main(int argc, char** argv)
 {
 	IEnvironment::argc = argc;
 	IEnvironment::argv = argv;
-	signal(SIGINT, openms_signal);
 
 	service = openms_startup();
 	if (service == nullptr) return 1;
 	service->startup();
-
-	TPrint("CTRL+C to exit");
-	TUniqueLock lock(mutex);
-	unlock.wait(lock);
-	service->shutdown();
 	return 0;
 }
 #endif

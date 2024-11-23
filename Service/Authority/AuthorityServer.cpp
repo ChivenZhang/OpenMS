@@ -19,16 +19,6 @@ struct AuthorityServerConfig
 	OPENMS_TYPE(AuthorityServerConfig, ip, port, backlog)
 };
 
-AuthorityServer::AuthorityServer()
-{
-	startup();
-}
-
-AuthorityServer::~AuthorityServer()
-{
-	shutdown();
-}
-
 void AuthorityServer::configureEndpoint(config_t& config)
 {
 	auto properties = AUTOWIRE(IProperty)::bean();
@@ -36,16 +26,6 @@ void AuthorityServer::configureEndpoint(config_t& config)
 	config.IP = configInfo.ip;
 	config.PortNum = configInfo.port;
 	config.Backlog = configInfo.backlog;
-}
-
-AuthorityClient::AuthorityClient()
-{
-	startup();
-}
-
-AuthorityClient::~AuthorityClient()
-{
-	shutdown();
 }
 
 void AuthorityClient::configureEndpoint(config_t& config)

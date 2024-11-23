@@ -16,12 +16,16 @@ TRef<IService> openms_startup()
 	return TNew<RegistryService>();
 }
 
+TMutex mutex;
+TMutexUnlock unlock;
+
 void RegistryService::startup()
 {
+	signal(SIGINT, [](int) {
+		unlock.notify_all();
+		});
 	AUTOWIRE(RegistryServer)::bean()->startup();
-}
-
-void RegistryService::shutdown()
-{
+	TUniqueLock lock(mutex);
+	unlock.wait(lock);
 	AUTOWIRE(RegistryServer)::bean()->shutdown();
 }

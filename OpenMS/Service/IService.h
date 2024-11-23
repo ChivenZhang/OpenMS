@@ -19,8 +19,6 @@ public:
 
 	virtual void startup() = 0;
 
-	virtual void shutdown() = 0;
-
 	virtual TString property(TString const& name) const = 0;
 
 	template <class T>

@@ -19,5 +19,4 @@ class RegistryService :
 {
 public:
 	void startup() override;
-	void shutdown() override;
 };

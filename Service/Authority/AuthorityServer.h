@@ -17,8 +17,6 @@ class AuthorityServer :
 	public AUTOWIRE(IProperty)
 {
 public:
-	AuthorityServer();
-	~AuthorityServer();
 	void configureEndpoint(config_t & config) override;
 };
 
@@ -27,10 +25,5 @@ class AuthorityClient :
 	public AUTOWIRE(IProperty)
 {
 public:
-	AuthorityClient();
-	~AuthorityClient();
 	void configureEndpoint(config_t & config) override;
-
-protected:
-
 };
