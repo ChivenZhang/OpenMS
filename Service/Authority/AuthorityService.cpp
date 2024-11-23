@@ -33,7 +33,8 @@ void AuthorityService::startup()
 	auto server = AUTOWIRE(AuthorityServer)::bean();
 	auto client = AUTOWIRE(AuthorityClient)::bean();
 
-	server->startup(); client->startup();
+	server->startup();
+	client->startup();
 
 	auto address = server->address().lock();
 	if (address)
@@ -58,5 +59,6 @@ void AuthorityService::startup()
 	}
 	timer.stop(timerID);
 
-	server->shutdown(); client->shutdown();
+	server->shutdown();
+	client->shutdown();
 }
