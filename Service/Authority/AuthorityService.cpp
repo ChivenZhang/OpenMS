@@ -32,16 +32,12 @@ void AuthorityService::startup()
 	client->startup();
 
 	auto address = server->address().lock();
-	if (address)
-	{
-		client->call<TString>("registry/register", serviceName, address->getString());
-	}
+	if (address) client->call<TString>("registry/register", serviceName, address->getString());
 
 	Timer timer;
 	auto update_func = [=]() {
 		auto address = server->address().lock();
-		if (address == nullptr) return;
-		client->call<TString>("registry/renew", serviceName, address->getString());
+		if (address)  client->call<TString>("registry/renew", serviceName, address->getString());
 		auto result = client->call<TString>("registry/query");
 		TPrint("query result: %s", result.c_str());
 		};
