@@ -10,6 +10,7 @@
 *
 * =================================================*/
 #include "OpenMS/Service/Private/Property.h"
+#include "OpenMS/Toolkit/Timer.h"
 #include "AuthorityServer.h"
 
 class AuthorityConfig :
@@ -17,6 +18,7 @@ class AuthorityConfig :
 	public RESOURCE2N(Value, IValue, "iptable"),
 	public RESOURCE2N(Value, IValue, "service"),
 	public RESOURCE(AuthorityServer),
-	public RESOURCE(AuthorityClient)
+	public RESOURCE(AuthorityClient),
+	public RESOURCE(Timer)
 {
 };

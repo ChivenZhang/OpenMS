@@ -15,7 +15,7 @@
 class Timer final
 {
 public:
-	using task_t = TLambda<void()>;
+	using task_t = TLambda<void(uint32_t timer)>;
 
 public:
 	Timer();
@@ -26,12 +26,9 @@ public:
 private:
 	struct timer_t
 	{
-		uint32_t ID;
-		uint64_t Timeout;
-		uint64_t Repeat;
 		task_t Method;
-		uv_async_t Async;
 		uv_timer_t Handle;
+		uint32_t ID; uint64_t Timeout, Repeat;
 	};
 	struct clause_t
 	{
@@ -39,8 +36,8 @@ private:
 		TPromise<void>& Promise;
 	};
 	TThread m_Thread;
-	uv_loop_t m_Loop;
 	uint32_t m_TimerID;
 	TMap<uint32_t, timer_t> m_Timers;
-	uv_async_t m_AsyncStart, m_AsyncStop, m_AsyncExit;
+	TRaw<uv_loop_t> m_Loop;
+	TRaw<uv_async_t> m_AsyncExit, m_AsyncStart, m_AsyncStop;
 };

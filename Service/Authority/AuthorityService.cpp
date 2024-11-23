@@ -25,6 +25,7 @@ void AuthorityService::startup()
 	signal(SIGINT, [](int) { running = false; });
 
 	auto serviceName = property("authority.name");
+	auto timer = AUTOWIRE(Timer)::bean();
 	auto server = AUTOWIRE(AuthorityServer)::bean();
 	auto client = AUTOWIRE(AuthorityClient)::bean();
 
@@ -34,20 +35,20 @@ void AuthorityService::startup()
 	auto address = server->address().lock();
 	if (address) client->call<TString>("registry/register", 1000, serviceName, address->getString());
 
-	Timer timer;
-	auto update_func = [=]() {
+	auto update_func = [=](uint32_t handle) {
 		auto address = server->address().lock();
-		if (address)  client->call<TString>("registry/renew", 1000, serviceName, address->getString());
-		auto result = client->call<TString>("registry/query", 1000);
-		TPrint("query result: %s", result.c_str());
+		if (address)  client->call<TString>("registry/renew", 100, serviceName, address->getString());
+		client->async<TString>("registry/query", 100, {}, [](TString&& result) {
+			TPrint("query result: %s", result.c_str());
+			});
 		};
-	auto timerID = timer.start(0, 5000, update_func);
+	auto timerID = timer->start(0, 10, update_func);
 
 	while (running)
 	{
 		std::this_thread::sleep_for(std::chrono::milliseconds(50));
 	}
-	// timer.stop(timerID);
+	timer->stop(timerID);
 
 	server->shutdown();
 	client->shutdown();

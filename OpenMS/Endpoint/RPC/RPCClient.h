@@ -10,6 +10,7 @@
 *
 * =================================================*/
 #include "OpenMS/Endpoint/IEndpoint.h"
+#include "OpenMS/Toolkit/Timer.h"
 #include "OpenMS/Service/IProperty.h"
 #include "OpenMS/Service/Private/Property.h"
 #include "OpenMS/Reactor/TCP/TCPClientReactor.h"
@@ -181,6 +182,17 @@ public:
 				};
 		}
 
+		m_Timer.start(timeout, 0, [=, packageID = request.indx](uint32_t handle) {
+			TMutexLock lock(m_Lock);
+			auto result = m_Packages.find(packageID);
+			if (result != m_Packages.end())
+			{
+				result->second.OnResult(TString());
+				m_Packages.erase(result);
+			}
+			});
+
+
 		// Send input to remote server
 
 		auto event = TNew<IChannelEvent>();
@@ -217,6 +229,16 @@ public:
 				};
 		}
 
+		m_Timer.start(timeout, 0, [=, packageID = request.indx](uint32_t handle) {
+			TMutexLock lock(m_Lock);
+			auto result = m_Packages.find(packageID);
+			if (result != m_Packages.end())
+			{
+				result->second.OnResult(TString());
+				m_Packages.erase(result);
+			}
+			});
+
 		// Send input to remote server
 
 		auto event = TNew<IChannelEvent>();
@@ -230,6 +252,7 @@ protected:
 	uint32_t m_PackageID = 0;
 	uint32_t m_Buffers = UINT32_MAX;	// bytes from property
 	TMutex m_Lock;
+	Timer m_Timer;
 	TRef<TCPClientReactor> m_Reactor;
 	TMap<uint32_t, invoke_t> m_Packages;
 };

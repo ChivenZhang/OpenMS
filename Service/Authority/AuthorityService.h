@@ -20,7 +20,8 @@ class AuthorityService :
 	public AUTOWIREN(Value, "iptable"),
 	public AUTOWIREN(Value, "service"),
 	public AUTOWIRE(AuthorityServer),
-	public AUTOWIRE(AuthorityClient)
+	public AUTOWIRE(AuthorityClient),
+	public AUTOWIRE(Timer)
 {
 public:
 	void startup() override;

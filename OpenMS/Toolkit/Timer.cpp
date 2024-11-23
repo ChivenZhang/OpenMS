@@ -12,25 +12,40 @@
 
 Timer::Timer()
 	:
-	m_TimerID(0)
+	m_TimerID(0),
+	m_Loop(nullptr),
+	m_AsyncExit(nullptr),
+	m_AsyncStop(nullptr),
+	m_AsyncStart(nullptr)
 {
 	TPromise<void> promise;
 	auto future = promise.get_future();
 
 	m_Thread = TThread([=, &promise]() {
-		uv_loop_init(&m_Loop);
-		m_Loop.data = this;
+		uv_loop_t loop;
+		uv_async_t asyncExit, asyncStart, asyncStop;
+		uv_loop_init(&loop);
+		loop.data = this;
 
-		uv_async_init(&m_Loop, &m_AsyncStart, [](uv_async_t* handle) {
+		uv_async_init(&loop, &asyncExit, [](uv_async_t* handle) {
+			auto _this = (Timer*)handle->loop->data;
+
+			uv_close((uv_handle_t*)_this->m_AsyncStart, nullptr);
+			uv_close((uv_handle_t*)_this->m_AsyncStop, nullptr);
+			uv_close((uv_handle_t*)_this->m_AsyncExit, nullptr);
+			uv_loop_close(handle->loop);
+			});
+
+		uv_async_init(&loop, &asyncStart, [](uv_async_t* handle) {
 			auto _this = (Timer*)handle->loop->data;
 			auto clause = (clause_t*)handle->data;
 			auto timer = &clause->Timer;
 
 			uv_timer_init(handle->loop, &timer->Handle);
-			auto result = uv_timer_start(&timer->Handle, [](uv_timer_t* handle) {
+			uv_timer_start(&timer->Handle, [](uv_timer_t* handle) {
 				auto _this = (Timer*)handle->loop->data;
 				auto timer = (timer_t*)handle->data;
-				if (timer->Method) timer->Method();
+				if (timer->Method) timer->Method(timer->ID);
 				if (handle->repeat == 0)
 				{
 					uv_timer_stop(handle);
@@ -42,7 +57,7 @@ Timer::Timer()
 			clause->Promise.set_value();
 			});
 
-		uv_async_init(&m_Loop, &m_AsyncStop, [](uv_async_t* handle) {
+		uv_async_init(&loop, &asyncStop, [](uv_async_t* handle) {
 			auto clause = (clause_t*)handle->data;
 			auto timer = &clause->Timer;
 
@@ -50,17 +65,16 @@ Timer::Timer()
 			clause->Promise.set_value();
 			});
 
-		uv_async_init(&m_Loop, &m_AsyncExit, [](uv_async_t* handle) {
-			auto _this = (Timer*)handle->loop->data;
-
-			uv_close((uv_handle_t*)&_this->m_AsyncStart, nullptr);
-			uv_close((uv_handle_t*)&_this->m_AsyncStop, nullptr);
-			uv_close((uv_handle_t*)&_this->m_AsyncExit, nullptr);
-			uv_loop_close(handle->loop);
-			});
-
+		m_Loop = &loop;
+		m_AsyncExit = &asyncExit;
+		m_AsyncStop = &asyncStop;
+		m_AsyncStart = &asyncStart;
 		promise.set_value();
-		uv_run(&m_Loop, UV_RUN_DEFAULT);
+		uv_run(&loop, UV_RUN_DEFAULT);
+		m_AsyncExit = nullptr;
+		m_AsyncStop = nullptr;
+		m_AsyncStart = nullptr;
+		m_Loop = nullptr;
 		});
 
 	future.wait();
@@ -71,7 +85,7 @@ Timer::~Timer()
 	TVector<uint32_t> handles;
 	for (auto& timer : m_Timers) handles.push_back(timer.first);
 	for (auto& timer : handles) stop(timer);
-	uv_async_send(&m_AsyncExit);
+	uv_async_send(m_AsyncExit);
 	if (m_Thread.joinable()) m_Thread.join();
 	m_Timers.clear();
 }
@@ -81,9 +95,9 @@ uint32_t Timer::start(uint64_t timeout, uint64_t repeat, task_t task)
 	auto timerID = ++m_TimerID;
 	auto& timer = m_Timers[timerID];
 	timer.ID = timerID;
+	timer.Method = task;
 	timer.Repeat = repeat;
 	timer.Timeout = timeout;
-	timer.Method = task;
 	timer.Handle.data = &timer;
 
 	TPromise<void> promise;
@@ -94,13 +108,9 @@ uint32_t Timer::start(uint64_t timeout, uint64_t repeat, task_t task)
 		TPromise<void>& Promise;
 	} clause{ timer, promise };
 
-	m_AsyncStart.data = &clause;
-	if (uv_async_send(&m_AsyncStart) == 0)
-	{
-		future.wait();
-		return timerID;
-	}
-	return uint32_t();
+	m_AsyncStart->data = &clause;
+	if (uv_async_send(m_AsyncStart) == 0) future.wait();
+	return timerID;
 }
 
 bool Timer::stop(uint32_t handle)
@@ -113,12 +123,9 @@ bool Timer::stop(uint32_t handle)
 	auto future = promise.get_future();
 	clause_t clause{ timer, promise };
 
-	m_AsyncStop.data = &clause;
-	if (uv_async_send(&m_AsyncStop) == 0)
-	{
-		future.wait();
-		m_Timers.erase(timer.ID);
-		return true;
-	}
-	return false;
+	m_AsyncStop->data = &clause;
+	if (uv_async_send(m_AsyncStop) == 0) future.wait();
+	future.wait();
+	m_Timers.erase(result);
+	return true;
 }
