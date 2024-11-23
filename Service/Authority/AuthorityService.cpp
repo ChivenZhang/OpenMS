@@ -26,7 +26,6 @@ void AuthorityService::startup()
 		auto server = AUTOWIRE(AuthorityServer)::bean();
 		auto client = AUTOWIRE(AuthorityClient)::bean();
 
-
 		auto update_func = [=]() {
 			auto address = server->address().lock();
 			if (address == nullptr) return;
@@ -37,7 +36,6 @@ void AuthorityService::startup()
 
 		Timer timer;
 		auto timerID = timer.start(0, 5000, update_func);
-
 		while (m_Running)
 		{
 			timer.update();

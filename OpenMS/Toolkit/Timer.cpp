@@ -40,12 +40,11 @@ uint32_t Timer::start(uint64_t timeout, uint64_t repeat, task_t task)
 	auto reuslt = uv_timer_start(&timer.Handle, [](uv_timer_t* handle) {
 		auto _this = (Timer*)handle->loop->data;
 		auto timer = (timer_t*)handle->data;
-		if (timer->Method)timer->Method();
+		if (timer->Method) timer->Method();
 		if (handle->repeat == 0)
 		{
 			uv_timer_stop(handle);
-			auto timeID = timer->ID;
-			_this->m_Timers.erase(timeID);
+			_this->m_Timers.erase(timer->ID);
 		}
 		}, timeout, repeat);
 	return timerID;
