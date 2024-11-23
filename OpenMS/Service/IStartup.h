@@ -14,7 +14,6 @@
 #include <OpenMS/Service/IEnvironment.h>
 #include <csignal>
 
-TRef<IService> service;
 extern TRef<IService> openms_startup();
 
 int main(int argc, char** argv)
@@ -22,10 +21,9 @@ int main(int argc, char** argv)
 	IEnvironment::argc = argc;
 	IEnvironment::argv = argv;
 
-	service = openms_startup();
+	auto service = openms_startup();
 	if (service == nullptr) return 1;
 	service->startup();
-	service = nullptr;
 
 	return 0;
 }
