@@ -21,11 +21,11 @@ TMutexUnlock unlock;
 
 void RegistryService::startup()
 {
-	signal(SIGINT, [](int) {
-		unlock.notify_all();
-		});
+	signal(SIGINT, [](int) { unlock.notify_all(); });
+
 	AUTOWIRE(RegistryServer)::bean()->startup();
-	TUniqueLock lock(mutex);
-	unlock.wait(lock);
+
+	TUniqueLock lock(mutex); unlock.wait(lock);
+
 	AUTOWIRE(RegistryServer)::bean()->shutdown();
 }
