@@ -17,17 +17,12 @@ TRef<IService> openms_startup()
 	return TNew<AuthorityService>();
 }
 
-TMutex mutex;
-TMutexUnlock unlock;
 bool running = false;
 
 void AuthorityService::startup()
 {
 	running = true;
-	signal(SIGINT, [](int) {
-		running = false;
-		unlock.notify_all();
-		});
+	signal(SIGINT, [](int) { running = false; });
 
 	auto serviceName = property("authority.name");
 	auto server = AUTOWIRE(AuthorityServer)::bean();
