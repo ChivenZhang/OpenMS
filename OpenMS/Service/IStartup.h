@@ -25,6 +25,8 @@ int main(int argc, char** argv)
 	service = openms_startup();
 	if (service == nullptr) return 1;
 	service->startup();
+	service = nullptr;
+
 	return 0;
 }
 #endif
