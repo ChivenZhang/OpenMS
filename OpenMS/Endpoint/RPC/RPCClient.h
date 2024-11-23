@@ -56,7 +56,7 @@ public:
 	virtual void configureEndpoint(config_t& config) = 0;
 
 	template<class T, class... Args, OPENMS_NOT_SAME(T, void)>
-	T call(TStringView name, Args... args)
+	T call(TStringView name, uint32_t timeout/*ms*/, Args... args)
 	{
 		if (m_Reactor == nullptr || m_Reactor->connect() == false) return T();
 
@@ -75,24 +75,26 @@ public:
 
 		// Set up promise and callback
 
-		auto promise = TNew<TPromise<bool>>();
+		auto promise = TNew<TPromise<void>>();
 		auto future = promise->get_future();
-		auto& package = m_Packages[request.indx];
-		package.OnResult = [promise, &output](TString&& response) {
-			output = response;
-			promise->set_value(true);
-			};
+		{
+			TMutexLock lock(m_Lock);
+			auto& package = m_Packages[request.indx];
+			package.OnResult = [promise, &output](TString&& response) {
+				output = response;
+				promise->set_value();
+				};
+		}
 
 		// Send input to remote server
 
 		auto event = TNew<IChannelEvent>();
-		// Use '\0' to split the message
-		event->Message = input + char();
+		event->Message = input + char(); // Use '\0' to split the message
 		m_Reactor->writeAndFlush(event, nullptr);
 
 		// Wait for result and return
 
-		auto status = future.wait_for(std::chrono::milliseconds(m_ReadTimeout));
+		auto status = future.wait_for(std::chrono::milliseconds(timeout));
 		{
 			TMutexLock lock(m_Lock);
 			m_Packages.erase(request.indx);
@@ -107,7 +109,7 @@ public:
 	}
 
 	template<class T, class... Args, OPENMS_IS_SAME(T, void)>
-	T call(TStringView name, Args... args)
+	T call(TStringView name, uint32_t timeout/*ms*/, Args... args)
 	{
 		if (m_Reactor == nullptr || m_Reactor->connect() == false) return T();
 
@@ -126,23 +128,23 @@ public:
 
 		// Set up promise and callback
 
-		auto promise = TNew<TPromise<bool>>();
+		auto promise = TNew<TPromise<void>>();
 		auto future = promise->get_future();
-		auto& package = m_Packages[request.indx];
-		package.OnResult = [promise](TString&& response) {
-			promise->set_value(true);
-			};
+		{
+			TMutexLock lock(m_Lock);
+			auto& package = m_Packages[request.indx];
+			package.OnResult = [promise](TString&& response) { promise->set_value(); };
+		}
 
 		// Send input to remote server
 
 		auto event = TNew<IChannelEvent>();
-		// Use '\0' to split the message
-		event->Message = input + char();
+		event->Message = input + char(); // Use '\0' to split the message
 		m_Reactor->writeAndFlush(event, nullptr);
 
 		// Wait for result and return
 
-		future.wait_for(std::chrono::milliseconds(m_ReadTimeout));
+		future.wait_for(std::chrono::milliseconds(timeout));
 		{
 			TMutexLock lock(m_Lock);
 			m_Packages.erase(request.indx);
@@ -150,7 +152,7 @@ public:
 	}
 
 	template<class T, class... Args, OPENMS_NOT_SAME(T, void)>
-	bool async(TStringView name, TTuple<Args...> args, TLambda<void(T&&)> callback)
+	bool async(TStringView name, uint32_t timeout/*ms*/, TTuple<Args...> args, TLambda<void(T&&)> callback)
 	{
 		if (m_Reactor == nullptr || m_Reactor->connect() == false) return false;
 
@@ -169,25 +171,26 @@ public:
 
 		// Set up promise and callback
 
-		auto& package = m_Packages[request.indx];
-		package.OnResult = [callback](TString&& response) {
-			if (callback == nullptr) return;
-			T result;
-			TTypeC(response, result);
-			callback(std::move(result));
-			};
+		{
+			TMutexLock lock(m_Lock);
+			auto& package = m_Packages[request.indx];
+			package.OnResult = [callback](TString&& response) {
+				T result;
+				TTypeC(response, result);
+				if (callback) callback(std::move(result));
+				};
+		}
 
 		// Send input to remote server
 
 		auto event = TNew<IChannelEvent>();
-		// Use '\0' to split the message
-		event->Message = input + char();
+		event->Message = input + char(); // Use '\0' to split the message
 		m_Reactor->writeAndFlush(event, nullptr);
 		return true;
 	}
 
 	template<class T, class... Args, OPENMS_IS_SAME(T, void)>
-	bool async(TStringView name, TTuple<Args...> args, TLambda<void()> callback)
+	bool async(TStringView name, uint32_t timeout/*ms*/, TTuple<Args...> args, TLambda<void()> callback)
 	{
 		if (m_Reactor == nullptr || m_Reactor->connect() == false) return false;
 
@@ -206,17 +209,18 @@ public:
 
 		// Set up promise and callback
 
-		auto& package = m_Packages[request.indx];
-		package.OnResult = [callback](TString&& response) {
-			if (callback == nullptr) return;
-			callback();
-			};
+		{
+			TMutexLock lock(m_Lock);
+			auto& package = m_Packages[request.indx];
+			package.OnResult = [callback](TString&& response) {
+				if (callback) callback();
+				};
+		}
 
 		// Send input to remote server
 
 		auto event = TNew<IChannelEvent>();
-		// Use '\0' to split the message
-		event->Message = input + char();
+		event->Message = input + char(); // Use '\0' to split the message
 		m_Reactor->writeAndFlush(event, nullptr);
 		return true;
 	}
@@ -225,8 +229,6 @@ protected:
 	friend class RPCClientInboundHandler;
 	uint32_t m_PackageID = 0;
 	uint32_t m_Buffers = UINT32_MAX;	// bytes from property
-	uint32_t m_ReadTimeout = 2000;	// ms from property
-	uint32_t m_WriteTimeout = 2000;	// ms from property
 	TMutex m_Lock;
 	TRef<TCPClientReactor> m_Reactor;
 	TMap<uint32_t, invoke_t> m_Packages;
