@@ -20,8 +20,6 @@ class RegistryServer :
 	public AUTOWIREN(Value, "iptable")
 {
 public:
-	RegistryServer();
-	~RegistryServer();
 	void configureEndpoint(config_t & config) override;
 
 protected:

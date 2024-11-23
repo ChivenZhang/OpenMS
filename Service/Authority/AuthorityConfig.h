@@ -14,6 +14,9 @@
 
 class AuthorityConfig :
 	public RESOURCE2(Property, IProperty),
-	public RESOURCE2N(Value, IValue, "iptable")
+	public RESOURCE2N(Value, IValue, "iptable"),
+	public RESOURCE2N(Value, IValue, "service"),
+	public RESOURCE(AuthorityServer),
+	public RESOURCE(AuthorityClient)
 {
 };

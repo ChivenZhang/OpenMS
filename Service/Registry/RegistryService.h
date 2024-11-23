@@ -15,7 +15,7 @@
 class RegistryService :
 	public Service,
 	public RESOURCE(RegistryConfig),
-	public RESOURCE(RegistryServer)
+	public AUTOWIRE(RegistryServer)
 {
 public:
 	void startup() override;

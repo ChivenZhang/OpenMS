@@ -9,37 +9,46 @@
 *
 * =================================================*/
 #include "AuthorityService.h"
-#include <OpenMS/Service/IBootstrap.h>
+#include "OpenMS/Toolkit/Timer.h"
+#include <OpenMS/Service/IStartup.h>
 
-TRef<IService> openms_bootstrap()
+TRef<IService> openms_startup()
 {
 	return TNew<AuthorityService>();
 }
 
 void AuthorityService::startup()
 {
-	Service::startup();
+	auto serviceName = property("authority.name");
 
 	m_Running = true;
 	m_Thread = TThread([=]() {
-		auto server = RESOURCE(AuthorityServer)::bean();
-		auto client = RESOURCE(AuthorityClient)::bean();
+		auto server = AUTOWIRE(AuthorityServer)::bean();
+		auto client = AUTOWIRE(AuthorityClient)::bean();
+
+
+		auto update_func = [=]() {
+			auto address = server->address().lock();
+			if (address == nullptr) return;
+			client->call<TString>("registry/renew", serviceName, address->getString());
+			auto result = client->call<TString>("registry/query");
+			TPrint("query result: %s", result.c_str());
+			};
+
+		Timer timer;
+		auto timerID = timer.start(0, 5000, update_func);
+
 		while (m_Running)
 		{
-			TUniqueLock lock(m_Lock);
-			auto address = server->address().lock();
-			if (address)
-			{
-				auto result = client->call<TString>("registry/renew", "authority", address->getString());
-				result = client->call<TString>("registry/query");
-				TPrint("query result: %s", result.c_str());
-			}
-			m_Unlock.wait_for(lock, std::chrono::seconds(2), [=]() { return m_Running == false; });
+			timer.update();
+			std::this_thread::sleep_for(std::chrono::milliseconds(100));
 		}
+		timer.stop(timerID);
+
 		});
 
-	auto server = RESOURCE(AuthorityServer)::bean();
-	auto client = RESOURCE(AuthorityClient)::bean();
+	auto server = AUTOWIRE(AuthorityServer)::bean();
+	auto client = AUTOWIRE(AuthorityClient)::bean();
 	auto address = server->address().lock();
 	if (address)
 	{
@@ -52,5 +61,4 @@ void AuthorityService::shutdown()
 	m_Running = false;
 	m_Unlock.notify_one();
 	if (m_Thread.joinable()) m_Thread.join();
-	Service::shutdown();
 }

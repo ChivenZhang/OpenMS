@@ -18,7 +18,7 @@ TMutex mutex;
 TMutexUnlock unlock;
 TRef<IService> service;
 extern void openms_signal(int signal) { unlock.notify_all(); }
-extern TRef<IService> openms_bootstrap();
+extern TRef<IService> openms_startup();
 
 int main(int argc, char** argv)
 {
@@ -26,7 +26,7 @@ int main(int argc, char** argv)
 	IEnvironment::argv = argv;
 	signal(SIGINT, openms_signal);
 
-	service = openms_bootstrap();
+	service = openms_startup();
 	if (service == nullptr) return 1;
 	service->startup();
 

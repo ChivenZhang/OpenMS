@@ -19,16 +19,6 @@ struct RegistryServerConfig
 	OPENMS_TYPE(RegistryServerConfig, ip, port, backlog)
 };
 
-RegistryServer::RegistryServer()
-{
-	startup();
-}
-
-RegistryServer::~RegistryServer()
-{
-	shutdown();
-}
-
 void RegistryServer::configureEndpoint(config_t& config)
 {
 	auto property = AUTOWIRE(IProperty)::bean();

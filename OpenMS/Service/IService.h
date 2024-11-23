@@ -15,9 +15,6 @@
 class OPENMS_API IService
 {
 public:
-	static TRaw<IService> Instance();
-
-public:
 	virtual ~IService() = default;
 
 	virtual void startup() = 0;

@@ -70,7 +70,7 @@ bool RPCServer::unbind(TStringView name)
 
 bool RPCServer::invoke(TStringView name, TString const& input, TString& output)
 {
-	TLambda<bool(TString const&, TString&)> method;
+	decltype(m_Methods)::value_type::second_type method;
 	{
 		TMutexLock lock(m_Lock);
 		auto result = m_Methods.find(TString(name));

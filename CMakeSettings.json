@@ -30,11 +30,6 @@
 			"inheritEnvironments": [ "msvc_x64_x64" ],
 			"variables": [
 				{
-					"name": "OPENMS_ENABLE_SAMPLE",
-					"value": "True",
-					"type": "BOOL"
-				},
-				{
 					"name": "LIBUV_BUILD_SHARED",
 					"value": "False",
 					"type": "BOOL"

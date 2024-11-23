@@ -92,7 +92,7 @@ add_library(OpenMS STATIC
 	Service/Private/Property.h
 	Service/Private/Service.cpp
 	Service/Private/Service.h
-)
+ "Remote/RemoteClient.h" "Remote/RemoteServer.h" "Remote/RegistryClient.h" "Remote/RegistryServer.h" "Remote/RegistryClient.cpp" "Remote/RegistryServer.cpp" "Remote/RemoteClient.cpp" "Remote/RemoteServer.cpp" "Toolkit/Timer.h" "Toolkit/Timer.cpp")
 add_dependencies(OpenMS uv_a)
 
 target_include_directories(OpenMS PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
