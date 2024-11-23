@@ -28,23 +28,23 @@ void AuthorityService::startup()
 		running = false;
 		unlock.notify_all();
 		});
-	AUTOWIRE(AuthorityServer)::bean()->startup();
-	AUTOWIRE(AuthorityClient)::bean()->startup();
 
-
+	auto serviceName = property("authority.name");
 	auto server = AUTOWIRE(AuthorityServer)::bean();
 	auto client = AUTOWIRE(AuthorityClient)::bean();
+
+	server->startup(); client->startup();
+
 	auto address = server->address().lock();
 	if (address)
 	{
-		client->call<TString>("registry/register", "authority", address->getString());
+		client->call<TString>("registry/register", serviceName, address->getString());
 	}
 
 	Timer timer;
 	auto update_func = [=]() {
 		auto address = server->address().lock();
 		if (address == nullptr) return;
-		auto serviceName = property("authority.name");
 		client->call<TString>("registry/renew", serviceName, address->getString());
 		auto result = client->call<TString>("registry/query");
 		TPrint("query result: %s", result.c_str());
@@ -58,6 +58,5 @@ void AuthorityService::startup()
 	}
 	timer.stop(timerID);
 
-	AUTOWIRE(AuthorityServer)::bean()->shutdown();
-	AUTOWIRE(AuthorityClient)::bean()->shutdown();
+	server->shutdown(); client->shutdown();
 }
