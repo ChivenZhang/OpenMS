@@ -5,14 +5,14 @@ add_definitions(
 )
 
 include_directories(
-	${CMAKE_SOURCE_DIR}/External/kcp
+	${OPENMS_SOURCE_DIR}/External/kcp
 )
 
 add_library(OpenMS STATIC
-	${CMAKE_SOURCE_DIR}/External/kcp/ikcp.c
-	${CMAKE_SOURCE_DIR}/External/kcp/ikcp.h
-	${CMAKE_SOURCE_DIR}/External/http-parser/http_parser.c
-	${CMAKE_SOURCE_DIR}/External/http-parser/http_parser.h
+	${OPENMS_SOURCE_DIR}/External/kcp/ikcp.c
+	${OPENMS_SOURCE_DIR}/External/kcp/ikcp.h
+	${OPENMS_SOURCE_DIR}/External/http-parser/http_parser.c
+	${OPENMS_SOURCE_DIR}/External/http-parser/http_parser.h
 	Endpoint/HTTP/HTTPClient.cpp
 	Endpoint/HTTP/HTTPClient.h
 	Endpoint/HTTP/HTTPServer.cpp
@@ -98,8 +98,8 @@ add_library(OpenMS STATIC
 add_dependencies(OpenMS uv_a)
 
 target_include_directories(OpenMS PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_include_directories(OpenMS PUBLIC ${CMAKE_SOURCE_DIR}/External/iocpp)
-target_include_directories(OpenMS PUBLIC ${CMAKE_SOURCE_DIR}/External/http-parser)
-target_include_directories(OpenMS PUBLIC ${CMAKE_SOURCE_DIR}/External/libuv/include)
-target_include_directories(OpenMS PUBLIC ${CMAKE_SOURCE_DIR}/External/nlohmann/single_include)
+target_include_directories(OpenMS PUBLIC ${OPENMS_SOURCE_DIR}/External/iocpp)
+target_include_directories(OpenMS PUBLIC ${OPENMS_SOURCE_DIR}/External/http-parser)
+target_include_directories(OpenMS PUBLIC ${OPENMS_SOURCE_DIR}/External/libuv/include)
+target_include_directories(OpenMS PUBLIC ${OPENMS_SOURCE_DIR}/External/nlohmann/single_include)
 target_link_libraries(OpenMS uv_a iocpp)

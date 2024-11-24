@@ -14,6 +14,6 @@ target_link_libraries(RegistryService OpenMS)
 
 add_custom_command(
     TARGET RegistryService POST_BUILD  
-    COMMAND "${CMAKE_SOURCE_DIR}/INSTALL.bat"
+    COMMAND "${OPENMS_SOURCE_DIR}/INSTALL.bat"
     COMMENT "Copying dll to output directory"
 )

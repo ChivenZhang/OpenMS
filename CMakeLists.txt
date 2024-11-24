@@ -6,21 +6,23 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY  ${CMAKE_BINARY_DIR})
-set(OPENMS_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR} CACHE STRING "OpenMS Source Path")
+set(OPENMS_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
-add_definitions(-DOPENMS_TEST)
+#add_definitions(-DOPENMS_TEST)
 
-include_directories(${CMAKE_SOURCE_DIR})
 include_directories(${OPENMS_SOURCE_DIR})
 
-add_subdirectory(${CMAKE_SOURCE_DIR}/External/libuv)
-add_subdirectory(${CMAKE_SOURCE_DIR}/External/iocpp)
-add_subdirectory(${CMAKE_SOURCE_DIR}/OpenMS)
-add_subdirectory(${CMAKE_SOURCE_DIR}/Service)
+add_subdirectory(${OPENMS_SOURCE_DIR}/External/libuv)
+add_subdirectory(${OPENMS_SOURCE_DIR}/External/iocpp)
+add_subdirectory(${OPENMS_SOURCE_DIR}/OpenMS)
 
 if(OPENMS_ENABLE_SAMPLE)
+
+add_subdirectory(${OPENMS_SOURCE_DIR}/Service)
+
 add_executable(Sample Sample/main.cpp Sample/TestHandler.h)
 add_dependencies(Sample OpenMS)
-target_include_directories(Sample PRIVATE ${CMAKE_SOURCE_DIR}/OpenMS)
+target_include_directories(Sample PRIVATE ${OPENMS_SOURCE_DIR}/OpenMS)
 target_link_libraries(Sample OpenMS)
+
 endif()
