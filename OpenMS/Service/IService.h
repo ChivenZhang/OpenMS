@@ -15,9 +15,13 @@
 class OPENMS_API IService
 {
 public:
+	static int argc;
+	static char** argv;
+
+public:
 	virtual ~IService() = default;
 
-	virtual void startup() = 0;
+	virtual int startup() = 0;
 
 	virtual TString property(TString const& name) const = 0;
 

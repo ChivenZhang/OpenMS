@@ -9,16 +9,10 @@
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
-#include "MS.h"
-class IChannel;
+#include <OpenMS/Service/Private/Service.h>
 
-/// @brief Interface for channel
-class OPENMS_API IChannelEvent
+class StatusServer : public Service
 {
 public:
-	static TRef<IChannelEvent> New(TString&& message);
-public:
-	TString Message;
-	THnd<IChannel> Channel;
-	TRaw<TPromise<bool>> Promise = nullptr;
+	int startup() override;
 };

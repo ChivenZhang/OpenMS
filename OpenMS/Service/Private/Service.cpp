@@ -9,10 +9,9 @@
 *
 * =================================================*/
 #include "Service.h"
-#include "../IEnvironment.h"
 
-int IEnvironment::argc = 0;
-char** IEnvironment::argv = nullptr;
+int IService::argc = 0;
+char** IService::argv = nullptr;
 
 TString Service::property(TString const& name) const
 {

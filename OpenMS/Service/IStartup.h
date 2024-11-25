@@ -11,20 +11,14 @@
 * =================================================*/
 #ifndef OPENMS_SHARED_LIBRARY
 #include <OpenMS/Service/IService.h>
-#include <OpenMS/Service/IEnvironment.h>
 #include <csignal>
 
-extern TRef<IService> openms_startup();
+extern int openms_main(int argc, char** argv);
 
 int main(int argc, char** argv)
 {
-	IEnvironment::argc = argc;
-	IEnvironment::argv = argv;
-
-	auto service = openms_startup();
-	if (service == nullptr) return 1;
-	service->startup();
-
-	return 0;
+	IService::argc = argc;
+	IService::argv = argv;
+	return openms_main(argc, argv);
 }
 #endif

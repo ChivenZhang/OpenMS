@@ -9,16 +9,11 @@
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
-#include "MS.h"
-class IChannel;
+#include "../IChannelEvent.h"
 
-/// @brief Interface for channel
-class OPENMS_API IChannelEvent
+TRef<IChannelEvent> IChannelEvent::New(TString&& message)
 {
-public:
-	static TRef<IChannelEvent> New(TString&& message);
-public:
-	TString Message;
-	THnd<IChannel> Channel;
-	TRaw<TPromise<bool>> Promise = nullptr;
-};
+	auto result = TNew<IChannelEvent>();
+	result->Message = message;
+	return result;
+}

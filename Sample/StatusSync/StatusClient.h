@@ -9,10 +9,10 @@
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
+#include <OpenMS/Service/Private/Service.h>
 
-class IEnvironment
+class StatusClient : public Service
 {
 public:
-	static int argc;
-	static char** argv;
+	int startup() override;
 };

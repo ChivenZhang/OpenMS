@@ -24,7 +24,7 @@ class AuthorityService :
 	public AUTOWIRE(Timer)
 {
 public:
-	void startup() override;
+	int startup() override;
 
 protected:
 	RegistryIPTable m_IPTables;

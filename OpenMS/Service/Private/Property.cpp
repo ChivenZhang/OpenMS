@@ -11,7 +11,7 @@
 *
 * =================================================*/
 #include "Property.h"
-#include "../IEnvironment.h"
+#include "OpenMS/Service/IService.h"
 #include <fstream>
 #include <filesystem>
 #define OPENMS_CONFIG_FILE "application.json"
@@ -28,8 +28,8 @@ void Value::setValue(TString const& value)
 
 Property::Property()
 {
-	auto argc = IEnvironment::argc;
-	auto argv = IEnvironment::argv;
+	auto argc = IService::argc;
+	auto argv = IService::argv;
 
 	// Get config file path
 

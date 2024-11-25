@@ -1,4 +1,3 @@
-#pragma once
 /*=================================================
 * Copyright © 2020-2024 ChivenZhang.
 * All Rights Reserved.
@@ -9,16 +8,16 @@
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
-#include "MS.h"
-class IChannel;
+#include "StatusClient.h"
+#include <OpenMS/Service/IStartup.h>
 
-/// @brief Interface for channel
-class OPENMS_API IChannelEvent
+int openms_main(int argc, char** argv)
 {
-public:
-	static TRef<IChannelEvent> New(TString&& message);
-public:
-	TString Message;
-	THnd<IChannel> Channel;
-	TRaw<TPromise<bool>> Promise = nullptr;
-};
+	StatusClient server;
+	return server.startup();
+}
+
+int StatusClient::startup()
+{
+	return 0;
+}

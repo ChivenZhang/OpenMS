@@ -12,14 +12,16 @@
 #include "OpenMS/Toolkit/Timer.h"
 #include <OpenMS/Service/IStartup.h>
 
-TRef<IService> openms_startup()
+int openms_main(int argc, char** argv)
 {
-	return TNew<AuthorityService>();
+	AuthorityService service;
+	service.startup();
+	return 0;
 }
 
 bool running = false;
 
-void AuthorityService::startup()
+int AuthorityService::startup()
 {
 	running = true;
 	signal(SIGINT, [](int) { running = false; });
@@ -52,4 +54,6 @@ void AuthorityService::startup()
 
 	server->shutdown();
 	client->shutdown();
+
+	return 0;
 }

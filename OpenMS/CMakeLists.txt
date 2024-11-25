@@ -64,7 +64,7 @@ add_library(OpenMS STATIC
 	Reactor/Private/ChannelBuffer.h
 	Reactor/Private/ChannelContext.cpp
 	Reactor/Private/ChannelContext.h
-	Reactor/Private/ChannelEvent.h 
+	Reactor/Private/ChannelEvent.cpp
 	Reactor/Private/ChannelHandler.cpp
 	Reactor/Private/ChannelHandler.h
 	Reactor/Private/ChannelPipeline.cpp
@@ -85,7 +85,6 @@ add_library(OpenMS STATIC
 	Reactor/UDP/UDPClientReactor.h 
 	Reactor/UDP/UDPServerReactor.cpp 
 	Reactor/UDP/UDPServerReactor.h
-	Service/IEnvironment.h
 	Service/IProperty.h
 	Service/IService.h
 	Service/Private/Property.cpp

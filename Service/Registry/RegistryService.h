@@ -18,5 +18,5 @@ class RegistryService :
 	public AUTOWIRE(RegistryServer)
 {
 public:
-	void startup() override;
+	int startup() override;
 };

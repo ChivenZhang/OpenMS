@@ -18,11 +18,7 @@ add_subdirectory(${OPENMS_SOURCE_DIR}/OpenMS)
 
 if(OPENMS_ENABLE_SAMPLE)
 
+add_subdirectory(${OPENMS_SOURCE_DIR}/Sample)
 add_subdirectory(${OPENMS_SOURCE_DIR}/Service)
-
-add_executable(Sample Sample/main.cpp Sample/TestHandler.h)
-add_dependencies(Sample OpenMS)
-target_include_directories(Sample PRIVATE ${OPENMS_SOURCE_DIR}/OpenMS)
-target_link_libraries(Sample OpenMS)
 
 endif()

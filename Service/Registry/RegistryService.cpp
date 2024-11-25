@@ -11,15 +11,17 @@
 #include "RegistryService.h"
 #include <OpenMS/Service/IStartup.h>
 
-TRef<IService> openms_startup()
+int openms_main(int argc, char** argv)
 {
-	return TNew<RegistryService>();
+	RegistryService service;
+	service.startup();
+	return 0;
 }
 
 TMutex mutex;
 TMutexUnlock unlock;
 
-void RegistryService::startup()
+int RegistryService::startup()
 {
 	signal(SIGINT, [](int) { unlock.notify_all(); });
 
@@ -28,4 +30,6 @@ void RegistryService::startup()
 	TUniqueLock lock(mutex); unlock.wait(lock);
 
 	AUTOWIRE(RegistryServer)::bean()->shutdown();
+
+	return 0;
 }
