@@ -35,6 +35,7 @@ void TCPServerReactor::startup()
 
 		uv_loop_init(&loop);
 		uv_tcp_init(&loop, &server);
+		uv_tcp_nodelay(&server, 1);
 
 		do
 		{

@@ -17,19 +17,36 @@ int openms_main(int argc, char** argv)
 {
 	TVector<TRef<IChannel>> clients;
 
+	TCPServerReactor timeSync(IPv4Address::New("127.0.0.1", 9090), 0, 0, TCPServerReactor::callback_tcp_t{
+		[&](TRef<IChannel> channel) {
+			TPrint("accept %s", channel->getRemote().lock()->getString().c_str());
+
+			channel->getPipeline()->addFirst("timesync", {
+				.OnRead = [&, channel](TRaw<IChannelContext> context, TRaw<IChannelEvent> event) -> bool {
+					auto t2 = std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch().count();
+					decltype(t2) buffer[2]{ t2, t2 };
+					context->writeAndFlush(IChannelEvent::New(TString((char*)buffer, sizeof(buffer))));
+					return false;
+				}
+				});
+		}
+		});
+	timeSync.startup();
+
 	TCPServerReactor server(IPv4Address::New("127.0.0.1", 8080), 0, 0, TCPServerReactor::callback_tcp_t{
 		[&](TRef<IChannel> channel) {
 			TPrint("accept %s", channel->getRemote().lock()->getString().c_str());
 			clients.push_back(channel);
 
+			TString buffer;
 			channel->getPipeline()->addFirst("broadcast", {
-				.OnRead = [&](TRaw<IChannelContext> context, TRaw<IChannelEvent> event)->bool {
+				.OnRead = [&, channel](TRaw<IChannelContext> context, TRaw<IChannelEvent> event) mutable ->bool {
 					for (size_t i = 0; i < clients.size(); ++i)
 					{
 						if (clients[i] == channel) continue;
 						auto _event = TNew<IChannelEvent>();
 						_event->Message = event->Message;
-						clients[i]->write(_event);
+						clients[i]->writeAndFlush(_event);
 					}
 					return false;
 				}
@@ -45,5 +62,7 @@ int openms_main(int argc, char** argv)
 	signal(SIGINT, [](int) { unlock.notify_all(); });
 	TUniqueLock _lock(lock); unlock.wait(_lock);
 	server.shutdown();
+
+	timeSync.shutdown();
 	return 0;
 }

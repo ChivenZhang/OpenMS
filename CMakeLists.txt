@@ -14,6 +14,7 @@ include_directories(${OPENMS_SOURCE_DIR})
 
 add_subdirectory(${OPENMS_SOURCE_DIR}/External/libuv)
 add_subdirectory(${OPENMS_SOURCE_DIR}/External/iocpp)
+add_subdirectory(${OPENMS_SOURCE_DIR}/External/xege)
 add_subdirectory(${OPENMS_SOURCE_DIR}/OpenMS)
 
 if(OPENMS_ENABLE_SAMPLE)
