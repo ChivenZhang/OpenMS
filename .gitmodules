@@ -14,3 +14,6 @@
 [submodule "External/iocpp"]
 	path = External/iocpp
 	url = https://github.com/ChivenZhang/iocpp.git
+[submodule "External/xege"]
+	path = External/xege
+	url = https://github.com/wysaid/xege.git
