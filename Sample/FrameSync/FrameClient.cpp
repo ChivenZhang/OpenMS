@@ -33,6 +33,7 @@ struct status_t
 int openms_main(int argc, char** argv)
 {
 	initgraph(640, 480, INIT_DEFAULT);
+	setrendermode(RENDER_MANUAL);
 
 	TVector<status_t> actorStatus;
 	TQueue<operate_t> operateQueue;
@@ -43,7 +44,7 @@ int openms_main(int argc, char** argv)
 	TPromise<void> promise;
 	auto future = promise.get_future();
 	time_t t1, t2, t3, t4;
-	TCPClientReactor timeSync(IPv4Address::New("127.0.0.1", 9090), 0, TCPClientReactor::callback_tcp_t{
+	TCPClientReactor timeSync(IPv4Address::New("127.0.0.1", 9090), 0, {
 		[&](TRef<IChannel> channel) {
 			channel->getPipeline()->addFirst("timesync", {
 				.OnRead = [&](TRaw<IChannelContext> context, TRaw<IChannelEvent> event)->bool {
@@ -61,7 +62,7 @@ int openms_main(int argc, char** argv)
 	timeSync.startup();
 	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	t1 = std::chrono::time_point_cast<std::chrono::milliseconds>(std::chrono::system_clock::now()).time_since_epoch().count();
-	timeSync.write(IChannelEvent::New("123"), nullptr);
+	timeSync.write(IChannelEvent::New("0"), nullptr);
 	future.wait();
 	timeSync.shutdown();
 
@@ -69,7 +70,7 @@ int openms_main(int argc, char** argv)
 
 	// Setup Client
 
-	TCPClientReactor client(IPv4Address::New("127.0.0.1", 8080), 0, TCPClientReactor::callback_tcp_t{
+	TCPClientReactor client(IPv4Address::New("127.0.0.1", 8080), 0, {
 		[&](TRef<IChannel> channel) {
 			TString buffer;
 			channel->getPipeline()->addFirst("broadcast", {
@@ -92,7 +93,7 @@ int openms_main(int argc, char** argv)
 	client.startup();
 
 	srand(time(nullptr));
-	auto actorID = uint32_t(1 + rand() % 10000);
+	auto actorID = uint32_t(1 + rand() % 1000);
 	actorStatus.emplace_back(status_t{ actorID });
 
 	bool pressedA = false, pressedD = false, pressedS = false, pressedW = false;
@@ -166,21 +167,23 @@ int openms_main(int argc, char** argv)
 		else pressedW = false;
 		};
 
+	uint32_t frame = 0;
+
 	auto render_func = [&](float time) {
 
 		cleardevice();
+		outtextxy(10, 10, std::to_string(frame).c_str());
 		for (auto& status : actorStatus)
 		{
 			fillcircle(status.X, status.Y, MOVE_SIZE);
+			outtextxy(status.X + MOVE_SIZE, status.Y - 2 * MOVE_SIZE, std::to_string(status.Actor).c_str());
 		}
 		};
 
-	uint32_t frame = 0;
 	auto frameLength = 1000 / 20;
-	auto timePerLoop = 1000 / 60;
 	auto frameTime = ::clock();
 	auto frameNext = frameTime + frameLength;
-	while (is_run())
+	for (; is_run(); delay_fps(60))
 	{
 		frameTime = ::clock();
 		while (frameNext < frameTime)
@@ -189,7 +192,6 @@ int openms_main(int argc, char** argv)
 			frameNext += frameLength;
 		}
 		render_func(frameTime);
-		delay(timePerLoop);
 	}
 
 	client.shutdown();

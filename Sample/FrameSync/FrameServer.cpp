@@ -17,7 +17,7 @@ int openms_main(int argc, char** argv)
 {
 	TVector<TRef<IChannel>> clients;
 
-	TCPServerReactor timeSync(IPv4Address::New("127.0.0.1", 9090), 0, 0, TCPServerReactor::callback_tcp_t{
+	TCPServerReactor timeSync(IPv4Address::New("0.0.0.0", 9090), 0, 0, {
 		[&](TRef<IChannel> channel) {
 			TPrint("accept %s", channel->getRemote().lock()->getString().c_str());
 
@@ -33,7 +33,7 @@ int openms_main(int argc, char** argv)
 		});
 	timeSync.startup();
 
-	TCPServerReactor server(IPv4Address::New("127.0.0.1", 8080), 0, 0, TCPServerReactor::callback_tcp_t{
+	TCPServerReactor server(IPv4Address::New("0.0.0.0", 8080), 0, 0, {
 		[&](TRef<IChannel> channel) {
 			TPrint("accept %s", channel->getRemote().lock()->getString().c_str());
 			clients.push_back(channel);
