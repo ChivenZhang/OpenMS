@@ -15,6 +15,16 @@
 					"name": "LIBUV_BUILD_SHARED",
 					"value": "False",
 					"type": "BOOL"
+				},
+				{
+					"name": "protobuf_BUILD_TESTS",
+					"value": "False",
+					"type": "BOOL"
+				},
+				{
+					"name": "BUILD_TESTING",
+					"value": "True",
+					"type": "BOOL"
 				}
 			]
 		},
@@ -31,6 +41,16 @@
 			"variables": [
 				{
 					"name": "LIBUV_BUILD_SHARED",
+					"value": "False",
+					"type": "BOOL"
+				},
+				{
+					"name": "BUILD_TESTING",
+					"value": "True",
+					"type": "BOOL"
+				},
+				{
+					"name": "protobuf_BUILD_TESTS",
 					"value": "False",
 					"type": "BOOL"
 				}

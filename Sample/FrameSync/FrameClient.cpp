@@ -12,6 +12,7 @@
 #include <OpenMS/Reactor/TCP/TCPClientReactor.h>
 #include <Windows.h>
 #include <graphics.h>
+#include "Message.pb.h"
 
 #define MOVE_SIZE 10
 #define MOVE_STEP 20
@@ -32,6 +33,15 @@ struct status_t
 
 int openms_main(int argc, char** argv)
 {
+	sync::Message msg;
+	msg.set_type(sync::MSG_TYPE_LOGIN);
+	TString buffer;
+	msg.SerializeToString(&buffer);
+
+	sync::Message clone;
+	clone.ParseFromString(buffer);
+	TPrint("%d", clone.type());
+
 	initgraph(640, 480, INIT_DEFAULT);
 	setrendermode(RENDER_MANUAL);
 

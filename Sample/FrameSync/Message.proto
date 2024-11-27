@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package sync;
+
+enum MsgType
+{
+	MSG_TYPE_NONE = 0;
+	MSG_TYPE_LOGIN = 1;
+}
+
+message MsgMove
+{
+	uint32 Angle = 1;
+}
+
+message MsgBody
+{
+	optional MsgMove move = 1;
+}
+
+message Message
+{
+	optional MsgType type = 1;
+	optional MsgBody body = 2;
+}
