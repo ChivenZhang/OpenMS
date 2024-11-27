@@ -9,27 +9,18 @@
 *
 * =================================================*/
 #include "RegistryService.h"
-#include <OpenMS/Service/IStartup.h>
 
-int openms_main(int argc, char** argv)
+int main(int argc, char** argv)
 {
-	RegistryService service;
-	service.startup();
-	return 0;
+	return IApplication::Run<RegistryService>(argc, argv);
 }
 
-TMutex mutex;
-TMutexUnlock unlock;
-
-int RegistryService::startup()
+void RegistryService::onStartup()
 {
-	signal(SIGINT, [](int) { unlock.notify_all(); });
-
 	AUTOWIRE(RegistryServer)::bean()->startup();
+}
 
-	TUniqueLock lock(mutex); unlock.wait(lock);
-
+void RegistryService::onShutdown()
+{
 	AUTOWIRE(RegistryServer)::bean()->shutdown();
-
-	return 0;
 }

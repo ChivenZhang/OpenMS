@@ -9,16 +9,9 @@
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
-#ifndef OPENMS_SHARED_LIBRARY
-#include <OpenMS/Service/IService.h>
-#include <csignal>
+#include <OpenMS/Reactor/TCP/TCPServerReactor.h>
+#include <OpenMS/Reactor/UDP/UDPServerReactor.h>
 
-extern int openms_main(int argc, char** argv);
-
-int main(int argc, char** argv)
+class FrameConfig
 {
-	IService::argc = argc;
-	IService::argv = argv;
-	return openms_main(argc, argv);
-}
-#endif
+};

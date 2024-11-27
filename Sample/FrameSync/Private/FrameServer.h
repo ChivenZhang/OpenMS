@@ -1,3 +1,4 @@
+#pragma once
 /*=================================================
 * Copyright © 2020-2024 ChivenZhang.
 * All Rights Reserved.
@@ -8,9 +9,10 @@
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
-#include "StatusServer.h"
+#include <OpenMS/Endpoint/TCP/TCPServer.h>
 
-int main(int argc, char** argv)
+class FrameServer : public TCPServer
 {
-	return 0;
-}
+public:
+	void configureEndpoint(config_t& config) override;
+};

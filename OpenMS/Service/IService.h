@@ -10,18 +10,17 @@
 *
 * =================================================*/
 #include "MS.h"
+#include <csignal>
 
 /// @brief Interface for service
 class OPENMS_API IService
 {
 public:
-	static int argc;
-	static char** argv;
-
-public:
 	virtual ~IService() = default;
 
 	virtual int startup() = 0;
+
+	virtual void shutdown() = 0;
 
 	virtual TString property(TString const& name) const = 0;
 
@@ -30,21 +29,27 @@ public:
 	{
 		return TTextC<T>::from_string(property(name), value);
 	}
-
-protected:
-	static TRaw<IService> m_Instance;
 };
 
-/// @brief Interface for provider service
-class OPENMS_API IProviderService : public virtual IService
+/// @brief Interface for application
+class OPENMS_API IApplication
 {
 public:
+	static int argc;
+	static char** argv;
 
-};
-
-/// @brief Interface for comsumer service
-class OPENMS_API IComsumerService : public virtual IService
-{
 public:
-
+	template <class T, OPENMS_BASE_OF(IService, T)>
+	static int Run(int argc, char** argv)
+	{
+		IApplication::argc = argc;
+		IApplication::argv = argv;
+		static TRef<IService> service;
+		if (service == nullptr) service = TNew<T>();
+		signal(SIGINT, [](int) { service->shutdown(); });
+		auto result = service->startup();
+		signal(SIGINT, nullptr);
+		service = nullptr;
+		return result;
+	}
 };

@@ -20,11 +20,11 @@ class AuthorityService :
 	public AUTOWIREN(Value, "iptable"),
 	public AUTOWIREN(Value, "service"),
 	public AUTOWIRE(AuthorityServer),
-	public AUTOWIRE(AuthorityClient),
-	public AUTOWIRE(Timer)
+	public AUTOWIRE(AuthorityClient)
 {
 public:
-	int startup() override;
+	void onStartup() override;
+	void onShutdown() override;
 
 protected:
 	RegistryIPTable m_IPTables;

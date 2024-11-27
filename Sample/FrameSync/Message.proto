@@ -4,18 +4,53 @@ package sync;
 
 enum MsgType
 {
-	MSG_TYPE_NONE = 0;
-	MSG_TYPE_LOGIN = 1;
+	MSG_NONE = 0;
+	MSG_ENTER_BATTLE = 1;
+	MSG_MATCH_BATTLE = 2;
+	MSG_READY_BATTLE = 3;
+	MSG_BEGIN_BATTLE = 4;
+	MSG_END_BATTLE = 5;
+	MSG_EXIT_BATTLE = 6;
 }
 
-message MsgMove
+message MsgEnterBattle
 {
-	uint32 Angle = 1;
+	string name = 1;
+}
+
+message MsgMatchBattle
+{
+	string name = 1;
+}
+
+message MsgReadyBattle
+{
+	string name = 1;
+}
+
+message MsgBeginBattle
+{
+	string name = 1;
+}
+
+message MsgEndBattle
+{
+	string name = 1;
+}
+
+message MsgExitBattle
+{
+	string name = 1;
 }
 
 message MsgBody
 {
-	optional MsgMove move = 1;
+	optional MsgEnterBattle enter_battle = 1;
+	optional MsgMatchBattle match_battle = 2;
+	optional MsgReadyBattle ready_battle = 3;
+	optional MsgBeginBattle begin_battle = 4;
+	optional MsgEndBattle end_battle = 5;
+	optional MsgExitBattle exit_battle = 6;
 }
 
 message Message

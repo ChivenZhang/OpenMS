@@ -28,8 +28,8 @@ void Value::setValue(TString const& value)
 
 Property::Property()
 {
-	auto argc = IService::argc;
-	auto argv = IService::argv;
+	auto argc = IApplication::argc;
+	auto argv = IApplication::argv;
 
 	// Get config file path
 

@@ -14,5 +14,4 @@
 class StatusServer : public Service
 {
 public:
-	int startup() override;
 };

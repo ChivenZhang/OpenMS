@@ -53,6 +53,11 @@
 					"name": "protobuf_BUILD_TESTS",
 					"value": "False",
 					"type": "BOOL"
+				},
+				{
+					"name": "protobuf_MSVC_STATIC_RUNTIME",
+					"value": "False",
+					"type": "BOOL"
 				}
 			]
 		}

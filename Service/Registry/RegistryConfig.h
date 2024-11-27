@@ -17,7 +17,6 @@
 class RegistryConfig :
 	public RESOURCE2(Property, IProperty),
 	public RESOURCE2N(Value, IValue, "iptable"),
-	public RESOURCE(RegistryServer),
-	public RESOURCE(Timer)
+	public RESOURCE(RegistryServer)
 {
 };

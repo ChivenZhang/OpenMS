@@ -62,14 +62,34 @@ class Message;
 struct MessageDefaultTypeInternal;
 extern MessageDefaultTypeInternal _Message_default_instance_;
 extern const ::google::protobuf::internal::ClassDataFull Message_class_data_;
+class MsgBeginBattle;
+struct MsgBeginBattleDefaultTypeInternal;
+extern MsgBeginBattleDefaultTypeInternal _MsgBeginBattle_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull MsgBeginBattle_class_data_;
 class MsgBody;
 struct MsgBodyDefaultTypeInternal;
 extern MsgBodyDefaultTypeInternal _MsgBody_default_instance_;
 extern const ::google::protobuf::internal::ClassDataFull MsgBody_class_data_;
-class MsgMove;
-struct MsgMoveDefaultTypeInternal;
-extern MsgMoveDefaultTypeInternal _MsgMove_default_instance_;
-extern const ::google::protobuf::internal::ClassDataFull MsgMove_class_data_;
+class MsgEndBattle;
+struct MsgEndBattleDefaultTypeInternal;
+extern MsgEndBattleDefaultTypeInternal _MsgEndBattle_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull MsgEndBattle_class_data_;
+class MsgEnterBattle;
+struct MsgEnterBattleDefaultTypeInternal;
+extern MsgEnterBattleDefaultTypeInternal _MsgEnterBattle_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull MsgEnterBattle_class_data_;
+class MsgExitBattle;
+struct MsgExitBattleDefaultTypeInternal;
+extern MsgExitBattleDefaultTypeInternal _MsgExitBattle_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull MsgExitBattle_class_data_;
+class MsgMatchBattle;
+struct MsgMatchBattleDefaultTypeInternal;
+extern MsgMatchBattleDefaultTypeInternal _MsgMatchBattle_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull MsgMatchBattle_class_data_;
+class MsgReadyBattle;
+struct MsgReadyBattleDefaultTypeInternal;
+extern MsgReadyBattleDefaultTypeInternal _MsgReadyBattle_default_instance_;
+extern const ::google::protobuf::internal::ClassDataFull MsgReadyBattle_class_data_;
 }  // namespace sync
 namespace google {
 namespace protobuf {
@@ -81,8 +101,13 @@ internal::EnumTraitsT<::sync::MsgType_internal_data_>
 
 namespace sync {
 enum MsgType : int {
-  MSG_TYPE_NONE = 0,
-  MSG_TYPE_LOGIN = 1,
+  MSG_NONE = 0,
+  MSG_ENTER_BATTLE = 1,
+  MSG_MATCH_BATTLE = 2,
+  MSG_READY_BATTLE = 3,
+  MSG_BEGIN_BATTLE = 4,
+  MSG_END_BATTLE = 5,
+  MSG_EXIT_BATTLE = 6,
   MsgType_INT_MIN_SENTINEL_DO_NOT_USE_ =
       std::numeric_limits<::int32_t>::min(),
   MsgType_INT_MAX_SENTINEL_DO_NOT_USE_ =
@@ -94,8 +119,8 @@ extern const uint32_t MsgType_internal_data_[];
 inline constexpr MsgType MsgType_MIN =
     static_cast<MsgType>(0);
 inline constexpr MsgType MsgType_MAX =
-    static_cast<MsgType>(1);
-inline constexpr int MsgType_ARRAYSIZE = 1 + 1;
+    static_cast<MsgType>(6);
+inline constexpr int MsgType_ARRAYSIZE = 6 + 1;
 const ::google::protobuf::EnumDescriptor*
 MsgType_descriptor();
 template <typename T>
@@ -108,7 +133,7 @@ const std::string& MsgType_Name(T value) {
 template <>
 inline const std::string& MsgType_Name(MsgType value) {
   return ::google::protobuf::internal::NameOfDenseEnum<MsgType_descriptor,
-                                                 0, 1>(
+                                                 0, 6>(
       static_cast<int>(value));
 }
 inline bool MsgType_Parse(absl::string_view name, MsgType* value) {
@@ -121,32 +146,32 @@ inline bool MsgType_Parse(absl::string_view name, MsgType* value) {
 
 // -------------------------------------------------------------------
 
-class MsgMove final
+class MsgReadyBattle final
     : public ::google::protobuf::Message
-/* @@protoc_insertion_point(class_definition:sync.MsgMove) */ {
+/* @@protoc_insertion_point(class_definition:sync.MsgReadyBattle) */ {
  public:
-  inline MsgMove() : MsgMove(nullptr) {}
-  ~MsgMove() PROTOBUF_FINAL;
+  inline MsgReadyBattle() : MsgReadyBattle(nullptr) {}
+  ~MsgReadyBattle() PROTOBUF_FINAL;
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-  void operator delete(MsgMove* msg, std::destroying_delete_t) {
+  void operator delete(MsgReadyBattle* msg, std::destroying_delete_t) {
     SharedDtor(*msg);
-    ::google::protobuf::internal::SizedDelete(msg, sizeof(MsgMove));
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(MsgReadyBattle));
   }
 #endif
 
   template <typename = void>
-  explicit PROTOBUF_CONSTEXPR MsgMove(
+  explicit PROTOBUF_CONSTEXPR MsgReadyBattle(
       ::google::protobuf::internal::ConstantInitialized);
 
-  inline MsgMove(const MsgMove& from) : MsgMove(nullptr, from) {}
-  inline MsgMove(MsgMove&& from) noexcept
-      : MsgMove(nullptr, std::move(from)) {}
-  inline MsgMove& operator=(const MsgMove& from) {
+  inline MsgReadyBattle(const MsgReadyBattle& from) : MsgReadyBattle(nullptr, from) {}
+  inline MsgReadyBattle(MsgReadyBattle&& from) noexcept
+      : MsgReadyBattle(nullptr, std::move(from)) {}
+  inline MsgReadyBattle& operator=(const MsgReadyBattle& from) {
     CopyFrom(from);
     return *this;
   }
-  inline MsgMove& operator=(MsgMove&& from) noexcept {
+  inline MsgReadyBattle& operator=(MsgReadyBattle&& from) noexcept {
     if (this == &from) return *this;
     if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
       InternalSwap(&from);
@@ -174,13 +199,13 @@ class MsgMove final
   static const ::google::protobuf::Reflection* GetReflection() {
     return default_instance().GetMetadata().reflection;
   }
-  static const MsgMove& default_instance() {
-    return *reinterpret_cast<const MsgMove*>(
-        &_MsgMove_default_instance_);
+  static const MsgReadyBattle& default_instance() {
+    return *reinterpret_cast<const MsgReadyBattle*>(
+        &_MsgReadyBattle_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 0;
-  friend void swap(MsgMove& a, MsgMove& b) { a.Swap(&b); }
-  inline void Swap(MsgMove* other) {
+  static constexpr int kIndexInFileMessages = 2;
+  friend void swap(MsgReadyBattle& a, MsgReadyBattle& b) { a.Swap(&b); }
+  inline void Swap(MsgReadyBattle* other) {
     if (other == this) return;
     if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
       InternalSwap(other);
@@ -188,7 +213,7 @@ class MsgMove final
       ::google::protobuf::internal::GenericSwap(this, other);
     }
   }
-  void UnsafeArenaSwap(MsgMove* other) {
+  void UnsafeArenaSwap(MsgReadyBattle* other) {
     if (other == this) return;
     ABSL_DCHECK(GetArena() == other->GetArena());
     InternalSwap(other);
@@ -196,13 +221,13 @@ class MsgMove final
 
   // implements Message ----------------------------------------------
 
-  MsgMove* New(::google::protobuf::Arena* arena = nullptr) const {
-    return ::google::protobuf::Message::DefaultConstruct<MsgMove>(arena);
+  MsgReadyBattle* New(::google::protobuf::Arena* arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<MsgReadyBattle>(arena);
   }
   using ::google::protobuf::Message::CopyFrom;
-  void CopyFrom(const MsgMove& from);
+  void CopyFrom(const MsgReadyBattle& from);
   using ::google::protobuf::Message::MergeFrom;
-  void MergeFrom(const MsgMove& from) { MsgMove::MergeImpl(*this, from); }
+  void MergeFrom(const MsgReadyBattle& from) { MsgReadyBattle::MergeImpl(*this, from); }
 
   private:
   static void MergeImpl(
@@ -239,18 +264,18 @@ class MsgMove final
   private:
   void SharedCtor(::google::protobuf::Arena* arena);
   static void SharedDtor(MessageLite& self);
-  void InternalSwap(MsgMove* other);
+  void InternalSwap(MsgReadyBattle* other);
  private:
   template <typename T>
   friend ::absl::string_view(
       ::google::protobuf::internal::GetAnyMessageName)();
-  static ::absl::string_view FullMessageName() { return "sync.MsgMove"; }
+  static ::absl::string_view FullMessageName() { return "sync.MsgReadyBattle"; }
 
  protected:
-  explicit MsgMove(::google::protobuf::Arena* arena);
-  MsgMove(::google::protobuf::Arena* arena, const MsgMove& from);
-  MsgMove(::google::protobuf::Arena* arena, MsgMove&& from) noexcept
-      : MsgMove(arena) {
+  explicit MsgReadyBattle(::google::protobuf::Arena* arena);
+  MsgReadyBattle(::google::protobuf::Arena* arena, const MsgReadyBattle& from);
+  MsgReadyBattle(::google::protobuf::Arena* arena, MsgReadyBattle&& from) noexcept
+      : MsgReadyBattle(arena) {
     *this = ::std::move(from);
   }
   const ::google::protobuf::internal::ClassData* GetClassData() const PROTOBUF_FINAL;
@@ -266,25 +291,30 @@ class MsgMove final
 
   // accessors -------------------------------------------------------
   enum : int {
-    kAngleFieldNumber = 1,
+    kNameFieldNumber = 1,
   };
-  // uint32 Angle = 1;
-  void clear_angle() ;
-  ::uint32_t angle() const;
-  void set_angle(::uint32_t value);
+  // string name = 1;
+  void clear_name() ;
+  const std::string& name() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_name(Arg_&& arg, Args_... args);
+  std::string* mutable_name();
+  [[nodiscard]] std::string* release_name();
+  void set_allocated_name(std::string* value);
 
   private:
-  ::uint32_t _internal_angle() const;
-  void _internal_set_angle(::uint32_t value);
+  const std::string& _internal_name() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_name(const std::string& value);
+  std::string* _internal_mutable_name();
 
   public:
-  // @@protoc_insertion_point(class_scope:sync.MsgMove)
+  // @@protoc_insertion_point(class_scope:sync.MsgReadyBattle)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
       0, 1, 0,
-      0, 2>
+      32, 2>
       _table_;
 
   friend class ::google::protobuf::MessageLite;
@@ -300,17 +330,1002 @@ class MsgMove final
                           ::google::protobuf::Arena* arena);
     inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
                           ::google::protobuf::Arena* arena, const Impl_& from,
-                          const MsgMove& from_msg);
+                          const MsgReadyBattle& from_msg);
     ::google::protobuf::internal::HasBits<1> _has_bits_;
     ::google::protobuf::internal::CachedSize _cached_size_;
-    ::uint32_t angle_;
+    ::google::protobuf::internal::ArenaStringPtr name_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
   friend struct ::TableStruct_Message_2eproto;
 };
 
-extern const ::google::protobuf::internal::ClassDataFull MsgMove_class_data_;
+extern const ::google::protobuf::internal::ClassDataFull MsgReadyBattle_class_data_;
+// -------------------------------------------------------------------
+
+class MsgMatchBattle final
+    : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:sync.MsgMatchBattle) */ {
+ public:
+  inline MsgMatchBattle() : MsgMatchBattle(nullptr) {}
+  ~MsgMatchBattle() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(MsgMatchBattle* msg, std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(MsgMatchBattle));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR MsgMatchBattle(
+      ::google::protobuf::internal::ConstantInitialized);
+
+  inline MsgMatchBattle(const MsgMatchBattle& from) : MsgMatchBattle(nullptr, from) {}
+  inline MsgMatchBattle(MsgMatchBattle&& from) noexcept
+      : MsgMatchBattle(nullptr, std::move(from)) {}
+  inline MsgMatchBattle& operator=(const MsgMatchBattle& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline MsgMatchBattle& operator=(MsgMatchBattle&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const MsgMatchBattle& default_instance() {
+    return *reinterpret_cast<const MsgMatchBattle*>(
+        &_MsgMatchBattle_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 1;
+  friend void swap(MsgMatchBattle& a, MsgMatchBattle& b) { a.Swap(&b); }
+  inline void Swap(MsgMatchBattle* other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(MsgMatchBattle* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  MsgMatchBattle* New(::google::protobuf::Arena* arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<MsgMatchBattle>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const MsgMatchBattle& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const MsgMatchBattle& from) { MsgMatchBattle::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(
+      ::google::protobuf::MessageLite& to_msg,
+      const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* _InternalSerialize(
+      const MessageLite& msg, ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(MsgMatchBattle* other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(
+      ::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "sync.MsgMatchBattle"; }
+
+ protected:
+  explicit MsgMatchBattle(::google::protobuf::Arena* arena);
+  MsgMatchBattle(::google::protobuf::Arena* arena, const MsgMatchBattle& from);
+  MsgMatchBattle(::google::protobuf::Arena* arena, MsgMatchBattle&& from) noexcept
+      : MsgMatchBattle(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* GetClassData() const PROTOBUF_FINAL;
+  static void* PlacementNew_(const void*, void* mem,
+                             ::google::protobuf::Arena* arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kNameFieldNumber = 1,
+  };
+  // string name = 1;
+  void clear_name() ;
+  const std::string& name() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_name(Arg_&& arg, Args_... args);
+  std::string* mutable_name();
+  [[nodiscard]] std::string* release_name();
+  void set_allocated_name(std::string* value);
+
+  private:
+  const std::string& _internal_name() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_name(const std::string& value);
+  std::string* _internal_mutable_name();
+
+  public:
+  // @@protoc_insertion_point(class_scope:sync.MsgMatchBattle)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      0, 1, 0,
+      32, 2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(
+        ::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena);
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena, const Impl_& from,
+                          const MsgMatchBattle& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::google::protobuf::internal::ArenaStringPtr name_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_Message_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull MsgMatchBattle_class_data_;
+// -------------------------------------------------------------------
+
+class MsgExitBattle final
+    : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:sync.MsgExitBattle) */ {
+ public:
+  inline MsgExitBattle() : MsgExitBattle(nullptr) {}
+  ~MsgExitBattle() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(MsgExitBattle* msg, std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(MsgExitBattle));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR MsgExitBattle(
+      ::google::protobuf::internal::ConstantInitialized);
+
+  inline MsgExitBattle(const MsgExitBattle& from) : MsgExitBattle(nullptr, from) {}
+  inline MsgExitBattle(MsgExitBattle&& from) noexcept
+      : MsgExitBattle(nullptr, std::move(from)) {}
+  inline MsgExitBattle& operator=(const MsgExitBattle& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline MsgExitBattle& operator=(MsgExitBattle&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const MsgExitBattle& default_instance() {
+    return *reinterpret_cast<const MsgExitBattle*>(
+        &_MsgExitBattle_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 5;
+  friend void swap(MsgExitBattle& a, MsgExitBattle& b) { a.Swap(&b); }
+  inline void Swap(MsgExitBattle* other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(MsgExitBattle* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  MsgExitBattle* New(::google::protobuf::Arena* arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<MsgExitBattle>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const MsgExitBattle& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const MsgExitBattle& from) { MsgExitBattle::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(
+      ::google::protobuf::MessageLite& to_msg,
+      const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* _InternalSerialize(
+      const MessageLite& msg, ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(MsgExitBattle* other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(
+      ::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "sync.MsgExitBattle"; }
+
+ protected:
+  explicit MsgExitBattle(::google::protobuf::Arena* arena);
+  MsgExitBattle(::google::protobuf::Arena* arena, const MsgExitBattle& from);
+  MsgExitBattle(::google::protobuf::Arena* arena, MsgExitBattle&& from) noexcept
+      : MsgExitBattle(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* GetClassData() const PROTOBUF_FINAL;
+  static void* PlacementNew_(const void*, void* mem,
+                             ::google::protobuf::Arena* arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kNameFieldNumber = 1,
+  };
+  // string name = 1;
+  void clear_name() ;
+  const std::string& name() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_name(Arg_&& arg, Args_... args);
+  std::string* mutable_name();
+  [[nodiscard]] std::string* release_name();
+  void set_allocated_name(std::string* value);
+
+  private:
+  const std::string& _internal_name() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_name(const std::string& value);
+  std::string* _internal_mutable_name();
+
+  public:
+  // @@protoc_insertion_point(class_scope:sync.MsgExitBattle)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      0, 1, 0,
+      31, 2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(
+        ::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena);
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena, const Impl_& from,
+                          const MsgExitBattle& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::google::protobuf::internal::ArenaStringPtr name_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_Message_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull MsgExitBattle_class_data_;
+// -------------------------------------------------------------------
+
+class MsgEnterBattle final
+    : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:sync.MsgEnterBattle) */ {
+ public:
+  inline MsgEnterBattle() : MsgEnterBattle(nullptr) {}
+  ~MsgEnterBattle() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(MsgEnterBattle* msg, std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(MsgEnterBattle));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR MsgEnterBattle(
+      ::google::protobuf::internal::ConstantInitialized);
+
+  inline MsgEnterBattle(const MsgEnterBattle& from) : MsgEnterBattle(nullptr, from) {}
+  inline MsgEnterBattle(MsgEnterBattle&& from) noexcept
+      : MsgEnterBattle(nullptr, std::move(from)) {}
+  inline MsgEnterBattle& operator=(const MsgEnterBattle& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline MsgEnterBattle& operator=(MsgEnterBattle&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const MsgEnterBattle& default_instance() {
+    return *reinterpret_cast<const MsgEnterBattle*>(
+        &_MsgEnterBattle_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 0;
+  friend void swap(MsgEnterBattle& a, MsgEnterBattle& b) { a.Swap(&b); }
+  inline void Swap(MsgEnterBattle* other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(MsgEnterBattle* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  MsgEnterBattle* New(::google::protobuf::Arena* arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<MsgEnterBattle>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const MsgEnterBattle& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const MsgEnterBattle& from) { MsgEnterBattle::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(
+      ::google::protobuf::MessageLite& to_msg,
+      const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* _InternalSerialize(
+      const MessageLite& msg, ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(MsgEnterBattle* other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(
+      ::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "sync.MsgEnterBattle"; }
+
+ protected:
+  explicit MsgEnterBattle(::google::protobuf::Arena* arena);
+  MsgEnterBattle(::google::protobuf::Arena* arena, const MsgEnterBattle& from);
+  MsgEnterBattle(::google::protobuf::Arena* arena, MsgEnterBattle&& from) noexcept
+      : MsgEnterBattle(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* GetClassData() const PROTOBUF_FINAL;
+  static void* PlacementNew_(const void*, void* mem,
+                             ::google::protobuf::Arena* arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kNameFieldNumber = 1,
+  };
+  // string name = 1;
+  void clear_name() ;
+  const std::string& name() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_name(Arg_&& arg, Args_... args);
+  std::string* mutable_name();
+  [[nodiscard]] std::string* release_name();
+  void set_allocated_name(std::string* value);
+
+  private:
+  const std::string& _internal_name() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_name(const std::string& value);
+  std::string* _internal_mutable_name();
+
+  public:
+  // @@protoc_insertion_point(class_scope:sync.MsgEnterBattle)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      0, 1, 0,
+      32, 2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(
+        ::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena);
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena, const Impl_& from,
+                          const MsgEnterBattle& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::google::protobuf::internal::ArenaStringPtr name_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_Message_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull MsgEnterBattle_class_data_;
+// -------------------------------------------------------------------
+
+class MsgEndBattle final
+    : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:sync.MsgEndBattle) */ {
+ public:
+  inline MsgEndBattle() : MsgEndBattle(nullptr) {}
+  ~MsgEndBattle() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(MsgEndBattle* msg, std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(MsgEndBattle));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR MsgEndBattle(
+      ::google::protobuf::internal::ConstantInitialized);
+
+  inline MsgEndBattle(const MsgEndBattle& from) : MsgEndBattle(nullptr, from) {}
+  inline MsgEndBattle(MsgEndBattle&& from) noexcept
+      : MsgEndBattle(nullptr, std::move(from)) {}
+  inline MsgEndBattle& operator=(const MsgEndBattle& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline MsgEndBattle& operator=(MsgEndBattle&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const MsgEndBattle& default_instance() {
+    return *reinterpret_cast<const MsgEndBattle*>(
+        &_MsgEndBattle_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 4;
+  friend void swap(MsgEndBattle& a, MsgEndBattle& b) { a.Swap(&b); }
+  inline void Swap(MsgEndBattle* other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(MsgEndBattle* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  MsgEndBattle* New(::google::protobuf::Arena* arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<MsgEndBattle>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const MsgEndBattle& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const MsgEndBattle& from) { MsgEndBattle::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(
+      ::google::protobuf::MessageLite& to_msg,
+      const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* _InternalSerialize(
+      const MessageLite& msg, ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(MsgEndBattle* other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(
+      ::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "sync.MsgEndBattle"; }
+
+ protected:
+  explicit MsgEndBattle(::google::protobuf::Arena* arena);
+  MsgEndBattle(::google::protobuf::Arena* arena, const MsgEndBattle& from);
+  MsgEndBattle(::google::protobuf::Arena* arena, MsgEndBattle&& from) noexcept
+      : MsgEndBattle(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* GetClassData() const PROTOBUF_FINAL;
+  static void* PlacementNew_(const void*, void* mem,
+                             ::google::protobuf::Arena* arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kNameFieldNumber = 1,
+  };
+  // string name = 1;
+  void clear_name() ;
+  const std::string& name() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_name(Arg_&& arg, Args_... args);
+  std::string* mutable_name();
+  [[nodiscard]] std::string* release_name();
+  void set_allocated_name(std::string* value);
+
+  private:
+  const std::string& _internal_name() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_name(const std::string& value);
+  std::string* _internal_mutable_name();
+
+  public:
+  // @@protoc_insertion_point(class_scope:sync.MsgEndBattle)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      0, 1, 0,
+      30, 2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(
+        ::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena);
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena, const Impl_& from,
+                          const MsgEndBattle& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::google::protobuf::internal::ArenaStringPtr name_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_Message_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull MsgEndBattle_class_data_;
+// -------------------------------------------------------------------
+
+class MsgBeginBattle final
+    : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:sync.MsgBeginBattle) */ {
+ public:
+  inline MsgBeginBattle() : MsgBeginBattle(nullptr) {}
+  ~MsgBeginBattle() PROTOBUF_FINAL;
+
+#if defined(PROTOBUF_CUSTOM_VTABLE)
+  void operator delete(MsgBeginBattle* msg, std::destroying_delete_t) {
+    SharedDtor(*msg);
+    ::google::protobuf::internal::SizedDelete(msg, sizeof(MsgBeginBattle));
+  }
+#endif
+
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR MsgBeginBattle(
+      ::google::protobuf::internal::ConstantInitialized);
+
+  inline MsgBeginBattle(const MsgBeginBattle& from) : MsgBeginBattle(nullptr, from) {}
+  inline MsgBeginBattle(MsgBeginBattle&& from) noexcept
+      : MsgBeginBattle(nullptr, std::move(from)) {}
+  inline MsgBeginBattle& operator=(const MsgBeginBattle& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline MsgBeginBattle& operator=(MsgBeginBattle&& from) noexcept {
+    if (this == &from) return *this;
+    if (::google::protobuf::internal::CanMoveWithInternalSwap(GetArena(), from.GetArena())) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const MsgBeginBattle& default_instance() {
+    return *reinterpret_cast<const MsgBeginBattle*>(
+        &_MsgBeginBattle_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 3;
+  friend void swap(MsgBeginBattle& a, MsgBeginBattle& b) { a.Swap(&b); }
+  inline void Swap(MsgBeginBattle* other) {
+    if (other == this) return;
+    if (::google::protobuf::internal::CanUseInternalSwap(GetArena(), other->GetArena())) {
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(MsgBeginBattle* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  MsgBeginBattle* New(::google::protobuf::Arena* arena = nullptr) const {
+    return ::google::protobuf::Message::DefaultConstruct<MsgBeginBattle>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const MsgBeginBattle& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const MsgBeginBattle& from) { MsgBeginBattle::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(
+      ::google::protobuf::MessageLite& to_msg,
+      const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() PROTOBUF_FINAL;
+  #if defined(PROTOBUF_CUSTOM_VTABLE)
+  private:
+  static ::size_t ByteSizeLong(const ::google::protobuf::MessageLite& msg);
+  static ::uint8_t* _InternalSerialize(
+      const MessageLite& msg, ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream);
+
+  public:
+  ::size_t ByteSizeLong() const { return ByteSizeLong(*this); }
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+    return _InternalSerialize(*this, target, stream);
+  }
+  #else   // PROTOBUF_CUSTOM_VTABLE
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  #endif  // PROTOBUF_CUSTOM_VTABLE
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* arena);
+  static void SharedDtor(MessageLite& self);
+  void InternalSwap(MsgBeginBattle* other);
+ private:
+  template <typename T>
+  friend ::absl::string_view(
+      ::google::protobuf::internal::GetAnyMessageName)();
+  static ::absl::string_view FullMessageName() { return "sync.MsgBeginBattle"; }
+
+ protected:
+  explicit MsgBeginBattle(::google::protobuf::Arena* arena);
+  MsgBeginBattle(::google::protobuf::Arena* arena, const MsgBeginBattle& from);
+  MsgBeginBattle(::google::protobuf::Arena* arena, MsgBeginBattle&& from) noexcept
+      : MsgBeginBattle(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::internal::ClassData* GetClassData() const PROTOBUF_FINAL;
+  static void* PlacementNew_(const void*, void* mem,
+                             ::google::protobuf::Arena* arena);
+  static constexpr auto InternalNewImpl_();
+
+ public:
+  static constexpr auto InternalGenerateClassData_();
+
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kNameFieldNumber = 1,
+  };
+  // string name = 1;
+  void clear_name() ;
+  const std::string& name() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_name(Arg_&& arg, Args_... args);
+  std::string* mutable_name();
+  [[nodiscard]] std::string* release_name();
+  void set_allocated_name(std::string* value);
+
+  private:
+  const std::string& _internal_name() const;
+  PROTOBUF_ALWAYS_INLINE void _internal_set_name(const std::string& value);
+  std::string* _internal_mutable_name();
+
+  public:
+  // @@protoc_insertion_point(class_scope:sync.MsgBeginBattle)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      0, 1, 0,
+      32, 2>
+      _table_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(
+        ::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena);
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena, const Impl_& from,
+                          const MsgBeginBattle& from_msg);
+    ::google::protobuf::internal::HasBits<1> _has_bits_;
+    ::google::protobuf::internal::CachedSize _cached_size_;
+    ::google::protobuf::internal::ArenaStringPtr name_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_Message_2eproto;
+};
+
+extern const ::google::protobuf::internal::ClassDataFull MsgBeginBattle_class_data_;
 // -------------------------------------------------------------------
 
 class MsgBody final
@@ -370,7 +1385,7 @@ class MsgBody final
     return *reinterpret_cast<const MsgBody*>(
         &_MsgBody_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 1;
+  static constexpr int kIndexInFileMessages = 6;
   friend void swap(MsgBody& a, MsgBody& b) { a.Swap(&b); }
   inline void Swap(MsgBody* other) {
     if (other == this) return;
@@ -458,21 +1473,101 @@ class MsgBody final
 
   // accessors -------------------------------------------------------
   enum : int {
-    kMoveFieldNumber = 1,
+    kEnterBattleFieldNumber = 1,
+    kMatchBattleFieldNumber = 2,
+    kReadyBattleFieldNumber = 3,
+    kBeginBattleFieldNumber = 4,
+    kEndBattleFieldNumber = 5,
+    kExitBattleFieldNumber = 6,
   };
-  // optional .sync.MsgMove move = 1;
-  bool has_move() const;
-  void clear_move() ;
-  const ::sync::MsgMove& move() const;
-  [[nodiscard]] ::sync::MsgMove* release_move();
-  ::sync::MsgMove* mutable_move();
-  void set_allocated_move(::sync::MsgMove* value);
-  void unsafe_arena_set_allocated_move(::sync::MsgMove* value);
-  ::sync::MsgMove* unsafe_arena_release_move();
+  // optional .sync.MsgEnterBattle enter_battle = 1;
+  bool has_enter_battle() const;
+  void clear_enter_battle() ;
+  const ::sync::MsgEnterBattle& enter_battle() const;
+  [[nodiscard]] ::sync::MsgEnterBattle* release_enter_battle();
+  ::sync::MsgEnterBattle* mutable_enter_battle();
+  void set_allocated_enter_battle(::sync::MsgEnterBattle* value);
+  void unsafe_arena_set_allocated_enter_battle(::sync::MsgEnterBattle* value);
+  ::sync::MsgEnterBattle* unsafe_arena_release_enter_battle();
 
   private:
-  const ::sync::MsgMove& _internal_move() const;
-  ::sync::MsgMove* _internal_mutable_move();
+  const ::sync::MsgEnterBattle& _internal_enter_battle() const;
+  ::sync::MsgEnterBattle* _internal_mutable_enter_battle();
+
+  public:
+  // optional .sync.MsgMatchBattle match_battle = 2;
+  bool has_match_battle() const;
+  void clear_match_battle() ;
+  const ::sync::MsgMatchBattle& match_battle() const;
+  [[nodiscard]] ::sync::MsgMatchBattle* release_match_battle();
+  ::sync::MsgMatchBattle* mutable_match_battle();
+  void set_allocated_match_battle(::sync::MsgMatchBattle* value);
+  void unsafe_arena_set_allocated_match_battle(::sync::MsgMatchBattle* value);
+  ::sync::MsgMatchBattle* unsafe_arena_release_match_battle();
+
+  private:
+  const ::sync::MsgMatchBattle& _internal_match_battle() const;
+  ::sync::MsgMatchBattle* _internal_mutable_match_battle();
+
+  public:
+  // optional .sync.MsgReadyBattle ready_battle = 3;
+  bool has_ready_battle() const;
+  void clear_ready_battle() ;
+  const ::sync::MsgReadyBattle& ready_battle() const;
+  [[nodiscard]] ::sync::MsgReadyBattle* release_ready_battle();
+  ::sync::MsgReadyBattle* mutable_ready_battle();
+  void set_allocated_ready_battle(::sync::MsgReadyBattle* value);
+  void unsafe_arena_set_allocated_ready_battle(::sync::MsgReadyBattle* value);
+  ::sync::MsgReadyBattle* unsafe_arena_release_ready_battle();
+
+  private:
+  const ::sync::MsgReadyBattle& _internal_ready_battle() const;
+  ::sync::MsgReadyBattle* _internal_mutable_ready_battle();
+
+  public:
+  // optional .sync.MsgBeginBattle begin_battle = 4;
+  bool has_begin_battle() const;
+  void clear_begin_battle() ;
+  const ::sync::MsgBeginBattle& begin_battle() const;
+  [[nodiscard]] ::sync::MsgBeginBattle* release_begin_battle();
+  ::sync::MsgBeginBattle* mutable_begin_battle();
+  void set_allocated_begin_battle(::sync::MsgBeginBattle* value);
+  void unsafe_arena_set_allocated_begin_battle(::sync::MsgBeginBattle* value);
+  ::sync::MsgBeginBattle* unsafe_arena_release_begin_battle();
+
+  private:
+  const ::sync::MsgBeginBattle& _internal_begin_battle() const;
+  ::sync::MsgBeginBattle* _internal_mutable_begin_battle();
+
+  public:
+  // optional .sync.MsgEndBattle end_battle = 5;
+  bool has_end_battle() const;
+  void clear_end_battle() ;
+  const ::sync::MsgEndBattle& end_battle() const;
+  [[nodiscard]] ::sync::MsgEndBattle* release_end_battle();
+  ::sync::MsgEndBattle* mutable_end_battle();
+  void set_allocated_end_battle(::sync::MsgEndBattle* value);
+  void unsafe_arena_set_allocated_end_battle(::sync::MsgEndBattle* value);
+  ::sync::MsgEndBattle* unsafe_arena_release_end_battle();
+
+  private:
+  const ::sync::MsgEndBattle& _internal_end_battle() const;
+  ::sync::MsgEndBattle* _internal_mutable_end_battle();
+
+  public:
+  // optional .sync.MsgExitBattle exit_battle = 6;
+  bool has_exit_battle() const;
+  void clear_exit_battle() ;
+  const ::sync::MsgExitBattle& exit_battle() const;
+  [[nodiscard]] ::sync::MsgExitBattle* release_exit_battle();
+  ::sync::MsgExitBattle* mutable_exit_battle();
+  void set_allocated_exit_battle(::sync::MsgExitBattle* value);
+  void unsafe_arena_set_allocated_exit_battle(::sync::MsgExitBattle* value);
+  ::sync::MsgExitBattle* unsafe_arena_release_exit_battle();
+
+  private:
+  const ::sync::MsgExitBattle& _internal_exit_battle() const;
+  ::sync::MsgExitBattle* _internal_mutable_exit_battle();
 
   public:
   // @@protoc_insertion_point(class_scope:sync.MsgBody)
@@ -480,7 +1575,7 @@ class MsgBody final
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      0, 1, 1,
+      3, 6, 6,
       0, 2>
       _table_;
 
@@ -500,7 +1595,12 @@ class MsgBody final
                           const MsgBody& from_msg);
     ::google::protobuf::internal::HasBits<1> _has_bits_;
     ::google::protobuf::internal::CachedSize _cached_size_;
-    ::sync::MsgMove* move_;
+    ::sync::MsgEnterBattle* enter_battle_;
+    ::sync::MsgMatchBattle* match_battle_;
+    ::sync::MsgReadyBattle* ready_battle_;
+    ::sync::MsgBeginBattle* begin_battle_;
+    ::sync::MsgEndBattle* end_battle_;
+    ::sync::MsgExitBattle* exit_battle_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -567,7 +1667,7 @@ class Message final
     return *reinterpret_cast<const Message*>(
         &_Message_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 2;
+  static constexpr int kIndexInFileMessages = 7;
   friend void swap(Message& a, Message& b) { a.Swap(&b); }
   inline void Swap(Message* other) {
     if (other == this) return;
@@ -733,75 +1833,461 @@ extern const ::google::protobuf::internal::ClassDataFull Message_class_data_;
 #endif  // __GNUC__
 // -------------------------------------------------------------------
 
-// MsgMove
+// MsgEnterBattle
 
-// uint32 Angle = 1;
-inline void MsgMove::clear_angle() {
+// string name = 1;
+inline void MsgEnterBattle::clear_name() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.angle_ = 0u;
+  _impl_.name_.ClearToEmpty();
   _impl_._has_bits_[0] &= ~0x00000001u;
 }
-inline ::uint32_t MsgMove::angle() const {
-  // @@protoc_insertion_point(field_get:sync.MsgMove.Angle)
-  return _internal_angle();
+inline const std::string& MsgEnterBattle::name() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:sync.MsgEnterBattle.name)
+  return _internal_name();
 }
-inline void MsgMove::set_angle(::uint32_t value) {
-  _internal_set_angle(value);
-  _impl_._has_bits_[0] |= 0x00000001u;
-  // @@protoc_insertion_point(field_set:sync.MsgMove.Angle)
-}
-inline ::uint32_t MsgMove::_internal_angle() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.angle_;
-}
-inline void MsgMove::_internal_set_angle(::uint32_t value) {
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void MsgEnterBattle::set_name(Arg_&& arg,
+                                              Args_... args) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.angle_ = value;
+  _impl_._has_bits_[0] |= 0x00000001u;
+  _impl_.name_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:sync.MsgEnterBattle.name)
+}
+inline std::string* MsgEnterBattle::mutable_name() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_name();
+  // @@protoc_insertion_point(field_mutable:sync.MsgEnterBattle.name)
+  return _s;
+}
+inline const std::string& MsgEnterBattle::_internal_name() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.name_.Get();
+}
+inline void MsgEnterBattle::_internal_set_name(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001u;
+  _impl_.name_.Set(value, GetArena());
+}
+inline std::string* MsgEnterBattle::_internal_mutable_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001u;
+  return _impl_.name_.Mutable( GetArena());
+}
+inline std::string* MsgEnterBattle::release_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:sync.MsgEnterBattle.name)
+  if ((_impl_._has_bits_[0] & 0x00000001u) == 0) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000001u;
+  auto* released = _impl_.name_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.name_.Set("", GetArena());
+  }
+  return released;
+}
+inline void MsgEnterBattle::set_allocated_name(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000001u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001u;
+  }
+  _impl_.name_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.name_.IsDefault()) {
+    _impl_.name_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:sync.MsgEnterBattle.name)
+}
+
+// -------------------------------------------------------------------
+
+// MsgMatchBattle
+
+// string name = 1;
+inline void MsgMatchBattle::clear_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& MsgMatchBattle::name() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:sync.MsgMatchBattle.name)
+  return _internal_name();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void MsgMatchBattle::set_name(Arg_&& arg,
+                                              Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001u;
+  _impl_.name_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:sync.MsgMatchBattle.name)
+}
+inline std::string* MsgMatchBattle::mutable_name() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_name();
+  // @@protoc_insertion_point(field_mutable:sync.MsgMatchBattle.name)
+  return _s;
+}
+inline const std::string& MsgMatchBattle::_internal_name() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.name_.Get();
+}
+inline void MsgMatchBattle::_internal_set_name(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001u;
+  _impl_.name_.Set(value, GetArena());
+}
+inline std::string* MsgMatchBattle::_internal_mutable_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001u;
+  return _impl_.name_.Mutable( GetArena());
+}
+inline std::string* MsgMatchBattle::release_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:sync.MsgMatchBattle.name)
+  if ((_impl_._has_bits_[0] & 0x00000001u) == 0) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000001u;
+  auto* released = _impl_.name_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.name_.Set("", GetArena());
+  }
+  return released;
+}
+inline void MsgMatchBattle::set_allocated_name(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000001u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001u;
+  }
+  _impl_.name_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.name_.IsDefault()) {
+    _impl_.name_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:sync.MsgMatchBattle.name)
+}
+
+// -------------------------------------------------------------------
+
+// MsgReadyBattle
+
+// string name = 1;
+inline void MsgReadyBattle::clear_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& MsgReadyBattle::name() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:sync.MsgReadyBattle.name)
+  return _internal_name();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void MsgReadyBattle::set_name(Arg_&& arg,
+                                              Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001u;
+  _impl_.name_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:sync.MsgReadyBattle.name)
+}
+inline std::string* MsgReadyBattle::mutable_name() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_name();
+  // @@protoc_insertion_point(field_mutable:sync.MsgReadyBattle.name)
+  return _s;
+}
+inline const std::string& MsgReadyBattle::_internal_name() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.name_.Get();
+}
+inline void MsgReadyBattle::_internal_set_name(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001u;
+  _impl_.name_.Set(value, GetArena());
+}
+inline std::string* MsgReadyBattle::_internal_mutable_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001u;
+  return _impl_.name_.Mutable( GetArena());
+}
+inline std::string* MsgReadyBattle::release_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:sync.MsgReadyBattle.name)
+  if ((_impl_._has_bits_[0] & 0x00000001u) == 0) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000001u;
+  auto* released = _impl_.name_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.name_.Set("", GetArena());
+  }
+  return released;
+}
+inline void MsgReadyBattle::set_allocated_name(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000001u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001u;
+  }
+  _impl_.name_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.name_.IsDefault()) {
+    _impl_.name_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:sync.MsgReadyBattle.name)
+}
+
+// -------------------------------------------------------------------
+
+// MsgBeginBattle
+
+// string name = 1;
+inline void MsgBeginBattle::clear_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& MsgBeginBattle::name() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:sync.MsgBeginBattle.name)
+  return _internal_name();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void MsgBeginBattle::set_name(Arg_&& arg,
+                                              Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001u;
+  _impl_.name_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:sync.MsgBeginBattle.name)
+}
+inline std::string* MsgBeginBattle::mutable_name() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_name();
+  // @@protoc_insertion_point(field_mutable:sync.MsgBeginBattle.name)
+  return _s;
+}
+inline const std::string& MsgBeginBattle::_internal_name() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.name_.Get();
+}
+inline void MsgBeginBattle::_internal_set_name(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001u;
+  _impl_.name_.Set(value, GetArena());
+}
+inline std::string* MsgBeginBattle::_internal_mutable_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001u;
+  return _impl_.name_.Mutable( GetArena());
+}
+inline std::string* MsgBeginBattle::release_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:sync.MsgBeginBattle.name)
+  if ((_impl_._has_bits_[0] & 0x00000001u) == 0) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000001u;
+  auto* released = _impl_.name_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.name_.Set("", GetArena());
+  }
+  return released;
+}
+inline void MsgBeginBattle::set_allocated_name(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000001u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001u;
+  }
+  _impl_.name_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.name_.IsDefault()) {
+    _impl_.name_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:sync.MsgBeginBattle.name)
+}
+
+// -------------------------------------------------------------------
+
+// MsgEndBattle
+
+// string name = 1;
+inline void MsgEndBattle::clear_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& MsgEndBattle::name() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:sync.MsgEndBattle.name)
+  return _internal_name();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void MsgEndBattle::set_name(Arg_&& arg,
+                                              Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001u;
+  _impl_.name_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:sync.MsgEndBattle.name)
+}
+inline std::string* MsgEndBattle::mutable_name() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_name();
+  // @@protoc_insertion_point(field_mutable:sync.MsgEndBattle.name)
+  return _s;
+}
+inline const std::string& MsgEndBattle::_internal_name() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.name_.Get();
+}
+inline void MsgEndBattle::_internal_set_name(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001u;
+  _impl_.name_.Set(value, GetArena());
+}
+inline std::string* MsgEndBattle::_internal_mutable_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001u;
+  return _impl_.name_.Mutable( GetArena());
+}
+inline std::string* MsgEndBattle::release_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:sync.MsgEndBattle.name)
+  if ((_impl_._has_bits_[0] & 0x00000001u) == 0) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000001u;
+  auto* released = _impl_.name_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.name_.Set("", GetArena());
+  }
+  return released;
+}
+inline void MsgEndBattle::set_allocated_name(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000001u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001u;
+  }
+  _impl_.name_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.name_.IsDefault()) {
+    _impl_.name_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:sync.MsgEndBattle.name)
+}
+
+// -------------------------------------------------------------------
+
+// MsgExitBattle
+
+// string name = 1;
+inline void MsgExitBattle::clear_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.ClearToEmpty();
+  _impl_._has_bits_[0] &= ~0x00000001u;
+}
+inline const std::string& MsgExitBattle::name() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:sync.MsgExitBattle.name)
+  return _internal_name();
+}
+template <typename Arg_, typename... Args_>
+PROTOBUF_ALWAYS_INLINE void MsgExitBattle::set_name(Arg_&& arg,
+                                              Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001u;
+  _impl_.name_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:sync.MsgExitBattle.name)
+}
+inline std::string* MsgExitBattle::mutable_name() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_name();
+  // @@protoc_insertion_point(field_mutable:sync.MsgExitBattle.name)
+  return _s;
+}
+inline const std::string& MsgExitBattle::_internal_name() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.name_.Get();
+}
+inline void MsgExitBattle::_internal_set_name(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001u;
+  _impl_.name_.Set(value, GetArena());
+}
+inline std::string* MsgExitBattle::_internal_mutable_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_._has_bits_[0] |= 0x00000001u;
+  return _impl_.name_.Mutable( GetArena());
+}
+inline std::string* MsgExitBattle::release_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:sync.MsgExitBattle.name)
+  if ((_impl_._has_bits_[0] & 0x00000001u) == 0) {
+    return nullptr;
+  }
+  _impl_._has_bits_[0] &= ~0x00000001u;
+  auto* released = _impl_.name_.Release();
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString()) {
+    _impl_.name_.Set("", GetArena());
+  }
+  return released;
+}
+inline void MsgExitBattle::set_allocated_name(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000001u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000001u;
+  }
+  _impl_.name_.SetAllocated(value, GetArena());
+  if (::google::protobuf::internal::DebugHardenForceCopyDefaultString() && _impl_.name_.IsDefault()) {
+    _impl_.name_.Set("", GetArena());
+  }
+  // @@protoc_insertion_point(field_set_allocated:sync.MsgExitBattle.name)
 }
 
 // -------------------------------------------------------------------
 
 // MsgBody
 
-// optional .sync.MsgMove move = 1;
-inline bool MsgBody::has_move() const {
+// optional .sync.MsgEnterBattle enter_battle = 1;
+inline bool MsgBody::has_enter_battle() const {
   bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
-  PROTOBUF_ASSUME(!value || _impl_.move_ != nullptr);
+  PROTOBUF_ASSUME(!value || _impl_.enter_battle_ != nullptr);
   return value;
 }
-inline void MsgBody::clear_move() {
+inline void MsgBody::clear_enter_battle() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  if (_impl_.move_ != nullptr) _impl_.move_->Clear();
+  if (_impl_.enter_battle_ != nullptr) _impl_.enter_battle_->Clear();
   _impl_._has_bits_[0] &= ~0x00000001u;
 }
-inline const ::sync::MsgMove& MsgBody::_internal_move() const {
+inline const ::sync::MsgEnterBattle& MsgBody::_internal_enter_battle() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  const ::sync::MsgMove* p = _impl_.move_;
-  return p != nullptr ? *p : reinterpret_cast<const ::sync::MsgMove&>(::sync::_MsgMove_default_instance_);
+  const ::sync::MsgEnterBattle* p = _impl_.enter_battle_;
+  return p != nullptr ? *p : reinterpret_cast<const ::sync::MsgEnterBattle&>(::sync::_MsgEnterBattle_default_instance_);
 }
-inline const ::sync::MsgMove& MsgBody::move() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_get:sync.MsgBody.move)
-  return _internal_move();
+inline const ::sync::MsgEnterBattle& MsgBody::enter_battle() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:sync.MsgBody.enter_battle)
+  return _internal_enter_battle();
 }
-inline void MsgBody::unsafe_arena_set_allocated_move(::sync::MsgMove* value) {
+inline void MsgBody::unsafe_arena_set_allocated_enter_battle(::sync::MsgEnterBattle* value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   if (GetArena() == nullptr) {
-    delete reinterpret_cast<::google::protobuf::MessageLite*>(_impl_.move_);
+    delete reinterpret_cast<::google::protobuf::MessageLite*>(_impl_.enter_battle_);
   }
-  _impl_.move_ = reinterpret_cast<::sync::MsgMove*>(value);
+  _impl_.enter_battle_ = reinterpret_cast<::sync::MsgEnterBattle*>(value);
   if (value != nullptr) {
     _impl_._has_bits_[0] |= 0x00000001u;
   } else {
     _impl_._has_bits_[0] &= ~0x00000001u;
   }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:sync.MsgBody.move)
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:sync.MsgBody.enter_battle)
 }
-inline ::sync::MsgMove* MsgBody::release_move() {
+inline ::sync::MsgEnterBattle* MsgBody::release_enter_battle() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
 
   _impl_._has_bits_[0] &= ~0x00000001u;
-  ::sync::MsgMove* released = _impl_.move_;
-  _impl_.move_ = nullptr;
+  ::sync::MsgEnterBattle* released = _impl_.enter_battle_;
+  _impl_.enter_battle_ = nullptr;
   if (::google::protobuf::internal::DebugHardenForceCopyInRelease()) {
     auto* old = reinterpret_cast<::google::protobuf::MessageLite*>(released);
     released = ::google::protobuf::internal::DuplicateIfNonNull(released);
@@ -815,34 +2301,34 @@ inline ::sync::MsgMove* MsgBody::release_move() {
   }
   return released;
 }
-inline ::sync::MsgMove* MsgBody::unsafe_arena_release_move() {
+inline ::sync::MsgEnterBattle* MsgBody::unsafe_arena_release_enter_battle() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  // @@protoc_insertion_point(field_release:sync.MsgBody.move)
+  // @@protoc_insertion_point(field_release:sync.MsgBody.enter_battle)
 
   _impl_._has_bits_[0] &= ~0x00000001u;
-  ::sync::MsgMove* temp = _impl_.move_;
-  _impl_.move_ = nullptr;
+  ::sync::MsgEnterBattle* temp = _impl_.enter_battle_;
+  _impl_.enter_battle_ = nullptr;
   return temp;
 }
-inline ::sync::MsgMove* MsgBody::_internal_mutable_move() {
+inline ::sync::MsgEnterBattle* MsgBody::_internal_mutable_enter_battle() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  if (_impl_.move_ == nullptr) {
-    auto* p = ::google::protobuf::Message::DefaultConstruct<::sync::MsgMove>(GetArena());
-    _impl_.move_ = reinterpret_cast<::sync::MsgMove*>(p);
+  if (_impl_.enter_battle_ == nullptr) {
+    auto* p = ::google::protobuf::Message::DefaultConstruct<::sync::MsgEnterBattle>(GetArena());
+    _impl_.enter_battle_ = reinterpret_cast<::sync::MsgEnterBattle*>(p);
   }
-  return _impl_.move_;
+  return _impl_.enter_battle_;
 }
-inline ::sync::MsgMove* MsgBody::mutable_move() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+inline ::sync::MsgEnterBattle* MsgBody::mutable_enter_battle() ABSL_ATTRIBUTE_LIFETIME_BOUND {
   _impl_._has_bits_[0] |= 0x00000001u;
-  ::sync::MsgMove* _msg = _internal_mutable_move();
-  // @@protoc_insertion_point(field_mutable:sync.MsgBody.move)
+  ::sync::MsgEnterBattle* _msg = _internal_mutable_enter_battle();
+  // @@protoc_insertion_point(field_mutable:sync.MsgBody.enter_battle)
   return _msg;
 }
-inline void MsgBody::set_allocated_move(::sync::MsgMove* value) {
+inline void MsgBody::set_allocated_enter_battle(::sync::MsgEnterBattle* value) {
   ::google::protobuf::Arena* message_arena = GetArena();
   ::google::protobuf::internal::TSanWrite(&_impl_);
   if (message_arena == nullptr) {
-    delete (_impl_.move_);
+    delete (_impl_.enter_battle_);
   }
 
   if (value != nullptr) {
@@ -855,8 +2341,488 @@ inline void MsgBody::set_allocated_move(::sync::MsgMove* value) {
     _impl_._has_bits_[0] &= ~0x00000001u;
   }
 
-  _impl_.move_ = reinterpret_cast<::sync::MsgMove*>(value);
-  // @@protoc_insertion_point(field_set_allocated:sync.MsgBody.move)
+  _impl_.enter_battle_ = reinterpret_cast<::sync::MsgEnterBattle*>(value);
+  // @@protoc_insertion_point(field_set_allocated:sync.MsgBody.enter_battle)
+}
+
+// optional .sync.MsgMatchBattle match_battle = 2;
+inline bool MsgBody::has_match_battle() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.match_battle_ != nullptr);
+  return value;
+}
+inline void MsgBody::clear_match_battle() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (_impl_.match_battle_ != nullptr) _impl_.match_battle_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000002u;
+}
+inline const ::sync::MsgMatchBattle& MsgBody::_internal_match_battle() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  const ::sync::MsgMatchBattle* p = _impl_.match_battle_;
+  return p != nullptr ? *p : reinterpret_cast<const ::sync::MsgMatchBattle&>(::sync::_MsgMatchBattle_default_instance_);
+}
+inline const ::sync::MsgMatchBattle& MsgBody::match_battle() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:sync.MsgBody.match_battle)
+  return _internal_match_battle();
+}
+inline void MsgBody::unsafe_arena_set_allocated_match_battle(::sync::MsgMatchBattle* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::google::protobuf::MessageLite*>(_impl_.match_battle_);
+  }
+  _impl_.match_battle_ = reinterpret_cast<::sync::MsgMatchBattle*>(value);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000002u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000002u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:sync.MsgBody.match_battle)
+}
+inline ::sync::MsgMatchBattle* MsgBody::release_match_battle() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+
+  _impl_._has_bits_[0] &= ~0x00000002u;
+  ::sync::MsgMatchBattle* released = _impl_.match_battle_;
+  _impl_.match_battle_ = nullptr;
+  if (::google::protobuf::internal::DebugHardenForceCopyInRelease()) {
+    auto* old = reinterpret_cast<::google::protobuf::MessageLite*>(released);
+    released = ::google::protobuf::internal::DuplicateIfNonNull(released);
+    if (GetArena() == nullptr) {
+      delete old;
+    }
+  } else {
+    if (GetArena() != nullptr) {
+      released = ::google::protobuf::internal::DuplicateIfNonNull(released);
+    }
+  }
+  return released;
+}
+inline ::sync::MsgMatchBattle* MsgBody::unsafe_arena_release_match_battle() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:sync.MsgBody.match_battle)
+
+  _impl_._has_bits_[0] &= ~0x00000002u;
+  ::sync::MsgMatchBattle* temp = _impl_.match_battle_;
+  _impl_.match_battle_ = nullptr;
+  return temp;
+}
+inline ::sync::MsgMatchBattle* MsgBody::_internal_mutable_match_battle() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (_impl_.match_battle_ == nullptr) {
+    auto* p = ::google::protobuf::Message::DefaultConstruct<::sync::MsgMatchBattle>(GetArena());
+    _impl_.match_battle_ = reinterpret_cast<::sync::MsgMatchBattle*>(p);
+  }
+  return _impl_.match_battle_;
+}
+inline ::sync::MsgMatchBattle* MsgBody::mutable_match_battle() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  _impl_._has_bits_[0] |= 0x00000002u;
+  ::sync::MsgMatchBattle* _msg = _internal_mutable_match_battle();
+  // @@protoc_insertion_point(field_mutable:sync.MsgBody.match_battle)
+  return _msg;
+}
+inline void MsgBody::set_allocated_match_battle(::sync::MsgMatchBattle* value) {
+  ::google::protobuf::Arena* message_arena = GetArena();
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (message_arena == nullptr) {
+    delete (_impl_.match_battle_);
+  }
+
+  if (value != nullptr) {
+    ::google::protobuf::Arena* submessage_arena = (value)->GetArena();
+    if (message_arena != submessage_arena) {
+      value = ::google::protobuf::internal::GetOwnedMessage(message_arena, value, submessage_arena);
+    }
+    _impl_._has_bits_[0] |= 0x00000002u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000002u;
+  }
+
+  _impl_.match_battle_ = reinterpret_cast<::sync::MsgMatchBattle*>(value);
+  // @@protoc_insertion_point(field_set_allocated:sync.MsgBody.match_battle)
+}
+
+// optional .sync.MsgReadyBattle ready_battle = 3;
+inline bool MsgBody::has_ready_battle() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000004u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.ready_battle_ != nullptr);
+  return value;
+}
+inline void MsgBody::clear_ready_battle() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (_impl_.ready_battle_ != nullptr) _impl_.ready_battle_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000004u;
+}
+inline const ::sync::MsgReadyBattle& MsgBody::_internal_ready_battle() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  const ::sync::MsgReadyBattle* p = _impl_.ready_battle_;
+  return p != nullptr ? *p : reinterpret_cast<const ::sync::MsgReadyBattle&>(::sync::_MsgReadyBattle_default_instance_);
+}
+inline const ::sync::MsgReadyBattle& MsgBody::ready_battle() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:sync.MsgBody.ready_battle)
+  return _internal_ready_battle();
+}
+inline void MsgBody::unsafe_arena_set_allocated_ready_battle(::sync::MsgReadyBattle* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::google::protobuf::MessageLite*>(_impl_.ready_battle_);
+  }
+  _impl_.ready_battle_ = reinterpret_cast<::sync::MsgReadyBattle*>(value);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000004u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000004u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:sync.MsgBody.ready_battle)
+}
+inline ::sync::MsgReadyBattle* MsgBody::release_ready_battle() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+
+  _impl_._has_bits_[0] &= ~0x00000004u;
+  ::sync::MsgReadyBattle* released = _impl_.ready_battle_;
+  _impl_.ready_battle_ = nullptr;
+  if (::google::protobuf::internal::DebugHardenForceCopyInRelease()) {
+    auto* old = reinterpret_cast<::google::protobuf::MessageLite*>(released);
+    released = ::google::protobuf::internal::DuplicateIfNonNull(released);
+    if (GetArena() == nullptr) {
+      delete old;
+    }
+  } else {
+    if (GetArena() != nullptr) {
+      released = ::google::protobuf::internal::DuplicateIfNonNull(released);
+    }
+  }
+  return released;
+}
+inline ::sync::MsgReadyBattle* MsgBody::unsafe_arena_release_ready_battle() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:sync.MsgBody.ready_battle)
+
+  _impl_._has_bits_[0] &= ~0x00000004u;
+  ::sync::MsgReadyBattle* temp = _impl_.ready_battle_;
+  _impl_.ready_battle_ = nullptr;
+  return temp;
+}
+inline ::sync::MsgReadyBattle* MsgBody::_internal_mutable_ready_battle() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (_impl_.ready_battle_ == nullptr) {
+    auto* p = ::google::protobuf::Message::DefaultConstruct<::sync::MsgReadyBattle>(GetArena());
+    _impl_.ready_battle_ = reinterpret_cast<::sync::MsgReadyBattle*>(p);
+  }
+  return _impl_.ready_battle_;
+}
+inline ::sync::MsgReadyBattle* MsgBody::mutable_ready_battle() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  _impl_._has_bits_[0] |= 0x00000004u;
+  ::sync::MsgReadyBattle* _msg = _internal_mutable_ready_battle();
+  // @@protoc_insertion_point(field_mutable:sync.MsgBody.ready_battle)
+  return _msg;
+}
+inline void MsgBody::set_allocated_ready_battle(::sync::MsgReadyBattle* value) {
+  ::google::protobuf::Arena* message_arena = GetArena();
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (message_arena == nullptr) {
+    delete (_impl_.ready_battle_);
+  }
+
+  if (value != nullptr) {
+    ::google::protobuf::Arena* submessage_arena = (value)->GetArena();
+    if (message_arena != submessage_arena) {
+      value = ::google::protobuf::internal::GetOwnedMessage(message_arena, value, submessage_arena);
+    }
+    _impl_._has_bits_[0] |= 0x00000004u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000004u;
+  }
+
+  _impl_.ready_battle_ = reinterpret_cast<::sync::MsgReadyBattle*>(value);
+  // @@protoc_insertion_point(field_set_allocated:sync.MsgBody.ready_battle)
+}
+
+// optional .sync.MsgBeginBattle begin_battle = 4;
+inline bool MsgBody::has_begin_battle() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000008u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.begin_battle_ != nullptr);
+  return value;
+}
+inline void MsgBody::clear_begin_battle() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (_impl_.begin_battle_ != nullptr) _impl_.begin_battle_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000008u;
+}
+inline const ::sync::MsgBeginBattle& MsgBody::_internal_begin_battle() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  const ::sync::MsgBeginBattle* p = _impl_.begin_battle_;
+  return p != nullptr ? *p : reinterpret_cast<const ::sync::MsgBeginBattle&>(::sync::_MsgBeginBattle_default_instance_);
+}
+inline const ::sync::MsgBeginBattle& MsgBody::begin_battle() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:sync.MsgBody.begin_battle)
+  return _internal_begin_battle();
+}
+inline void MsgBody::unsafe_arena_set_allocated_begin_battle(::sync::MsgBeginBattle* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::google::protobuf::MessageLite*>(_impl_.begin_battle_);
+  }
+  _impl_.begin_battle_ = reinterpret_cast<::sync::MsgBeginBattle*>(value);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000008u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000008u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:sync.MsgBody.begin_battle)
+}
+inline ::sync::MsgBeginBattle* MsgBody::release_begin_battle() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+
+  _impl_._has_bits_[0] &= ~0x00000008u;
+  ::sync::MsgBeginBattle* released = _impl_.begin_battle_;
+  _impl_.begin_battle_ = nullptr;
+  if (::google::protobuf::internal::DebugHardenForceCopyInRelease()) {
+    auto* old = reinterpret_cast<::google::protobuf::MessageLite*>(released);
+    released = ::google::protobuf::internal::DuplicateIfNonNull(released);
+    if (GetArena() == nullptr) {
+      delete old;
+    }
+  } else {
+    if (GetArena() != nullptr) {
+      released = ::google::protobuf::internal::DuplicateIfNonNull(released);
+    }
+  }
+  return released;
+}
+inline ::sync::MsgBeginBattle* MsgBody::unsafe_arena_release_begin_battle() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:sync.MsgBody.begin_battle)
+
+  _impl_._has_bits_[0] &= ~0x00000008u;
+  ::sync::MsgBeginBattle* temp = _impl_.begin_battle_;
+  _impl_.begin_battle_ = nullptr;
+  return temp;
+}
+inline ::sync::MsgBeginBattle* MsgBody::_internal_mutable_begin_battle() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (_impl_.begin_battle_ == nullptr) {
+    auto* p = ::google::protobuf::Message::DefaultConstruct<::sync::MsgBeginBattle>(GetArena());
+    _impl_.begin_battle_ = reinterpret_cast<::sync::MsgBeginBattle*>(p);
+  }
+  return _impl_.begin_battle_;
+}
+inline ::sync::MsgBeginBattle* MsgBody::mutable_begin_battle() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  _impl_._has_bits_[0] |= 0x00000008u;
+  ::sync::MsgBeginBattle* _msg = _internal_mutable_begin_battle();
+  // @@protoc_insertion_point(field_mutable:sync.MsgBody.begin_battle)
+  return _msg;
+}
+inline void MsgBody::set_allocated_begin_battle(::sync::MsgBeginBattle* value) {
+  ::google::protobuf::Arena* message_arena = GetArena();
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (message_arena == nullptr) {
+    delete (_impl_.begin_battle_);
+  }
+
+  if (value != nullptr) {
+    ::google::protobuf::Arena* submessage_arena = (value)->GetArena();
+    if (message_arena != submessage_arena) {
+      value = ::google::protobuf::internal::GetOwnedMessage(message_arena, value, submessage_arena);
+    }
+    _impl_._has_bits_[0] |= 0x00000008u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000008u;
+  }
+
+  _impl_.begin_battle_ = reinterpret_cast<::sync::MsgBeginBattle*>(value);
+  // @@protoc_insertion_point(field_set_allocated:sync.MsgBody.begin_battle)
+}
+
+// optional .sync.MsgEndBattle end_battle = 5;
+inline bool MsgBody::has_end_battle() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000010u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.end_battle_ != nullptr);
+  return value;
+}
+inline void MsgBody::clear_end_battle() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (_impl_.end_battle_ != nullptr) _impl_.end_battle_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000010u;
+}
+inline const ::sync::MsgEndBattle& MsgBody::_internal_end_battle() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  const ::sync::MsgEndBattle* p = _impl_.end_battle_;
+  return p != nullptr ? *p : reinterpret_cast<const ::sync::MsgEndBattle&>(::sync::_MsgEndBattle_default_instance_);
+}
+inline const ::sync::MsgEndBattle& MsgBody::end_battle() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:sync.MsgBody.end_battle)
+  return _internal_end_battle();
+}
+inline void MsgBody::unsafe_arena_set_allocated_end_battle(::sync::MsgEndBattle* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::google::protobuf::MessageLite*>(_impl_.end_battle_);
+  }
+  _impl_.end_battle_ = reinterpret_cast<::sync::MsgEndBattle*>(value);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000010u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000010u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:sync.MsgBody.end_battle)
+}
+inline ::sync::MsgEndBattle* MsgBody::release_end_battle() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+
+  _impl_._has_bits_[0] &= ~0x00000010u;
+  ::sync::MsgEndBattle* released = _impl_.end_battle_;
+  _impl_.end_battle_ = nullptr;
+  if (::google::protobuf::internal::DebugHardenForceCopyInRelease()) {
+    auto* old = reinterpret_cast<::google::protobuf::MessageLite*>(released);
+    released = ::google::protobuf::internal::DuplicateIfNonNull(released);
+    if (GetArena() == nullptr) {
+      delete old;
+    }
+  } else {
+    if (GetArena() != nullptr) {
+      released = ::google::protobuf::internal::DuplicateIfNonNull(released);
+    }
+  }
+  return released;
+}
+inline ::sync::MsgEndBattle* MsgBody::unsafe_arena_release_end_battle() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:sync.MsgBody.end_battle)
+
+  _impl_._has_bits_[0] &= ~0x00000010u;
+  ::sync::MsgEndBattle* temp = _impl_.end_battle_;
+  _impl_.end_battle_ = nullptr;
+  return temp;
+}
+inline ::sync::MsgEndBattle* MsgBody::_internal_mutable_end_battle() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (_impl_.end_battle_ == nullptr) {
+    auto* p = ::google::protobuf::Message::DefaultConstruct<::sync::MsgEndBattle>(GetArena());
+    _impl_.end_battle_ = reinterpret_cast<::sync::MsgEndBattle*>(p);
+  }
+  return _impl_.end_battle_;
+}
+inline ::sync::MsgEndBattle* MsgBody::mutable_end_battle() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  _impl_._has_bits_[0] |= 0x00000010u;
+  ::sync::MsgEndBattle* _msg = _internal_mutable_end_battle();
+  // @@protoc_insertion_point(field_mutable:sync.MsgBody.end_battle)
+  return _msg;
+}
+inline void MsgBody::set_allocated_end_battle(::sync::MsgEndBattle* value) {
+  ::google::protobuf::Arena* message_arena = GetArena();
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (message_arena == nullptr) {
+    delete (_impl_.end_battle_);
+  }
+
+  if (value != nullptr) {
+    ::google::protobuf::Arena* submessage_arena = (value)->GetArena();
+    if (message_arena != submessage_arena) {
+      value = ::google::protobuf::internal::GetOwnedMessage(message_arena, value, submessage_arena);
+    }
+    _impl_._has_bits_[0] |= 0x00000010u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000010u;
+  }
+
+  _impl_.end_battle_ = reinterpret_cast<::sync::MsgEndBattle*>(value);
+  // @@protoc_insertion_point(field_set_allocated:sync.MsgBody.end_battle)
+}
+
+// optional .sync.MsgExitBattle exit_battle = 6;
+inline bool MsgBody::has_exit_battle() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000020u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.exit_battle_ != nullptr);
+  return value;
+}
+inline void MsgBody::clear_exit_battle() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (_impl_.exit_battle_ != nullptr) _impl_.exit_battle_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000020u;
+}
+inline const ::sync::MsgExitBattle& MsgBody::_internal_exit_battle() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  const ::sync::MsgExitBattle* p = _impl_.exit_battle_;
+  return p != nullptr ? *p : reinterpret_cast<const ::sync::MsgExitBattle&>(::sync::_MsgExitBattle_default_instance_);
+}
+inline const ::sync::MsgExitBattle& MsgBody::exit_battle() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:sync.MsgBody.exit_battle)
+  return _internal_exit_battle();
+}
+inline void MsgBody::unsafe_arena_set_allocated_exit_battle(::sync::MsgExitBattle* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::google::protobuf::MessageLite*>(_impl_.exit_battle_);
+  }
+  _impl_.exit_battle_ = reinterpret_cast<::sync::MsgExitBattle*>(value);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000020u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000020u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:sync.MsgBody.exit_battle)
+}
+inline ::sync::MsgExitBattle* MsgBody::release_exit_battle() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+
+  _impl_._has_bits_[0] &= ~0x00000020u;
+  ::sync::MsgExitBattle* released = _impl_.exit_battle_;
+  _impl_.exit_battle_ = nullptr;
+  if (::google::protobuf::internal::DebugHardenForceCopyInRelease()) {
+    auto* old = reinterpret_cast<::google::protobuf::MessageLite*>(released);
+    released = ::google::protobuf::internal::DuplicateIfNonNull(released);
+    if (GetArena() == nullptr) {
+      delete old;
+    }
+  } else {
+    if (GetArena() != nullptr) {
+      released = ::google::protobuf::internal::DuplicateIfNonNull(released);
+    }
+  }
+  return released;
+}
+inline ::sync::MsgExitBattle* MsgBody::unsafe_arena_release_exit_battle() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:sync.MsgBody.exit_battle)
+
+  _impl_._has_bits_[0] &= ~0x00000020u;
+  ::sync::MsgExitBattle* temp = _impl_.exit_battle_;
+  _impl_.exit_battle_ = nullptr;
+  return temp;
+}
+inline ::sync::MsgExitBattle* MsgBody::_internal_mutable_exit_battle() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (_impl_.exit_battle_ == nullptr) {
+    auto* p = ::google::protobuf::Message::DefaultConstruct<::sync::MsgExitBattle>(GetArena());
+    _impl_.exit_battle_ = reinterpret_cast<::sync::MsgExitBattle*>(p);
+  }
+  return _impl_.exit_battle_;
+}
+inline ::sync::MsgExitBattle* MsgBody::mutable_exit_battle() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  _impl_._has_bits_[0] |= 0x00000020u;
+  ::sync::MsgExitBattle* _msg = _internal_mutable_exit_battle();
+  // @@protoc_insertion_point(field_mutable:sync.MsgBody.exit_battle)
+  return _msg;
+}
+inline void MsgBody::set_allocated_exit_battle(::sync::MsgExitBattle* value) {
+  ::google::protobuf::Arena* message_arena = GetArena();
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (message_arena == nullptr) {
+    delete (_impl_.exit_battle_);
+  }
+
+  if (value != nullptr) {
+    ::google::protobuf::Arena* submessage_arena = (value)->GetArena();
+    if (message_arena != submessage_arena) {
+      value = ::google::protobuf::internal::GetOwnedMessage(message_arena, value, submessage_arena);
+    }
+    _impl_._has_bits_[0] |= 0x00000020u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000020u;
+  }
+
+  _impl_.exit_battle_ = reinterpret_cast<::sync::MsgExitBattle*>(value);
+  // @@protoc_insertion_point(field_set_allocated:sync.MsgBody.exit_battle)
 }
 
 // -------------------------------------------------------------------

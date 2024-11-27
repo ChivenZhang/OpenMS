@@ -15,13 +15,13 @@
 class Timer final
 {
 public:
-	using task_t = TLambda<void(uint32_t timer)>;
+	using task_t = TLambda<void(uint32_t handle)>;
 
 public:
 	Timer();
 	~Timer();
 	uint32_t start(uint64_t timeout, uint64_t repeat, task_t task);
-	bool stop(uint32_t timer);
+	bool stop(uint32_t handle);
 
 private:
 	struct timer_t

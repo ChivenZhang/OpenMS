@@ -9,25 +9,15 @@
 *
 * =================================================*/
 #include "AuthorityService.h"
-#include "OpenMS/Toolkit/Timer.h"
-#include <OpenMS/Service/IStartup.h>
 
-int openms_main(int argc, char** argv)
+int main(int argc, char** argv)
 {
-	AuthorityService service;
-	service.startup();
-	return 0;
+	return IApplication::Run<AuthorityService>(argc, argv);
 }
 
-bool running = false;
-
-int AuthorityService::startup()
+void AuthorityService::onStartup()
 {
-	running = true;
-	signal(SIGINT, [](int) { running = false; });
-
 	auto serviceName = property("authority.name");
-	auto timer = AUTOWIRE(Timer)::bean();
 	auto server = AUTOWIRE(AuthorityServer)::bean();
 	auto client = AUTOWIRE(AuthorityClient)::bean();
 
@@ -44,16 +34,14 @@ int AuthorityService::startup()
 			TPrint("query result: %s", result.c_str());
 			});
 		};
-	auto timerID = timer->start(0, 10, update_func);
+	startTimer(0, 1000, update_func);
+}
 
-	while (running)
-	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(50));
-	}
-	timer->stop(timerID);
+void AuthorityService::onShutdown()
+{
+	auto server = AUTOWIRE(AuthorityServer)::bean();
+	auto client = AUTOWIRE(AuthorityClient)::bean();
 
 	server->shutdown();
 	client->shutdown();
-
-	return 0;
 }

@@ -42,6 +42,7 @@ Timer::Timer()
 			auto timer = &clause->Timer;
 
 			uv_timer_init(handle->loop, &timer->Handle);
+			timer->Handle.data = timer;
 			uv_timer_start(&timer->Handle, [](uv_timer_t* handle) {
 				auto _this = (Timer*)handle->loop->data;
 				auto timer = (timer_t*)handle->data;
@@ -49,8 +50,11 @@ Timer::Timer()
 				if (handle->repeat == 0)
 				{
 					uv_timer_stop(handle);
-					uv_close((uv_handle_t*)&timer->Handle, nullptr);
-					_this->m_Timers.erase(timer->ID);
+					uv_close((uv_handle_t*)&timer->Handle, [](uv_handle_t* handle) {
+						auto _this = (Timer*)handle->loop->data;
+						auto timer = (timer_t*)handle->data;
+						_this->m_Timers.erase(timer->ID);
+						});
 				}
 				}, timer->Timeout, timer->Repeat);
 

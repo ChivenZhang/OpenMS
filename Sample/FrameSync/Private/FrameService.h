@@ -1,3 +1,4 @@
+#pragma once
 /*=================================================
 * Copyright © 2020-2024 ChivenZhang.
 * All Rights Reserved.
@@ -8,9 +9,16 @@
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
-#include "StatusServer.h"
+#include <OpenMS/Service/Private/Service.h>
+#include <OpenMS/Reactor/TCP/TCPServerReactor.h>
+#include <OpenMS/Reactor/UDP/UDPServerReactor.h>
+#include "FrameConfig.h"
 
-int main(int argc, char** argv)
+class FrameService :
+	public Service,
+	public RESOURCE(FrameConfig)
 {
-	return 0;
-}
+protected:
+	void onStartup() override;
+	void onShutdown() override;
+};

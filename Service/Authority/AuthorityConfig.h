@@ -18,7 +18,6 @@ class AuthorityConfig :
 	public RESOURCE2N(Value, IValue, "iptable"),
 	public RESOURCE2N(Value, IValue, "service"),
 	public RESOURCE(AuthorityServer),
-	public RESOURCE(AuthorityClient),
-	public RESOURCE(Timer)
+	public RESOURCE(AuthorityClient)
 {
 };

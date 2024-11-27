@@ -9,15 +9,8 @@
 *
 * =================================================*/
 #include "StatusClient.h"
-#include <OpenMS/Service/IStartup.h>
 
-int openms_main(int argc, char** argv)
-{
-	StatusClient server;
-	return server.startup();
-}
-
-int StatusClient::startup()
+int main(int argc, char** argv)
 {
 	return 0;
 }
