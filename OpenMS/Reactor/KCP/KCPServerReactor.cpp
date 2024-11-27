@@ -196,12 +196,16 @@ void KCPServerReactor::startup()
 				m_ChannelsRemoved.clear();
 			}
 
+			uv_close((uv_handle_t*)&server, nullptr);
+			uv_loop_close(&loop);
+
+			TPrint("closed server");
+			return;
 		} while (0);
 
 		uv_close((uv_handle_t*)&server, nullptr);
 		uv_loop_close(&loop);
-
-		TPrint("closed server");
+		promise.set_value();
 		});
 
 	future.wait();

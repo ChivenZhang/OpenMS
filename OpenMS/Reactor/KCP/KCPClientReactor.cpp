@@ -198,12 +198,16 @@ void KCPClientReactor::startup()
 				m_ChannelRemoved = nullptr;
 			}
 
+			uv_close((uv_handle_t*)&client, nullptr);
+			uv_loop_close(&loop);
+
+			TPrint("closed client");
+			return;
 		} while (0);
 
 		uv_close((uv_handle_t*)&client, nullptr);
 		uv_loop_close(&loop);
-
-		TPrint("closed client");
+		promise.set_value();
 		});
 
 	future.wait();
