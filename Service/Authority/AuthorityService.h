@@ -17,8 +17,6 @@ using RegistryIPTable = TMap<TString, TVector<TString>>;
 class AuthorityService :
 	public Service,
 	public RESOURCE(AuthorityConfig),
-	public AUTOWIREN(Value, "iptable"),
-	public AUTOWIREN(Value, "service"),
 	public AUTOWIRE(AuthorityServer),
 	public AUTOWIRE(AuthorityClient)
 {
