@@ -113,7 +113,7 @@ void TCPClientReactor::startup()
 			// Close all channels
 
 			{
-				if (m_Channel) onDisconnect(m_Channel);
+				if (m_Channel) onOnClose(m_Channel);
 				m_Channel = nullptr;
 			}
 
@@ -162,10 +162,10 @@ void TCPClientReactor::onConnect(TRef<Channel> channel)
 	ChannelReactor::onConnect(channel);
 }
 
-void TCPClientReactor::onDisconnect(TRef<Channel> channel)
+void TCPClientReactor::onOnClose(TRef<Channel> channel)
 {
 	m_Channel = nullptr;
-	ChannelReactor::onDisconnect(channel);
+	ChannelReactor::onOnClose(channel);
 }
 
 void TCPClientReactor::on_connect(uv_connect_t* req, int status)
@@ -255,7 +255,7 @@ void TCPClientReactor::on_connect(uv_connect_t* req, int status)
 		TError("read start error: %s", ::uv_strerror(result));
 		uv_close((uv_handle_t*)&client, nullptr);
 
-		reactor->onDisconnect(channel->shared_from_this());
+		reactor->onOnClose(channel->shared_from_this());
 	}
 }
 
@@ -277,7 +277,7 @@ void TCPClientReactor::on_read(uv_stream_t* stream, ssize_t nread, const uv_buf_
 		uv_close((uv_handle_t*)stream, nullptr);
 		free(buf->base);
 
-		reactor->onDisconnect(channel);
+		reactor->onOnClose(channel);
 		return;
 	}
 
@@ -286,7 +286,7 @@ void TCPClientReactor::on_read(uv_stream_t* stream, ssize_t nread, const uv_buf_
 		uv_close((uv_handle_t*)stream, nullptr);
 		free(buf->base);
 
-		reactor->onDisconnect(channel);
+		reactor->onOnClose(channel);
 		return;
 	}
 
@@ -295,7 +295,7 @@ void TCPClientReactor::on_read(uv_stream_t* stream, ssize_t nread, const uv_buf_
 		uv_close((uv_handle_t*)stream, nullptr);
 		free(buf->base);
 
-		reactor->onDisconnect(channel);
+		reactor->onOnClose(channel);
 		return;
 	}
 
@@ -327,7 +327,7 @@ void TCPClientReactor::on_send(uv_tcp_t* handle)
 		if (event->Channel.expired()) continue;
 		auto channel = TCast<TCPChannel>(event->Channel.lock());
 		if (channel == nullptr) continue;
-		if (channel->running() == false) reactor->onDisconnect(channel);
+		if (channel->running() == false) reactor->onOnClose(channel);
 		if (channel->running() == false) continue;
 		if (event->Message.empty()) continue;
 		auto client = channel->getHandle();
@@ -339,7 +339,7 @@ void TCPClientReactor::on_send(uv_tcp_t* handle)
 			auto result = uv_try_write((uv_stream_t*)client, &buf, 1);
 			if (result < 0)
 			{
-				reactor->onDisconnect(channel);
+				reactor->onOnClose(channel);
 				break;
 			}
 			else if (result == UV_EAGAIN) continue;

@@ -193,7 +193,7 @@ void KCPClientReactor::startup()
 			// Close all channels
 
 			{
-				if (m_Channel) onDisconnect(m_Channel);
+				if (m_Channel) onOnClose(m_Channel);
 				m_Channel = nullptr;
 				m_ChannelRemoved = nullptr;
 			}
@@ -244,11 +244,11 @@ void KCPClientReactor::onConnect(TRef<Channel> channel)
 	ChannelReactor::onConnect(channel);
 }
 
-void KCPClientReactor::onDisconnect(TRef<Channel> channel)
+void KCPClientReactor::onOnClose(TRef<Channel> channel)
 {
 	m_Channel = nullptr;
 	m_ChannelRemoved = channel;
-	ChannelReactor::onDisconnect(channel);
+	ChannelReactor::onOnClose(channel);
 }
 
 void KCPClientReactor::on_alloc(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf)
@@ -352,7 +352,7 @@ void KCPClientReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 	{
 		free(buf->base);
 
-		reactor->onDisconnect(channel);
+		reactor->onOnClose(channel);
 		return;
 	}
 
@@ -360,7 +360,7 @@ void KCPClientReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 	{
 		free(buf->base);
 
-		reactor->onDisconnect(channel);
+		reactor->onOnClose(channel);
 		return;
 	}
 
@@ -370,7 +370,7 @@ void KCPClientReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 	{
 		free(buf->base);
 
-		reactor->onDisconnect(channel);
+		reactor->onOnClose(channel);
 		return;
 	}
 
@@ -394,7 +394,7 @@ int KCPClientReactor::on_output(const char* buf, int len, IKCPCB* kcp, void* use
 		auto result = uv_udp_try_send(client, &buf, 1, nullptr);
 		if (result < 0)
 		{
-			reactor->onDisconnect(channel->shared_from_this());
+			reactor->onOnClose(channel->shared_from_this());
 			return -1;
 		}
 		else if (result == UV_EAGAIN) continue;
@@ -447,7 +447,7 @@ void KCPClientReactor::on_send(uv_udp_t* handle)
 
 		auto channel = TCast<KCPChannel>(event->Channel.lock());
 		if (channel == nullptr) continue;
-		if (channel->running() == false) reactor->onDisconnect(channel);
+		if (channel->running() == false) reactor->onOnClose(channel);
 		if (channel->running() == false) continue;
 		if (event->Message.empty()) continue;
 		auto session = channel->getSession();
@@ -459,7 +459,7 @@ void KCPClientReactor::on_send(uv_udp_t* handle)
 			auto result = ikcp_send(session, (char*)buf.base, buf.len);
 			if (result < 0)
 			{
-				reactor->onDisconnect(channel);
+				reactor->onOnClose(channel);
 				break;
 			}
 			else if (result == UV_EAGAIN) continue;

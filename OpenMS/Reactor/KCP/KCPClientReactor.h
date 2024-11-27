@@ -16,9 +16,7 @@
 class KCPClientReactor : public ChannelReactor
 {
 public:
-	struct callback_kcp_t : public callback_t
-	{
-	};
+	using callback_kcp_t = callback_t;
 
 public:
 	KCPClientReactor(TRef<ISocketAddress> address, size_t workerNum, callback_kcp_t callback);
@@ -30,7 +28,7 @@ public:
 
 protected:
 	void onConnect(TRef<Channel> channel) override;
-	void onDisconnect(TRef<Channel> channel) override;
+	void onOnClose(TRef<Channel> channel) override;
 
 protected:
 	static void on_alloc(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf);

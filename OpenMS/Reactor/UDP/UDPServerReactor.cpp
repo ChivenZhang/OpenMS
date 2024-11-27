@@ -134,7 +134,7 @@ void UDPServerReactor::startup()
 				auto channels = m_Channels;
 				for (auto channel : channels)
 				{
-					if (channel) onDisconnect(channel);
+					if (channel) onOnClose(channel);
 				}
 				m_Channels.clear();
 				m_ChannelMap.clear();
@@ -170,17 +170,17 @@ void UDPServerReactor::onConnect(TRef<Channel> channel)
 	auto hashName = remote->getHashName();
 	m_Channels.insert(m_Channels.begin(), channel);
 	m_ChannelMap[hashName] = channel;
-	if (m_Backlog < m_Channels.size()) onDisconnect(m_Channels.back());
+	if (m_Backlog < m_Channels.size()) onOnClose(m_Channels.back());
 	ChannelReactor::onConnect(channel);
 }
 
-void UDPServerReactor::onDisconnect(TRef<Channel> channel)
+void UDPServerReactor::onOnClose(TRef<Channel> channel)
 {
 	auto remote = TCast<ISocketAddress>(channel->getRemote().lock());
 	auto hashName = remote->getHashName();
 	m_ChannelMap.erase(hashName);
 	m_Channels.erase(std::remove(m_Channels.begin(), m_Channels.end(), channel), m_Channels.end());
-	ChannelReactor::onDisconnect(channel);
+	ChannelReactor::onOnClose(channel);
 }
 
 void UDPServerReactor::on_alloc(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf)
@@ -292,7 +292,7 @@ void UDPServerReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 	{
 		free(buf->base);
 
-		reactor->onDisconnect(channel);
+		reactor->onOnClose(channel);
 		return;
 	}
 
@@ -300,7 +300,7 @@ void UDPServerReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 	{
 		free(buf->base);
 
-		reactor->onDisconnect(channel);
+		reactor->onOnClose(channel);
 		return;
 	}
 
@@ -328,7 +328,7 @@ void UDPServerReactor::on_send(uv_udp_t* handle)
 
 		auto channel = TCast<UDPChannel>(event->Channel.lock());
 		if (channel == nullptr) continue;
-		if (channel->running() == false) reactor->onDisconnect(channel);
+		if (channel->running() == false) reactor->onOnClose(channel);
 		if (channel->running() == false) continue;
 		if (event->Message.empty()) continue;
 		auto server = channel->getHandle();
@@ -360,7 +360,7 @@ void UDPServerReactor::on_send(uv_udp_t* handle)
 			result = uv_udp_try_send(server, &buf, 1, (sockaddr*)&addr);
 			if (result < 0)
 			{
-				reactor->onDisconnect(channel);
+				reactor->onOnClose(channel);
 				break;
 			}
 			else if (result == UV_EAGAIN) continue;

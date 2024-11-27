@@ -17,8 +17,8 @@ ChannelReactor::ChannelReactor(size_t workerNum, callback_t callback)
 	m_Running(false),
 	m_Sending(false),
 	m_Connect(false),
-	m_OnConnected(callback.Connected),
-	m_OnDisconnect(callback.Disconnect),
+	m_OnOnOpen(callback.OnOpen),
+	m_OnOnClose(callback.OnClose),
 	m_WorkerList(std::max(1ULL, workerNum)),
 	m_WorkerThreads(std::max(1ULL, workerNum))
 {
@@ -45,7 +45,7 @@ void ChannelReactor::startup()
 			auto event = TNew<IChannelEvent>(IChannelEvent { "A message!", channel });
 			onInbound(event);
 		}
-		onDisconnect(channel);
+		onOnClose(channel);
 		std::this_thread::sleep_for(std::chrono::seconds(2));
 		});
 #endif
@@ -102,13 +102,13 @@ TFuture<bool> ChannelReactor::writeAndFlush(TRef<IChannelEvent> event, TRef<ICha
 
 void ChannelReactor::onConnect(TRef<Channel> channel)
 {
-	if (m_OnConnected) m_OnConnected(channel);
+	if (m_OnOnOpen) m_OnOnOpen(channel);
 }
 
-void ChannelReactor::onDisconnect(TRef<Channel> channel)
+void ChannelReactor::onOnClose(TRef<Channel> channel)
 {
 	channel->close();
-	if (m_OnDisconnect) m_OnDisconnect(channel);
+	if (m_OnOnClose) m_OnOnClose(channel);
 }
 
 void ChannelReactor::onInbound(TRef<IChannelEvent> event)

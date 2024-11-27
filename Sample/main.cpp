@@ -1,171 +1,101 @@
 #include <iostream>
-#include <OpenMS/Service/IService.h>
 #include <OpenMS/Reactor/TCP/TCPServerReactor.h>
 #include <OpenMS/Reactor/TCP/TCPClientReactor.h>
 #include <OpenMS/Reactor/UDP/UDPServerReactor.h>
 #include <OpenMS/Reactor/UDP/UDPClientReactor.h>
 #include <OpenMS/Reactor/KCP/KCPServerReactor.h>
 #include <OpenMS/Reactor/KCP/KCPClientReactor.h>
-#include "TestHandler.h"
+#include <OpenMS/Reactor/Private/ChannelHandler.h>
+
+#define SERVER_HANDLER \
+	[](TRef<IChannel> channel) { \
+		auto ip = TCast<IPv4Address>(channel->getRemote().lock()); \
+		TPrint("connect %s", ip->getString().c_str()); \
+		\
+		channel->getPipeline()->addFirst("input", { \
+			.OnRead = [](TRaw<IChannelContext> context, TRaw<IChannelEvent> event)->bool \
+			{ \
+				TPrint("Server read: %s", event->Message.c_str()); \
+				return true; \
+			} \
+			}); \
+		\
+		channel->getPipeline()->addFirst("output", { \
+			.OnWrite = [](TRaw<IChannelContext> context, TRaw<IChannelEvent> event)->bool \
+			{ \
+				context->write(IChannelEvent::New(event->Message)); \
+				return true; \
+			} \
+			}); \
+	}, \
+	[](TRef<IChannel> channel) { \
+		auto ip = TCast<IPv4Address>(channel->getRemote().lock()); \
+		TPrint("disconnect %s", ip->getString().c_str()); \
+	},
+
+#define CLIENT_HANDLER \
+	[](TRef<IChannel> channel) { \
+		auto ip = TCast<IPv4Address>(channel->getRemote().lock()); \
+		TPrint("connect %s", ip->getString().c_str()); \
+		\
+		channel->getPipeline()->addFirst("input", { \
+			.OnRead = [](TRaw<IChannelContext> context, TRaw<IChannelEvent> event)->bool \
+			{ \
+				TPrint("Client read: %s", event->Message.c_str()); \
+				return true; \
+			} \
+			}); \
+		\
+		channel->getPipeline()->addFirst("output", { \
+			.OnWrite = [](TRaw<IChannelContext> context, TRaw<IChannelEvent> event)->bool \
+			{ \
+				printf(">>"); \
+				\
+				char buffer[1024]{}; \
+				size_t buflen = 0; \
+				while (scanf("%c", buffer + buflen) != EOF && buffer[buflen] != '\n') ++buflen; \
+				\
+				context->write(IChannelEvent::New(TStringView(buffer, buflen))); \
+				return true; \
+			} \
+			}); \
+		channel->write(IChannelEvent::New("Hello, server!\n")); \
+	}, \
+	[](TRef<IChannel> channel) { \
+		auto ip = TCast<IPv4Address>(channel->getRemote().lock()); \
+		TPrint("disconnect %s", ip->getString().c_str()); \
+	},
 
 int main()
 {
-	if (false)
-	{
-		TCPServerReactor server(IPv4Address::New("0.0.0.0", 8080), 128, 2, {
-			[](TRef<IChannel> channel) {	// Connected
-				auto ipv4 = TCast<IPv4Address>(channel->getRemote().lock());
-				TPrint("connect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
-
-				auto inbound = TNew<ServerInboundHandler>();
-				channel->getPipeline()->addFirst("https", inbound);
-
-				auto outbound = TNew<ServerOutboundHandler>();
-				channel->getPipeline()->addFirst("https", outbound);
-			},
-			[](TRef<IChannel> channel) {	// Disconnect
-				auto ipv4 = TCast<IPv4Address>(channel->getRemote().lock());
-				TPrint("disconnect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
-			},
-			});
-		server.startup();
-
-		TCPClientReactor client(IPv4Address::New("127.0.0.1", 8080), 1, {
-			[](TRef<IChannel> channel) {	// Connected
-				auto ipv4 = TCast<IPv4Address>(channel->getRemote().lock());
-				TPrint("connect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
-
-				auto inbound = TNew<ClientInboundHandler>();
-				channel->getPipeline()->addFirst("https", inbound);
-
-				auto outbound = TNew<ClientOutboundHandler>();
-				channel->getPipeline()->addFirst("https", outbound);
-
-				auto event = TNew<IChannelEvent>();
-				event->Message = "Hello";
-				channel->write(event);
-			},
-			[](TRef<IChannel> channel) {	// Disconnect
-				auto ipv4 = TCast<IPv4Address>(channel->getRemote().lock());
-				TPrint("disconnect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
-			},
-			});
-		client.startup();
-
-		TMutex mutex; TMutexUnlock unlock; TUniqueLock lock(mutex); unlock.wait(lock);
-	}
-
-	if (false)
-	{
-		UDPServerReactor server(IPv4Address::New("0.0.0.0", 8080), 0, false, false, 2, {
-			[](TRef<IChannel> channel) {	// Connected
-				auto ipv4 = TCast<IPv4Address>(channel->getRemote().lock());
-				TPrint("connect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
-
-				auto inbound = TNew<ServerInboundHandler>();
-				channel->getPipeline()->addFirst("https", inbound);
-
-				auto outbound = TNew<ServerOutboundHandler>();
-				channel->getPipeline()->addFirst("https", outbound);
-			},
-			[](TRef<IChannel> channel) {	// Disconnect
-				auto ipv4 = TCast<IPv4Address>(channel->getRemote().lock());
-				TPrint("disconnect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
-			},
-			});
-		server.startup();
-
-		UDPClientReactor client(IPv4Address::New("127.0.0.1", 8080), false, false, 1, {
-			[](TRef<IChannel> channel) {	// Connected
-				auto ipv4 = TCast<IPv4Address>(channel->getRemote().lock());
-				TPrint("connect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
-
-				auto inbound = TNew<ClientInboundHandler>();
-				channel->getPipeline()->addFirst("https", inbound);
-
-				auto outbound = TNew<ClientOutboundHandler>();
-				channel->getPipeline()->addFirst("https", outbound);
-
-				auto event = TNew<IChannelEvent>();
-				event->Message = "Hello";
-				channel->write(event);
-			},
-			[](TRef<IChannel> channel) {	// Disconnect
-				auto ipv4 = TCast<IPv4Address>(channel->getRemote().lock());
-				TPrint("disconnect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
-			},
-			});
-		client.startup();
-
-		TMutex mutex; TMutexUnlock unlock; TUniqueLock lock(mutex); unlock.wait(lock);
-	}
-
-	if (false)
-	{
-		KCPServerReactor server(IPv4Address::New("0.0.0.0", 8080), 0, 2, {
-			[](TRef<IChannel> channel) {	// Connected
-				auto ipv4 = TCast<IPv4Address>(channel->getRemote().lock());
-				TPrint("connect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
-
-				auto inbound = TNew<ServerInboundHandler>();
-				channel->getPipeline()->addFirst("https", inbound);
-
-				auto outbound = TNew<ServerOutboundHandler>();
-				channel->getPipeline()->addFirst("https", outbound);
-			},
-			[](TRef<IChannel> channel) {	// Disconnect
-				auto ipv4 = TCast<IPv4Address>(channel->getRemote().lock());
-				TPrint("disconnect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
-			},
-			});
-		server.startup();
-
-		KCPClientReactor client(IPv4Address::New("127.0.0.1", 8080), 1, {
-			[](TRef<IChannel> channel) {	// Connected
-				auto ipv4 = TCast<IPv4Address>(channel->getRemote().lock());
-				TPrint("connect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
-
-				auto inbound = TNew<ClientInboundHandler>();
-				channel->getPipeline()->addFirst("https", inbound);
-
-				auto outbound = TNew<ClientOutboundHandler>();
-				channel->getPipeline()->addFirst("https", outbound);
-
-				auto event = TNew<IChannelEvent>();
-				event->Message = "Hello";
-				channel->write(event);
-			},
-			[](TRef<IChannel> channel) {	// Disconnect
-				auto ipv4 = TCast<IPv4Address>(channel->getRemote().lock());
-				TPrint("disconnect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
-			},
-			});
-		client.startup();
-
-		TMutex mutex; TMutexUnlock unlock; TUniqueLock lock(mutex); unlock.wait(lock);
-	}
-
 	if (true)
 	{
-		TCPClientReactor client(IPv4Address::New("127.0.0.1", 8080), 1, {
-			[](TRef<IChannel> channel) {	// Connected
-				auto ipv4 = TCast<IPv4Address>(channel->getRemote().lock());
-				TPrint("connect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
+		TCPServerReactor server(IPv4Address::New("0.0.0.0", 8080), 128, 0, { SERVER_HANDLER });
+		server.startup();
 
-				auto inbound = TNew<ClientInboundHandler>();
-				channel->getPipeline()->addFirst("test", inbound);
-				auto outbound = TNew<ClientOutboundHandler>();
-				channel->getPipeline()->addFirst("test", outbound);
+		TCPClientReactor client(IPv4Address::New("127.0.0.1", 8080), 0, { CLIENT_HANDLER });
+		client.startup();
 
-				auto event = TNew<IChannelEvent>();
-				event->Message = "Hello, Server!";
-				channel->write(event);
-			},
-			[](TRef<IChannel> channel) {	// Disconnect
-				auto ipv4 = TCast<IPv4Address>(channel->getRemote().lock());
-				TPrint("disconnect %s:%d", ipv4->getAddress().c_str(), ipv4->getPort());
-			},
-			});
+		TMutex mutex; TMutexUnlock unlock; TUniqueLock lock(mutex); unlock.wait(lock);
+	}
+
+	if (false)
+	{
+		UDPServerReactor server(IPv4Address::New("0.0.0.0", 8080), 0, false, false, 0, { SERVER_HANDLER });
+		server.startup();
+
+		UDPClientReactor client(IPv4Address::New("127.0.0.1", 8080), false, false, 0, { CLIENT_HANDLER });
+		client.startup();
+
+		TMutex mutex; TMutexUnlock unlock; TUniqueLock lock(mutex); unlock.wait(lock);
+	}
+
+	if (false)
+	{
+		KCPServerReactor server(IPv4Address::New("0.0.0.0", 8080), 0, 0, { SERVER_HANDLER });
+		server.startup();
+
+		KCPClientReactor client(IPv4Address::New("127.0.0.1", 8080), 0, { CLIENT_HANDLER });
 		client.startup();
 
 		TMutex mutex; TMutexUnlock unlock; TUniqueLock lock(mutex); unlock.wait(lock);

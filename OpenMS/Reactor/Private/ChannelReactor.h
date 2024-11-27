@@ -18,8 +18,8 @@ class ChannelReactor : public IChannelReactor
 public:
 	struct callback_t
 	{
-		TLambda<void(TRef<IChannel>)> Connected;
-		TLambda<void(TRef<IChannel>)> Disconnect;
+		TLambda<void(TRef<IChannel>)> OnOpen;
+		TLambda<void(TRef<IChannel>)> OnClose;
 	};
 
 public:
@@ -37,7 +37,7 @@ public:
 
 protected:
 	virtual void onConnect(TRef<Channel> channel);
-	virtual void onDisconnect(TRef<Channel> channel);
+	virtual void onOnClose(TRef<Channel> channel);
 	virtual void onInbound(TRef<IChannelEvent> event);
 	virtual void onOutbound(TRef<IChannelEvent> event, bool flush = false);
 
@@ -50,8 +50,8 @@ protected:
 	TVector<TThread> m_WorkerThreads;
 	TVector<TRef<ChannelWorker>> m_WorkerList;
 	TQueue<TRef<IChannelEvent>> m_EventQueue;
-	TLambda<void(TRef<IChannel>)> m_OnConnected;
-	TLambda<void(TRef<IChannel>)> m_OnDisconnect;
+	TLambda<void(TRef<IChannel>)> m_OnOnOpen;
+	TLambda<void(TRef<IChannel>)> m_OnOnClose;
 
 private:
 	friend class Channel;

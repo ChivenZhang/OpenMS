@@ -16,9 +16,7 @@
 class TCPServerReactor : public ChannelReactor
 {
 public:
-	struct callback_tcp_t : public callback_t
-	{
-	};
+	using callback_tcp_t = callback_t;
 
 public:
 	TCPServerReactor(TRef<ISocketAddress> address, uint32_t backlog, size_t workerNum, callback_tcp_t callback);
@@ -28,7 +26,7 @@ public:
 
 protected:
 	void onConnect(TRef<Channel> channel) override;
-	void onDisconnect(TRef<Channel> channel) override;
+	void onOnClose(TRef<Channel> channel) override;
 
 protected:
 	static void on_connect(uv_stream_t* server, int status);

@@ -122,7 +122,7 @@ void TCPServerReactor::startup()
 				auto channels = m_ChannelMap;
 				for (auto channel : channels)
 				{
-					if (channel.second) onDisconnect(channel.second);
+					if (channel.second) onOnClose(channel.second);
 				}
 				m_ChannelMap.clear();
 			}
@@ -158,12 +158,12 @@ void TCPServerReactor::onConnect(TRef<Channel> channel)
 	ChannelReactor::onConnect(channel);
 }
 
-void TCPServerReactor::onDisconnect(TRef<Channel> channel)
+void TCPServerReactor::onOnClose(TRef<Channel> channel)
 {
 	auto remote = TCast<ISocketAddress>(channel->getRemote().lock());
 	auto hashName = remote->getHashName();
 	m_ChannelMap.erase(hashName);
-	ChannelReactor::onDisconnect(channel);
+	ChannelReactor::onOnClose(channel);
 }
 
 void TCPServerReactor::on_connect(uv_stream_t* server, int status)
@@ -259,7 +259,7 @@ void TCPServerReactor::on_connect(uv_stream_t* server, int status)
 			uv_close((uv_handle_t*)&client, nullptr);
 			free(client);
 
-			reactor->onDisconnect(channel->shared_from_this());
+			reactor->onOnClose(channel->shared_from_this());
 			return;
 		}
 	}
@@ -288,7 +288,7 @@ void TCPServerReactor::on_read(uv_stream_t* stream, ssize_t nread, const uv_buf_
 		uv_close((uv_handle_t*)stream, nullptr);
 		free(buf->base);
 
-		reactor->onDisconnect(channel);
+		reactor->onOnClose(channel);
 		return;
 	}
 
@@ -297,7 +297,7 @@ void TCPServerReactor::on_read(uv_stream_t* stream, ssize_t nread, const uv_buf_
 		uv_close((uv_handle_t*)stream, nullptr);
 		free(buf->base);
 
-		reactor->onDisconnect(channel);
+		reactor->onOnClose(channel);
 		return;
 	}
 
@@ -306,7 +306,7 @@ void TCPServerReactor::on_read(uv_stream_t* stream, ssize_t nread, const uv_buf_
 		uv_close((uv_handle_t*)stream, nullptr);
 		free(buf->base);
 
-		reactor->onDisconnect(channel);
+		reactor->onOnClose(channel);
 		return;
 	}
 
@@ -335,7 +335,7 @@ void TCPServerReactor::on_send(uv_tcp_t* handle)
 
 		auto channel = TCast<TCPChannel>(event->Channel.lock());
 		if (channel == nullptr) continue;
-		if (channel->running() == false) reactor->onDisconnect(channel);
+		if (channel->running() == false) reactor->onOnClose(channel);
 		if (channel->running() == false) continue;
 		if (event->Message.empty()) continue;
 		auto client = channel->getHandle();
@@ -347,7 +347,7 @@ void TCPServerReactor::on_send(uv_tcp_t* handle)
 			auto result = uv_try_write((uv_stream_t*)client, &buf, 1);
 			if (result < 0)
 			{
-				reactor->onDisconnect(channel);
+				reactor->onOnClose(channel);
 				break;
 			}
 			else if (result == UV_EAGAIN) continue;
