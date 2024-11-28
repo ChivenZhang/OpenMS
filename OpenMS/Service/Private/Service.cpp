@@ -23,7 +23,7 @@ int Service::startup()
 
 	try
 	{
-		onStart();
+		onInit();
 	}
 	catch (TException& ex)
 	{
@@ -70,7 +70,7 @@ int Service::startup()
 
 	try
 	{
-		onStop();
+		onExit();
 	}
 	catch (TException ex)
 	{
@@ -90,14 +90,7 @@ void Service::shutdown()
 	m_Unlock.notify_one();
 }
 
-TString Service::property(TString const& name) const
-{
-	auto source = AUTOWIRE_DATA(IProperty);
-	if (source == nullptr) return TString();
-	return source->property(name);
-}
-
-uint32_t Service::startTimer(uint64_t timeout, uint64_t repeat, Timer::task_t&& task)
+uint32_t Service::startTimer(uint64_t timeout, uint64_t repeat, TLambda<void(uint32_t handle)>&& task)
 {
 	return m_Timer.start(timeout, repeat, [=](uint32_t handle) {
 		sendEvent([&]() { task(handle); });
@@ -119,11 +112,18 @@ void Service::sendEvent(TLambda<void()>&& event)
 	m_Unlock.notify_one();
 }
 
-void Service::onStart()
+TString Service::property(TString const& name) const
+{
+	auto source = AUTOWIRE_DATA(IProperty);
+	if (source == nullptr) return TString();
+	return source->property(name);
+}
+
+void Service::onInit()
 {
 }
 
-void Service::onStop()
+void Service::onExit()
 {
 }
 

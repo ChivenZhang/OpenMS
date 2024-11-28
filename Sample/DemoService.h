@@ -9,13 +9,21 @@
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
-#include "OpenMS/Service/Private/Service.h"
-#include "RegistryConfig.h"
+#include <OpenMS/Service/Private/Service.h>
+#include "DemoServer.h"
 
-class RegistryService :
+class DemoConfig
+	:
+	public RESOURCE(DemoServer),
+	public RESOURCE(DemoClient)
+{
+};
+
+class DemoService :
 	public Service,
-	public RESOURCE(RegistryConfig),
-	public AUTOWIRE(RegistryServer)
+	public RESOURCE(DemoConfig),
+	public AUTOWIRE(DemoServer),
+	public AUTOWIRE(DemoClient)
 {
 public:
 	void onInit() override;

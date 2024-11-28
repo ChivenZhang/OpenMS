@@ -23,6 +23,7 @@
 ======|_|============================
 
 :: OpenMS ::                (v1.0.0)
+
 )")
 
 /// @brief Interface for service
@@ -34,6 +35,12 @@ public:
 	virtual int startup() = 0;
 
 	virtual void shutdown() = 0;
+
+	virtual void sendEvent(TLambda<void()>&& event) = 0;
+
+	virtual uint32_t startTimer(uint64_t timeout, uint64_t repeat, TLambda<void(uint32_t handle)>&& task) = 0;
+
+	virtual bool stopTimer(uint32_t handle) = 0;
 
 	virtual TString property(TString const& name) const = 0;
 

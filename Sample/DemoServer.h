@@ -9,15 +9,18 @@
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
-#include "OpenMS/Service/Private/Service.h"
-#include "RegistryConfig.h"
+#include <OpenMS/Endpoint/TCP/TCPServer.h>
+#include <OpenMS/Endpoint/TCP/TCPClient.h>
+#include <OpenMS/Service/IService.h>
 
-class RegistryService :
-	public Service,
-	public RESOURCE(RegistryConfig),
-	public AUTOWIRE(RegistryServer)
+class DemoServer : public TCPServer
 {
 public:
-	void onInit() override;
-	void onExit() override;
+	void configureEndpoint(config_t& config) override;
+};
+
+class DemoClient : public TCPClient, public AUTOWIRE(IService)
+{
+public:
+	void configureEndpoint(config_t & config) override;
 };

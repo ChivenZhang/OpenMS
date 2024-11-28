@@ -20,15 +20,15 @@ class Service :
 public:
 	int startup() override final;
 	void shutdown() override final;
+	void sendEvent(TLambda<void()> && event) override final;
+	uint32_t startTimer(uint64_t timeout, uint64_t repeat, TLambda<void(uint32_t handle)> && task) override final;
+	bool stopTimer(uint32_t handle) override final;
 	using IService::property;
 	TString property(TString const& name) const override final;
-	void sendEvent(TLambda<void()> && event);
-	uint32_t startTimer(uint64_t timeout, uint64_t repeat, Timer::task_t && task);
-	bool stopTimer(uint32_t handle);
 
 protected:
-	virtual void onStart();
-	virtual void onStop();
+	virtual void onInit();
+	virtual void onExit();
 	virtual void onUpdate(float time);
 	virtual void onFrame(uint32_t frame);
 	virtual void onError(TException && error);

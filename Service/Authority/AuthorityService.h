@@ -21,8 +21,8 @@ class AuthorityService :
 	public AUTOWIRE(AuthorityClient)
 {
 public:
-	void onStart() override;
-	void onStop() override;
+	void onInit() override;
+	void onExit() override;
 
 protected:
 	RegistryIPTable m_IPTables;
