@@ -10,7 +10,7 @@
 * =================================================*/
 #include "AuthorityService.h"
 
-int main(int argc, char** argv)
+int main(int argc, char* argv[])
 {
 	return IApplication::Run<AuthorityService>(argc, argv);
 }

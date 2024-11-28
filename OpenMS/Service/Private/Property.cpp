@@ -28,8 +28,8 @@ void Value::setValue(TString const& value)
 
 Property::Property()
 {
-	auto argc = IApplication::argc;
-	auto argv = IApplication::argv;
+	auto argc = IApplication::Argc;
+	auto argv = IApplication::Argv;
 
 	// Get config file path
 
@@ -95,7 +95,7 @@ Property::Property()
 
 	for (auto& value : m_PropertyMap)
 	{
-		RESOURCE2_DATA(Value, IValue, value.first)->setValue(value.second);
+		RESOURCE2N_DATA(Value, IValue, value.first)->setValue(value.second);
 	}
 }
 

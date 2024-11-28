@@ -30,7 +30,7 @@ struct status_t
 	int32_t Y = 100;
 };
 
-int main(int argc, char** argv)
+int main(int argc, char* argv[])
 {
 	initgraph(640, 480, INIT_DEFAULT);
 	setrendermode(RENDER_MANUAL);

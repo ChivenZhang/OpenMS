@@ -21,8 +21,8 @@
 * =================================================*/
 #include "Service.h"
 
-int IApplication::argc = 0;
-char** IApplication::argv = nullptr;
+int IApplication::Argc = 0;
+char** IApplication::Argv = nullptr;
 
 int Service::startup()
 {

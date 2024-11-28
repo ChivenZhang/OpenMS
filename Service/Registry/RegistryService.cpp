@@ -10,7 +10,7 @@
 * =================================================*/
 #include "RegistryService.h"
 
-int main(int argc, char** argv)
+int main(int argc, char* argv[])
 {
 	return IApplication::Run<RegistryService>(argc, argv);
 }

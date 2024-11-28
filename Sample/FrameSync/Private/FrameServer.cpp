@@ -14,7 +14,7 @@
 
 TMutex lock; TMutexUnlock unlock;
 //
-//int main(int argc, char** argv)
+//int main(int argc, char* argv[])
 //{
 //	TVector<TRef<IChannel>> clients;
 //
