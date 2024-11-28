@@ -15,7 +15,7 @@ int main(int argc, char* argv[])
 	return IApplication::Run<AuthorityService>(argc, argv);
 }
 
-void AuthorityService::onStartup()
+void AuthorityService::onStart()
 {
 	auto serviceName = property("authority.name");
 	auto server = AUTOWIRE(AuthorityServer)::bean();
@@ -37,7 +37,7 @@ void AuthorityService::onStartup()
 	startTimer(0, 1000, update_func);
 }
 
-void AuthorityService::onShutdown()
+void AuthorityService::onStop()
 {
 	auto server = AUTOWIRE(AuthorityServer)::bean();
 	auto client = AUTOWIRE(AuthorityClient)::bean();

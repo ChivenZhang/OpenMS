@@ -21,17 +21,17 @@ public:
 	int startup() override final;
 	void shutdown() override final;
 	using IService::property;
-	TString property(TString const& name) const override;
+	TString property(TString const& name) const override final;
 	void sendEvent(TLambda<void()> && event);
 	uint32_t startTimer(uint64_t timeout, uint64_t repeat, Timer::task_t && task);
 	bool stopTimer(uint32_t handle);
 
 protected:
-	virtual void onStartup();
-	virtual void onShutdown();
+	virtual void onStart();
+	virtual void onStop();
 	virtual void onUpdate(float time);
-	virtual void onException(TException && ex);
-	virtual void onFixedUpdate(uint32_t frame);
+	virtual void onFrame(uint32_t frame);
+	virtual void onError(TException && error);
 
 protected:
 	Timer m_Timer;

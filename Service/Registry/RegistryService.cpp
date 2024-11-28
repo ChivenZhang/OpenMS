@@ -15,12 +15,12 @@ int main(int argc, char* argv[])
 	return IApplication::Run<RegistryService>(argc, argv);
 }
 
-void RegistryService::onStartup()
+void RegistryService::onStart()
 {
 	AUTOWIRE(RegistryServer)::bean()->startup();
 }
 
-void RegistryService::onShutdown()
+void RegistryService::onStop()
 {
 	AUTOWIRE(RegistryServer)::bean()->shutdown();
 }

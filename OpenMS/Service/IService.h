@@ -14,35 +14,34 @@
 #include <csignal>
 
 #define OPENMS_LOGO \
-R"(
-  .    ___                  __  __ ____  __ _ _
- /\\  / _ \ _ __  ___ _ __ |  \/  / ___| \ \ \ \
-( ( )| | | | '_ \/ _ \ '_ \| |\/| \___ \  \ \ \ \
- \\/ | |_| | |_) | __/ | | | |  | |___) |  ) ) ) )
-  '   \___/| .__/\___|_| |_|_|  |_|____/  / / / /
- ==========|_|===========================/_/_/_/
+(R"(
+  ___                   __  __ ____  
+ / _ \ _ __   ___ _ __ |  \/  / ___| 
+| | | | '_ \ / _ \ '_ \| |\/| \___ \ 
+| |_| | |_) |  __/ | | | |  | |___) |
+ \___/| .__/ \___|_| |_|_|  |_|____/ 
+======|_|============================
 
- :: OpenMS ::                           (v1.0.0)
-
-)"
+:: OpenMS ::                (v1.0.0)
+)")
 
 /// @brief Interface for service
 class OPENMS_API IService
-  {
-  public:
-	  virtual ~IService() = default;
+{
+public:
+	virtual ~IService() = default;
 
-	  virtual int startup() = 0;
+	virtual int startup() = 0;
 
-	  virtual void shutdown() = 0;
+	virtual void shutdown() = 0;
 
-	  virtual TString property(TString const& name) const = 0;
+	virtual TString property(TString const& name) const = 0;
 
-	  template <class T>
-	  T property(TString const& name, T const& value = T()) const
-	  {
-		  return TTextC<T>::from_string(property(name), value);
-	  }
+	template <class T>
+	T property(TString const& name, T const& value = T()) const
+	{
+		return TTextC<T>::from_string(property(name), value);
+	}
   };
 
   /// @brief Interface for application

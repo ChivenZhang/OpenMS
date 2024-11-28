@@ -18,6 +18,6 @@ class RegistryService :
 	public AUTOWIRE(RegistryServer)
 {
 public:
-	void onStartup() override;
-	void onShutdown() override;
+	void onStart() override;
+	void onStop() override;
 };

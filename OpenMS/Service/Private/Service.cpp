@@ -1,14 +1,3 @@
-#include "Service.h"
-#include "Service.h"
-#include "Service.h"
-#include "Service.h"
-#include "Service.h"
-#include "Service.h"
-#include "Service.h"
-#include "Service.h"
-#include "Service.h"
-#include "Service.h"
-#include "Service.h"
 /*=================================================
 * Copyright © 2020-2024 ChivenZhang.
 * All Rights Reserved.
@@ -34,15 +23,15 @@ int Service::startup()
 
 	try
 	{
-		onStartup();
+		onStart();
 	}
 	catch (TException& ex)
 	{
-		onException(std::move(ex));
+		onError(std::move(ex));
 	}
 	catch (...)
 	{
-		onException(std::exception("unknown exception"));
+		onError(std::exception("unknown exception"));
 	}
 
 	while (m_Running)
@@ -61,11 +50,11 @@ int Service::startup()
 				}
 				catch (TException ex)
 				{
-					onException(std::forward<TException>(ex));
+					onError(std::forward<TException>(ex));
 				}
 				catch (...)
 				{
-					onException(std::exception("unknown exception"));
+					onError(std::exception("unknown exception"));
 				}
 			}
 		}
@@ -74,22 +63,22 @@ int Service::startup()
 		onUpdate(frameTime * 0.001f);
 		while (frameNext < frameTime)
 		{
-			onFixedUpdate(frame++);
+			onFrame(frame++);
 			frameNext += timePerFrame;
 		}
 	}
 
 	try
 	{
-		onShutdown();
+		onStop();
 	}
 	catch (TException ex)
 	{
-		onException(std::forward<TException>(ex));
+		onError(std::forward<TException>(ex));
 	}
 	catch (...)
 	{
-		onException(std::exception("unknown exception"));
+		onError(std::exception("unknown exception"));
 	}
 
 	return 0;
@@ -130,15 +119,11 @@ void Service::sendEvent(TLambda<void()>&& event)
 	m_Unlock.notify_one();
 }
 
-void Service::onStartup()
+void Service::onStart()
 {
 }
 
-void Service::onShutdown()
-{
-}
-
-void Service::onException(TException&& ex)
+void Service::onStop()
 {
 }
 
@@ -146,6 +131,10 @@ void Service::onUpdate(float time)
 {
 }
 
-void Service::onFixedUpdate(uint32_t frame)
+void Service::onFrame(uint32_t frame)
+{
+}
+
+void Service::onError(TException&& error)
 {
 }

@@ -19,6 +19,6 @@ class FrameService :
 	public RESOURCE(FrameConfig)
 {
 protected:
-	void onStartup() override;
-	void onShutdown() override;
+	void onStart() override;
+	void onStop() override;
 };

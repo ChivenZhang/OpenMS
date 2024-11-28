@@ -15,11 +15,11 @@ int main(int argc, char* argv[])
 	return IApplication::Run<FrameService>(argc, argv);
 }
 
-void FrameService::onStartup()
+void FrameService::onStart()
 {
 
 }
 
-void FrameService::onShutdown()
+void FrameService::onStop()
 {
 }
