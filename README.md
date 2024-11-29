@@ -1,3 +1,5 @@
+<div align="center">
+<pre>
   ___                   __  __ ____  
  / _ \ _ __   ___ _ __ |  \/  / ___| 
 | | | | '_ \ / _ \ '_ \| |\/| \___ \ 
@@ -5,8 +7,14 @@
  \___/| .__/ \___|_| |_|_|  |_|____/ 
 ======|_|============================
 
-# OpenMS - Distributed Network based on Microservice Theory.
+:: OpenMS ::                (v1.0.0)
+</pre>
+</div>
 
-<div align="center">
-  <img src="Framework.png" style="width:60%;" />
+# OpenMS
+The Distributed Network Library based on Microservice Theory.
+
+## Architecture
+<div>
+  <img src="Framework.png" style="width:50%;" />
 </div>
