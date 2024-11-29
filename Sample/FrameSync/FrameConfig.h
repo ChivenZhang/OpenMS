@@ -10,7 +10,7 @@
 *
 * =================================================*/
 #include "Server/FrameServer.h"
-#include "Client/FrameServer.h"
+#include "Client/FrameClient.h"
 
 #define OPENMS_AES256_IV "y8WOkCzXZHmRLMq6"
 #define OPENMS_AES256_KEY "6BGtsnEW9s2QJalfTHFcXUi46JgJmmDe"

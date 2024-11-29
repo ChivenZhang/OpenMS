@@ -17,8 +17,8 @@ add_executable(FrameClient
 	FrameConfig.h
 	Message.pb.cc
 	Message.pb.h
-	Client/FrameServer.cpp
-	Client/FrameServer.h
+	Client/FrameClient.cpp
+	Client/FrameClient.h
 	Client/FrameService.cpp
 	Client/FrameService.h
 )

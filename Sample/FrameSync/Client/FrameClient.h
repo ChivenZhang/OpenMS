@@ -12,8 +12,10 @@
 #include <OpenMS/Endpoint/TCP/TCPClient.h>
 #include <OpenMS/Service/IService.h>
 
-class FrameClient : public TCPClient
+class FrameClient :
+	public TCPClient,
+	public AUTOWIRE(IService)
 {
 public:
-	void configureEndpoint(config_t& config) override;
+	void configureEndpoint(config_t & config) override;
 };
