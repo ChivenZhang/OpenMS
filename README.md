@@ -12,7 +12,7 @@
 </div>
 
 # OpenMS
-The Distributed Network Library based on Microservice Theory.
+The Distributed Network Framework based on Microservice Theory.
 
 ## Architecture
 <div align="center">
