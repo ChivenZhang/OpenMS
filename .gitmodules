@@ -20,3 +20,7 @@
 [submodule "External/protobuf"]
 	path = External/protobuf
 	url = https://github.com/protocolbuffers/protobuf.git
+[submodule "External/mbedtls"]
+	path = External/mbedtls
+	url = https://github.com/Mbed-TLS/mbedtls
+	branch = master
