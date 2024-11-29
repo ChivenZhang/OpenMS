@@ -17,18 +17,16 @@ void DemoServer::configureEndpoint(config_t& config)
 	config.Callback =
 	{
 		.OnOpen = [](TRef<IChannel> channel) {
-			auto ip = TCast<IPv4Address>(channel->getRemote().lock());
-			TPrint("accept %s", ip->getString().c_str());
 
-			channel->getPipeline()->addFirst("readChannel", {
+			channel->getPipeline()->addLast("read", {
 				.OnRead = [](TRaw<IChannelContext> context, TRaw<IChannelEvent> event)->bool
 				{
-					TPrint("Server readChannel: %s", event->Message.c_str());
+					TPrint("Server read: %s", event->Message.c_str());
 					return false;
 				}
 				});
 
-			channel->getPipeline()->addFirst("send", {
+			channel->getPipeline()->addLast("send", {
 				.OnWrite = [](TRaw<IChannelContext> context, TRaw<IChannelEvent> event)->bool
 				{
 					context->write(IChannelEvent::New(event->Message));
@@ -38,8 +36,7 @@ void DemoServer::configureEndpoint(config_t& config)
 		},
 
 		.OnClose = [](TRef<IChannel> channel) {
-			auto ip = TCast<IPv4Address>(channel->getRemote().lock());
-			TPrint("reject %s", ip->getString().c_str());
+			TPrint("rejected %s", channel->getRemote().lock()->getString().c_str());
 		},
 	};
 }
@@ -51,8 +48,9 @@ void DemoClient::configureEndpoint(config_t& config)
 	config.Callback =
 	{
 		.OnOpen = [=](TRef<IChannel> channel) {
+
 			auto service = AUTOWIRE(IService)::bean();
-			service->startTimer(0, 1000, [=](uint32_t handle) {
+			service->startTimer(1000, 1000, [=](uint32_t handle) {
 				channel->write(IChannelEvent::New("Hello, world!"));
 				});
 		}
