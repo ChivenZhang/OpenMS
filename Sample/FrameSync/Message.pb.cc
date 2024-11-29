@@ -382,19 +382,19 @@ const char descriptor_table_protodef_Message_2eproto[] ABSL_ATTRIBUTE_SECTION_VA
     " \001(\0132\023.sync.MsgExitBattleH\005\210\001\001B\017\n\r_enter"
     "_battleB\017\n\r_match_battleB\017\n\r_ready_battl"
     "eB\017\n\r_begin_battleB\r\n\013_end_battleB\016\n\014_ex"
-    "it_battle\"_\n\007Message\022 \n\004type\030\001 \001(\0162\r.syn"
-    "c.MsgTypeH\000\210\001\001\022 \n\004body\030\002 \001(\0132\r.sync.MsgB"
-    "odyH\001\210\001\001B\007\n\005_typeB\007\n\005_body*\230\001\n\007MsgType\022\014"
-    "\n\010MSG_NONE\020\000\022\024\n\020MSG_ENTER_BATTLE\020\001\022\024\n\020MS"
-    "G_MATCH_BATTLE\020\002\022\024\n\020MSG_READY_BATTLE\020\003\022\024"
-    "\n\020MSG_BEGIN_BATTLE\020\004\022\022\n\016MSG_END_BATTLE\020\005"
-    "\022\023\n\017MSG_EXIT_BATTLE\020\006b\006proto3"
+    "it_battle\"C\n\007Message\022\033\n\004type\030\001 \001(\0162\r.syn"
+    "c.MsgType\022\033\n\004body\030\002 \001(\0132\r.sync.MsgBody*\230"
+    "\001\n\007MsgType\022\014\n\010MSG_NONE\020\000\022\024\n\020MSG_ENTER_BA"
+    "TTLE\020\001\022\024\n\020MSG_MATCH_BATTLE\020\002\022\024\n\020MSG_READ"
+    "Y_BATTLE\020\003\022\024\n\020MSG_BEGIN_BATTLE\020\004\022\022\n\016MSG_"
+    "END_BATTLE\020\005\022\023\n\017MSG_EXIT_BATTLE\020\006b\006proto"
+    "3"
 };
 static ::absl::once_flag descriptor_table_Message_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_Message_2eproto = {
     false,
     false,
-    869,
+    841,
     descriptor_table_protodef_Message_2eproto,
     "Message.proto",
     &descriptor_table_Message_2eproto_once,
@@ -2562,19 +2562,19 @@ const ::_pbi::TcParseTable<1, 2, 1, 0, 2> Message::_table_ = {
     ::_pbi::TcParser::GetTable<::sync::Message>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    // optional .sync.MsgBody body = 2;
+    // .sync.MsgBody body = 2;
     {::_pbi::TcParser::FastMtS1,
      {18, 0, 0, PROTOBUF_FIELD_OFFSET(Message, _impl_.body_)}},
-    // optional .sync.MsgType type = 1;
+    // .sync.MsgType type = 1;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Message, _impl_.type_), 1>(),
      {8, 1, 0, PROTOBUF_FIELD_OFFSET(Message, _impl_.type_)}},
   }}, {{
     65535, 65535
   }}, {{
-    // optional .sync.MsgType type = 1;
+    // .sync.MsgType type = 1;
     {PROTOBUF_FIELD_OFFSET(Message, _impl_.type_), _Internal::kHasBitsOffset + 1, 0,
     (0 | ::_fl::kFcOptional | ::_fl::kOpenEnum)},
-    // optional .sync.MsgBody body = 2;
+    // .sync.MsgBody body = 2;
     {PROTOBUF_FIELD_OFFSET(Message, _impl_.body_), _Internal::kHasBitsOffset + 0, 0,
     (0 | ::_fl::kFcOptional | ::_fl::kMessage | ::_fl::kTvTable)},
   }}, {{
@@ -2615,15 +2615,17 @@ PROTOBUF_NOINLINE void Message::Clear() {
           ::uint32_t cached_has_bits = 0;
           (void)cached_has_bits;
 
-          cached_has_bits = this_._impl_._has_bits_[0];
-          // optional .sync.MsgType type = 1;
-          if (cached_has_bits & 0x00000002u) {
-            target = stream->EnsureSpace(target);
-            target = ::_pbi::WireFormatLite::WriteEnumToArray(
-                1, this_._internal_type(), target);
+          // .sync.MsgType type = 1;
+          if ((this_._impl_._has_bits_[0] & 0x00000002u) != 0) {
+            if (this_._internal_type() != 0) {
+              target = stream->EnsureSpace(target);
+              target = ::_pbi::WireFormatLite::WriteEnumToArray(
+                  1, this_._internal_type(), target);
+            }
           }
 
-          // optional .sync.MsgBody body = 2;
+          cached_has_bits = this_._impl_._has_bits_[0];
+          // .sync.MsgBody body = 2;
           if (cached_has_bits & 0x00000001u) {
             target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
                 2, *this_._impl_.body_, this_._impl_.body_->GetCachedSize(), target,
@@ -2656,15 +2658,17 @@ PROTOBUF_NOINLINE void Message::Clear() {
           ::_pbi::Prefetch5LinesFrom7Lines(&this_);
           cached_has_bits = this_._impl_._has_bits_[0];
           if (cached_has_bits & 0x00000003u) {
-            // optional .sync.MsgBody body = 2;
+            // .sync.MsgBody body = 2;
             if (cached_has_bits & 0x00000001u) {
               total_size += 1 +
                             ::google::protobuf::internal::WireFormatLite::MessageSize(*this_._impl_.body_);
             }
-            // optional .sync.MsgType type = 1;
+            // .sync.MsgType type = 1;
             if (cached_has_bits & 0x00000002u) {
-              total_size += 1 +
-                            ::_pbi::WireFormatLite::EnumSize(this_._internal_type());
+              if (this_._internal_type() != 0) {
+                total_size += 1 +
+                              ::_pbi::WireFormatLite::EnumSize(this_._internal_type());
+              }
             }
           }
           return this_.MaybeComputeUnknownFieldsSize(total_size,
@@ -2692,7 +2696,9 @@ void Message::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google:
       }
     }
     if (cached_has_bits & 0x00000002u) {
-      _this->_impl_.type_ = from._impl_.type_;
+      if (from._internal_type() != 0) {
+        _this->_impl_.type_ = from._impl_.type_;
+      }
     }
   }
   _this->_impl_._has_bits_[0] |= cached_has_bits;

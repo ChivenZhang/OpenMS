@@ -20,10 +20,10 @@ void DemoServer::configureEndpoint(config_t& config)
 			auto ip = TCast<IPv4Address>(channel->getRemote().lock());
 			TPrint("accept %s", ip->getString().c_str());
 
-			channel->getPipeline()->addFirst("read", {
+			channel->getPipeline()->addFirst("readChannel", {
 				.OnRead = [](TRaw<IChannelContext> context, TRaw<IChannelEvent> event)->bool
 				{
-					TPrint("Server read: %s", event->Message.c_str());
+					TPrint("Server readChannel: %s", event->Message.c_str());
 					return false;
 				}
 				});

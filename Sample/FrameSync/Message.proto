@@ -55,6 +55,6 @@ message MsgBody
 
 message Message
 {
-	optional MsgType type = 1;
-	optional MsgBody body = 2;
+	MsgType type = 1;
+	MsgBody body = 2;
 }

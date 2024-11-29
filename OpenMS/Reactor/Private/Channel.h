@@ -25,10 +25,10 @@ public:
 	THnd<IChannelAddress> getRemote() const override;
 	TRaw<IChannelContext> getContext() const override;
 	TRaw<IChannelPipeline> getPipeline() const override;
+	void readChannel(TRef<IChannelEvent> event) override;
+	void writeChannel(TRef<IChannelEvent> event) override;
 	void close() override;
 	TFuture<bool> close(TPromise<bool>& promise) override;
-	void read(TRef<IChannelEvent> event);
-	TFuture<bool> read(TRef<IChannelEvent> event, TPromise<bool>& promise);
 	void write(TRef<IChannelEvent> event) override;
 	TFuture<bool> write(TRef<IChannelEvent> event, TPromise<bool>& promise) override;
 	void writeAndFlush(TRef<IChannelEvent> event) override;

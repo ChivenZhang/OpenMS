@@ -45,7 +45,7 @@ void ChannelReactor::startup()
 			auto event = TNew<IChannelEvent>(IChannelEvent { "A message!", channel });
 			onInbound(event);
 		}
-		onOnClose(channel);
+		onDisconnect(channel);
 		std::this_thread::sleep_for(std::chrono::seconds(2));
 		});
 #endif
@@ -105,7 +105,7 @@ void ChannelReactor::onConnect(TRef<Channel> channel)
 	if (m_OnOnOpen) m_OnOnOpen(channel);
 }
 
-void ChannelReactor::onOnClose(TRef<Channel> channel)
+void ChannelReactor::onDisconnect(TRef<Channel> channel)
 {
 	channel->close();
 	if (m_OnOnClose) m_OnOnClose(channel);

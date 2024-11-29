@@ -189,7 +189,7 @@ void KCPServerReactor::startup()
 				auto channels = m_Channels;
 				for (auto channel : channels)
 				{
-					if (channel) onOnClose(channel);
+					if (channel) onDisconnect(channel);
 				}
 				m_Channels.clear();
 				m_ChannelMap.clear();
@@ -227,22 +227,26 @@ THnd<IChannelAddress> KCPServerReactor::address() const
 
 void KCPServerReactor::onConnect(TRef<Channel> channel)
 {
+	TDebug("accepted from %s", channel->getRemote().lock()->getString().c_str());
+
 	auto remote = TCast<ISocketAddress>(channel->getRemote().lock());
 	auto hashName = remote->getHashName();
 	m_Channels.insert(m_Channels.begin(), channel);
 	m_ChannelMap[hashName] = channel;
-	if (m_Backlog < m_Channels.size()) onOnClose(m_Channels.back());
+	if (m_Backlog < m_Channels.size()) onDisconnect(m_Channels.back());
 	ChannelReactor::onConnect(channel);
 }
 
-void KCPServerReactor::onOnClose(TRef<Channel> channel)
+void KCPServerReactor::onDisconnect(TRef<Channel> channel)
 {
+	TDebug("rejected from %s", channel->getRemote().lock()->getString().c_str());
+
 	auto remote = TCast<ISocketAddress>(channel->getRemote().lock());
 	auto hashName = remote->getHashName();
 	m_ChannelsRemoved.push_back(channel);
 	m_ChannelMap.erase(hashName);
 	m_Channels.erase(std::remove(m_Channels.begin(), m_Channels.end(), channel), m_Channels.end());
-	ChannelReactor::onOnClose(channel);
+	ChannelReactor::onDisconnect(channel);
 }
 
 void KCPServerReactor::on_alloc(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf)
@@ -372,7 +376,7 @@ void KCPServerReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 	{
 		free(buf->base);
 
-		reactor->onOnClose(channel);
+		reactor->onDisconnect(channel);
 		return;
 	}
 
@@ -380,7 +384,7 @@ void KCPServerReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 	{
 		free(buf->base);
 
-		reactor->onOnClose(channel);
+		reactor->onDisconnect(channel);
 		return;
 	}
 
@@ -388,7 +392,7 @@ void KCPServerReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 	auto result = ikcp_input(_channel->getSession(), (char*)buf->base, (uint32_t)nread);
 	if (result < 0)
 	{
-		reactor->onOnClose(channel);
+		reactor->onDisconnect(channel);
 
 		free(buf->base);
 		return;
@@ -425,7 +429,7 @@ int KCPServerReactor::on_output(const char* buf, int len, IKCPCB* kcp, void* use
 		auto result = uv_udp_try_send(server, &buf, 1, (sockaddr*)&addr);
 		if (result < 0)
 		{
-			reactor->onOnClose(channel->shared_from_this());
+			reactor->onDisconnect(channel->shared_from_this());
 			return -1;
 		}
 		else if (result == UV_EAGAIN) continue;
@@ -481,7 +485,7 @@ void KCPServerReactor::on_send(uv_udp_t* handle)
 
 		auto channel = TCast<KCPChannel>(event->Channel.lock());
 		if (channel == nullptr) continue;
-		if (channel->running() == false) reactor->onOnClose(channel);
+		if (channel->running() == false) reactor->onDisconnect(channel);
 		if (channel->running() == false) continue;
 		if (event->Message.empty()) continue;
 		auto server = channel->getHandle();
@@ -495,7 +499,7 @@ void KCPServerReactor::on_send(uv_udp_t* handle)
 			auto result = ikcp_send(session, (char*)buf.base, buf.len);
 			if (result < 0)
 			{
-				reactor->onOnClose(channel);
+				reactor->onDisconnect(channel);
 				break;
 			}
 			else if (result == UV_EAGAIN) continue;

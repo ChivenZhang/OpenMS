@@ -1758,7 +1758,7 @@ class Message final
     kBodyFieldNumber = 2,
     kTypeFieldNumber = 1,
   };
-  // optional .sync.MsgBody body = 2;
+  // .sync.MsgBody body = 2;
   bool has_body() const;
   void clear_body() ;
   const ::sync::MsgBody& body() const;
@@ -1773,8 +1773,7 @@ class Message final
   ::sync::MsgBody* _internal_mutable_body();
 
   public:
-  // optional .sync.MsgType type = 1;
-  bool has_type() const;
+  // .sync.MsgType type = 1;
   void clear_type() ;
   ::sync::MsgType type() const;
   void set_type(::sync::MsgType value);
@@ -2829,11 +2828,7 @@ inline void MsgBody::set_allocated_exit_battle(::sync::MsgExitBattle* value) {
 
 // Message
 
-// optional .sync.MsgType type = 1;
-inline bool Message::has_type() const {
-  bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
-  return value;
-}
+// .sync.MsgType type = 1;
 inline void Message::clear_type() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.type_ = 0;
@@ -2857,7 +2852,7 @@ inline void Message::_internal_set_type(::sync::MsgType value) {
   _impl_.type_ = value;
 }
 
-// optional .sync.MsgBody body = 2;
+// .sync.MsgBody body = 2;
 inline bool Message::has_body() const {
   bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
   PROTOBUF_ASSUME(!value || _impl_.body_ != nullptr);

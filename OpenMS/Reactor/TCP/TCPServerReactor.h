@@ -26,7 +26,7 @@ public:
 
 protected:
 	void onConnect(TRef<Channel> channel) override;
-	void onOnClose(TRef<Channel> channel) override;
+	void onDisconnect(TRef<Channel> channel) override;
 
 protected:
 	static void on_connect(uv_stream_t* server, int status);

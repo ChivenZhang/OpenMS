@@ -1,3 +1,4 @@
+#pragma once
 /*=================================================
 * Copyright © 2020-2024 ChivenZhang.
 * All Rights Reserved.
@@ -8,18 +9,11 @@
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
-#include "FrameService.h"
+#include <OpenMS/Endpoint/TCP/TCPServer.h>
+#include <OpenMS/Service/IService.h>
 
-int main(int argc, char* argv[])
+class FrameServer : public TCPServer, public AUTOWIRE(IService)
 {
-	return IApplication::Run<FrameService>(argc, argv);
-}
-
-void FrameService::onInit()
-{
-
-}
-
-void FrameService::onExit()
-{
-}
+public:
+	void configureEndpoint(config_t & config) override;
+};

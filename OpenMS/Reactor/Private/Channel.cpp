@@ -1,4 +1,5 @@
 #include "Channel.h"
+#include "Channel.h"
 /*=================================================
 * Copyright © 2020-2024 ChivenZhang.
 * All Rights Reserved.
@@ -72,17 +73,17 @@ TFuture<bool> Channel::close(TPromise<bool>& promise)
 	return result;
 }
 
-void Channel::read(TRef<IChannelEvent> event)
+void Channel::readChannel(TRef<IChannelEvent> event)
 {
 	if (m_Running == false) return;
 
+	auto result = true;
 	auto inbounds = m_Pipeline.getInbounds();
-	for (size_t i = 0; i < inbounds.size(); ++i)
+	for (size_t i = 0; result && i < inbounds.size(); ++i)
 	{
 		try
 		{
-			auto result = inbounds[i].Handler->channelRead(&m_Context, event.get());
-			if (result == false) break;
+			result = inbounds[i].Handler->channelRead(&m_Context, event.get());
 		}
 		catch (TException ex)
 		{
@@ -96,12 +97,11 @@ void Channel::read(TRef<IChannelEvent> event)
 	}
 
 	auto outbounds = m_Pipeline.getOutbounds();
-	for (size_t i = 0; i < outbounds.size(); ++i)
+	for (size_t i = 0; result && i < outbounds.size(); ++i)
 	{
 		try
 		{
-			auto result = outbounds[i].Handler->channelWrite(&m_Context, event.get());
-			if (result == false) break;
+			result = outbounds[i].Handler->channelWrite(&m_Context, event.get());
 		}
 		catch (TException ex)
 		{
@@ -115,13 +115,28 @@ void Channel::read(TRef<IChannelEvent> event)
 	}
 }
 
-TFuture<bool> Channel::read(TRef<IChannelEvent> event, TPromise<bool>& promise)
+void Channel::writeChannel(TRef<IChannelEvent> event)
 {
-	if (m_Running == false) return TFuture<bool>();
-	auto result = promise.get_future();
-	read(event);
-	promise.set_value(true);
-	return result;
+	if (m_Running == false) return;
+
+	auto result = true;
+	auto outbounds = m_Pipeline.getOutbounds();
+	for (size_t i = 0; result && i < outbounds.size(); ++i)
+	{
+		try
+		{
+			result = outbounds[i].Handler->channelWrite(&m_Context, event.get());
+		}
+		catch (TException ex)
+		{
+			outbounds[i].Handler->channelError(&m_Context, std::move(ex));
+		}
+		catch (...)
+		{
+			auto ex = std::exception("unknown exception caught in " __FILE__ " [ " __FUNCTION__ " ]");
+			outbounds[i].Handler->channelError(&m_Context, std::move(ex));
+		}
+	}
 }
 
 void Channel::write(TRef<IChannelEvent> event)

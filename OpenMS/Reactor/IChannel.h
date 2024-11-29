@@ -32,13 +32,13 @@ public:
 
 	virtual TRaw<IChannelPipeline> getPipeline() const = 0;
 
+	virtual void readChannel(TRef<IChannelEvent> event) = 0;
+
+	virtual void writeChannel(TRef<IChannelEvent> event) = 0;
+
 	virtual void close() = 0;
 
 	virtual TFuture<bool> close(TPromise<bool>& promise) = 0;
-
-	virtual void read(TRef<IChannelEvent> event) = 0;
-
-	virtual TFuture<bool> read(TRef<IChannelEvent> event, TPromise<bool>& promise) = 0;
 
 	virtual void write(TRef<IChannelEvent> event) = 0;
 

@@ -93,12 +93,15 @@ add_library(OpenMS STATIC
 	Service/Private/Service.h
 	Toolkit/Timer.cpp
 	Toolkit/Timer.h
- )
-add_dependencies(OpenMS uv_a)
+	Handler/AES/AESHandler.cpp
+	Handler/AES/AESHandler.h
+)
+add_dependencies(OpenMS uv_a mbedtls)
 
 target_include_directories(OpenMS PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(OpenMS PUBLIC ${OPENMS_SOURCE_DIR}/External/iocpp)
 target_include_directories(OpenMS PUBLIC ${OPENMS_SOURCE_DIR}/External/http-parser)
 target_include_directories(OpenMS PUBLIC ${OPENMS_SOURCE_DIR}/External/libuv/include)
+target_include_directories(OpenMS PUBLIC ${OPENMS_SOURCE_DIR}/External/mbedtls/include)
 target_include_directories(OpenMS PUBLIC ${OPENMS_SOURCE_DIR}/External/nlohmann/single_include)
-target_link_libraries(OpenMS uv_a iocpp)
+target_link_libraries(OpenMS uv_a iocpp mbedcrypto mbedtls mbedx509)

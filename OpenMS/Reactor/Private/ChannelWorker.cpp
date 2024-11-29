@@ -33,7 +33,7 @@ void ChannelWorker::startup()
 			auto event = m_EventQueue.front();
 			m_EventQueue.pop();
 			auto channel = event->Channel.lock();
-			if (channel) channel->read(event);
+			if (channel) channel->readChannel(event);
 		}
 	}
 

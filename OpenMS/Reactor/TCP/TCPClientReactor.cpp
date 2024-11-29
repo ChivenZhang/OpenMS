@@ -113,7 +113,7 @@ void TCPClientReactor::startup()
 			// Close all channels
 
 			{
-				if (m_Channel) onOnClose(m_Channel);
+				if (m_Channel) onDisconnect(m_Channel);
 				m_Channel = nullptr;
 			}
 
@@ -162,14 +162,18 @@ void TCPClientReactor::writeAndFlush(TRef<IChannelEvent> event, TRef<IChannelAdd
 
 void TCPClientReactor::onConnect(TRef<Channel> channel)
 {
+	TDebug("accepted from %s", channel->getRemote().lock()->getString().c_str());
+
 	m_Channel = channel;
 	ChannelReactor::onConnect(channel);
 }
 
-void TCPClientReactor::onOnClose(TRef<Channel> channel)
+void TCPClientReactor::onDisconnect(TRef<Channel> channel)
 {
+	TDebug("rejected from %s", channel->getRemote().lock()->getString().c_str());
+
 	m_Channel = nullptr;
-	ChannelReactor::onOnClose(channel);
+	ChannelReactor::onDisconnect(channel);
 }
 
 void TCPClientReactor::on_connect(uv_connect_t* req, int status)
@@ -249,17 +253,15 @@ void TCPClientReactor::on_connect(uv_connect_t* req, int status)
 	client->data = channel.get();
 	reactor->onConnect(channel);
 
-	TDebug("accepted from %s:%d", remoteAddress->getAddress().c_str(), remoteAddress->getPort());
-
 	// Start reading data from the server
 
 	result = uv_read_start((uv_stream_t*)client, on_alloc, on_read);
 	if (result)
 	{
-		TError("read start error: %s", ::uv_strerror(result));
+		TError("readChannel start error: %s", ::uv_strerror(result));
 		uv_close((uv_handle_t*)&client, nullptr);
 
-		reactor->onOnClose(channel->shared_from_this());
+		reactor->onDisconnect(channel->shared_from_this());
 	}
 }
 
@@ -281,7 +283,7 @@ void TCPClientReactor::on_read(uv_stream_t* stream, ssize_t nread, const uv_buf_
 		uv_close((uv_handle_t*)stream, nullptr);
 		free(buf->base);
 
-		reactor->onOnClose(channel);
+		reactor->onDisconnect(channel);
 		return;
 	}
 
@@ -290,7 +292,7 @@ void TCPClientReactor::on_read(uv_stream_t* stream, ssize_t nread, const uv_buf_
 		uv_close((uv_handle_t*)stream, nullptr);
 		free(buf->base);
 
-		reactor->onOnClose(channel);
+		reactor->onDisconnect(channel);
 		return;
 	}
 
@@ -299,7 +301,7 @@ void TCPClientReactor::on_read(uv_stream_t* stream, ssize_t nread, const uv_buf_
 		uv_close((uv_handle_t*)stream, nullptr);
 		free(buf->base);
 
-		reactor->onOnClose(channel);
+		reactor->onDisconnect(channel);
 		return;
 	}
 
@@ -331,7 +333,7 @@ void TCPClientReactor::on_send(uv_tcp_t* handle)
 		if (event->Channel.expired()) continue;
 		auto channel = TCast<TCPChannel>(event->Channel.lock());
 		if (channel == nullptr) continue;
-		if (channel->running() == false) reactor->onOnClose(channel);
+		if (channel->running() == false) reactor->onDisconnect(channel);
 		if (channel->running() == false) continue;
 		if (event->Message.empty()) continue;
 		auto client = channel->getHandle();
@@ -343,7 +345,7 @@ void TCPClientReactor::on_send(uv_tcp_t* handle)
 			auto result = uv_try_write((uv_stream_t*)client, &buf, 1);
 			if (result < 0)
 			{
-				reactor->onOnClose(channel);
+				reactor->onDisconnect(channel);
 				break;
 			}
 			else if (result == UV_EAGAIN) continue;

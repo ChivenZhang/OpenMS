@@ -9,9 +9,19 @@
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
-#include <OpenMS/Reactor/TCP/TCPServerReactor.h>
-#include <OpenMS/Reactor/UDP/UDPServerReactor.h>
+#include <OpenMS/Service/Private/Service.h>
+#include "../FrameConfig.h"
+#include "../Message.pb.h"
 
-class FrameConfig
+class FrameService :
+	public Service,
+	public RESOURCE(FrameConfig1),
+	public AUTOWIRE(FrameServer)
 {
+public:
+	void onMessage(sync::Message && msg);
+
+protected:
+	void onInit() override;
+	void onExit() override;
 };

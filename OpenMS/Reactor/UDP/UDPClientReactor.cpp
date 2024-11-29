@@ -159,7 +159,7 @@ void UDPClientReactor::startup()
 			// Close all channels
 
 			{
-				if (m_Channel) onOnClose(m_Channel);
+				if (m_Channel) onDisconnect(m_Channel);
 				m_Channel = nullptr;
 			}
 
@@ -208,14 +208,18 @@ void UDPClientReactor::writeAndFlush(TRef<IChannelEvent> event, TRef<IChannelAdd
 
 void UDPClientReactor::onConnect(TRef<Channel> channel)
 {
+	TDebug("accepted from %s", channel->getRemote().lock()->getString().c_str());
+
 	m_Channel = channel;
 	ChannelReactor::onConnect(channel);
 }
 
-void UDPClientReactor::onOnClose(TRef<Channel> channel)
+void UDPClientReactor::onDisconnect(TRef<Channel> channel)
 {
+	TDebug("rejected from %s", channel->getRemote().lock()->getString().c_str());
+
 	m_Channel = nullptr;
-	ChannelReactor::onOnClose(channel);
+	ChannelReactor::onDisconnect(channel);
 }
 
 void UDPClientReactor::on_alloc(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf)
@@ -235,7 +239,7 @@ void UDPClientReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 	{
 		free(buf->base);
 
-		reactor->onOnClose(channel);
+		reactor->onDisconnect(channel);
 		return;
 	}
 
@@ -243,7 +247,7 @@ void UDPClientReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 	{
 		free(buf->base);
 
-		reactor->onOnClose(channel);
+		reactor->onDisconnect(channel);
 		return;
 	}
 
@@ -272,7 +276,7 @@ void UDPClientReactor::on_send(uv_udp_t* handle)
 
 		auto channel = TCast<UDPChannel>(event->Channel.lock());
 		if (channel == nullptr) continue;
-		if (channel->running() == false) reactor->onOnClose(channel);
+		if (channel->running() == false) reactor->onDisconnect(channel);
 		if (channel->running() == false) continue;
 		if (event->Message.empty()) continue;
 		auto client = channel->getHandle();
@@ -284,7 +288,7 @@ void UDPClientReactor::on_send(uv_udp_t* handle)
 			auto result = uv_udp_try_send(client, &buf, 1, nullptr);
 			if (result < 0)
 			{
-				reactor->onOnClose(channel);
+				reactor->onDisconnect(channel);
 				break;
 			}
 			else if (result == UV_EAGAIN) continue;

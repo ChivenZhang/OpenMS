@@ -9,10 +9,19 @@
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
-#include <OpenMS/Endpoint/TCP/TCPServer.h>
+#include <OpenMS/Service/Private/Service.h>
+#include "../FrameConfig.h"
+#include "../Message.pb.h"
 
-class FrameServer : public TCPServer
+class FrameService :
+	public Service,
+	public RESOURCE(FrameConfig2),
+	public AUTOWIRE(FrameClient)
 {
 public:
-	void configureEndpoint(config_t& config) override;
+	void onMessage(sync::Message && msg);
+
+protected:
+	void onInit() override;
+	void onExit() override;
 };

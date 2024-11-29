@@ -28,7 +28,7 @@ public:
 
 protected:
 	void onConnect(TRef<Channel> channel) override;
-	void onOnClose(TRef<Channel> channel) override;
+	void onDisconnect(TRef<Channel> channel) override;
 
 protected:
 	static void on_connect(uv_connect_t* req, int status);

@@ -37,7 +37,7 @@ public:
 
 protected:
 	virtual void onConnect(TRef<Channel> channel);
-	virtual void onOnClose(TRef<Channel> channel);
+	virtual void onDisconnect(TRef<Channel> channel);
 	virtual void onInbound(TRef<IChannelEvent> event);
 	virtual void onOutbound(TRef<IChannelEvent> event, bool flush = false);
 

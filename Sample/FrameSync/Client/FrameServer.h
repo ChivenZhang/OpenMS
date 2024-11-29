@@ -9,16 +9,11 @@
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
-#include <OpenMS/Service/Private/Service.h>
-#include <OpenMS/Reactor/TCP/TCPServerReactor.h>
-#include <OpenMS/Reactor/UDP/UDPServerReactor.h>
-#include "FrameConfig.h"
+#include <OpenMS/Endpoint/TCP/TCPClient.h>
+#include <OpenMS/Service/IService.h>
 
-class FrameService :
-	public Service,
-	public RESOURCE(FrameConfig)
+class FrameClient : public TCPClient
 {
-protected:
-	void onInit() override;
-	void onExit() override;
+public:
+	void configureEndpoint(config_t& config) override;
 };

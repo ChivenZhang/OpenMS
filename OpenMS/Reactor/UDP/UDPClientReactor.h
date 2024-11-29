@@ -28,7 +28,7 @@ public:
 
 protected:
 	void onConnect(TRef<Channel> channel) override;
-	void onOnClose(TRef<Channel> channel) override;
+	void onDisconnect(TRef<Channel> channel) override;
 
 protected:
 	static void on_alloc(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf);
