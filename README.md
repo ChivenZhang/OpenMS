@@ -15,6 +15,6 @@
 The Distributed Network Library based on Microservice Theory.
 
 ## Architecture
-<div>
-  <img src="Framework.png" style="width:50%;" />
+<div align="center">
+  <img src="Framework.png" style="width:100%;" />
 </div>
