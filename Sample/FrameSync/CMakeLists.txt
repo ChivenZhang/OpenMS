@@ -7,6 +7,19 @@ add_executable(FrameServer
 	Server/FrameServer.h
 	Server/FrameService.cpp
 	Server/FrameService.h
+	Server/FrameConfig.h
+	Server/Battle.cpp
+	Server/Battle.h
+	Server/BattleManager.cpp
+	Server/BattleManager.h
+	Server/Player.cpp
+	Server/Player.h
+	Server/PlayerManager.cpp
+	Server/PlayerManager.h
+	Server/User.cpp
+	Server/User.h
+	Server/UserManager.cpp
+	Server/UserManager.h
 )
 add_dependencies(FrameServer OpenMS libprotobuf)
 target_include_directories(FrameServer PRIVATE ${OPENMS_SOURCE_DIR}/External/protobuf/src)
@@ -21,6 +34,7 @@ add_executable(FrameClient
 	Client/FrameClient.h
 	Client/FrameService.cpp
 	Client/FrameService.h
+	Client/FrameConfig.h
 )
 add_dependencies(FrameClient OpenMS libprotobuf xege)
 target_include_directories(FrameClient PRIVATE ${OPENMS_SOURCE_DIR}/External/protobuf/src)

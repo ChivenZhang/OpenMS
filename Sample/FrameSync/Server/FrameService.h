@@ -10,13 +10,15 @@
 *
 * =================================================*/
 #include <OpenMS/Service/Private/Service.h>
-#include "../FrameConfig.h"
-#include "../Message.pb.h"
+#include "FrameConfig.h"
 
 class FrameService :
 	public Service,
-	public RESOURCE(FrameConfig1),
-	public AUTOWIRE(FrameServer)
+	public RESOURCE(FrameConfig),
+	public AUTOWIRE(FrameServer),
+	public AUTOWIRE(UserManager),
+	public AUTOWIRE(PlayerManager),
+	public AUTOWIRE(BattleManager)
 {
 public:
 	void onMessage(sync::Message && msg);

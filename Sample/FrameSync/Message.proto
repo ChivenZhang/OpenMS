@@ -7,15 +7,16 @@ enum MsgType
 	MSG_NONE = 0;
 	MSG_ENTER_BATTLE = 1;
 	MSG_MATCH_BATTLE = 2;
-	MSG_READY_BATTLE = 3;
-	MSG_BEGIN_BATTLE = 4;
-	MSG_END_BATTLE = 5;
-	MSG_EXIT_BATTLE = 6;
+	MSG_CANCEL_MATCH = 3;
+	MSG_READY_BATTLE = 4;
+	MSG_BEGIN_BATTLE = 5;
+	MSG_END_BATTLE = 6;
+	MSG_EXIT_BATTLE = 7;
 }
 
 message MsgEnterBattle
 {
-	string name = 1;
+	uint32 uid;
 }
 
 message MsgMatchBattle

@@ -43,6 +43,7 @@ void FrameService::onMessage(sync::Message&& msg)
 void FrameService::onInit()
 {
 	AUTOWIRE(FrameClient)::bean()->startup();
+
 }
 
 void FrameService::onExit()

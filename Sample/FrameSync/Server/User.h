@@ -10,13 +10,11 @@
 *
 * =================================================*/
 #include <OpenMS/MS.h>
-#include "Message.pb.h"
 
-#define OPENMS_AES256_IV "y8WOkCzXZHmRLMq6"
-#define OPENMS_AES256_KEY "6BGtsnEW9s2QJalfTHFcXUi46JgJmmDe"
-
-struct FramePackage
+class User
 {
-	uint32_t Size;
-	TString Data;
+public:
+	uint32_t ID;
+	uint32_t PlayerID;
+	uint32_t BattleID;
 };

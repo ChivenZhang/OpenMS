@@ -10,12 +10,12 @@
 *
 * =================================================*/
 #include <OpenMS/Service/Private/Service.h>
-#include "../FrameConfig.h"
+#include "FrameConfig.h"
 #include "../Message.pb.h"
 
 class FrameService :
 	public Service,
-	public RESOURCE(FrameConfig2),
+	public RESOURCE(FrameConfig),
 	public AUTOWIRE(FrameClient)
 {
 public:

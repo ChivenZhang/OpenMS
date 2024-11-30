@@ -383,18 +383,18 @@ const char descriptor_table_protodef_Message_2eproto[] ABSL_ATTRIBUTE_SECTION_VA
     "_battleB\017\n\r_match_battleB\017\n\r_ready_battl"
     "eB\017\n\r_begin_battleB\r\n\013_end_battleB\016\n\014_ex"
     "it_battle\"C\n\007Message\022\033\n\004type\030\001 \001(\0162\r.syn"
-    "c.MsgType\022\033\n\004body\030\002 \001(\0132\r.sync.MsgBody*\230"
+    "c.MsgType\022\033\n\004body\030\002 \001(\0132\r.sync.MsgBody*\256"
     "\001\n\007MsgType\022\014\n\010MSG_NONE\020\000\022\024\n\020MSG_ENTER_BA"
-    "TTLE\020\001\022\024\n\020MSG_MATCH_BATTLE\020\002\022\024\n\020MSG_READ"
-    "Y_BATTLE\020\003\022\024\n\020MSG_BEGIN_BATTLE\020\004\022\022\n\016MSG_"
-    "END_BATTLE\020\005\022\023\n\017MSG_EXIT_BATTLE\020\006b\006proto"
-    "3"
+    "TTLE\020\001\022\024\n\020MSG_MATCH_BATTLE\020\002\022\024\n\020MSG_CANC"
+    "EL_MATCH\020\003\022\024\n\020MSG_READY_BATTLE\020\004\022\024\n\020MSG_"
+    "BEGIN_BATTLE\020\005\022\022\n\016MSG_END_BATTLE\020\006\022\023\n\017MS"
+    "G_EXIT_BATTLE\020\007b\006proto3"
 };
 static ::absl::once_flag descriptor_table_Message_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_Message_2eproto = {
     false,
     false,
-    841,
+    863,
     descriptor_table_protodef_Message_2eproto,
     "Message.proto",
     &descriptor_table_Message_2eproto_once,
@@ -413,9 +413,9 @@ const ::google::protobuf::EnumDescriptor* MsgType_descriptor() {
   return file_level_enum_descriptors_Message_2eproto[0];
 }
 PROTOBUF_CONSTINIT const uint32_t MsgType_internal_data_[] = {
-    458752u, 0u, };
+    524288u, 0u, };
 bool MsgType_IsValid(int value) {
-  return 0 <= value && value <= 6;
+  return 0 <= value && value <= 7;
 }
 // ===================================================================
 

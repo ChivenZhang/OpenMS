@@ -104,10 +104,11 @@ enum MsgType : int {
   MSG_NONE = 0,
   MSG_ENTER_BATTLE = 1,
   MSG_MATCH_BATTLE = 2,
-  MSG_READY_BATTLE = 3,
-  MSG_BEGIN_BATTLE = 4,
-  MSG_END_BATTLE = 5,
-  MSG_EXIT_BATTLE = 6,
+  MSG_CANCEL_MATCH = 3,
+  MSG_READY_BATTLE = 4,
+  MSG_BEGIN_BATTLE = 5,
+  MSG_END_BATTLE = 6,
+  MSG_EXIT_BATTLE = 7,
   MsgType_INT_MIN_SENTINEL_DO_NOT_USE_ =
       std::numeric_limits<::int32_t>::min(),
   MsgType_INT_MAX_SENTINEL_DO_NOT_USE_ =
@@ -119,8 +120,8 @@ extern const uint32_t MsgType_internal_data_[];
 inline constexpr MsgType MsgType_MIN =
     static_cast<MsgType>(0);
 inline constexpr MsgType MsgType_MAX =
-    static_cast<MsgType>(6);
-inline constexpr int MsgType_ARRAYSIZE = 6 + 1;
+    static_cast<MsgType>(7);
+inline constexpr int MsgType_ARRAYSIZE = 7 + 1;
 const ::google::protobuf::EnumDescriptor*
 MsgType_descriptor();
 template <typename T>
@@ -133,7 +134,7 @@ const std::string& MsgType_Name(T value) {
 template <>
 inline const std::string& MsgType_Name(MsgType value) {
   return ::google::protobuf::internal::NameOfDenseEnum<MsgType_descriptor,
-                                                 0, 6>(
+                                                 0, 7>(
       static_cast<int>(value));
 }
 inline bool MsgType_Parse(absl::string_view name, MsgType* value) {
