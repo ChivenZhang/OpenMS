@@ -25,6 +25,9 @@ void FrameService::onMessage(sync::Message&& msg)
 	case sync::MSG_MATCH_BATTLE:
 		TPrint("MSG_MATCH_BATTLE");
 		break;
+	case sync::MSG_CANCEL_MATCH:
+		TPrint("MSG_CANCEL_MATCH");
+		break;
 	case sync::MSG_READY_BATTLE:
 		TPrint("MSG_READY_BATTLE");
 		break;

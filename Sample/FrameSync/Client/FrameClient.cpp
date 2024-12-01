@@ -36,8 +36,8 @@ void FrameClient::configureEndpoint(config_t& config)
 					},
 				});
 
-			TArray<uint8_t, 32> key;
 			TArray<uint8_t, 16> iv;
+			TArray<uint8_t, 32> key;
 			memcpy(iv.data(), OPENMS_AES256_IV, 16);
 			memcpy(key.data(), OPENMS_AES256_KEY, 32);
 			channel->getPipeline()->addLast("decrypt", TNew<AESInboundHandler>(AESInboundHandler::config_t{ key, iv}));

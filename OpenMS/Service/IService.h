@@ -67,8 +67,10 @@ public:
 		  IApplication::Argv = argv;
 		  auto service = RESOURCE2_DATA(T, IService);
 		  signal(SIGINT, [](int) { RESOURCE2_DATA(T, IService)->shutdown(); });
+		  signal(SIGTERM, [](int) { RESOURCE2_DATA(T, IService)->shutdown(); });
 		  auto result = service->startup();
 		  signal(SIGINT, nullptr);
+		  signal(SIGTERM, nullptr);
 		  IApplication::Argc = 0;
 		  IApplication::Argv = nullptr;
 		  return result;
