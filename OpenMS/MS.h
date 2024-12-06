@@ -53,7 +53,7 @@
 
 #ifdef _WIN32
 #	ifdef _DEBUG
-#		define OPENMS_DEBUG
+#		define OPENMS_DEBUG_MODE
 #	endif
 #endif
 
@@ -101,24 +101,55 @@
 // ============================================
 
 #include <assert.h>
-#define TAssert(...) assert(__VA_ARGS__)
+#define MSAssert(...) assert(__VA_ARGS__)
 
 // ============================================
 
-#include <time.h>
-#define MSPrint(FORMAT, ...) do{ fprintf(stdout, "%s(%d)\n%.3f s\t[%s]\t" FORMAT "\n\n", __FILE__, __LINE__, ::clock()*0.001f, "INFO", __VA_ARGS__); }while(0)
-#define MSError(FORMAT, ...) do{ fprintf(stderr, "%s(%d)\n%.3f s\t[%s]\t" FORMAT "\n\n", __FILE__, __LINE__, ::clock()*0.001f, "ERROR", __VA_ARGS__); }while(0)
-#define MSFatal(FORMAT, ...) do{ fprintf(stderr, "%s(%d)\n%.3f s\t[%s]\t" FORMAT "\n\n", __FILE__, __LINE__, ::clock()*0.001f, "FATAL", __VA_ARGS__); exit(1); }while(0)
-#ifdef OPENMS_DEBUG
-#define MSDebug(FORMAT, ...) do{ fprintf(stdout, "%s(%d)\n%.3f s\t[%s]\t" FORMAT "\n\n", __FILE__, __LINE__, ::clock()*0.001f, "DEBUG", __VA_ARGS__); }while(0)
-#else													
-#define MSDebug(FORMAT, ...)
+#include <cstdio>
+#include <ctime>
+#include <thread>
+#define MS_FORMAT(TARGET, FORMAT, LEVEL, ...) \
+do { \
+char __DATETIME__[32]; auto __NOWTIME__ = std::time(nullptr); \
+std::strftime(__DATETIME__, sizeof(__DATETIME__), "%Y-%m-%d %H:%M:%S", std::localtime(&__NOWTIME__)); \
+auto __THREAD__ = []()->uint32_t { std::stringstream ss; ss << std::this_thread::get_id(); return std::stoul(ss.str()); }(); \
+std::fprintf(TARGET, "%s:%d\n" "%s " #LEVEL " %d --- " FORMAT "\n\n", __FILE__, __LINE__, __DATETIME__, __THREAD__, ##__VA_ARGS__); \
+} while (0)
+
+#ifndef MS_DEBUG
+#ifdef OPENMS_DEBUG_MODE
+#	define MS_DEBUG(FORMAT, ...) MS_FORMAT(stdout, FORMAT, DEBUG, ##__VA_ARGS__)
+#else
+#	define MS_DEBUG(FORMAT, ...)
+#endif
 #endif
 
-#define MS_PRINT MSPrint
-#define MS_ERROR MSError
-#define MS_FATAL MSFatal
-#define MS_DEBUG MSDebug
+#ifndef MS_WARN
+#	define MS_WARN(FORMAT, ...) MS_FORMAT(stdout, FORMAT, WARN, ##__VA_ARGS__)
+#endif
+
+#ifndef MS_INFO
+#	define MS_INFO(FORMAT, ...) MS_FORMAT(stdout, FORMAT, INFO, ##__VA_ARGS__)
+#endif
+
+#ifndef MS_ERROR
+#	define MS_ERROR(FORMAT, ...) MS_FORMAT(stderr, FORMAT, ERROR, ##__VA_ARGS__)
+#endif
+
+#ifndef MS_FATAL
+#	define MS_FATAL(FORMAT, ...) do{ MS_FORMAT(stderr, FORMAT, FATAL, ##__VA_ARGS__); std::abort(); } while(0)
+#endif
+
+#ifndef MS_PRINT
+#	define MS_PRINT(FORMAT, ...) MS_INFO(FORMAT, ##__VA_ARGS__)
+#endif
+
+#define MSDebug MS_DEBUG
+#define MSWarn MS_WARN
+#define MSInfo MS_INFO
+#define MSError MS_ERROR
+#define MSFatal MS_FATAL
+#define MSPrint MS_PRINT
 
 // ============================================
 
