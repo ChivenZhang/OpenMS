@@ -5,7 +5,7 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
@@ -24,5 +24,5 @@ public:
 
 	virtual bool running() const = 0;
 
-	virtual void enqueue(TRef<IChannelEvent> event) = 0;
+	virtual void enqueue(MSRef<IChannelEvent> event) = 0;
 };

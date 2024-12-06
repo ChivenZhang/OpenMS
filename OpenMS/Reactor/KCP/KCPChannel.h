@@ -5,7 +5,7 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
@@ -16,11 +16,11 @@
 class KCPChannel : public Channel
 {
 public:
-	KCPChannel(TRaw<ChannelReactor> reactor, TRef<IChannelAddress> local, TRef<IChannelAddress> remote, uint32_t workID, uv_udp_t* handle, ikcpcb* session);
+	KCPChannel(MSRaw<ChannelReactor> reactor, MSRef<IChannelAddress> local, MSRef<IChannelAddress> remote, uint32_t workID, uv_udp_t* handle, ikcpcb* session);
 	~KCPChannel();
 	uv_udp_t* getHandle() const;
 	ikcpcb* getSession() const;
-	TRaw<ChannelReactor> getReactor() const;
+	MSRaw<ChannelReactor> getReactor() const;
 
 protected:
 	uv_udp_t* m_Handle;

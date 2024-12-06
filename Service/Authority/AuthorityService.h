@@ -5,14 +5,14 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
 #include "OpenMS/Service/Private/Service.h"
 #include "AuthorityConfig.h"
 
-using RegistryIPTable = TMap<TString, TVector<TString>>;
+using RegistryIPTable = MSMap<MSString, MSVector<MSString>>;
 
 class AuthorityService :
 	public Service,

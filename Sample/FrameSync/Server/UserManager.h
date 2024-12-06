@@ -5,7 +5,7 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
@@ -15,19 +15,19 @@
 class UserManager
 {
 public:
-	THnd<User> getUser(uint32_t uid) const
+	MSHnd<User> getUser(uint32_t uid) const
 	{
 		auto result = m_Users.find(uid);
-		if (result == m_Users.end()) return THnd<User>();
+		if (result == m_Users.end()) return MSHnd<User>();
 		return result->second;
 	}
 
-	void setUser(uint32_t uid, TRef<User> user)
+	void setUser(uint32_t uid, MSRef<User> user)
 	{
 		if (user) m_Users[uid] = user;
 		else m_Users.erase(uid);
 	}
 
 protected:
-	TMap<uint32_t, TRef<User>> m_Users;
+	MSMap<uint32_t, MSRef<User>> m_Users;
 };

@@ -5,7 +5,7 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
@@ -18,7 +18,7 @@ class TCPClient : public Endpoint
 public:
 	struct config_t
 	{
-		TString IP;
+		MSString IP;
 		uint16_t PortNum = 0;
 		uint32_t Workers = 0;
 		TCPClientReactor::callback_tcp_t Callback;
@@ -29,9 +29,9 @@ public:
 	void shutdown() override;
 	bool running() const override;
 	bool connect() const override;
-	THnd<IChannelAddress> address() const override;
+	MSHnd<IChannelAddress> address() const override;
 	virtual void configureEndpoint(config_t& config) = 0;
 
 protected:
-	TRef<TCPClientReactor> m_Reactor;
+	MSRef<TCPClientReactor> m_Reactor;
 };

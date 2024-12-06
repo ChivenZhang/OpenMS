@@ -5,7 +5,7 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
@@ -19,5 +19,5 @@ public:
 	virtual void shutdown() = 0;
 	virtual bool running() const = 0;
 	virtual bool connect() const = 0;
-	virtual THnd<IChannelAddress> address() const = 0;
+	virtual MSHnd<IChannelAddress> address() const = 0;
 };

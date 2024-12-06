@@ -5,7 +5,7 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
@@ -19,16 +19,16 @@ public:
 	using callback_tcp_t = callback_t;
 
 public:
-	TCPClientReactor(TRef<ISocketAddress> address, size_t workerNum, callback_tcp_t callback);
+	TCPClientReactor(MSRef<ISocketAddress> address, size_t workerNum, callback_tcp_t callback);
 	void startup() override;
 	void shutdown() override;
-	THnd<IChannelAddress> address() const override;
-	void write(TRef<IChannelEvent> event, TRef<IChannelAddress> address) override;
-	void writeAndFlush(TRef<IChannelEvent> event, TRef<IChannelAddress> address) override;
+	MSHnd<IChannelAddress> address() const override;
+	void write(MSRef<IChannelEvent> event, MSRef<IChannelAddress> address) override;
+	void writeAndFlush(MSRef<IChannelEvent> event, MSRef<IChannelAddress> address) override;
 
 protected:
-	void onConnect(TRef<Channel> channel) override;
-	void onDisconnect(TRef<Channel> channel) override;
+	void onConnect(MSRef<Channel> channel) override;
+	void onDisconnect(MSRef<Channel> channel) override;
 
 protected:
 	static void on_connect(uv_connect_t* req, int status);
@@ -37,7 +37,7 @@ protected:
 	static void on_send(uv_tcp_t* handle);
 
 protected:
-	TRef<Channel> m_Channel;
-	TRef<ISocketAddress> m_Address;
-	TRef<ISocketAddress> m_LocalAddress;
+	MSRef<Channel> m_Channel;
+	MSRef<ISocketAddress> m_Address;
+	MSRef<ISocketAddress> m_LocalAddress;
 };

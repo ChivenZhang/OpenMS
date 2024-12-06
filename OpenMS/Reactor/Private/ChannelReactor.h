@@ -5,7 +5,7 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
@@ -18,8 +18,8 @@ class ChannelReactor : public IChannelReactor
 public:
 	struct callback_t
 	{
-		TLambda<void(TRef<IChannel>)> OnOpen;
-		TLambda<void(TRef<IChannel>)> OnClose;
+		MSLambda<void(MSRef<IChannel>)> OnOpen;
+		MSLambda<void(MSRef<IChannel>)> OnClose;
 	};
 
 public:
@@ -29,29 +29,29 @@ public:
 	void shutdown() override;
 	bool running() const override;
 	bool connect() const override;
-	THnd<IChannelAddress> address() const override;
-	void write(TRef<IChannelEvent> event, TRef<IChannelAddress> address) override;
-	TFuture<bool> write(TRef<IChannelEvent> event, TRef<IChannelAddress> address, TPromise<bool>&& promise) override;
-	void writeAndFlush(TRef<IChannelEvent> event, TRef<IChannelAddress> address) override;
-	TFuture<bool> writeAndFlush(TRef<IChannelEvent> event, TRef<IChannelAddress> address, TPromise<bool>&& promise) override;
+	MSHnd<IChannelAddress> address() const override;
+	void write(MSRef<IChannelEvent> event, MSRef<IChannelAddress> address) override;
+	MSFuture<bool> write(MSRef<IChannelEvent> event, MSRef<IChannelAddress> address, MSPromise<bool>&& promise) override;
+	void writeAndFlush(MSRef<IChannelEvent> event, MSRef<IChannelAddress> address) override;
+	MSFuture<bool> writeAndFlush(MSRef<IChannelEvent> event, MSRef<IChannelAddress> address, MSPromise<bool>&& promise) override;
 
 protected:
-	virtual void onConnect(TRef<Channel> channel);
-	virtual void onDisconnect(TRef<Channel> channel);
-	virtual void onInbound(TRef<IChannelEvent> event);
-	virtual void onOutbound(TRef<IChannelEvent> event, bool flush = false);
+	virtual void onConnect(MSRef<Channel> channel);
+	virtual void onDisconnect(MSRef<Channel> channel);
+	virtual void onInbound(MSRef<IChannelEvent> event);
+	virtual void onOutbound(MSRef<IChannelEvent> event, bool flush = false);
 
 protected:
-	TMutex m_EventLock;
-	TThread m_EventThread;
-	TAtomic<bool> m_Running;
-	TAtomic<bool> m_Sending;
-	TAtomic<bool> m_Connect;
-	TVector<TThread> m_WorkerThreads;
-	TVector<TRef<ChannelWorker>> m_WorkerList;
-	TQueue<TRef<IChannelEvent>> m_EventQueue;
-	TLambda<void(TRef<IChannel>)> m_OnOnOpen;
-	TLambda<void(TRef<IChannel>)> m_OnOnClose;
+	MSMutex m_EventLock;
+	MSThread m_EventThread;
+	MSAtomic<bool> m_Running;
+	MSAtomic<bool> m_Sending;
+	MSAtomic<bool> m_Connect;
+	MSVector<MSThread> m_WorkerThreads;
+	MSVector<MSRef<ChannelWorker>> m_WorkerList;
+	MSQueue<MSRef<IChannelEvent>> m_EventQueue;
+	MSLambda<void(MSRef<IChannel>)> m_OnOnOpen;
+	MSLambda<void(MSRef<IChannel>)> m_OnOnClose;
 
 private:
 	friend class Channel;

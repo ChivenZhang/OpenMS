@@ -4,18 +4,18 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
 #include "ChannelAddress.h"
 
-TRef<IPv4Address> IPv4Address::New(TStringView ip, uint16_t port, TStringView host)
+MSRef<IPv4Address> IPv4Address::New(MSStringView ip, uint16_t port, MSStringView host)
 {
-	return TNew<IPv4Address>(ip, port, host);
+	return MSNew<IPv4Address>(ip, port, host);
 }
 
-IPv4Address::IPv4Address(TStringView ip, uint16_t port, TStringView host)
+IPv4Address::IPv4Address(MSStringView ip, uint16_t port, MSStringView host)
 	:
 	m_Address(ip),
 	m_PortNum(port),
@@ -23,22 +23,22 @@ IPv4Address::IPv4Address(TStringView ip, uint16_t port, TStringView host)
 {
 }
 
-TString IPv4Address::getAddress() const
+MSString IPv4Address::getAddress() const
 {
 	return m_Address;
 }
 
-TString IPv4Address::getHostName() const
+MSString IPv4Address::getHostName() const
 {
 	return m_HostName;
 }
 
 uint32_t IPv4Address::getHashName() const
 {
-	return THash(getString());
+	return MSHash(getString());
 }
 
-TString IPv4Address::getString() const
+MSString IPv4Address::getString() const
 {
 	return m_Address + ":" + std::to_string(m_PortNum);
 }
@@ -48,12 +48,12 @@ uint16_t IPv4Address::getPort() const
 	return m_PortNum;
 }
 
-TRef<IPv6Address> IPv6Address::New(TStringView ip, uint16_t port, TStringView host)
+MSRef<IPv6Address> IPv6Address::New(MSStringView ip, uint16_t port, MSStringView host)
 {
-	return TNew<IPv6Address>(ip, port, host);
+	return MSNew<IPv6Address>(ip, port, host);
 }
 
-IPv6Address::IPv6Address(TStringView ip, uint16_t port, TStringView host)
+IPv6Address::IPv6Address(MSStringView ip, uint16_t port, MSStringView host)
 	:
 	m_Address(ip),
 	m_PortNum(port),
@@ -61,22 +61,22 @@ IPv6Address::IPv6Address(TStringView ip, uint16_t port, TStringView host)
 {
 }
 
-TString IPv6Address::getAddress() const
+MSString IPv6Address::getAddress() const
 {
 	return m_Address;
 }
 
-TString IPv6Address::getHostName() const
+MSString IPv6Address::getHostName() const
 {
 	return m_HostName;
 }
 
 uint32_t IPv6Address::getHashName() const
 {
-	return THash(getString());
+	return MSHash(getString());
 }
 
-TString IPv6Address::getString() const
+MSString IPv6Address::getString() const
 {
 	return m_Address + ":" + std::to_string(m_PortNum);
 }

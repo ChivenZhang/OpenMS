@@ -5,7 +5,7 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
@@ -16,13 +16,13 @@ class AESInboundHandler : public ChannelInboundHandler
 public:
 	struct config_t
 	{
-		TArray<uint8_t, 32> Key;
-		TArray<uint8_t, 16> IV;
+		MSArray<uint8_t, 32> Key;
+		MSArray<uint8_t, 16> IV;
 	};
 
 public:
 	AESInboundHandler(config_t const& config);
-	bool channelRead(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) override;
+	bool channelRead(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event) override;
 
 protected:
 	config_t m_Config;
@@ -33,13 +33,13 @@ class AESOutboundHandler : public ChannelOutboundHandler
 public:
 	struct config_t
 	{
-		TArray<uint8_t, 32> Key;
-		TArray<uint8_t, 16> IV;
+		MSArray<uint8_t, 32> Key;
+		MSArray<uint8_t, 16> IV;
 	};
 
 public:
 	AESOutboundHandler(config_t const& config);
-	bool channelWrite(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) override;
+	bool channelWrite(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event) override;
 
 protected:
 	config_t m_Config;

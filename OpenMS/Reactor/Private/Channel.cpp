@@ -6,14 +6,14 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
 #include "Channel.h"
 #include "ChannelReactor.h"
 
-Channel::Channel(TRaw<ChannelReactor> reactor, TRef<IChannelAddress> local, TRef<IChannelAddress> remote, uint32_t workID)
+Channel::Channel(MSRaw<ChannelReactor> reactor, MSRef<IChannelAddress> local, MSRef<IChannelAddress> remote, uint32_t workID)
 	:
 	m_Running(true),
 	m_WorkID(workID),
@@ -40,24 +40,24 @@ uint32_t Channel::getWorkID() const
 	return m_WorkID;
 }
 
-THnd<IChannelAddress> Channel::getLocal() const
+MSHnd<IChannelAddress> Channel::getLocal() const
 {
 	return m_LocalAddr;
 }
 
-THnd<IChannelAddress> Channel::getRemote() const
+MSHnd<IChannelAddress> Channel::getRemote() const
 {
 	return m_RemoteAddr;
 }
 
-TRaw<IChannelContext> Channel::getContext() const
+MSRaw<IChannelContext> Channel::getContext() const
 {
-	return (TRaw<IChannelContext>) & m_Context;
+	return (MSRaw<IChannelContext>) & m_Context;
 }
 
-TRaw<IChannelPipeline> Channel::getPipeline() const
+MSRaw<IChannelPipeline> Channel::getPipeline() const
 {
-	return (TRaw<IChannelPipeline>) & m_Pipeline;
+	return (MSRaw<IChannelPipeline>) & m_Pipeline;
 }
 
 void Channel::close()
@@ -65,7 +65,7 @@ void Channel::close()
 	m_Running = false;
 }
 
-TFuture<bool> Channel::close(TPromise<bool>& promise)
+MSFuture<bool> Channel::close(MSPromise<bool>& promise)
 {
 	auto result = promise.get_future();
 	close();
@@ -73,7 +73,7 @@ TFuture<bool> Channel::close(TPromise<bool>& promise)
 	return result;
 }
 
-void Channel::readChannel(TRef<IChannelEvent> event)
+void Channel::readChannel(MSRef<IChannelEvent> event)
 {
 	if (m_Running == false) return;
 
@@ -85,7 +85,7 @@ void Channel::readChannel(TRef<IChannelEvent> event)
 		{
 			result = inbounds[i].Handler->channelRead(&m_Context, event.get());
 		}
-		catch (TException ex)
+		catch (MSError ex)
 		{
 			inbounds[i].Handler->channelError(&m_Context, std::move(ex));
 		}
@@ -103,7 +103,7 @@ void Channel::readChannel(TRef<IChannelEvent> event)
 		{
 			result = outbounds[i].Handler->channelWrite(&m_Context, event.get());
 		}
-		catch (TException ex)
+		catch (MSError ex)
 		{
 			outbounds[i].Handler->channelError(&m_Context, std::move(ex));
 		}
@@ -115,7 +115,7 @@ void Channel::readChannel(TRef<IChannelEvent> event)
 	}
 }
 
-void Channel::writeChannel(TRef<IChannelEvent> event)
+void Channel::writeChannel(MSRef<IChannelEvent> event)
 {
 	if (m_Running == false) return;
 
@@ -127,7 +127,7 @@ void Channel::writeChannel(TRef<IChannelEvent> event)
 		{
 			result = outbounds[i].Handler->channelWrite(&m_Context, event.get());
 		}
-		catch (TException ex)
+		catch (MSError ex)
 		{
 			outbounds[i].Handler->channelError(&m_Context, std::move(ex));
 		}
@@ -139,32 +139,32 @@ void Channel::writeChannel(TRef<IChannelEvent> event)
 	}
 }
 
-void Channel::write(TRef<IChannelEvent> event)
+void Channel::write(MSRef<IChannelEvent> event)
 {
 	if (m_Running == false) return;
 	event->Channel = shared_from_this();
 	m_Reactor->onOutbound(event, false);
 }
 
-TFuture<bool> Channel::write(TRef<IChannelEvent> event, TPromise<bool>& promise)
+MSFuture<bool> Channel::write(MSRef<IChannelEvent> event, MSPromise<bool>& promise)
 {
-	if (m_Running == false) return TFuture<bool>();
+	if (m_Running == false) return MSFuture<bool>();
 	auto result = promise.get_future();
 	event->Promise = &promise;
 	write(event);
 	return result;
 }
 
-void Channel::writeAndFlush(TRef<IChannelEvent> event)
+void Channel::writeAndFlush(MSRef<IChannelEvent> event)
 {
 	if (m_Running == false) return;
 	event->Channel = shared_from_this();
 	m_Reactor->onOutbound(event, true);
 }
 
-TFuture<bool> Channel::writeAndFlush(TRef<IChannelEvent> event, TPromise<bool>& promise)
+MSFuture<bool> Channel::writeAndFlush(MSRef<IChannelEvent> event, MSPromise<bool>& promise)
 {
-	if (m_Running == false) return TFuture<bool>();
+	if (m_Running == false) return MSFuture<bool>();
 	auto result = promise.get_future();
 	event->Promise = &promise;
 	writeAndFlush(event);

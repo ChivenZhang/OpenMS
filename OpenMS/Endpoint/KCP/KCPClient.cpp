@@ -4,7 +4,7 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
@@ -14,13 +14,13 @@ void KCPClient::startup()
 {
 	config_t config;
 	configureEndpoint(config);
-	m_Reactor = TNew<KCPClientReactor>(
+	m_Reactor = MSNew<KCPClientReactor>(
 		IPv4Address::New(config.IP, config.PortNum),
 		config.Workers,
 		config.Callback
 	);
 	m_Reactor->startup();
-	if (m_Reactor->running() == false) TFatal("failed to start reactor");
+	if (m_Reactor->running() == false) MSFatal("failed to start reactor");
 }
 
 void KCPClient::shutdown()
@@ -39,7 +39,7 @@ bool KCPClient::connect() const
 	return m_Reactor ? m_Reactor->connect() : false;
 }
 
-THnd<IChannelAddress> KCPClient::address() const
+MSHnd<IChannelAddress> KCPClient::address() const
 {
-	return m_Reactor ? m_Reactor->address() : THnd<IChannelAddress>();
+	return m_Reactor ? m_Reactor->address() : MSHnd<IChannelAddress>();
 }

@@ -5,7 +5,7 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
@@ -16,10 +16,10 @@
 class OPENMS_API IProperty
 {
 public:
-	virtual TString property(TString const& name) const = 0;
+	virtual MSString property(MSString const& name) const = 0;
 
 	template <class T>
-	T property(TString const& name, T const& value = T()) const
+	T property(MSString const& name, T const& value = T()) const
 	{
 		return TTextC<T>::from_string(property(name), value);
 	}
@@ -29,7 +29,7 @@ public:
 class OPENMS_API IValue
 {
 public:
-	virtual TString value() const = 0;
+	virtual MSString value() const = 0;
 
 	template <class T>
 	T value(T const& value = T()) const

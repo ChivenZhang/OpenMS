@@ -5,7 +5,7 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
@@ -19,16 +19,16 @@ public:
 	using callback_udp_t = callback_t;
 
 public:
-	UDPClientReactor(TRef<ISocketAddress> address, bool broadcast, bool multicast, size_t workerNum, callback_udp_t callback);
+	UDPClientReactor(MSRef<ISocketAddress> address, bool broadcast, bool multicast, size_t workerNum, callback_udp_t callback);
 	void startup() override;
 	void shutdown() override;
-	THnd<IChannelAddress> address() const override;
-	void write(TRef<IChannelEvent> event, TRef<IChannelAddress> address) override;
-	void writeAndFlush(TRef<IChannelEvent> event, TRef<IChannelAddress> address) override;
+	MSHnd<IChannelAddress> address() const override;
+	void write(MSRef<IChannelEvent> event, MSRef<IChannelAddress> address) override;
+	void writeAndFlush(MSRef<IChannelEvent> event, MSRef<IChannelAddress> address) override;
 
 protected:
-	void onConnect(TRef<Channel> channel) override;
-	void onDisconnect(TRef<Channel> channel) override;
+	void onConnect(MSRef<Channel> channel) override;
+	void onDisconnect(MSRef<Channel> channel) override;
 
 protected:
 	static void on_alloc(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf);
@@ -37,7 +37,7 @@ protected:
 
 protected:
 	bool m_Broadcast, m_Multicast;
-	TRef<Channel> m_Channel;
-	TRef<ISocketAddress> m_Address;
-	TRef<ISocketAddress> m_LocalAddress;
+	MSRef<Channel> m_Channel;
+	MSRef<ISocketAddress> m_Address;
+	MSRef<ISocketAddress> m_LocalAddress;
 };

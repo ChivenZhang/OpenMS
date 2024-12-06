@@ -4,7 +4,7 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
@@ -25,13 +25,13 @@ void AuthorityService::onInit()
 	client->startup();
 
 	auto address = server->address().lock();
-	if (address) client->call<TString>("registry/register", 1000, serviceName, address->getString());
+	if (address) client->call<MSString>("registry/register", 1000, serviceName, address->getString());
 
 	auto update_func = [=](uint32_t handle) {
 		auto address = server->address().lock();
-		if (address)  client->call<TString>("registry/renew", 100, serviceName, address->getString());
-		client->async<TString>("registry/query", 100, {}, [](TString&& result) {
-			TPrint("query result: %s", result.c_str());
+		if (address)  client->call<MSString>("registry/renew", 100, serviceName, address->getString());
+		client->async<MSString>("registry/query", 100, {}, [](MSString&& result) {
+			MSPrint("query result: %s", result.c_str());
 			});
 		};
 	startTimer(0, 1000, update_func);

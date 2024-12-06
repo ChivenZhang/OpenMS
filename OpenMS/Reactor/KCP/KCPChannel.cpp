@@ -4,13 +4,13 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
 #include "KCPChannel.h"
 
-KCPChannel::KCPChannel(TRaw<ChannelReactor> reactor, TRef<IChannelAddress> local, TRef<IChannelAddress> remote, uint32_t workID, uv_udp_t* handle, ikcpcb* session)
+KCPChannel::KCPChannel(MSRaw<ChannelReactor> reactor, MSRef<IChannelAddress> local, MSRef<IChannelAddress> remote, uint32_t workID, uv_udp_t* handle, ikcpcb* session)
 	:
 	Channel(reactor, local, remote, workID),
 	m_Handle(handle),
@@ -33,7 +33,7 @@ ikcpcb* KCPChannel::getSession() const
 	return m_Session;
 }
 
-TRaw<ChannelReactor> KCPChannel::getReactor() const
+MSRaw<ChannelReactor> KCPChannel::getReactor() const
 {
 	return m_Reactor;
 }

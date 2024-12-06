@@ -5,7 +5,7 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
@@ -26,13 +26,13 @@ public:
 
 	virtual bool connect() const = 0;
 
-	virtual THnd<IChannelAddress> address() const = 0;
+	virtual MSHnd<IChannelAddress> address() const = 0;
 
-	virtual void write(TRef<IChannelEvent> event, TRef<IChannelAddress> address) = 0;
+	virtual void write(MSRef<IChannelEvent> event, MSRef<IChannelAddress> address) = 0;
 
-	virtual TFuture<bool> write(TRef<IChannelEvent> event, TRef<IChannelAddress> address, TPromise<bool>&& promise) = 0;
+	virtual MSFuture<bool> write(MSRef<IChannelEvent> event, MSRef<IChannelAddress> address, MSPromise<bool>&& promise) = 0;
 
-	virtual void writeAndFlush(TRef<IChannelEvent> event, TRef<IChannelAddress> address) = 0;
+	virtual void writeAndFlush(MSRef<IChannelEvent> event, MSRef<IChannelAddress> address) = 0;
 
-	virtual TFuture<bool> writeAndFlush(TRef<IChannelEvent> event, TRef<IChannelAddress> address, TPromise<bool>&& promise) = 0;
+	virtual MSFuture<bool> writeAndFlush(MSRef<IChannelEvent> event, MSRef<IChannelAddress> address, MSPromise<bool>&& promise) = 0;
 };

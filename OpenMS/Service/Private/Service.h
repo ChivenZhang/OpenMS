@@ -5,7 +5,7 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
@@ -20,24 +20,24 @@ class Service :
 public:
 	int startup() override final;
 	void shutdown() override final;
-	void sendEvent(TLambda<void()> && event) override final;
-	uint32_t startTimer(uint64_t timeout, uint64_t repeat, TLambda<void(uint32_t handle)> && task) override final;
+	void sendEvent(MSLambda<void()> && event) override final;
+	uint32_t startTimer(uint64_t timeout, uint64_t repeat, MSLambda<void(uint32_t handle)> && task) override final;
 	bool stopTimer(uint32_t handle) override final;
 	using IService::property;
-	TString property(TString const& name) const override final;
+	MSString property(MSString const& name) const override final;
 
 protected:
 	virtual void onInit();
 	virtual void onExit();
 	virtual void onUpdate(float time);
 	virtual void onFrame(uint32_t frame);
-	virtual void onError(TException && error);
+	virtual void onError(MSError && error);
 
 protected:
 	Timer m_Timer;
-	TMutex m_Mutex;
-	TMutexUnlock m_Unlock;
-	TAtomic<bool> m_Running;
-	TAtomic<bool> m_Working;
-	TQueue<TLambda<void()>> m_Events;
+	MSMutex m_Mutex;
+	MSMutexUnlock m_Unlock;
+	MSAtomic<bool> m_Running;
+	MSAtomic<bool> m_Working;
+	MSQueue<MSLambda<void()>> m_Events;
 };

@@ -5,7 +5,7 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
@@ -16,18 +16,18 @@ void DemoServer::configureEndpoint(config_t& config)
 	config.PortNum = 8080;
 	config.Callback =
 	{
-		.OnOpen = [](TRef<IChannel> channel) {
+		.OnOpen = [](MSRef<IChannel> channel) {
 
 			channel->getPipeline()->addLast("read", {
-				.OnRead = [](TRaw<IChannelContext> context, TRaw<IChannelEvent> event)->bool
+				.OnRead = [](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)->bool
 				{
-					TPrint("Server read: %s", event->Message.c_str());
+					MSPrint("Server read: %s", event->Message.c_str());
 					return false;
 				}
 				});
 
 			channel->getPipeline()->addLast("send", {
-				.OnWrite = [](TRaw<IChannelContext> context, TRaw<IChannelEvent> event)->bool
+				.OnWrite = [](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)->bool
 				{
 					context->write(IChannelEvent::New(event->Message));
 					return false;
@@ -35,8 +35,8 @@ void DemoServer::configureEndpoint(config_t& config)
 				});
 		},
 
-		.OnClose = [](TRef<IChannel> channel) {
-			TPrint("rejected %s", channel->getRemote().lock()->getString().c_str());
+		.OnClose = [](MSRef<IChannel> channel) {
+			MSPrint("rejected %s", channel->getRemote().lock()->getString().c_str());
 		},
 	};
 }
@@ -47,7 +47,7 @@ void DemoClient::configureEndpoint(config_t& config)
 	config.PortNum = 8080;
 	config.Callback =
 	{
-		.OnOpen = [=](TRef<IChannel> channel) {
+		.OnOpen = [=](MSRef<IChannel> channel) {
 
 			auto service = AUTOWIRE(IService)::bean();
 			service->startTimer(1000, 1000, [=](uint32_t handle) {

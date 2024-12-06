@@ -4,7 +4,7 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
@@ -18,10 +18,10 @@ Timer::Timer()
 	m_AsyncStop(nullptr),
 	m_AsyncStart(nullptr)
 {
-	TPromise<void> promise;
+	MSPromise<void> promise;
 	auto future = promise.get_future();
 
-	m_Thread = TThread([=, &promise]() {
+	m_Thread = MSThread([=, &promise]() {
 		uv_loop_t loop;
 		uv_async_t asyncExit, asyncStart, asyncStop;
 		uv_loop_init(&loop);
@@ -86,7 +86,7 @@ Timer::Timer()
 
 Timer::~Timer()
 {
-	TVector<uint32_t> handles;
+	MSVector<uint32_t> handles;
 	for (auto& timer : m_Timers) handles.push_back(timer.first);
 	for (auto& timer : handles) stop(timer);
 	uv_async_send(m_AsyncExit);
@@ -104,12 +104,12 @@ uint32_t Timer::start(uint64_t timeout, uint64_t repeat, task_t task)
 	timer.Timeout = timeout;
 	timer.Handle.data = &timer;
 
-	TPromise<void> promise;
+	MSPromise<void> promise;
 	auto future = promise.get_future();
 	struct clause_t
 	{
 		timer_t& Timer;
-		TPromise<void>& Promise;
+		MSPromise<void>& Promise;
 	} clause{ timer, promise };
 
 	m_AsyncStart->data = &clause;
@@ -123,7 +123,7 @@ bool Timer::stop(uint32_t handle)
 	if (result == m_Timers.end()) return false;
 	auto& timer = result->second;
 
-	TPromise<void> promise;
+	MSPromise<void> promise;
 	auto future = promise.get_future();
 	clause_t clause{ timer, promise };
 

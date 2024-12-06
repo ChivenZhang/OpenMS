@@ -5,7 +5,7 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
@@ -36,16 +36,16 @@ public:
 
 	virtual void shutdown() = 0;
 
-	virtual void sendEvent(TLambda<void()>&& event) = 0;
+	virtual void sendEvent(MSLambda<void()>&& event) = 0;
 
-	virtual uint32_t startTimer(uint64_t timeout, uint64_t repeat, TLambda<void(uint32_t handle)>&& task) = 0;
+	virtual uint32_t startTimer(uint64_t timeout, uint64_t repeat, MSLambda<void(uint32_t handle)>&& task) = 0;
 
 	virtual bool stopTimer(uint32_t handle) = 0;
 
-	virtual TString property(TString const& name) const = 0;
+	virtual MSString property(MSString const& name) const = 0;
 
 	template <class T>
-	T property(TString const& name, T const& value = T()) const
+	T property(MSString const& name, T const& value = T()) const
 	{
 		return TTextC<T>::from_string(property(name), value);
 	}

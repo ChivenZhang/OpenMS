@@ -5,7 +5,7 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
@@ -18,14 +18,14 @@ AESInboundHandler::AESInboundHandler(config_t const& config)
 {
 }
 
-bool AESInboundHandler::channelRead(TRaw<IChannelContext> context, TRaw<IChannelEvent> event)
+bool AESInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)
 {
 	auto& key = m_Config.Key;
 	auto& iv = m_Config.IV;
 
 	auto input = (uint8_t*)event->Message.data();
 	auto length = event->Message.size();
-	TString result;
+	MSString result;
 
 	int ret = MBEDTLS_ERR_AES_BAD_INPUT_DATA;
 	mbedtls_aes_context aes_ctx;
@@ -60,14 +60,14 @@ AESOutboundHandler::AESOutboundHandler(config_t const& config)
 {
 }
 
-bool AESOutboundHandler::channelWrite(TRaw<IChannelContext> context, TRaw<IChannelEvent> event)
+bool AESOutboundHandler::channelWrite(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)
 {
 	auto& key = m_Config.Key;
 	auto& iv = m_Config.IV;
 
 	auto input = (uint8_t*)event->Message.data();
 	auto length = event->Message.size();
-	TString result;
+	MSString result;
 
 	int ret = MBEDTLS_ERR_AES_BAD_INPUT_DATA;
 	mbedtls_aes_context aes_ctx;

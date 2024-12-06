@@ -5,7 +5,7 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
@@ -17,29 +17,29 @@ class ChannelReactor;
 class Channel : public IChannel, public std::enable_shared_from_this<Channel>
 {
 public:
-	Channel(TRaw<ChannelReactor> reactor, TRef<IChannelAddress> local, TRef<IChannelAddress> remote, uint32_t workID);
+	Channel(MSRaw<ChannelReactor> reactor, MSRef<IChannelAddress> local, MSRef<IChannelAddress> remote, uint32_t workID);
 	~Channel();
 	bool running() const override;
 	uint32_t getWorkID() const override;
-	THnd<IChannelAddress> getLocal() const override;
-	THnd<IChannelAddress> getRemote() const override;
-	TRaw<IChannelContext> getContext() const override;
-	TRaw<IChannelPipeline> getPipeline() const override;
-	void readChannel(TRef<IChannelEvent> event) override;
-	void writeChannel(TRef<IChannelEvent> event) override;
+	MSHnd<IChannelAddress> getLocal() const override;
+	MSHnd<IChannelAddress> getRemote() const override;
+	MSRaw<IChannelContext> getContext() const override;
+	MSRaw<IChannelPipeline> getPipeline() const override;
+	void readChannel(MSRef<IChannelEvent> event) override;
+	void writeChannel(MSRef<IChannelEvent> event) override;
 	void close() override;
-	TFuture<bool> close(TPromise<bool>& promise) override;
-	void write(TRef<IChannelEvent> event) override;
-	TFuture<bool> write(TRef<IChannelEvent> event, TPromise<bool>& promise) override;
-	void writeAndFlush(TRef<IChannelEvent> event) override;
-	TFuture<bool> writeAndFlush(TRef<IChannelEvent> event, TPromise<bool>& promise) override;
+	MSFuture<bool> close(MSPromise<bool>& promise) override;
+	void write(MSRef<IChannelEvent> event) override;
+	MSFuture<bool> write(MSRef<IChannelEvent> event, MSPromise<bool>& promise) override;
+	void writeAndFlush(MSRef<IChannelEvent> event) override;
+	MSFuture<bool> writeAndFlush(MSRef<IChannelEvent> event, MSPromise<bool>& promise) override;
 
 protected:
 	const uint32_t m_WorkID;
-	TAtomic<bool> m_Running;
+	MSAtomic<bool> m_Running;
 	ChannelContext m_Context;
 	ChannelPipeline m_Pipeline;
-	TRaw<ChannelReactor> m_Reactor;
-	TRef<IChannelAddress> m_LocalAddr;
-	TRef<IChannelAddress> m_RemoteAddr;
+	MSRaw<ChannelReactor> m_Reactor;
+	MSRef<IChannelAddress> m_LocalAddr;
+	MSRef<IChannelAddress> m_RemoteAddr;
 };

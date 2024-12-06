@@ -5,7 +5,7 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
@@ -15,19 +15,19 @@ class Value : public IValue
 {
 public:
 	using IValue::value;
-	TString value() const override;
-	void setValue(TString const& value);
+	MSString value() const override;
+	void setValue(MSString const& value);
 
 protected:
-	TString m_Value;
+	MSString m_Value;
 };
 
 class Property : public IProperty
 {
 public:
 	Property();
-	TString property(TString const& name) const override;
+	MSString property(MSString const& name) const override;
 
 protected:
-	TMap<TString, TString> m_PropertyMap;
+	MSMap<MSString, MSString> m_PropertyMap;
 };

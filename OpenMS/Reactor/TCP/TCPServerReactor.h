@@ -5,7 +5,7 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
@@ -19,14 +19,14 @@ public:
 	using callback_tcp_t = callback_t;
 
 public:
-	TCPServerReactor(TRef<ISocketAddress> address, uint32_t backlog, size_t workerNum, callback_tcp_t callback);
+	TCPServerReactor(MSRef<ISocketAddress> address, uint32_t backlog, size_t workerNum, callback_tcp_t callback);
 	void startup() override;
 	void shutdown() override;
-	THnd<IChannelAddress> address() const override;
+	MSHnd<IChannelAddress> address() const override;
 
 protected:
-	void onConnect(TRef<Channel> channel) override;
-	void onDisconnect(TRef<Channel> channel) override;
+	void onConnect(MSRef<Channel> channel) override;
+	void onDisconnect(MSRef<Channel> channel) override;
 
 protected:
 	static void on_connect(uv_stream_t* server, int status);
@@ -36,7 +36,7 @@ protected:
 
 protected:
 	uint32_t m_Backlog;
-	TRef<ISocketAddress> m_Address;
-	TRef<ISocketAddress> m_LocalAddress;
-	TMap<uint32_t, TRef<Channel>> m_ChannelMap;
+	MSRef<ISocketAddress> m_Address;
+	MSRef<ISocketAddress> m_LocalAddress;
+	MSMap<uint32_t, MSRef<Channel>> m_ChannelMap;
 };

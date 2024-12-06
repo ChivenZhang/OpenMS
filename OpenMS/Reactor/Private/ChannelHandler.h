@@ -5,7 +5,7 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
@@ -14,15 +14,15 @@
 class ChannelInboundHandler : public IChannelInboundHandler
 {
 public:
-	bool channelRead(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) override;
-	void channelError(TRaw<IChannelContext> context, TException&& exception) override;
+	bool channelRead(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event) override;
+	void channelError(MSRaw<IChannelContext> context, MSError&& exception) override;
 };
 
 class ChannelOutboundHandler : public IChannelOutboundHandler
 {
 public:
-	bool channelWrite(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) override;
-	void channelError(TRaw<IChannelContext> context, TException&& exception) override;
+	bool channelWrite(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event) override;
+	void channelError(MSRaw<IChannelContext> context, MSError&& exception) override;
 };
 
 class LambdaInboundHandler : public ChannelInboundHandler
@@ -30,18 +30,18 @@ class LambdaInboundHandler : public ChannelInboundHandler
 public:
 	struct callback_t
 	{
-		TLambda<bool(TRaw<IChannelContext> context, TRaw<IChannelEvent> event)> OnRead;
-		TLambda<void(TRaw<IChannelContext> context, TException&& exception)> OnError;
+		MSLambda<bool(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)> OnRead;
+		MSLambda<void(MSRaw<IChannelContext> context, MSError&& exception)> OnError;
 	};
 
 public:
 	LambdaInboundHandler(callback_t const& callback);
-	bool channelRead(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) override;
-	void channelError(TRaw<IChannelContext> context, TException&& exception) override;
+	bool channelRead(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event) override;
+	void channelError(MSRaw<IChannelContext> context, MSError&& exception) override;
 
 protected:
-	TLambda<bool(TRaw<IChannelContext> context, TRaw<IChannelEvent> event)> m_OnRead;
-	TLambda<void(TRaw<IChannelContext> context, TException&& exception)> m_OnError;
+	MSLambda<bool(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)> m_OnRead;
+	MSLambda<void(MSRaw<IChannelContext> context, MSError&& exception)> m_OnError;
 };
 
 class LambdaOutboundHandler : public ChannelOutboundHandler
@@ -49,16 +49,16 @@ class LambdaOutboundHandler : public ChannelOutboundHandler
 public:
 	struct callback_t
 	{
-		TLambda<bool(TRaw<IChannelContext> context, TRaw<IChannelEvent> event)> OnWrite;
-		TLambda<void(TRaw<IChannelContext> context, TException&& exception)> OnError;
+		MSLambda<bool(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)> OnWrite;
+		MSLambda<void(MSRaw<IChannelContext> context, MSError&& exception)> OnError;
 	};
 
 public:
 	LambdaOutboundHandler(callback_t const& callback);
-	bool channelWrite(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) override;
-	void channelError(TRaw<IChannelContext> context, TException&& exception) override;
+	bool channelWrite(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event) override;
+	void channelError(MSRaw<IChannelContext> context, MSError&& exception) override;
 
 protected:
-	TLambda<bool(TRaw<IChannelContext> context, TRaw<IChannelEvent> event)> m_OnWrite;
-	TLambda<void(TRaw<IChannelContext> context, TException&& exception)> m_OnError;
+	MSLambda<bool(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)> m_OnWrite;
+	MSLambda<void(MSRaw<IChannelContext> context, MSError&& exception)> m_OnError;
 };

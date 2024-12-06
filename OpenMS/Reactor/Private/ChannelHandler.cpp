@@ -4,30 +4,30 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
 #include "ChannelHandler.h"
 
-bool ChannelInboundHandler::channelRead(TRaw<IChannelContext> context, TRaw<IChannelEvent> event)
+bool ChannelInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)
 {
 	return false;
 }
 
-void ChannelInboundHandler::channelError(TRaw<IChannelContext> context, TException&& exception)
+void ChannelInboundHandler::channelError(MSRaw<IChannelContext> context, MSError&& exception)
 {
-	TError("%s", exception.what());
+	MSError("%s", exception.what());
 }
 
-bool ChannelOutboundHandler::channelWrite(TRaw<IChannelContext> context, TRaw<IChannelEvent> event)
+bool ChannelOutboundHandler::channelWrite(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)
 {
 	return false;
 }
 
-void ChannelOutboundHandler::channelError(TRaw<IChannelContext> context, TException&& exception)
+void ChannelOutboundHandler::channelError(MSRaw<IChannelContext> context, MSError&& exception)
 {
-	TError("%s", exception.what());
+	MSError("%s", exception.what());
 }
 
 LambdaInboundHandler::LambdaInboundHandler(callback_t const& callback)
@@ -37,15 +37,15 @@ LambdaInboundHandler::LambdaInboundHandler(callback_t const& callback)
 {
 }
 
-bool LambdaInboundHandler::channelRead(TRaw<IChannelContext> context, TRaw<IChannelEvent> event)
+bool LambdaInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)
 {
 	if (m_OnRead) return m_OnRead(context, event);
 	return false;
 }
 
-void LambdaInboundHandler::channelError(TRaw<IChannelContext> context, TException&& exception)
+void LambdaInboundHandler::channelError(MSRaw<IChannelContext> context, MSError&& exception)
 {
-	if (m_OnError) m_OnError(context, std::forward<TException>(exception));
+	if (m_OnError) m_OnError(context, std::forward<MSError>(exception));
 }
 
 LambdaOutboundHandler::LambdaOutboundHandler(callback_t const& callback)
@@ -55,13 +55,13 @@ LambdaOutboundHandler::LambdaOutboundHandler(callback_t const& callback)
 {
 }
 
-bool LambdaOutboundHandler::channelWrite(TRaw<IChannelContext> context, TRaw<IChannelEvent> event)
+bool LambdaOutboundHandler::channelWrite(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)
 {
 	if (m_OnWrite) return m_OnWrite(context, event);
 	return false;
 }
 
-void LambdaOutboundHandler::channelError(TRaw<IChannelContext> context, TException&& exception)
+void LambdaOutboundHandler::channelError(MSRaw<IChannelContext> context, MSError&& exception)
 {
-	if (m_OnError) m_OnError(context, std::forward<TException>(exception));
+	if (m_OnError) m_OnError(context, std::forward<MSError>(exception));
 }

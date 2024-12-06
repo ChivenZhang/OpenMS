@@ -5,7 +5,7 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
@@ -15,14 +15,14 @@ class Channel;
 class ChannelContext : public IChannelContext
 {
 public:
-	ChannelContext(TRaw<Channel> channel);
+	ChannelContext(MSRaw<Channel> channel);
 	void close() override;
-	TFuture<bool> close(TPromise<bool>& promise) override;
-	void write(TRef<IChannelEvent> event) override;
-	TFuture<bool> write(TRef<IChannelEvent> event, TPromise<bool>& promise) override;
-	void writeAndFlush(TRef<IChannelEvent> event) override;
-	TFuture<bool> writeAndFlush(TRef<IChannelEvent> event, TPromise<bool>& promise) override;
+	MSFuture<bool> close(MSPromise<bool>& promise) override;
+	void write(MSRef<IChannelEvent> event) override;
+	MSFuture<bool> write(MSRef<IChannelEvent> event, MSPromise<bool>& promise) override;
+	void writeAndFlush(MSRef<IChannelEvent> event) override;
+	MSFuture<bool> writeAndFlush(MSRef<IChannelEvent> event, MSPromise<bool>& promise) override;
 
 protected:
-	TRaw<Channel> m_Channel;
+	MSRaw<Channel> m_Channel;
 };

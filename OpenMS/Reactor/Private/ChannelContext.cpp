@@ -6,14 +6,14 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
 #include "ChannelContext.h"
 #include "Channel.h"
 
-ChannelContext::ChannelContext(TRaw<Channel> channel)
+ChannelContext::ChannelContext(MSRaw<Channel> channel)
 	:
 	m_Channel(channel)
 {
@@ -24,27 +24,27 @@ void ChannelContext::close()
 	m_Channel->close();
 }
 
-TFuture<bool> ChannelContext::close(TPromise<bool>& promise)
+MSFuture<bool> ChannelContext::close(MSPromise<bool>& promise)
 {
 	return m_Channel->close(promise);
 }
 
-void ChannelContext::write(TRef<IChannelEvent> event)
+void ChannelContext::write(MSRef<IChannelEvent> event)
 {
 	m_Channel->write(event);
 }
 
-TFuture<bool> ChannelContext::write(TRef<IChannelEvent> event, TPromise<bool>& promise)
+MSFuture<bool> ChannelContext::write(MSRef<IChannelEvent> event, MSPromise<bool>& promise)
 {
 	return m_Channel->write(event, promise);
 }
 
-void ChannelContext::writeAndFlush(TRef<IChannelEvent> event)
+void ChannelContext::writeAndFlush(MSRef<IChannelEvent> event)
 {
 	m_Channel->writeAndFlush(event);
 }
 
-TFuture<bool> ChannelContext::writeAndFlush(TRef<IChannelEvent> event, TPromise<bool>& promise)
+MSFuture<bool> ChannelContext::writeAndFlush(MSRef<IChannelEvent> event, MSPromise<bool>& promise)
 {
 	return m_Channel->writeAndFlush(event, promise);
 }

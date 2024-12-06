@@ -5,7 +5,7 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
@@ -16,5 +16,5 @@ class Battle
 {
 public:
 	uint32_t ID;
-	TVector<THnd<Player>> Players;
+	MSVector<MSHnd<Player>> Players;
 };

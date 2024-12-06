@@ -4,7 +4,7 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
@@ -14,7 +14,7 @@ void UDPClient::startup()
 {
 	config_t config;
 	configureEndpoint(config);
-	m_Reactor = TNew<UDPClientReactor>(
+	m_Reactor = MSNew<UDPClientReactor>(
 		IPv4Address::New(config.IP, config.PortNum),
 		config.Broadcast,
 		config.Multicast,
@@ -22,7 +22,7 @@ void UDPClient::startup()
 		config.Callback
 	);
 	m_Reactor->startup();
-	if (m_Reactor->running() == false) TFatal("failed to start reactor");
+	if (m_Reactor->running() == false) MSFatal("failed to start reactor");
 }
 
 void UDPClient::shutdown()
@@ -41,7 +41,7 @@ bool UDPClient::connect() const
 	return m_Reactor ? m_Reactor->connect() : false;
 }
 
-THnd<IChannelAddress> UDPClient::address() const
+MSHnd<IChannelAddress> UDPClient::address() const
 {
-	return m_Reactor ? m_Reactor->address() : THnd<IChannelAddress>();
+	return m_Reactor ? m_Reactor->address() : MSHnd<IChannelAddress>();
 }

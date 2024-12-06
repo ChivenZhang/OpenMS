@@ -4,7 +4,7 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
@@ -25,7 +25,7 @@ int Service::startup()
 	{
 		onInit();
 	}
-	catch (TException& ex)
+	catch (MSError& ex)
 	{
 		onError(std::move(ex));
 	}
@@ -38,7 +38,7 @@ int Service::startup()
 	{
 		if (m_Working)
 		{
-			TMutexLock lock(m_Mutex);
+			MSMutexLock lock(m_Mutex);
 			m_Working = false;
 			while (m_Running && m_Events.size())
 			{
@@ -48,9 +48,9 @@ int Service::startup()
 				{
 					event();
 				}
-				catch (TException ex)
+				catch (MSError ex)
 				{
-					onError(std::forward<TException>(ex));
+					onError(std::forward<MSError>(ex));
 				}
 				catch (...)
 				{
@@ -72,9 +72,9 @@ int Service::startup()
 	{
 		onExit();
 	}
-	catch (TException ex)
+	catch (MSError ex)
 	{
-		onError(std::forward<TException>(ex));
+		onError(std::forward<MSError>(ex));
 	}
 	catch (...)
 	{
@@ -90,7 +90,7 @@ void Service::shutdown()
 	m_Unlock.notify_one();
 }
 
-uint32_t Service::startTimer(uint64_t timeout, uint64_t repeat, TLambda<void(uint32_t handle)>&& task)
+uint32_t Service::startTimer(uint64_t timeout, uint64_t repeat, MSLambda<void(uint32_t handle)>&& task)
 {
 	return m_Timer.start(timeout, repeat, [=](uint32_t handle) {
 		sendEvent([&]() { task(handle); });
@@ -102,20 +102,20 @@ bool Service::stopTimer(uint32_t handle)
 	return m_Timer.stop(handle);
 }
 
-void Service::sendEvent(TLambda<void()>&& event)
+void Service::sendEvent(MSLambda<void()>&& event)
 {
 	{
-		TMutexLock lock(m_Mutex);
+		MSMutexLock lock(m_Mutex);
 		m_Working = true;
 		m_Events.emplace(std::move(event));
 	}
 	m_Unlock.notify_one();
 }
 
-TString Service::property(TString const& name) const
+MSString Service::property(MSString const& name) const
 {
 	auto source = AUTOWIRE_DATA(IProperty);
-	if (source == nullptr) return TString();
+	if (source == nullptr) return MSString();
 	return source->property(name);
 }
 
@@ -135,6 +135,6 @@ void Service::onFrame(uint32_t frame)
 {
 }
 
-void Service::onError(TException&& error)
+void Service::onError(MSError&& error)
 {
 }

@@ -5,7 +5,7 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
@@ -18,15 +18,15 @@
 struct RPCServerRequest
 {
 	uint32_t indx;
-	TString name;
-	TString args;
+	MSString name;
+	MSString args;
 	OPENMS_TYPE(RPCServerRequest, indx, name, args)
 };
 
 struct RPCServerResponse
 {
 	uint32_t indx;
-	TString args;
+	MSString args;
 	OPENMS_TYPE(RPCServerResponse, indx, args)
 };
 
@@ -35,7 +35,7 @@ class RPCServer : public IEndpoint
 public:
 	struct config_t
 	{
-		TString IP;
+		MSString IP;
 		uint16_t PortNum = 0;
 		uint32_t Backlog = 0;
 		uint32_t Workers = 0;
@@ -48,20 +48,20 @@ public:
 	void shutdown() override;
 	bool running() const override;
 	bool connect() const override;
-	THnd<IChannelAddress> address() const override;
-	bool unbind(TStringView name);
-	bool invoke(TStringView name, TString const& input, TString& output);
+	MSHnd<IChannelAddress> address() const override;
+	bool unbind(MSStringView name);
+	bool invoke(MSStringView name, MSString const& input, MSString& output);
 	virtual void configureEndpoint(config_t& config) = 0;
 
 	template<class F, OPENMS_NOT_SAME(typename std::function_traits<F>::result_type, void)>
-	bool bind(TStringView name, F method)
+	bool bind(MSStringView name, F method)
 	{
-		auto callback = [method](TString const& input, TString& output) -> bool {
+		auto callback = [method](MSString const& input, MSString& output) -> bool {
 
 			// Convert input to tuple
 
 			typename std::function_traits<F>::argument_tuple args;
-			if (std::is_same_v<decltype(args), TTuple<>> == false)
+			if (std::is_same_v<decltype(args), MSTuple<>> == false)
 			{
 				if (TTypeC(input, args) == false) return false;
 			}
@@ -80,14 +80,14 @@ public:
 	}
 
 	template<class F, OPENMS_IS_SAME(typename std::function_traits<F>::result_type, void)>
-	bool bind(TStringView name, F method)
+	bool bind(MSStringView name, F method)
 	{
-		auto callback = [method](TString const& input, TString& output) -> bool {
+		auto callback = [method](MSString const& input, MSString& output) -> bool {
 
 			// Convert input to tuple
 
 			typename std::function_traits<F>::argument_tuple args;
-			if (std::is_same_v<decltype(args), TTuple<>> == false)
+			if (std::is_same_v<decltype(args), MSTuple<>> == false)
 			{
 				if (TTypeC(input, args) == false) return false;
 			}
@@ -104,23 +104,23 @@ public:
 	}
 
 protected:
-	bool bind_internal(TStringView name, TLambda<bool(TString const&, TString&)> method);
+	bool bind_internal(MSStringView name, MSLambda<bool(MSString const&, MSString&)> method);
 
 protected:
 	friend class RPCServerInboundHandler;
-	TMutex m_Lock;
+	MSMutex m_Lock;
 	uint32_t m_Buffers = UINT32_MAX;	// bytes from property
-	TRef<TCPServerReactor> m_Reactor;
-	TMap<TString, TLambda<bool(TString const& input, TString& output)>> m_Methods;
+	MSRef<TCPServerReactor> m_Reactor;
+	MSMap<MSString, MSLambda<bool(MSString const& input, MSString& output)>> m_Methods;
 };
 
 class RPCServerInboundHandler : public ChannelInboundHandler
 {
 public:
-	RPCServerInboundHandler(TRaw<RPCServer> server);
-	bool channelRead(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) override;
+	RPCServerInboundHandler(MSRaw<RPCServer> server);
+	bool channelRead(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event) override;
 
 protected:
-	TString m_Buffer;
-	TRaw<RPCServer> m_Server;
+	MSString m_Buffer;
+	MSRaw<RPCServer> m_Server;
 };

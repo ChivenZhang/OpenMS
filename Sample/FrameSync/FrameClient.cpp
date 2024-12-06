@@ -4,7 +4,7 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
@@ -35,19 +35,19 @@ int main(int argc, char* argv[])
 	initgraph(640, 480, INIT_DEFAULT);
 	setrendermode(RENDER_MANUAL);
 
-	TVector<status_t> actorStatus;
-	TQueue<operate_t> operateQueue;
-	TMutex mutex; TMutexUnlock unlock;
+	MSVector<status_t> actorStatus;
+	MSQueue<operate_t> operateQueue;
+	MSMutex mutex; MSMutexUnlock unlock;
 
 	// Sync Time
 
-	TPromise<void> promise;
+	MSPromise<void> promise;
 	auto future = promise.get_future();
 	time_t t1, t2, t3, t4;
 	TCPClientReactor timeSync(IPv4Address::New("127.0.0.1", 9090), 0, {
-		[&](TRef<IChannel> channel) {
+		[&](MSRef<IChannel> channel) {
 			channel->getPipeline()->addFirst("timesync", {
-				.OnRead = [&](TRaw<IChannelContext> context, TRaw<IChannelEvent> event)->bool {
+				.OnRead = [&](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)->bool {
 					time_t buffer[2];
 					memcpy(buffer, event->Message.data(), sizeof(buffer));
 					t2 = buffer[0];
@@ -71,16 +71,16 @@ int main(int argc, char* argv[])
 	// Setup Client
 
 	TCPClientReactor client(IPv4Address::New("127.0.0.1", 8080), 0, {
-		[&](TRef<IChannel> channel) {
-			TString buffer;
+		[&](MSRef<IChannel> channel) {
+			MSString buffer;
 			channel->getPipeline()->addFirst("broadcast", {
-				.OnRead = [&, buffer](TRaw<IChannelContext> context, TRaw<IChannelEvent> event) mutable ->bool {
+				.OnRead = [&, buffer](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event) mutable ->bool {
 					buffer += event->Message;
 					while (sizeof(operate_t) <= buffer.size())
 					{
 						operate_t* op = (operate_t*)buffer.data();
 						{
-							TMutexLock lock(mutex);
+							MSMutexLock lock(mutex);
 							operateQueue.push(*op);
 						}
 						buffer = buffer.substr(sizeof(operate_t));
@@ -100,7 +100,7 @@ int main(int argc, char* argv[])
 
 	auto update_func = [&](uint32_t frame) {
 		{
-			TMutexLock lock(mutex);
+			MSMutexLock lock(mutex);
 			while (operateQueue.size())
 			{
 				auto op = operateQueue.front();
@@ -125,7 +125,7 @@ int main(int argc, char* argv[])
 		if (keystate(key_A))
 		{
 			operate_t op = { frame, 'A', status.Actor };
-			auto event = IChannelEvent::New(TString((char*)&op, sizeof(op)));
+			auto event = IChannelEvent::New(MSString((char*)&op, sizeof(op)));
 			client.write(event, nullptr);
 			status.X -= MOVE_STEP;
 
@@ -136,7 +136,7 @@ int main(int argc, char* argv[])
 		if (keystate(key_D))
 		{
 			operate_t op = { frame, 'D', status.Actor };
-			auto event = IChannelEvent::New(TString((char*)&op, sizeof(op)));
+			auto event = IChannelEvent::New(MSString((char*)&op, sizeof(op)));
 			client.write(event, nullptr);
 			status.X += MOVE_STEP;
 
@@ -147,7 +147,7 @@ int main(int argc, char* argv[])
 		if (keystate(key_S))
 		{
 			operate_t op = { frame, 'S', status.Actor };
-			auto event = IChannelEvent::New(TString((char*)&op, sizeof(op)));
+			auto event = IChannelEvent::New(MSString((char*)&op, sizeof(op)));
 			client.write(event, nullptr);
 			status.Y += MOVE_STEP;
 
@@ -158,7 +158,7 @@ int main(int argc, char* argv[])
 		if (keystate(key_W))
 		{
 			operate_t op = { frame, 'W', status.Actor };
-			auto event = IChannelEvent::New(TString((char*)&op, sizeof(op)));
+			auto event = IChannelEvent::New(MSString((char*)&op, sizeof(op)));
 			client.write(event, nullptr);
 			status.Y -= MOVE_STEP;
 

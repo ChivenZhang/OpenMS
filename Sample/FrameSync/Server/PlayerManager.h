@@ -5,7 +5,7 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
@@ -15,20 +15,20 @@
 class PlayerManager
 {
 public:
-	THnd<Player> getPlayer(uint32_t uid) const
+	MSHnd<Player> getPlayer(uint32_t uid) const
 	{
 		auto result = m_Players.find(uid);
-		if (result == m_Players.end()) return THnd<Player>();
+		if (result == m_Players.end()) return MSHnd<Player>();
 		return result->second;
 	}
 
-	void setPlayer(uint32_t uid, TRef<Player> player)
+	void setPlayer(uint32_t uid, MSRef<Player> player)
 	{
 		if (player) m_Players[uid] = player;
 		else m_Players.erase(uid);
 	}
 
 protected:
-	TMap<uint32_t, TRef<Player>> m_Players;
-	TMap<uint32_t, TRef<Player>> m_BattlePlayers;
+	MSMap<uint32_t, MSRef<Player>> m_Players;
+	MSMap<uint32_t, MSRef<Player>> m_BattlePlayers;
 };

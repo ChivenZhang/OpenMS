@@ -4,14 +4,14 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
 #include "TCPChannel.h"
 #include "../Private/ChannelReactor.h"
 
-TCPChannel::TCPChannel(TRaw<ChannelReactor> reactor, TRef<IChannelAddress> local, TRef<IChannelAddress> remote, uint32_t workid, uv_tcp_t* handle)
+TCPChannel::TCPChannel(MSRaw<ChannelReactor> reactor, MSRef<IChannelAddress> local, MSRef<IChannelAddress> remote, uint32_t workid, uv_tcp_t* handle)
 	:
 	Channel(reactor, local, remote, workid),
 	m_Handle(handle)

@@ -6,7 +6,7 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
@@ -32,17 +32,17 @@ ChannelReactor::~ChannelReactor()
 void ChannelReactor::startup()
 {
 	m_Running = true;
-	for (size_t i = 0; i < m_WorkerList.size(); ++i) m_WorkerList[i] = TNew<ChannelWorker>(this);
-	for (size_t i = 0; i < m_WorkerList.size(); ++i) m_WorkerThreads[i] = TThread([=]() { m_WorkerList[i]->startup(); });
+	for (size_t i = 0; i < m_WorkerList.size(); ++i) m_WorkerList[i] = MSNew<ChannelWorker>(this);
+	for (size_t i = 0; i < m_WorkerList.size(); ++i) m_WorkerThreads[i] = MSThread([=]() { m_WorkerList[i]->startup(); });
 	for (size_t i = 0; i < m_WorkerList.size(); ++i) while (m_WorkerList[i]->running() == false);
 
 #if 0 // test code
-	m_EventThread = TThread([=]() {
-		auto channel = TNew<Channel>(this, nullptr, nullptr);
+	m_EventThread = MSThread([=]() {
+		auto channel = MSNew<Channel>(this, nullptr, nullptr);
 		onConnect(channel);
 		for (size_t i = 0; i < 10; ++i)
 		{
-			auto event = TNew<IChannelEvent>(IChannelEvent { "A message!", channel });
+			auto event = MSNew<IChannelEvent>(IChannelEvent { "A message!", channel });
 			onInbound(event);
 		}
 		onDisconnect(channel);
@@ -69,59 +69,59 @@ bool ChannelReactor::connect() const
 	return m_Connect;
 }
 
-THnd<IChannelAddress> ChannelReactor::address() const
+MSHnd<IChannelAddress> ChannelReactor::address() const
 {
-	return THnd<IChannelAddress>();
+	return MSHnd<IChannelAddress>();
 }
 
-void ChannelReactor::write(TRef<IChannelEvent> event, TRef<IChannelAddress> address)
+void ChannelReactor::write(MSRef<IChannelEvent> event, MSRef<IChannelAddress> address)
 {
 }
 
-TFuture<bool> ChannelReactor::write(TRef<IChannelEvent> event, TRef<IChannelAddress> address, TPromise<bool>&& promise)
+MSFuture<bool> ChannelReactor::write(MSRef<IChannelEvent> event, MSRef<IChannelAddress> address, MSPromise<bool>&& promise)
 {
-	if (m_Running == false) return TFuture<bool>();
+	if (m_Running == false) return MSFuture<bool>();
 	auto result = promise.get_future();
 	event->Promise = &promise;
 	write(event, address);
 	return result;
 }
 
-void ChannelReactor::writeAndFlush(TRef<IChannelEvent> event, TRef<IChannelAddress> address)
+void ChannelReactor::writeAndFlush(MSRef<IChannelEvent> event, MSRef<IChannelAddress> address)
 {
 }
 
-TFuture<bool> ChannelReactor::writeAndFlush(TRef<IChannelEvent> event, TRef<IChannelAddress> address, TPromise<bool>&& promise)
+MSFuture<bool> ChannelReactor::writeAndFlush(MSRef<IChannelEvent> event, MSRef<IChannelAddress> address, MSPromise<bool>&& promise)
 {
-	if (m_Running == false) return TFuture<bool>();
+	if (m_Running == false) return MSFuture<bool>();
 	auto result = promise.get_future();
 	event->Promise = &promise;
 	writeAndFlush(event, address);
 	return result;
 }
 
-void ChannelReactor::onConnect(TRef<Channel> channel)
+void ChannelReactor::onConnect(MSRef<Channel> channel)
 {
 	if (m_OnOnOpen) m_OnOnOpen(channel);
 }
 
-void ChannelReactor::onDisconnect(TRef<Channel> channel)
+void ChannelReactor::onDisconnect(MSRef<Channel> channel)
 {
 	channel->close();
 	if (m_OnOnClose) m_OnOnClose(channel);
 }
 
-void ChannelReactor::onInbound(TRef<IChannelEvent> event)
+void ChannelReactor::onInbound(MSRef<IChannelEvent> event)
 {
 	auto channel = event->Channel.lock();
 	if (event == nullptr || channel == nullptr) return;
 	m_WorkerList[channel->getWorkID()]->enqueue(event);
 }
 
-void ChannelReactor::onOutbound(TRef<IChannelEvent> event, bool flush)
+void ChannelReactor::onOutbound(MSRef<IChannelEvent> event, bool flush)
 {
 	if (event == nullptr || event->Channel.expired()) return;
-	TMutexLock lock(m_EventLock);
+	MSMutexLock lock(m_EventLock);
 	m_EventQueue.push(event);
 	m_Sending = true;
 }

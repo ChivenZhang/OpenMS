@@ -5,7 +5,7 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
@@ -18,13 +18,13 @@ class OPENMS_API IChannelPipeline
 public:
 	struct inbound_t
 	{
-		TRef<IChannelInboundHandler> Handler;
+		MSRef<IChannelInboundHandler> Handler;
 		uint32_t HashName;
 	};
 
 	struct outbound_t
 	{
-		TRef<IChannelOutboundHandler> Handler;
+		MSRef<IChannelOutboundHandler> Handler;
 		uint32_t HashName;
 	};
 
@@ -35,39 +35,39 @@ public:
 public:
 	virtual ~IChannelPipeline() = default;
 
-	virtual TArrayView<const inbound_t> getInbounds() const = 0;
+	virtual MSArrayView<const inbound_t> getInbounds() const = 0;
 
-	virtual TArrayView<const outbound_t> getOutbounds() const = 0;
+	virtual MSArrayView<const outbound_t> getOutbounds() const = 0;
 
-	virtual bool addFirst(TStringView name, TRef<IChannelInboundHandler> handler) = 0;
+	virtual bool addFirst(MSStringView name, MSRef<IChannelInboundHandler> handler) = 0;
 
-	virtual bool addLast(TStringView name, TRef<IChannelInboundHandler> handler) = 0;
+	virtual bool addLast(MSStringView name, MSRef<IChannelInboundHandler> handler) = 0;
 
-	virtual bool addBefore(TStringView which, TStringView name, TRef<IChannelInboundHandler> handler) = 0;
+	virtual bool addBefore(MSStringView which, MSStringView name, MSRef<IChannelInboundHandler> handler) = 0;
 
-	virtual bool addAfter(TStringView which, TStringView name, TRef<IChannelInboundHandler> handler) = 0;
+	virtual bool addAfter(MSStringView which, MSStringView name, MSRef<IChannelInboundHandler> handler) = 0;
 
-	virtual bool addFirst(TStringView name, TRef<IChannelOutboundHandler> handler) = 0;
+	virtual bool addFirst(MSStringView name, MSRef<IChannelOutboundHandler> handler) = 0;
 
-	virtual bool addLast(TStringView name, TRef<IChannelOutboundHandler> handler) = 0;
+	virtual bool addLast(MSStringView name, MSRef<IChannelOutboundHandler> handler) = 0;
 
-	virtual bool addBefore(TStringView which, TStringView name, TRef<IChannelOutboundHandler> handler) = 0;
+	virtual bool addBefore(MSStringView which, MSStringView name, MSRef<IChannelOutboundHandler> handler) = 0;
 
-	virtual bool addAfter(TStringView which, TStringView name, TRef<IChannelOutboundHandler> handler) = 0;
+	virtual bool addAfter(MSStringView which, MSStringView name, MSRef<IChannelOutboundHandler> handler) = 0;
 
-	virtual bool addFirst(TStringView name, inconfig_t config) = 0;
+	virtual bool addFirst(MSStringView name, inconfig_t config) = 0;
 
-	virtual bool addLast(TStringView name, inconfig_t config) = 0;
+	virtual bool addLast(MSStringView name, inconfig_t config) = 0;
 
-	virtual bool addBefore(TStringView which, TStringView name, inconfig_t config) = 0;
+	virtual bool addBefore(MSStringView which, MSStringView name, inconfig_t config) = 0;
 
-	virtual bool addAfter(TStringView which, TStringView name, inconfig_t config) = 0;
+	virtual bool addAfter(MSStringView which, MSStringView name, inconfig_t config) = 0;
 
-	virtual bool addFirst(TStringView name, outconfig_t config) = 0;
+	virtual bool addFirst(MSStringView name, outconfig_t config) = 0;
 
-	virtual bool addLast(TStringView name, outconfig_t config) = 0;
+	virtual bool addLast(MSStringView name, outconfig_t config) = 0;
 
-	virtual bool addBefore(TStringView which, TStringView name, outconfig_t config) = 0;
+	virtual bool addBefore(MSStringView which, MSStringView name, outconfig_t config) = 0;
 
-	virtual bool addAfter(TStringView which, TStringView name, outconfig_t config) = 0;
+	virtual bool addAfter(MSStringView which, MSStringView name, outconfig_t config) = 0;
 };

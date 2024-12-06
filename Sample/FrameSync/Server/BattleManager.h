@@ -5,7 +5,7 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
@@ -15,19 +15,19 @@
 class BattleManager
 {
 public:
-	THnd<Battle> getBattle(uint32_t uid) const
+	MSHnd<Battle> getBattle(uint32_t uid) const
 	{
 		auto result = m_Battles.find(uid);
-		if (result == m_Battles.end()) return THnd<Battle>();
+		if (result == m_Battles.end()) return MSHnd<Battle>();
 		return result->second;
 	}
 
-	void setBattle(uint32_t uid, TRef<Battle> battle)
+	void setBattle(uint32_t uid, MSRef<Battle> battle)
 	{
 		if (battle) m_Battles[uid] = battle;
 		else m_Battles.erase(uid);
 	}
 
 protected:
-	TMap<uint32_t, TRef<Battle>> m_Battles;
+	MSMap<uint32_t, MSRef<Battle>> m_Battles;
 };

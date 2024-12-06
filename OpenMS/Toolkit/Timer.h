@@ -5,7 +5,7 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
@@ -15,7 +15,7 @@
 class Timer final
 {
 public:
-	using task_t = TLambda<void(uint32_t handle)>;
+	using task_t = MSLambda<void(uint32_t handle)>;
 
 public:
 	Timer();
@@ -33,11 +33,11 @@ private:
 	struct clause_t
 	{
 		Timer::timer_t& Timer;
-		TPromise<void>& Promise;
+		MSPromise<void>& Promise;
 	};
-	TThread m_Thread;
+	MSThread m_Thread;
 	uint32_t m_TimerID;
-	TMap<uint32_t, timer_t> m_Timers;
-	TRaw<uv_loop_t> m_Loop;
-	TRaw<uv_async_t> m_AsyncExit, m_AsyncStart, m_AsyncStop;
+	MSMap<uint32_t, timer_t> m_Timers;
+	MSRaw<uv_loop_t> m_Loop;
+	MSRaw<uv_async_t> m_AsyncExit, m_AsyncStart, m_AsyncStop;
 };

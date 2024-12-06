@@ -5,7 +5,7 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
@@ -18,18 +18,18 @@ class KCPServerReactor : public ChannelReactor
 public:
 	struct callback_kcp_t : public callback_t
 	{
-		TLambda<uint32_t(TRef<IChannelAddress>)> Session;
+		MSLambda<uint32_t(MSRef<IChannelAddress>)> Session;
 	};
 
 public:
-	KCPServerReactor(TRef<ISocketAddress> address, uint32_t backlog, size_t workerNum, callback_kcp_t callback);
+	KCPServerReactor(MSRef<ISocketAddress> address, uint32_t backlog, size_t workerNum, callback_kcp_t callback);
 	void startup() override;
 	void shutdown() override;
-	THnd<IChannelAddress> address() const override;
+	MSHnd<IChannelAddress> address() const override;
 
 protected:
-	void onConnect(TRef<Channel> channel) override;
-	void onDisconnect(TRef<Channel> channel) override;
+	void onConnect(MSRef<Channel> channel) override;
+	void onDisconnect(MSRef<Channel> channel) override;
 
 protected:
 	static void on_alloc(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf);
@@ -39,10 +39,10 @@ protected:
 
 protected:
 	uint32_t m_Backlog, m_Session;
-	TRef<ISocketAddress> m_Address;
-	TRef<ISocketAddress> m_LocalAddress;
-	TVector<TRef<Channel>> m_Channels;
-	TVector<TRef<Channel>> m_ChannelsRemoved;
-	TMap<uint32_t, TRef<Channel>> m_ChannelMap;
-	TLambda<uint32_t(TRef<IChannelAddress>)> m_OnSession;
+	MSRef<ISocketAddress> m_Address;
+	MSRef<ISocketAddress> m_LocalAddress;
+	MSVector<MSRef<Channel>> m_Channels;
+	MSVector<MSRef<Channel>> m_ChannelsRemoved;
+	MSMap<uint32_t, MSRef<Channel>> m_ChannelMap;
+	MSLambda<uint32_t(MSRef<IChannelAddress>)> m_OnSession;
 };

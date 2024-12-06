@@ -5,19 +5,19 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
 #include "TCPClientReactor.h"
 #include "TCPChannel.h"
 
-TCPClientReactor::TCPClientReactor(TRef<ISocketAddress> address, size_t workerNum, callback_tcp_t callback)
+TCPClientReactor::TCPClientReactor(MSRef<ISocketAddress> address, size_t workerNum, callback_tcp_t callback)
 	:
 	ChannelReactor(workerNum, callback),
 	m_Address(address)
 {
-	if (m_Address == nullptr) m_Address = TNew<IPv4Address>("0.0.0.0", 0);
+	if (m_Address == nullptr) m_Address = MSNew<IPv4Address>("0.0.0.0", 0);
 }
 
 void TCPClientReactor::startup()
@@ -25,9 +25,9 @@ void TCPClientReactor::startup()
 	if (m_Running == true) return;
 	ChannelReactor::startup();
 
-	TPromise<void> promise;
+	MSPromise<void> promise;
 	auto future = promise.get_future();
-	m_EventThread = TThread([=, &promise]() {
+	m_EventThread = MSThread([=, &promise]() {
 		uv_loop_t loop;
 		uv_tcp_t client;
 		uv_connect_t connect_req;
@@ -42,19 +42,19 @@ void TCPClientReactor::startup()
 			{
 				sockaddr_storage addr;
 				uint32_t result = uv_errno_t::UV_EINVAL;
-				if (auto ipv4 = TCast<IPv4Address>(m_Address))
+				if (auto ipv4 = MSCast<IPv4Address>(m_Address))
 				{
 					result = uv_ip4_addr(ipv4->getAddress().c_str(), ipv4->getPort(), (sockaddr_in*)&addr);
 				}
-				else if (auto ipv6 = TCast<IPv6Address>(m_Address))
+				else if (auto ipv6 = MSCast<IPv6Address>(m_Address))
 				{
 					result = uv_ip6_addr(ipv6->getAddress().c_str(), ipv6->getPort(), (sockaddr_in6*)&addr);
 				}
-				if (result) TError("invalid address: %s", ::uv_strerror(result));
+				if (result) MSError("invalid address: %s", ::uv_strerror(result));
 				if (result) break;
 
 				result = uv_tcp_connect(&connect_req, &client, (const struct sockaddr*)&addr, on_connect);
-				if (result) TError("failed to connect: %s", ::uv_strerror(result));
+				if (result) MSError("failed to connect: %s", ::uv_strerror(result));
 				if (result) break;
 			}
 
@@ -63,7 +63,7 @@ void TCPClientReactor::startup()
 			{
 				sockaddr_storage addr;
 				socklen_t addrlen = sizeof(addr);
-				TRef<ISocketAddress> localAddress;
+				MSRef<ISocketAddress> localAddress;
 
 				auto result = uv_tcp_getsockname((uv_tcp_t*)&client, (struct sockaddr*)&addr, &addrlen);
 				if (result == 0)
@@ -75,7 +75,7 @@ void TCPClientReactor::startup()
 						inet_ntop(AF_INET, &in_addr->sin_addr, ip_str, sizeof(ip_str));
 						auto address = ip_str;
 						auto portNum = ntohs(in_addr->sin_port);
-						localAddress = TNew<IPv4Address>(address, portNum);
+						localAddress = MSNew<IPv4Address>(address, portNum);
 					}
 					else if (addr.ss_family == AF_INET6)
 					{
@@ -84,16 +84,16 @@ void TCPClientReactor::startup()
 						inet_ntop(AF_INET6, &in6_addr->sin6_addr, ip_str, sizeof(ip_str));
 						auto address = ip_str;
 						auto portNum = ntohs(in6_addr->sin6_port);
-						localAddress = TNew<IPv6Address>(address, portNum);
+						localAddress = MSNew<IPv6Address>(address, portNum);
 					}
-					else TError("unknown address family: %d", addr.ss_family);
+					else MSError("unknown address family: %d", addr.ss_family);
 				}
-				else TError("failed to get socket name: %s", ::uv_strerror(result));
+				else MSError("failed to get socket name: %s", ::uv_strerror(result));
 
 				if (localAddress == nullptr) break;
 				m_LocalAddress = localAddress;
 
-				TPrint("listening on %s:%d", localAddress->getAddress().c_str(), localAddress->getPort());
+				MSPrint("listening on %s:%d", localAddress->getAddress().c_str(), localAddress->getPort());
 			}
 
 			// Run the event loop
@@ -120,7 +120,7 @@ void TCPClientReactor::startup()
 			uv_close((uv_handle_t*)&client, nullptr);
 			uv_loop_close(&loop);
 
-			TPrint("closed client");
+			MSPrint("closed client");
 			return;
 		} while (0);
 
@@ -139,12 +139,12 @@ void TCPClientReactor::shutdown()
 	m_Channel = nullptr;
 }
 
-THnd<IChannelAddress> TCPClientReactor::address() const
+MSHnd<IChannelAddress> TCPClientReactor::address() const
 {
-	return m_Connect ? m_LocalAddress : THnd<IChannelAddress>();
+	return m_Connect ? m_LocalAddress : MSHnd<IChannelAddress>();
 }
 
-void TCPClientReactor::write(TRef<IChannelEvent> event, TRef<IChannelAddress> address)
+void TCPClientReactor::write(MSRef<IChannelEvent> event, MSRef<IChannelAddress> address)
 {
 	if (m_Running == false) return;
 	auto channel = m_Channel;
@@ -152,7 +152,7 @@ void TCPClientReactor::write(TRef<IChannelEvent> event, TRef<IChannelAddress> ad
 	if (channel && channel->running()) channel->write(event);
 }
 
-void TCPClientReactor::writeAndFlush(TRef<IChannelEvent> event, TRef<IChannelAddress> address)
+void TCPClientReactor::writeAndFlush(MSRef<IChannelEvent> event, MSRef<IChannelAddress> address)
 {
 	if (m_Running == false) return;
 	auto channel = m_Channel;
@@ -160,17 +160,17 @@ void TCPClientReactor::writeAndFlush(TRef<IChannelEvent> event, TRef<IChannelAdd
 	if (channel && channel->running()) channel->writeAndFlush(event);
 }
 
-void TCPClientReactor::onConnect(TRef<Channel> channel)
+void TCPClientReactor::onConnect(MSRef<Channel> channel)
 {
-	TDebug("accepted from %s", channel->getRemote().lock()->getString().c_str());
+	MSDebug("accepted from %s", channel->getRemote().lock()->getString().c_str());
 
 	m_Channel = channel;
 	ChannelReactor::onConnect(channel);
 }
 
-void TCPClientReactor::onDisconnect(TRef<Channel> channel)
+void TCPClientReactor::onDisconnect(MSRef<Channel> channel)
 {
-	TDebug("rejected from %s", channel->getRemote().lock()->getString().c_str());
+	MSDebug("rejected from %s", channel->getRemote().lock()->getString().c_str());
 
 	m_Channel = nullptr;
 	ChannelReactor::onDisconnect(channel);
@@ -182,7 +182,7 @@ void TCPClientReactor::on_connect(uv_connect_t* req, int status)
 
 	if (status < 0)
 	{
-		TError("failed to connect: %s", ::uv_strerror(status));
+		MSError("failed to connect: %s", ::uv_strerror(status));
 		return;
 	}
 
@@ -190,7 +190,7 @@ void TCPClientReactor::on_connect(uv_connect_t* req, int status)
 
 	sockaddr_storage addr;
 	socklen_t addrlen = sizeof(addr);
-	TRef<ISocketAddress> localAddress, remoteAddress;
+	MSRef<ISocketAddress> localAddress, remoteAddress;
 
 	auto client = (uv_tcp_t*)req->handle;
 	auto result = uv_tcp_getsockname((uv_tcp_t*)client, (struct sockaddr*)&addr, &addrlen);
@@ -203,7 +203,7 @@ void TCPClientReactor::on_connect(uv_connect_t* req, int status)
 			inet_ntop(AF_INET, &in_addr->sin_addr, ip_str, sizeof(ip_str));
 			auto address = ip_str;
 			auto portNum = ntohs(in_addr->sin_port);
-			localAddress = TNew<IPv4Address>(address, portNum);
+			localAddress = MSNew<IPv4Address>(address, portNum);
 		}
 		else if (addr.ss_family == AF_INET6)
 		{
@@ -212,11 +212,11 @@ void TCPClientReactor::on_connect(uv_connect_t* req, int status)
 			inet_ntop(AF_INET6, &in6_addr->sin6_addr, ip_str, sizeof(ip_str));
 			auto portNum = ntohs(in6_addr->sin6_port);
 			auto address = ip_str;
-			localAddress = TNew<IPv6Address>(address, portNum);
+			localAddress = MSNew<IPv6Address>(address, portNum);
 		}
-		else TError("unknown address family: %d", addr.ss_family);
+		else MSError("unknown address family: %d", addr.ss_family);
 	}
-	else TError("failed to get socket name: %s", ::uv_strerror(result));
+	else MSError("failed to get socket name: %s", ::uv_strerror(result));
 
 	result = uv_tcp_getpeername((uv_tcp_t*)client, (struct sockaddr*)&addr, &addrlen);
 	if (result == 0)
@@ -228,7 +228,7 @@ void TCPClientReactor::on_connect(uv_connect_t* req, int status)
 			inet_ntop(AF_INET, &in_addr->sin_addr, ip_str, sizeof(ip_str));
 			auto address = ip_str;
 			auto portNum = ntohs(in_addr->sin_port);
-			remoteAddress = TNew<IPv4Address>(address, portNum);
+			remoteAddress = MSNew<IPv4Address>(address, portNum);
 		}
 		else if (addr.ss_family == AF_INET6)
 		{
@@ -237,11 +237,11 @@ void TCPClientReactor::on_connect(uv_connect_t* req, int status)
 			inet_ntop(AF_INET6, &in6_addr->sin6_addr, ip_str, sizeof(ip_str));
 			auto address = ip_str;
 			auto portNum = ntohs(in6_addr->sin6_port);
-			remoteAddress = TNew<IPv6Address>(address, portNum);
+			remoteAddress = MSNew<IPv6Address>(address, portNum);
 		}
-		else TError("unknown address family: %d", addr.ss_family);
+		else MSError("unknown address family: %d", addr.ss_family);
 	}
-	else TError("failed to get socket name: %s", ::uv_strerror(result));
+	else MSError("failed to get socket name: %s", ::uv_strerror(result));
 
 	if (localAddress == nullptr || remoteAddress == nullptr)
 	{
@@ -249,7 +249,7 @@ void TCPClientReactor::on_connect(uv_connect_t* req, int status)
 		return;
 	}
 
-	auto channel = TNew<TCPChannel>(reactor, localAddress, remoteAddress, (uint32_t)(rand() % reactor->m_WorkerList.size()), client);
+	auto channel = MSNew<TCPChannel>(reactor, localAddress, remoteAddress, (uint32_t)(rand() % reactor->m_WorkerList.size()), client);
 	client->data = channel.get();
 	reactor->onConnect(channel);
 
@@ -258,7 +258,7 @@ void TCPClientReactor::on_connect(uv_connect_t* req, int status)
 	result = uv_read_start((uv_stream_t*)client, on_alloc, on_read);
 	if (result)
 	{
-		TError("readChannel start error: %s", ::uv_strerror(result));
+		MSError("readChannel start error: %s", ::uv_strerror(result));
 		uv_close((uv_handle_t*)&client, nullptr);
 
 		reactor->onDisconnect(channel->shared_from_this());
@@ -306,8 +306,8 @@ void TCPClientReactor::on_read(uv_stream_t* stream, ssize_t nread, const uv_buf_
 	}
 
 	// 处理接收到的数据
-	auto event = TNew<IChannelEvent>();
-	event->Message = TString((char*)buf->base, nread);
+	auto event = MSNew<IChannelEvent>();
+	event->Message = MSString((char*)buf->base, nread);
 	event->Channel = channel;
 	reactor->onInbound(event);
 
@@ -322,7 +322,7 @@ void TCPClientReactor::on_send(uv_tcp_t* handle)
 
 	if (reactor->m_Sending == false) return;
 
-	TMutexLock lock(reactor->m_EventLock);
+	MSMutexLock lock(reactor->m_EventLock);
 	reactor->m_Sending = false;
 
 	while (reactor->m_EventQueue.size())
@@ -331,7 +331,7 @@ void TCPClientReactor::on_send(uv_tcp_t* handle)
 		reactor->m_EventQueue.pop();
 
 		if (event->Channel.expired()) continue;
-		auto channel = TCast<TCPChannel>(event->Channel.lock());
+		auto channel = MSCast<TCPChannel>(event->Channel.lock());
 		if (channel == nullptr) continue;
 		if (channel->running() == false) reactor->onDisconnect(channel);
 		if (channel->running() == false) continue;

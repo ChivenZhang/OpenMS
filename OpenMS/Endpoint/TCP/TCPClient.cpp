@@ -4,7 +4,7 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
@@ -14,13 +14,13 @@ void TCPClient::startup()
 {
 	config_t config;
 	configureEndpoint(config);
-	m_Reactor = TNew<TCPClientReactor>(
+	m_Reactor = MSNew<TCPClientReactor>(
 		IPv4Address::New(config.IP, config.PortNum),
 		config.Workers,
 		config.Callback
 	);
 	m_Reactor->startup();
-	if (m_Reactor->running() == false) TFatal("failed to start reactor");
+	if (m_Reactor->running() == false) MSFatal("failed to start reactor");
 }
 
 void TCPClient::shutdown()
@@ -39,7 +39,7 @@ bool TCPClient::connect() const
 	return m_Reactor ? m_Reactor->connect() : false;
 }
 
-THnd<IChannelAddress> TCPClient::address() const
+MSHnd<IChannelAddress> TCPClient::address() const
 {
-	return m_Reactor ? m_Reactor->address() : THnd<IChannelAddress>();
+	return m_Reactor ? m_Reactor->address() : MSHnd<IChannelAddress>();
 }

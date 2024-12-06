@@ -5,7 +5,7 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
@@ -19,15 +19,15 @@
 struct RPCClientRequest
 {
 	uint32_t indx;
-	TString name;
-	TString args;
+	MSString name;
+	MSString args;
 	OPENMS_TYPE(RPCClientRequest, indx, name, args)
 };
 
 struct RPCClientResponse
 {
 	uint32_t indx;
-	TString args;
+	MSString args;
 	OPENMS_TYPE(RPCClientResponse, indx, args)
 };
 
@@ -36,7 +36,7 @@ class RPCClient : public IEndpoint
 public:
 	struct config_t
 	{
-		TString IP;
+		MSString IP;
 		uint16_t PortNum = 0;
 		uint32_t Workers = 0;
 		uint32_t Buffers = UINT32_MAX;
@@ -45,7 +45,7 @@ public:
 
 	struct invoke_t
 	{
-		TLambda<void(TString&&)> OnResult;
+		MSLambda<void(MSString&&)> OnResult;
 	};
 
 public:
@@ -53,18 +53,18 @@ public:
 	void shutdown() override;
 	bool running() const override;
 	bool connect() const override;
-	THnd<IChannelAddress> address() const override;
+	MSHnd<IChannelAddress> address() const override;
 	virtual void configureEndpoint(config_t& config) = 0;
 
 	template<class T, class... Args, OPENMS_NOT_SAME(T, void)>
-	T call(TStringView name, uint32_t timeout/*ms*/, Args... args)
+	T call(MSStringView name, uint32_t timeout/*ms*/, Args... args)
 	{
 		if (m_Reactor == nullptr || m_Reactor->connect() == false) return T();
 
 		// Convert arguments to string
 
-		TString input, output;
-		if (std::is_same_v<TTuple<Args...>, TTuple<>> == false)
+		MSString input, output;
+		if (std::is_same_v<MSTuple<Args...>, MSTuple<>> == false)
 		{
 			if (TTypeC(std::make_tuple(args...), input) == false) return T();
 		}
@@ -76,12 +76,12 @@ public:
 
 		// Set up promise and callback
 
-		auto promise = TNew<TPromise<void>>();
+		auto promise = MSNew<MSPromise<void>>();
 		auto future = promise->get_future();
 		{
-			TMutexLock lock(m_Lock);
+			MSMutexLock lock(m_Lock);
 			auto& package = m_Packages[request.indx];
-			package.OnResult = [promise, &output](TString&& response) {
+			package.OnResult = [promise, &output](MSString&& response) {
 				output = response;
 				promise->set_value();
 				};
@@ -89,7 +89,7 @@ public:
 
 		// Send input to remote server
 
-		auto event = TNew<IChannelEvent>();
+		auto event = MSNew<IChannelEvent>();
 		event->Message = input + char(); // Use '\0' to split the message
 		m_Reactor->writeAndFlush(event, nullptr);
 
@@ -97,7 +97,7 @@ public:
 
 		auto status = future.wait_for(std::chrono::milliseconds(timeout));
 		{
-			TMutexLock lock(m_Lock);
+			MSMutexLock lock(m_Lock);
 			m_Packages.erase(request.indx);
 		}
 		if (status == std::future_status::ready)
@@ -110,14 +110,14 @@ public:
 	}
 
 	template<class T, class... Args, OPENMS_IS_SAME(T, void)>
-	T call(TStringView name, uint32_t timeout/*ms*/, Args... args)
+	T call(MSStringView name, uint32_t timeout/*ms*/, Args... args)
 	{
 		if (m_Reactor == nullptr || m_Reactor->connect() == false) return T();
 
 		// Convert arguments to string
 
-		TString input;
-		if (std::is_same_v<TTuple<Args...>, TTuple<>> == false)
+		MSString input;
+		if (std::is_same_v<MSTuple<Args...>, MSTuple<>> == false)
 		{
 			if (TTypeC(std::make_tuple(args...), input) == false) return T();
 		}
@@ -129,17 +129,17 @@ public:
 
 		// Set up promise and callback
 
-		auto promise = TNew<TPromise<void>>();
+		auto promise = MSNew<MSPromise<void>>();
 		auto future = promise->get_future();
 		{
-			TMutexLock lock(m_Lock);
+			MSMutexLock lock(m_Lock);
 			auto& package = m_Packages[request.indx];
-			package.OnResult = [promise](TString&& response) { promise->set_value(); };
+			package.OnResult = [promise](MSString&& response) { promise->set_value(); };
 		}
 
 		// Send input to remote server
 
-		auto event = TNew<IChannelEvent>();
+		auto event = MSNew<IChannelEvent>();
 		event->Message = input + char(); // Use '\0' to split the message
 		m_Reactor->writeAndFlush(event, nullptr);
 
@@ -147,20 +147,20 @@ public:
 
 		future.wait_for(std::chrono::milliseconds(timeout));
 		{
-			TMutexLock lock(m_Lock);
+			MSMutexLock lock(m_Lock);
 			m_Packages.erase(request.indx);
 		}
 	}
 
 	template<class T, class... Args, OPENMS_NOT_SAME(T, void)>
-	bool async(TStringView name, uint32_t timeout/*ms*/, TTuple<Args...> args, TLambda<void(T&&)> callback)
+	bool async(MSStringView name, uint32_t timeout/*ms*/, MSTuple<Args...> args, MSLambda<void(T&&)> callback)
 	{
 		if (m_Reactor == nullptr || m_Reactor->connect() == false) return false;
 
 		// Convert arguments to string
 
-		TString input;
-		if (std::is_same_v<TTuple<Args...>, TTuple<>> == false)
+		MSString input;
+		if (std::is_same_v<MSTuple<Args...>, MSTuple<>> == false)
 		{
 			if (TTypeC(args, input) == false) return false;
 		}
@@ -173,9 +173,9 @@ public:
 		// Set up promise and callback
 
 		{
-			TMutexLock lock(m_Lock);
+			MSMutexLock lock(m_Lock);
 			auto& package = m_Packages[request.indx];
-			package.OnResult = [callback](TString&& response) {
+			package.OnResult = [callback](MSString&& response) {
 				T result;
 				TTypeC(response, result);
 				if (callback) callback(std::move(result));
@@ -183,11 +183,11 @@ public:
 		}
 
 		m_Timer.start(timeout, 0, [=, packageID = request.indx](uint32_t handle) {
-			TMutexLock lock(m_Lock);
+			MSMutexLock lock(m_Lock);
 			auto result = m_Packages.find(packageID);
 			if (result != m_Packages.end())
 			{
-				result->second.OnResult(TString());
+				result->second.OnResult(MSString());
 				m_Packages.erase(result);
 			}
 			});
@@ -195,21 +195,21 @@ public:
 
 		// Send input to remote server
 
-		auto event = TNew<IChannelEvent>();
+		auto event = MSNew<IChannelEvent>();
 		event->Message = input + char(); // Use '\0' to split the message
 		m_Reactor->writeAndFlush(event, nullptr);
 		return true;
 	}
 
 	template<class T, class... Args, OPENMS_IS_SAME(T, void)>
-	bool async(TStringView name, uint32_t timeout/*ms*/, TTuple<Args...> args, TLambda<void()> callback)
+	bool async(MSStringView name, uint32_t timeout/*ms*/, MSTuple<Args...> args, MSLambda<void()> callback)
 	{
 		if (m_Reactor == nullptr || m_Reactor->connect() == false) return false;
 
 		// Convert arguments to string
 
-		TString input;
-		if (std::is_same_v<TTuple<Args...>, TTuple<>> == false)
+		MSString input;
+		if (std::is_same_v<MSTuple<Args...>, MSTuple<>> == false)
 		{
 			if (TTypeC(args, input) == false) return false;
 		}
@@ -222,26 +222,26 @@ public:
 		// Set up promise and callback
 
 		{
-			TMutexLock lock(m_Lock);
+			MSMutexLock lock(m_Lock);
 			auto& package = m_Packages[request.indx];
-			package.OnResult = [callback](TString&& response) {
+			package.OnResult = [callback](MSString&& response) {
 				if (callback) callback();
 				};
 		}
 
 		m_Timer.start(timeout, 0, [=, packageID = request.indx](uint32_t handle) {
-			TMutexLock lock(m_Lock);
+			MSMutexLock lock(m_Lock);
 			auto result = m_Packages.find(packageID);
 			if (result != m_Packages.end())
 			{
-				result->second.OnResult(TString());
+				result->second.OnResult(MSString());
 				m_Packages.erase(result);
 			}
 			});
 
 		// Send input to remote server
 
-		auto event = TNew<IChannelEvent>();
+		auto event = MSNew<IChannelEvent>();
 		event->Message = input + char(); // Use '\0' to split the message
 		m_Reactor->writeAndFlush(event, nullptr);
 		return true;
@@ -251,19 +251,19 @@ protected:
 	friend class RPCClientInboundHandler;
 	uint32_t m_PackageID = 0;
 	uint32_t m_Buffers = UINT32_MAX;	// bytes from property
-	TMutex m_Lock;
+	MSMutex m_Lock;
 	Timer m_Timer;
-	TRef<TCPClientReactor> m_Reactor;
-	TMap<uint32_t, invoke_t> m_Packages;
+	MSRef<TCPClientReactor> m_Reactor;
+	MSMap<uint32_t, invoke_t> m_Packages;
 };
 
 class RPCClientInboundHandler : public ChannelInboundHandler
 {
 public:
-	RPCClientInboundHandler(TRaw<RPCClient> client);
-	bool channelRead(TRaw<IChannelContext> context, TRaw<IChannelEvent> event) override;
+	RPCClientInboundHandler(MSRaw<RPCClient> client);
+	bool channelRead(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event) override;
 
 protected:
-	TString m_Buffer;
-	TRaw<RPCClient> m_Client;
+	MSString m_Buffer;
+	MSRaw<RPCClient> m_Client;
 };

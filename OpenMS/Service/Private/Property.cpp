@@ -6,7 +6,7 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
@@ -16,12 +16,12 @@
 #include <filesystem>
 #define OPENMS_CONFIG_FILE "application.json"
 
-TString Value::value() const
+MSString Value::value() const
 {
 	return m_Value;
 }
 
-void Value::setValue(TString const& value)
+void Value::setValue(MSString const& value)
 {
 	m_Value = value;
 }
@@ -35,20 +35,20 @@ Property::Property()
 
 	auto directory = std::filesystem::path(argv[0]).parent_path().generic_string();
 	auto configFile = directory + "/" + OPENMS_CONFIG_FILE;
-	if (std::filesystem::exists(configFile) == false) TFatal("config file not found: %s", configFile.c_str());
+	if (std::filesystem::exists(configFile) == false) MSFatal("config file not found: %s", configFile.c_str());
 
 	// Load config file
 
 	std::ifstream ifs(configFile);
-	if (!ifs.is_open()) TFatal("Failed to open config file: %s", configFile.c_str());
+	if (!ifs.is_open()) MSFatal("Failed to open config file: %s", configFile.c_str());
 	auto text = std::string((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
 	ifs.close();
 
 	// Parse config file
 
-	TLambda<void(TString const&, uint32_t, nlohmann::ordered_json&)> parse_func;
-	parse_func = [&](TString const& name, uint32_t depth, nlohmann::ordered_json& value) {
-		TString _value;
+	MSLambda<void(MSString const&, uint32_t, nlohmann::ordered_json&)> parse_func;
+	parse_func = [&](MSString const& name, uint32_t depth, nlohmann::ordered_json& value) {
+		MSString _value;
 		switch (value.type())
 		{
 		case nlohmann::ordered_json::value_t::array:
@@ -91,7 +91,7 @@ Property::Property()
 		}
 		};
 	auto document = nlohmann::ordered_json::parse(text, nullptr, false, true);
-	parse_func(TString(), 0, document);
+	parse_func(MSString(), 0, document);
 
 	for (auto& value : m_PropertyMap)
 	{
@@ -99,9 +99,9 @@ Property::Property()
 	}
 }
 
-TString Property::property(TString const& name) const
+MSString Property::property(MSString const& name) const
 {
 	auto result = m_PropertyMap.find(name);
-	if (result == m_PropertyMap.end()) return TString();
+	if (result == m_PropertyMap.end()) return MSString();
 	return result->second;
 }

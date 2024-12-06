@@ -5,36 +5,36 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
 #include "../IChannelEvent.h"
 
-TRef<IChannelEvent> IChannelEvent::New(TCString message)
+MSRef<IChannelEvent> IChannelEvent::New(MSCString message)
 {
-	auto result = TNew<IChannelEvent>();
+	auto result = MSNew<IChannelEvent>();
 	result->Message = message;
 	return result;
 }
 
-TRef<IChannelEvent> IChannelEvent::New(TString&& message)
+MSRef<IChannelEvent> IChannelEvent::New(MSString&& message)
 {
-	auto result = TNew<IChannelEvent>();
+	auto result = MSNew<IChannelEvent>();
 	result->Message = std::move(message);
 	return result;
 }
 
-TRef<IChannelEvent> IChannelEvent::New(TStringView message)
+MSRef<IChannelEvent> IChannelEvent::New(MSStringView message)
 {
-	auto result = TNew<IChannelEvent>();
+	auto result = MSNew<IChannelEvent>();
 	result->Message = message;
 	return result;
 }
 
-TRef<IChannelEvent> IChannelEvent::New(TString const& message)
+MSRef<IChannelEvent> IChannelEvent::New(MSString const& message)
 {
-	auto result = TNew<IChannelEvent>();
+	auto result = MSNew<IChannelEvent>();
 	result->Message = message;
 	return result;
 }

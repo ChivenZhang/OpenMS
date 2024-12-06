@@ -5,7 +5,7 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
@@ -24,27 +24,27 @@ public:
 
 	virtual uint32_t getWorkID() const = 0;
 
-	virtual THnd<IChannelAddress> getLocal() const = 0;
+	virtual MSHnd<IChannelAddress> getLocal() const = 0;
 
-	virtual THnd<IChannelAddress> getRemote() const = 0;
+	virtual MSHnd<IChannelAddress> getRemote() const = 0;
 
-	virtual TRaw<IChannelContext> getContext() const = 0;
+	virtual MSRaw<IChannelContext> getContext() const = 0;
 
-	virtual TRaw<IChannelPipeline> getPipeline() const = 0;
+	virtual MSRaw<IChannelPipeline> getPipeline() const = 0;
 
-	virtual void readChannel(TRef<IChannelEvent> event) = 0;
+	virtual void readChannel(MSRef<IChannelEvent> event) = 0;
 
-	virtual void writeChannel(TRef<IChannelEvent> event) = 0;
+	virtual void writeChannel(MSRef<IChannelEvent> event) = 0;
 
 	virtual void close() = 0;
 
-	virtual TFuture<bool> close(TPromise<bool>& promise) = 0;
+	virtual MSFuture<bool> close(MSPromise<bool>& promise) = 0;
 
-	virtual void write(TRef<IChannelEvent> event) = 0;
+	virtual void write(MSRef<IChannelEvent> event) = 0;
 
-	virtual TFuture<bool> write(TRef<IChannelEvent> event, TPromise<bool>& promise) = 0;
+	virtual MSFuture<bool> write(MSRef<IChannelEvent> event, MSPromise<bool>& promise) = 0;
 
-	virtual void writeAndFlush(TRef<IChannelEvent> event) = 0;
+	virtual void writeAndFlush(MSRef<IChannelEvent> event) = 0;
 
-	virtual TFuture<bool> writeAndFlush(TRef<IChannelEvent> event, TPromise<bool>& promise) = 0;
+	virtual MSFuture<bool> writeAndFlush(MSRef<IChannelEvent> event, MSPromise<bool>& promise) = 0;
 };

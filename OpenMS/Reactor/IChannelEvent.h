@@ -5,7 +5,7 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
@@ -16,13 +16,13 @@ class IChannel;
 class OPENMS_API IChannelEvent
 {
 public:
-	static TRef<IChannelEvent> New(TCString message);
-	static TRef<IChannelEvent> New(TString&& message);
-	static TRef<IChannelEvent> New(TStringView message);
-	static TRef<IChannelEvent> New(TString const& message);
+	static MSRef<IChannelEvent> New(MSCString message);
+	static MSRef<IChannelEvent> New(MSString&& message);
+	static MSRef<IChannelEvent> New(MSStringView message);
+	static MSRef<IChannelEvent> New(MSString const& message);
 
 public:
-	TString Message;
-	THnd<IChannel> Channel;
-	TRaw<TPromise<bool>> Promise = nullptr;
+	MSString Message;
+	MSHnd<IChannel> Channel;
+	MSRaw<MSPromise<bool>> Promise = nullptr;
 };

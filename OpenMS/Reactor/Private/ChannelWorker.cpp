@@ -4,14 +4,14 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
 #include "ChannelWorker.h"
 #include "ChannelReactor.h"
 
-ChannelWorker::ChannelWorker(TRaw<ChannelReactor> reactor)
+ChannelWorker::ChannelWorker(MSRaw<ChannelReactor> reactor)
 	:
 	m_Reactor(reactor)
 {
@@ -19,12 +19,12 @@ ChannelWorker::ChannelWorker(TRaw<ChannelReactor> reactor)
 
 void ChannelWorker::startup()
 {
-	TDebug("startup worker: %d", std::this_thread::get_id());
+	MSDebug("startup worker: %d", std::this_thread::get_id());
 
 	m_Running = true;
 	while (m_Running == true && m_Reactor->running())
 	{
-		TUniqueLock lock(m_EventLock);
+		MSUniqueLock lock(m_EventLock);
 		m_EventUnlock.wait(lock, [=]() {
 			return m_EventQueue.size() || m_Running == false || m_Reactor->running() == false; });
 
@@ -37,7 +37,7 @@ void ChannelWorker::startup()
 		}
 	}
 
-	TDebug("shutdown worker: %d", std::this_thread::get_id());
+	MSDebug("shutdown worker: %d", std::this_thread::get_id());
 }
 
 void ChannelWorker::shutdown()
@@ -51,10 +51,10 @@ bool ChannelWorker::running() const
 	return m_Running;
 }
 
-void ChannelWorker::enqueue(TRef<IChannelEvent> event)
+void ChannelWorker::enqueue(MSRef<IChannelEvent> event)
 {
 	if (m_Running == false) return;
-	TMutexLock lock(m_EventLock);
+	MSMutexLock lock(m_EventLock);
 	m_EventQueue.push(event);
 	m_EventUnlock.notify_one();
 }

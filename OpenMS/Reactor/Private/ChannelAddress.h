@@ -5,7 +5,7 @@
 * =====================Note=========================
 *
 *
-*=====================History========================
+* ====================History=======================
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
@@ -14,35 +14,35 @@
 class IPv4Address : public ISocketAddress
 {
 public:
-	static TRef<IPv4Address> New(TStringView ip, uint16_t port, TStringView host = TStringView());
+	static MSRef<IPv4Address> New(MSStringView ip, uint16_t port, MSStringView host = MSStringView());
 
 public:
-	IPv4Address(TStringView ip, uint16_t port, TStringView host = TStringView());
-	TString getAddress() const override;
-	TString getHostName() const override;
+	IPv4Address(MSStringView ip, uint16_t port, MSStringView host = MSStringView());
+	MSString getAddress() const override;
+	MSString getHostName() const override;
 	uint32_t getHashName() const override;
-	TString getString() const override;
+	MSString getString() const override;
 	uint16_t getPort() const override;
 
 protected:
 	uint16_t m_PortNum;
-	TString m_Address, m_HostName;
+	MSString m_Address, m_HostName;
 };
 
 class IPv6Address : public ISocketAddress
 {
 public:
-	static TRef<IPv6Address> New(TStringView ip, uint16_t port, TStringView host = TStringView());
+	static MSRef<IPv6Address> New(MSStringView ip, uint16_t port, MSStringView host = MSStringView());
 
 public:
-	IPv6Address(TStringView ip, uint16_t port, TStringView host = TStringView());
-	TString getAddress() const override;
-	TString getHostName() const override;
+	IPv6Address(MSStringView ip, uint16_t port, MSStringView host = MSStringView());
+	MSString getAddress() const override;
+	MSString getHostName() const override;
 	uint32_t getHashName() const override;
-	TString getString() const override;
+	MSString getString() const override;
 	uint16_t getPort() const override;
 
 protected:
 	uint16_t m_PortNum;
-	TString m_Address, m_HostName;
+	MSString m_Address, m_HostName;
 };
