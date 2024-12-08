@@ -12,7 +12,7 @@
 #include "OpenMS/Endpoint/RPC/RPCServer.h"
 #include "OpenMS/Endpoint/RPC/RPCClient.h"
 
-using RegistryIPTable = MSMap<MSString, MSVector<MSString>>;
+using RegistryIPTable = MSMap<MSString, MSList<MSString>>;
 
 class RegistryServer :
 	public RPCServer,

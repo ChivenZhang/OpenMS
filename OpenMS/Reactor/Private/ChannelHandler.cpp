@@ -17,7 +17,7 @@ bool ChannelInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<IC
 
 void ChannelInboundHandler::channelError(MSRaw<IChannelContext> context, MSError&& exception)
 {
-	MSError("%s", exception.what());
+	MS_ERROR("%s", exception.what());
 }
 
 bool ChannelOutboundHandler::channelWrite(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)
@@ -27,7 +27,7 @@ bool ChannelOutboundHandler::channelWrite(MSRaw<IChannelContext> context, MSRaw<
 
 void ChannelOutboundHandler::channelError(MSRaw<IChannelContext> context, MSError&& exception)
 {
-	MSError("%s", exception.what());
+	MS_ERROR("%s", exception.what());
 }
 
 LambdaInboundHandler::LambdaInboundHandler(callback_t const& callback)

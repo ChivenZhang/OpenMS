@@ -51,19 +51,19 @@ void UDPClientReactor::startup()
 				{
 					result = uv_ip6_addr(ipv6->getAddress().c_str(), ipv6->getPort(), (sockaddr_in6*)&addr);
 				}
-				if (result) MSError("invalid address: %s", ::uv_strerror(result));
+				if (result) MS_ERROR("invalid address: %s", ::uv_strerror(result));
 				if (result) break;
 
 				result = uv_udp_connect(&client, (sockaddr*)&addr);
-				if (result) MSError("connect error: %s", ::uv_strerror(result));
+				if (result) MS_ERROR("connect error: %s", ::uv_strerror(result));
 				if (result) break;
 
 				result = uv_udp_set_broadcast(&client, m_Broadcast ? 1 : 0);
-				if (result) MSError("set broadcast error: %s", ::uv_strerror(result));
+				if (result) MS_ERROR("set broadcast error: %s", ::uv_strerror(result));
 				if (result) break;
 
 				result = uv_udp_set_multicast_loop(&client, m_Multicast ? 1 : 0);
-				if (result) MSError("set multicast loop error: %s", ::uv_strerror(result));
+				if (result) MS_ERROR("set multicast loop error: %s", ::uv_strerror(result));
 				if (result) break;
 			}
 
@@ -95,9 +95,9 @@ void UDPClientReactor::startup()
 						auto address = ip_str;
 						localAddress = MSNew<IPv6Address>(address, portNum);
 					}
-					else MSError("unknown address family: %d", addr.ss_family);
+					else MS_ERROR("unknown address family: %d", addr.ss_family);
 				}
-				else MSError("failed to get socket name: %s", ::uv_strerror(result));
+				else MS_ERROR("failed to get socket name: %s", ::uv_strerror(result));
 
 				result = uv_udp_getpeername((uv_udp_t*)&client, (sockaddr*)&addr, &addrlen);
 				if (result == 0)
@@ -120,9 +120,9 @@ void UDPClientReactor::startup()
 						auto address = ip_str;
 						remoteAddress = MSNew<IPv6Address>(address, portNum);
 					}
-					else MSError("unknown address family: %d", addr.ss_family);
+					else MS_ERROR("unknown address family: %d", addr.ss_family);
 				}
-				else MSError("failed to get socket name: %s", ::uv_strerror(result));
+				else MS_ERROR("failed to get socket name: %s", ::uv_strerror(result));
 
 				if (localAddress == nullptr || remoteAddress == nullptr) break;
 				m_LocalAddress = localAddress;
@@ -131,14 +131,14 @@ void UDPClientReactor::startup()
 				client.data = channel.get();
 				onConnect(channel);
 
-				MSPrint("listening on %s:%d", localAddress->getAddress().c_str(), localAddress->getPort());
+				MS_PRINT("listening on %s:%d", localAddress->getAddress().c_str(), localAddress->getPort());
 			}
 
 			// Start receiving data
 
 			{
 				auto result = uv_udp_recv_start(&client, on_alloc, on_read);
-				if (result) MSError("recv start error: %s", ::uv_strerror(result));
+				if (result) MS_ERROR("recv start error: %s", ::uv_strerror(result));
 				if (result) break;
 			}
 
@@ -166,7 +166,7 @@ void UDPClientReactor::startup()
 			uv_close((uv_handle_t*)&client, nullptr);
 			uv_loop_close(&loop);
 
-			MSPrint("closed client");
+			MS_PRINT("closed client");
 			return;
 		} while (0);
 
@@ -208,7 +208,7 @@ void UDPClientReactor::writeAndFlush(MSRef<IChannelEvent> event, MSRef<IChannelA
 
 void UDPClientReactor::onConnect(MSRef<Channel> channel)
 {
-	MSDebug("accepted from %s", channel->getRemote().lock()->getString().c_str());
+	MS_DEBUG("accepted from %s", channel->getRemote().lock()->getString().c_str());
 
 	m_Channel = channel;
 	ChannelReactor::onConnect(channel);
@@ -216,7 +216,7 @@ void UDPClientReactor::onConnect(MSRef<Channel> channel)
 
 void UDPClientReactor::onDisconnect(MSRef<Channel> channel)
 {
-	MSDebug("rejected from %s", channel->getRemote().lock()->getString().c_str());
+	MS_DEBUG("rejected from %s", channel->getRemote().lock()->getString().c_str());
 
 	m_Channel = nullptr;
 	ChannelReactor::onDisconnect(channel);

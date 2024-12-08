@@ -20,25 +20,25 @@ void FrameService::onMessage(sync::Message&& msg)
 	switch (msg.type())
 	{
 	case sync::MSG_ENTER_BATTLE:
-		MSPrint("MSG_ENTER_BATTLE");
+		MS_PRINT("MSG_ENTER_BATTLE");
 		break;
 	case sync::MSG_MATCH_BATTLE:
-		MSPrint("MSG_MATCH_BATTLE");
+		MS_PRINT("MSG_MATCH_BATTLE");
 		break;
 	case sync::MSG_CANCEL_MATCH:
-		MSPrint("MSG_CANCEL_MATCH");
+		MS_PRINT("MSG_CANCEL_MATCH");
 		break;
 	case sync::MSG_READY_BATTLE:
-		MSPrint("MSG_READY_BATTLE");
+		MS_PRINT("MSG_READY_BATTLE");
 		break;
 	case sync::MSG_BEGIN_BATTLE:
-		MSPrint("MSG_BEGIN_BATTLE");
+		MS_PRINT("MSG_BEGIN_BATTLE");
 		break;
 	case sync::MSG_END_BATTLE:
-		MSPrint("MSG_END_BATTLE");
+		MS_PRINT("MSG_END_BATTLE");
 		break;
 	case sync::MSG_EXIT_BATTLE:
-		MSPrint("MSG_EXIT_BATTLE");
+		MS_PRINT("MSG_EXIT_BATTLE");
 		break;
 	}
 }

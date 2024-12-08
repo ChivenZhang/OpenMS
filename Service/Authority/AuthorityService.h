@@ -12,7 +12,7 @@
 #include "OpenMS/Service/Private/Service.h"
 #include "AuthorityConfig.h"
 
-using RegistryIPTable = MSMap<MSString, MSVector<MSString>>;
+using RegistryIPTable = MSMap<MSString, MSList<MSString>>;
 
 class AuthorityService :
 	public Service,

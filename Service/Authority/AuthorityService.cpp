@@ -31,7 +31,7 @@ void AuthorityService::onInit()
 		auto address = server->address().lock();
 		if (address)  client->call<MSString>("registry/renew", 100, serviceName, address->getString());
 		client->async<MSString>("registry/query", 100, {}, [](MSString&& result) {
-			MSPrint("query result: %s", result.c_str());
+			MS_PRINT("query result: %s", result.c_str());
 			});
 		};
 	startTimer(0, 1000, update_func);

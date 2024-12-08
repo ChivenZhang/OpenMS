@@ -52,19 +52,19 @@ void UDPServerReactor::startup()
 				{
 					result = uv_ip6_addr(ipv6->getAddress().c_str(), ipv6->getPort(), (sockaddr_in6*)&addr);
 				}
-				if (result) MSError("invalid address: %s", ::uv_strerror(result));
+				if (result) MS_ERROR("invalid address: %s", ::uv_strerror(result));
 				if (result) break;
 
 				result = uv_udp_bind(&server, (sockaddr*)&addr, 0);
-				if (result) MSError("bind error: %s", ::uv_strerror(result));
+				if (result) MS_ERROR("bind error: %s", ::uv_strerror(result));
 				if (result) break;
 
 				result = uv_udp_set_broadcast(&server, m_Broadcast ? 1 : 0);
-				if (result) MSError("set broadcast error: %s", ::uv_strerror(result));
+				if (result) MS_ERROR("set broadcast error: %s", ::uv_strerror(result));
 				if (result) break;
 
 				result = uv_udp_set_multicast_loop(&server, m_Multicast ? 1 : 0);
-				if (result) MSError("set multicast loop error: %s", ::uv_strerror(result));
+				if (result) MS_ERROR("set multicast loop error: %s", ::uv_strerror(result));
 				if (result) break;
 			}
 
@@ -96,21 +96,21 @@ void UDPServerReactor::startup()
 						auto portNum = ntohs(in6_addr->sin6_port);
 						localAddress = MSNew<IPv6Address>(address, portNum);
 					}
-					else MSError("unknown address family: %d", addr.ss_family);
+					else MS_ERROR("unknown address family: %d", addr.ss_family);
 				}
-				else MSError("failed to get socket name: %s", ::uv_strerror(result));
+				else MS_ERROR("failed to get socket name: %s", ::uv_strerror(result));
 
 				if (localAddress == nullptr) break;
 				m_LocalAddress = localAddress;
 
-				MSPrint("listening on %s:%d", localAddress->getAddress().c_str(), localAddress->getPort());
+				MS_PRINT("listening on %s:%d", localAddress->getAddress().c_str(), localAddress->getPort());
 			}
 
 			// Start receiving data
 
 			{
 				auto result = uv_udp_recv_start(&server, on_alloc, on_read);
-				if (result) MSError("recv start error: %s", ::uv_strerror(result));
+				if (result) MS_ERROR("recv start error: %s", ::uv_strerror(result));
 				if (result) break;
 			}
 
@@ -143,7 +143,7 @@ void UDPServerReactor::startup()
 			uv_close((uv_handle_t*)&server, nullptr);
 			uv_loop_close(&loop);
 
-			MSPrint("closed server");
+			MS_PRINT("closed server");
 			return;
 		} while (0);
 
@@ -170,7 +170,7 @@ MSHnd<IChannelAddress> UDPServerReactor::address() const
 
 void UDPServerReactor::onConnect(MSRef<Channel> channel)
 {
-	MSDebug("accepted from %s", channel->getRemote().lock()->getString().c_str());
+	MS_DEBUG("accepted from %s", channel->getRemote().lock()->getString().c_str());
 
 	auto remote = MSCast<ISocketAddress>(channel->getRemote().lock());
 	auto hashName = remote->getHashName();
@@ -182,7 +182,7 @@ void UDPServerReactor::onConnect(MSRef<Channel> channel)
 
 void UDPServerReactor::onDisconnect(MSRef<Channel> channel)
 {
-	MSDebug("rejected from %s", channel->getRemote().lock()->getString().c_str());
+	MS_DEBUG("rejected from %s", channel->getRemote().lock()->getString().c_str());
 
 	auto remote = MSCast<ISocketAddress>(channel->getRemote().lock());
 	auto hashName = remote->getHashName();
@@ -223,7 +223,7 @@ void UDPServerReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 		auto portNum = ntohs(in6_addr->sin6_port);
 		hashName = MSHash(address + ":" + std::to_string(portNum));
 	}
-	else MSError("unknown address family: %d", peer->sa_family);
+	else MS_ERROR("unknown address family: %d", peer->sa_family);
 
 	auto channel = reactor->m_ChannelMap[hashName].lock();
 	if (channel == nullptr)
@@ -255,9 +255,9 @@ void UDPServerReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 				auto address = ip_str;
 				localAddress = MSNew<IPv6Address>(address, portNum);
 			}
-			else MSError("unknown address family: %d", addr.ss_family);
+			else MS_ERROR("unknown address family: %d", addr.ss_family);
 		}
-		else MSError("failed to get socket name: %s", ::uv_strerror(result));
+		else MS_ERROR("failed to get socket name: %s", ::uv_strerror(result));
 
 		if (true)
 		{
@@ -279,9 +279,9 @@ void UDPServerReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 				auto portNum = ntohs(in6_addr->sin6_port);
 				remoteAddress = MSNew<IPv6Address>(address, portNum);
 			}
-			else MSError("unknown address family: %d", peer->sa_family);
+			else MS_ERROR("unknown address family: %d", peer->sa_family);
 		}
-		else MSError("failed to get socket name: %s", ::uv_strerror(result));
+		else MS_ERROR("failed to get socket name: %s", ::uv_strerror(result));
 
 		if (localAddress == nullptr || remoteAddress == nullptr)
 		{
@@ -293,7 +293,7 @@ void UDPServerReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 		server->data = channel.get();
 		reactor->onConnect(channel);
 
-		MSDebug("accepted from %s:%d", remoteAddress->getAddress().c_str(), remoteAddress->getPort());
+		MS_DEBUG("accepted from %s:%d", remoteAddress->getAddress().c_str(), remoteAddress->getPort());
 	}
 
 	if (nread < 0)
@@ -358,7 +358,7 @@ void UDPServerReactor::on_send(uv_udp_t* handle)
 			auto address = _remote->getAddress();
 			result = uv_ip6_addr(address.c_str(), portNum, (sockaddr_in6*)&addr);
 		}
-		if (result) MSError("invalid address: %s", ::uv_strerror(result));
+		if (result) MS_ERROR("invalid address: %s", ::uv_strerror(result));
 		if (result) continue;
 
 		size_t sentNum = 0;

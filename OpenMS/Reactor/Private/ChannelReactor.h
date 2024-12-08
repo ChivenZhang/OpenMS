@@ -47,8 +47,8 @@ protected:
 	MSAtomic<bool> m_Running;
 	MSAtomic<bool> m_Sending;
 	MSAtomic<bool> m_Connect;
-	MSVector<MSThread> m_WorkerThreads;
-	MSVector<MSRef<ChannelWorker>> m_WorkerList;
+	MSList<MSThread> m_WorkerThreads;
+	MSList<MSRef<ChannelWorker>> m_WorkerList;
 	MSQueue<MSRef<IChannelEvent>> m_EventQueue;
 	MSLambda<void(MSRef<IChannel>)> m_OnOnOpen;
 	MSLambda<void(MSRef<IChannel>)> m_OnOnClose;

@@ -38,6 +38,6 @@ protected:
 	bool m_Broadcast, m_Multicast;
 	MSRef<ISocketAddress> m_Address;
 	MSRef<ISocketAddress> m_LocalAddress;
-	MSVector<MSRef<Channel>> m_Channels;
+	MSList<MSRef<Channel>> m_Channels;
 	MSMap<uint32_t, MSHnd<Channel>> m_ChannelMap;
 };

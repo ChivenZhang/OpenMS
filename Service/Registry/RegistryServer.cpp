@@ -41,7 +41,7 @@ void RegistryServer::configureEndpoint(config_t& config)
 		});
 
 	bind("registry/renew", [=](MSString service, MSString address)->MSString {
-		MSPrint("renew %s:%s", service.c_str(), address.c_str());
+		MS_PRINT("renew %s:%s", service.c_str(), address.c_str());
 		return "ok";
 		});
 

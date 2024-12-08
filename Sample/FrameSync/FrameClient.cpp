@@ -35,7 +35,7 @@ int main(int argc, char* argv[])
 	initgraph(640, 480, INIT_DEFAULT);
 	setrendermode(RENDER_MANUAL);
 
-	MSVector<status_t> actorStatus;
+	MSList<status_t> actorStatus;
 	MSQueue<operate_t> operateQueue;
 	MSMutex mutex; MSMutexUnlock unlock;
 

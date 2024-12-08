@@ -110,15 +110,15 @@ void KCPClientReactor::startup()
 				{
 					result = uv_ip6_addr(ipv6->getAddress().c_str(), ipv6->getPort(), (sockaddr_in6*)&addr);
 				}
-				if (result) MSError("invalid address: %s", ::uv_strerror(result));
+				if (result) MS_ERROR("invalid address: %s", ::uv_strerror(result));
 				if (result) break;
 
 				result = uv_udp_connect(&client, (sockaddr*)&addr);
-				if (result) MSError("connect error: %s", ::uv_strerror(result));
+				if (result) MS_ERROR("connect error: %s", ::uv_strerror(result));
 				if (result) break;
 
 				result = uv_udp_recv_start(&client, on_alloc, on_read);
-				if (result) MSError("recv start error: %s", ::uv_strerror(result));
+				if (result) MS_ERROR("recv start error: %s", ::uv_strerror(result));
 				if (result) break;
 			}
 
@@ -150,14 +150,14 @@ void KCPClientReactor::startup()
 						auto portNum = ntohs(in6_addr->sin6_port);
 						localAddress = MSNew<IPv6Address>(address, portNum);
 					}
-					else MSError("unknown address family: %d", addr.ss_family);
+					else MS_ERROR("unknown address family: %d", addr.ss_family);
 				}
-				else MSError("failed to get socket name: %s", ::uv_strerror(result));
+				else MS_ERROR("failed to get socket name: %s", ::uv_strerror(result));
 
 				if (localAddress == nullptr) break;
 				m_LocalAddress = localAddress;
 
-				MSPrint("listening on %s:%d", localAddress->getAddress().c_str(), localAddress->getPort());
+				MS_PRINT("listening on %s:%d", localAddress->getAddress().c_str(), localAddress->getPort());
 			}
 
 			// Send the initial data for session id
@@ -201,7 +201,7 @@ void KCPClientReactor::startup()
 			uv_close((uv_handle_t*)&client, nullptr);
 			uv_loop_close(&loop);
 
-			MSPrint("closed client");
+			MS_PRINT("closed client");
 			return;
 		} while (0);
 
@@ -244,7 +244,7 @@ void KCPClientReactor::writeAndFlush(MSRef<IChannelEvent> event, MSRef<IChannelA
 
 void KCPClientReactor::onConnect(MSRef<Channel> channel)
 {
-	MSDebug("accepted from %s", channel->getRemote().lock()->getString().c_str());
+	MS_DEBUG("accepted from %s", channel->getRemote().lock()->getString().c_str());
 
 	m_Channel = channel;
 	ChannelReactor::onConnect(channel);
@@ -252,7 +252,7 @@ void KCPClientReactor::onConnect(MSRef<Channel> channel)
 
 void KCPClientReactor::onDisconnect(MSRef<Channel> channel)
 {
-	MSDebug("rejected from %s", channel->getRemote().lock()->getString().c_str());
+	MS_DEBUG("rejected from %s", channel->getRemote().lock()->getString().c_str());
 
 	m_Channel = nullptr;
 	m_ChannelRemoved = channel;
@@ -302,9 +302,9 @@ void KCPClientReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 				auto portNum = ntohs(in6_addr->sin6_port);
 				localAddress = MSNew<IPv6Address>(address, portNum);
 			}
-			else MSError("unknown address family: %d", addr.ss_family);
+			else MS_ERROR("unknown address family: %d", addr.ss_family);
 		}
-		else MSError("failed to get socket name: %s", ::uv_strerror(result));
+		else MS_ERROR("failed to get socket name: %s", ::uv_strerror(result));
 
 		result = uv_udp_getpeername((uv_udp_t*)client, (sockaddr*)&addr, &addrlen);
 		if (result == 0)
@@ -327,9 +327,9 @@ void KCPClientReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 				auto address = ip_str;
 				remoteAddress = MSNew<IPv6Address>(address, portNum);
 			}
-			else MSError("unknown address family: %d", addr.ss_family);
+			else MS_ERROR("unknown address family: %d", addr.ss_family);
 		}
-		else MSError("failed to get socket name: %s", ::uv_strerror(result));
+		else MS_ERROR("failed to get socket name: %s", ::uv_strerror(result));
 
 		if (localAddress == nullptr || remoteAddress == nullptr)
 		{
@@ -348,7 +348,7 @@ void KCPClientReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 		ikcp_nodelay(session, 1, 20, 2, 1);
 		reactor->onConnect(channel);
 
-		MSDebug("accepted from %s:%d", remoteAddress->getAddress().c_str(), remoteAddress->getPort());
+		MS_DEBUG("accepted from %s:%d", remoteAddress->getAddress().c_str(), remoteAddress->getPort());
 
 		free(buf->base);
 		return;

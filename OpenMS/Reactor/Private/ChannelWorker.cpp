@@ -19,7 +19,7 @@ ChannelWorker::ChannelWorker(MSRaw<ChannelReactor> reactor)
 
 void ChannelWorker::startup()
 {
-	MSDebug("startup worker: %d", std::this_thread::get_id());
+	MS_DEBUG("startup worker: %d", std::this_thread::get_id());
 
 	m_Running = true;
 	while (m_Running == true && m_Reactor->running())
@@ -37,7 +37,7 @@ void ChannelWorker::startup()
 		}
 	}
 
-	MSDebug("shutdown worker: %d", std::this_thread::get_id());
+	MS_DEBUG("shutdown worker: %d", std::this_thread::get_id());
 }
 
 void ChannelWorker::shutdown()

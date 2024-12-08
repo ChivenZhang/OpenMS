@@ -21,7 +21,7 @@ void DemoServer::configureEndpoint(config_t& config)
 			channel->getPipeline()->addLast("read", {
 				.OnRead = [](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)->bool
 				{
-					MSPrint("Server read: %s", event->Message.c_str());
+					MS_PRINT("Server read: %s", event->Message.c_str());
 					return false;
 				}
 				});
@@ -36,7 +36,7 @@ void DemoServer::configureEndpoint(config_t& config)
 		},
 
 		.OnClose = [](MSRef<IChannel> channel) {
-			MSPrint("rejected %s", channel->getRemote().lock()->getString().c_str());
+			MS_PRINT("rejected %s", channel->getRemote().lock()->getString().c_str());
 		},
 	};
 }

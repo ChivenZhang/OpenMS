@@ -52,15 +52,15 @@ void TCPServerReactor::startup()
 				{
 					result = uv_ip6_addr(ipv6->getAddress().c_str(), ipv6->getPort(), (sockaddr_in6*)&addr);
 				}
-				if (result) MSError("invalid address: %s", ::uv_strerror(result));
+				if (result) MS_ERROR("invalid address: %s", ::uv_strerror(result));
 				if (result) break;
 
 				result = uv_tcp_bind(&server, (const sockaddr*)&addr, 0);
-				if (result) MSError("bind error: %s", ::uv_strerror(result));
+				if (result) MS_ERROR("bind error: %s", ::uv_strerror(result));
 				if (result) break;
 
 				result = uv_listen((uv_stream_t*)&server, m_Backlog, on_connect);
-				if (result) MSError("listen error: %s", ::uv_strerror(result));
+				if (result) MS_ERROR("listen error: %s", ::uv_strerror(result));
 				if (result) break;
 			}
 
@@ -92,14 +92,14 @@ void TCPServerReactor::startup()
 						auto portNum = ntohs(in6_addr->sin6_port);
 						localAddress = MSNew<IPv6Address>(address, portNum);
 					}
-					else MSError("unknown address family: %d", addr.ss_family);
+					else MS_ERROR("unknown address family: %d", addr.ss_family);
 				}
-				else MSError("failed to get socket name: %s", ::uv_strerror(result));
+				else MS_ERROR("failed to get socket name: %s", ::uv_strerror(result));
 
 				if (localAddress == nullptr) break;
 				m_LocalAddress = localAddress;
 
-				MSPrint("listening on %s:%d", localAddress->getAddress().c_str(), localAddress->getPort());
+				MS_PRINT("listening on %s:%d", localAddress->getAddress().c_str(), localAddress->getPort());
 			}
 
 			// Run the event loop
@@ -130,7 +130,7 @@ void TCPServerReactor::startup()
 			uv_close((uv_handle_t*)&server, nullptr);
 			uv_loop_close(&loop);
 
-			MSPrint("closed server");
+			MS_PRINT("closed server");
 			return;
 		} while (0);
 
@@ -156,7 +156,7 @@ MSHnd<IChannelAddress> TCPServerReactor::address() const
 
 void TCPServerReactor::onConnect(MSRef<Channel> channel)
 {
-	MSDebug("accepted from %s", channel->getRemote().lock()->getString().c_str());
+	MS_DEBUG("accepted from %s", channel->getRemote().lock()->getString().c_str());
 
 	auto remote = MSCast<ISocketAddress>(channel->getRemote().lock());
 	auto hashName = remote->getHashName();
@@ -166,7 +166,7 @@ void TCPServerReactor::onConnect(MSRef<Channel> channel)
 
 void TCPServerReactor::onDisconnect(MSRef<Channel> channel)
 {
-	MSDebug("rejected from %s", channel->getRemote().lock()->getString().c_str());
+	MS_DEBUG("rejected from %s", channel->getRemote().lock()->getString().c_str());
 
 	auto remote = MSCast<ISocketAddress>(channel->getRemote().lock());
 	auto hashName = remote->getHashName();
@@ -180,7 +180,7 @@ void TCPServerReactor::on_connect(uv_stream_t* server, int status)
 
 	if (status < 0)
 	{
-		MSError("new connection error: %s", uv_strerror(status));
+		MS_ERROR("new connection error: %s", uv_strerror(status));
 		return;
 	}
 
@@ -216,9 +216,9 @@ void TCPServerReactor::on_connect(uv_stream_t* server, int status)
 				auto address = ip_str;
 				localAddress = MSNew<IPv6Address>(address, portNum);
 			}
-			else MSError("unknown address family: %d", addr.ss_family);
+			else MS_ERROR("unknown address family: %d", addr.ss_family);
 		}
-		else MSError("failed to get socket name: %s", ::uv_strerror(result));
+		else MS_ERROR("failed to get socket name: %s", ::uv_strerror(result));
 
 		result = uv_tcp_getpeername((uv_tcp_t*)client, (sockaddr*)&addr, &addrlen);
 		if (result == 0)
@@ -241,9 +241,9 @@ void TCPServerReactor::on_connect(uv_stream_t* server, int status)
 				auto portNum = ntohs(in6_addr->sin6_port);
 				remoteAddress = MSNew<IPv6Address>(address, portNum);
 			}
-			else MSError("unknown address family: %d", addr.ss_family);
+			else MS_ERROR("unknown address family: %d", addr.ss_family);
 		}
-		else MSError("failed to get socket name: %s", ::uv_strerror(result));
+		else MS_ERROR("failed to get socket name: %s", ::uv_strerror(result));
 
 		if (localAddress == nullptr || remoteAddress == nullptr)
 		{
@@ -261,7 +261,7 @@ void TCPServerReactor::on_connect(uv_stream_t* server, int status)
 		result = uv_read_start((uv_stream_t*)client, on_alloc, on_read);
 		if (result)
 		{
-			MSError("readChannel start error: %s", ::uv_strerror(result));
+			MS_ERROR("readChannel start error: %s", ::uv_strerror(result));
 			uv_close((uv_handle_t*)&client, nullptr);
 			free(client);
 

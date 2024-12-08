@@ -16,5 +16,5 @@ class Battle
 {
 public:
 	uint32_t ID;
-	MSVector<MSHnd<Player>> Players;
+	MSList<MSHnd<Player>> Players;
 };

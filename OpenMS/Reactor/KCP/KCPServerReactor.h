@@ -41,8 +41,8 @@ protected:
 	uint32_t m_Backlog, m_Session;
 	MSRef<ISocketAddress> m_Address;
 	MSRef<ISocketAddress> m_LocalAddress;
-	MSVector<MSRef<Channel>> m_Channels;
-	MSVector<MSRef<Channel>> m_ChannelsRemoved;
+	MSList<MSRef<Channel>> m_Channels;
+	MSList<MSRef<Channel>> m_ChannelsRemoved;
 	MSMap<uint32_t, MSRef<Channel>> m_ChannelMap;
 	MSLambda<uint32_t(MSRef<IChannelAddress>)> m_OnSession;
 };

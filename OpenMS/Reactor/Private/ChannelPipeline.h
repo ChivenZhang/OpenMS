@@ -37,6 +37,6 @@ public:
 
 protected:
 	MSRaw<Channel> m_Channel;
-	MSVector<inbound_t> m_Inbounds;
-	MSVector<outbound_t> m_Outbounds;
+	MSList<inbound_t> m_Inbounds;
+	MSList<outbound_t> m_Outbounds;
 };

@@ -86,7 +86,7 @@ Timer::Timer()
 
 Timer::~Timer()
 {
-	MSVector<uint32_t> handles;
+	MSList<uint32_t> handles;
 	for (auto& timer : m_Timers) handles.push_back(timer.first);
 	for (auto& timer : handles) stop(timer);
 	uv_async_send(m_AsyncExit);

@@ -114,11 +114,11 @@ void KCPServerReactor::startup()
 				{
 					result = uv_ip6_addr(ipv6->getAddress().c_str(), ipv6->getPort(), (sockaddr_in6*)&addr);
 				}
-				if (result) MSError("invalid address: %s", ::uv_strerror(result));
+				if (result) MS_ERROR("invalid address: %s", ::uv_strerror(result));
 				if (result) break;
 
 				result = uv_udp_bind(&server, (sockaddr*)&addr, 0);
-				if (result) MSError("bind error: %s", ::uv_strerror(result));
+				if (result) MS_ERROR("bind error: %s", ::uv_strerror(result));
 				if (result) break;
 			}
 
@@ -150,21 +150,21 @@ void KCPServerReactor::startup()
 						auto portNum = ntohs(in6_addr->sin6_port);
 						localAddress = MSNew<IPv6Address>(address, portNum);
 					}
-					else MSError("unknown address family: %d", addr.ss_family);
+					else MS_ERROR("unknown address family: %d", addr.ss_family);
 				}
-				else MSError("failed to get socket name: %s", ::uv_strerror(result));
+				else MS_ERROR("failed to get socket name: %s", ::uv_strerror(result));
 
 				if (localAddress == nullptr) break;
 				m_LocalAddress = localAddress;
 
-				MSPrint("listening on %s:%d", localAddress->getAddress().c_str(), localAddress->getPort());
+				MS_PRINT("listening on %s:%d", localAddress->getAddress().c_str(), localAddress->getPort());
 			}
 
 			// Start receiving data
 
 			{
 				auto result = uv_udp_recv_start(&server, on_alloc, on_read);
-				if (result) MSError("recv start error: %s", ::uv_strerror(result));
+				if (result) MS_ERROR("recv start error: %s", ::uv_strerror(result));
 				if (result) break;
 			}
 
@@ -199,7 +199,7 @@ void KCPServerReactor::startup()
 			uv_close((uv_handle_t*)&server, nullptr);
 			uv_loop_close(&loop);
 
-			MSPrint("closed server");
+			MS_PRINT("closed server");
 			return;
 		} while (0);
 
@@ -227,7 +227,7 @@ MSHnd<IChannelAddress> KCPServerReactor::address() const
 
 void KCPServerReactor::onConnect(MSRef<Channel> channel)
 {
-	MSDebug("accepted from %s", channel->getRemote().lock()->getString().c_str());
+	MS_DEBUG("accepted from %s", channel->getRemote().lock()->getString().c_str());
 
 	auto remote = MSCast<ISocketAddress>(channel->getRemote().lock());
 	auto hashName = remote->getHashName();
@@ -239,7 +239,7 @@ void KCPServerReactor::onConnect(MSRef<Channel> channel)
 
 void KCPServerReactor::onDisconnect(MSRef<Channel> channel)
 {
-	MSDebug("rejected from %s", channel->getRemote().lock()->getString().c_str());
+	MS_DEBUG("rejected from %s", channel->getRemote().lock()->getString().c_str());
 
 	auto remote = MSCast<ISocketAddress>(channel->getRemote().lock());
 	auto hashName = remote->getHashName();
@@ -283,7 +283,7 @@ void KCPServerReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 		auto portNum = ntohs(in6_addr->sin6_port);
 		hashName = MSHash(address + ":" + std::to_string(portNum));
 	}
-	else MSError("unknown address family: %d", peer->sa_family);
+	else MS_ERROR("unknown address family: %d", peer->sa_family);
 
 	auto channel = reactor->m_ChannelMap[hashName];
 	if (channel == nullptr)
@@ -315,9 +315,9 @@ void KCPServerReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 				auto portNum = ntohs(in6_addr->sin6_port);
 				localAddress = MSNew<IPv6Address>(address, portNum);
 			}
-			else MSError("unknown address family: %d", addr.ss_family);
+			else MS_ERROR("unknown address family: %d", addr.ss_family);
 		}
-		else MSError("failed to get socket name: %s", ::uv_strerror(result));
+		else MS_ERROR("failed to get socket name: %s", ::uv_strerror(result));
 
 		if (true)
 		{
@@ -339,9 +339,9 @@ void KCPServerReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 				auto portNum = ntohs(in6_addr->sin6_port);
 				remoteAddress = MSNew<IPv6Address>(address, portNum);
 			}
-			else MSError("unknown address family: %d", peer->sa_family);
+			else MS_ERROR("unknown address family: %d", peer->sa_family);
 		}
-		else MSError("failed to get socket name: %s", ::uv_strerror(result));
+		else MS_ERROR("failed to get socket name: %s", ::uv_strerror(result));
 
 		if (localAddress == nullptr || remoteAddress == nullptr)
 		{
@@ -364,7 +364,7 @@ void KCPServerReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 		if (result < 0)return;
 		reactor->onConnect(channel);
 
-		MSDebug("accepted from %s:%d", remoteAddress->getAddress().c_str(), remoteAddress->getPort());
+		MS_DEBUG("accepted from %s:%d", remoteAddress->getAddress().c_str(), remoteAddress->getPort());
 
 		free(buf->base);
 		return;
@@ -418,7 +418,7 @@ int KCPServerReactor::on_output(const char* buf, int len, IKCPCB* kcp, void* use
 	{
 		result = uv_ip6_addr(ipv6->getAddress().c_str(), ipv6->getPort(), (sockaddr_in6*)&addr);
 	}
-	if (result) MSError("invalid address: %s", ::uv_strerror(result));
+	if (result) MS_ERROR("invalid address: %s", ::uv_strerror(result));
 	if (result) return -1;
 
 	size_t sentNum = 0;

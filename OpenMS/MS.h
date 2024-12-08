@@ -144,13 +144,6 @@ std::fprintf(TARGET, "%s:%d\n" "%s " #LEVEL " %d --- " FORMAT "\n\n", __FILE__, 
 #	define MS_PRINT(FORMAT, ...) MS_INFO(FORMAT, ##__VA_ARGS__)
 #endif
 
-#define MSDebug MS_DEBUG
-#define MSWarn MS_WARN
-#define MSInfo MS_INFO
-#define MSError MS_ERROR
-#define MSFatal MS_FATAL
-#define MSPrint MS_PRINT
-
 // ============================================
 
 template<class T>
@@ -183,11 +176,11 @@ template <class T, size_t N = std::dynamic_extent>
 using MSArrayView = std::span<T, N>;
 #endif
 template <class T>
-using MSVector = std::vector<T>;
+using MSList = std::vector<T>;
 template <class T>
 using MSDeque = std::deque<T>;
 template <class T>
-using MSList = std::list<T>;
+using MSLinkedList = std::list<T>;
 template <class T, class L = std::less<T>>
 using MSSet = std::set<T, L>;
 template <class K, class T, class L = std::less<K>>
@@ -202,7 +195,7 @@ template <class K, class T, class H = std::hash<K>, class E = std::equal_to<K>>
 using MSHashMap = std::unordered_map<K, T, H, E>;
 template <class T>
 using MSQueue = std::queue<T>;
-template <class T, class C = MSVector<T>, class L = std::less<typename C::value_type>>
+template <class T, class C = MSList<T>, class L = std::less<typename C::value_type>>
 using MSSortedQueue = std::priority_queue<T, C, L>;
 template <class T>
 using MSStack = std::stack<T>;
@@ -227,13 +220,13 @@ using MSMutex = std::recursive_mutex;
 using MSMutexLock = std::lock_guard<MSMutex>;
 using MSUniqueLock = std::unique_lock<MSMutex>;
 using MSMutexUnlock = std::condition_variable_any;
-using MSStringList = MSVector<MSString>;
-using MSWStringList = MSVector<MSWString>;
+using MSStringList = MSList<MSString>;
+using MSWStringList = MSList<MSWString>;
 #if 20 <= OPENMS_CPP_VERSION
-using MSString8List = MSVector<MSString8>;
+using MSString8List = MSList<MSString8>;
 #endif
-using MSString16List = MSVector<MSString16>;
-using MSString32List = MSVector<MSString32>;
+using MSString16List = MSList<MSString16>;
+using MSString32List = MSList<MSString32>;
 template<class T>
 using MSStringMap = MSMap<MSString, T>;
 template<class T>

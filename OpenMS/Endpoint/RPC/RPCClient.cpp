@@ -31,7 +31,7 @@ void RPCClient::startup()
 		config.Callback
 	);
 	m_Reactor->startup();
-	if (m_Reactor->running() == false) MSFatal("failed to start reactor");
+	if (m_Reactor->running() == false) MS_FATAL("failed to start reactor");
 }
 
 void RPCClient::shutdown()
