@@ -203,7 +203,7 @@ using MSHashMap = std::unordered_map<K, T, H, E>;
 template <class T>
 using MSQueue = std::queue<T>;
 template <class T, class C = MSVector<T>, class L = std::less<typename C::value_type>>
-using MSPriorityQueue = std::priority_queue<T, C, L>;
+using MSSortedQueue = std::priority_queue<T, C, L>;
 template <class T>
 using MSStack = std::stack<T>;
 template <size_t N>
