@@ -62,7 +62,7 @@ Timer::Timer()
 			});
 
 		uv_async_init(&loop, &asyncStop, [](uv_async_t* handle) {
-			auto clause = (clause_t*)handle->data;
+			auto clause = static_cast<clause_t*>(handle->data);
 			auto timer = &clause->Timer;
 
 			uv_timer_stop(&timer->Handle);

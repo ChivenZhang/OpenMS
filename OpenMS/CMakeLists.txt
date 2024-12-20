@@ -26,6 +26,7 @@ add_library(OpenMS STATIC
 	Endpoint/Private/Endpoint.h
 	Endpoint/RPC/RPCClient.cpp
 	Endpoint/RPC/RPCClient.h
+	Endpoint/RPC/RPCProtocol.h
 	Endpoint/RPC/RPCServer.cpp
 	Endpoint/RPC/RPCServer.h
 	Endpoint/TCP/TCPClient.cpp 
@@ -95,6 +96,14 @@ add_library(OpenMS STATIC
 	Toolkit/Timer.h
 	Handler/AES/AESHandler.cpp
 	Handler/AES/AESHandler.h
+		Mailbox/IMailbox.h
+		Mailbox/IMailContext.h
+		Mailbox/Private/MailContext.cpp
+		Mailbox/Private/MailContext.h
+		Mailbox/Private/MailDeliver.cpp
+		Mailbox/Private/MailDeliver.h
+		Mailbox/Private/Mailbox.cpp
+		Mailbox/Private/Mailbox.h
 )
 add_dependencies(OpenMS uv_a mbedtls)
 
