@@ -8,7 +8,7 @@ public:
 
 	IMailResult sign(IMail&& mail) override
 	{
-		while (true)
+		// while (true)
 		{
 			MS_INFO("proxy: #%d %s -> %s \"%s\"", mail.SID, mail.From.c_str(), mail.To.c_str(), mail.Data.c_str());
 			co_yield {};
@@ -41,6 +41,18 @@ public:
 		{
 			MS_INFO("login: failed");
 		}
+
+		auto coroutine = []()->IMailPromise<int>
+		{
+			int i = 0;
+			while (true) co_yield ++i;
+		}();
+		for (auto i=0; i<100; ++i)
+		{
+			coroutine.resume();
+			MS_INFO("%d", (int)coroutine);
+		}
+
 		co_return;
 	}
 };
@@ -51,8 +63,7 @@ void DemoService::onInit()
 	auto context = AUTOWIRE(MailContext)::bean();
 	context->createMailbox<LoginMailbox>("login");
 	MS_INFO("test");
-	context->sendToMailbox({"client", "login", R"({"user":"admin1","pass":"123456"})" });
-	context->sendToMailbox({"client", "login", R"({"user":"admin2","pass":"123456"})" });
+	context->sendToMailbox({"client", "login", R"({"user":"admin","pass":"123456"})" });
 	MS_INFO("done");
 #endif
 

@@ -30,9 +30,9 @@ MailDeliver::MailDeliver(MSRaw<MailContext> context)
 				if (mailbox->m_MailQueue.size())
 				{
 					auto& mail = mailbox->m_MailQueue.front();
-					if (mail.Handle.get_handle()) mail.Handle.get_handle().resume();
+					if (mail.Handle.valid()) mail.Handle.resume();
 					else mail.Handle = std::move(mailbox->sign(std::move(mail.Mail)));
-					if (mail.Handle.get_handle().promise().is_done()) mailbox->m_MailQueue.pop();
+					if (mail.Handle.done()) mailbox->m_MailQueue.pop();
 				}
 				if (mailbox->m_MailQueue.size())
 				{
