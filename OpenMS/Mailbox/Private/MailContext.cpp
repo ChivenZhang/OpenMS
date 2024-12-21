@@ -73,7 +73,7 @@ bool MailContext::sendToMailbox(IMail&& mail)
 		MSMutexLock lock(mailbox->m_MailLock);
 		if (mail.SID == 0) mail.SID = ++mailbox->m_MailSession;
 		auto idle = mailbox->m_MailQueue.empty();
-		mailbox->m_MailQueue.push(std::forward<IMail>(mail));
+		mailbox->m_MailQueue.push({ std::forward<IMail>(mail) });
 		if (idle) enqueueMailbox(mailbox);
 		return true;
 	}

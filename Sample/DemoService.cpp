@@ -1,12 +1,18 @@
 #include "DemoService.h"
+#include <coroutine>
 
 class ProxyMailbox : public MailBox
 {
 public:
-	explicit ProxyMailbox(MSRaw<IMailContext> context) : MailBox(context) { }
-	void sign(IMail&& mail) override
+	explicit ProxyMailbox(IMailContextRaw context) : MailBox(context) { }
+
+	IMailResult sign(IMail&& mail) override
 	{
-		MS_INFO("proxy: #%d %s -> %s \"%s\"", mail.SID, mail.From.c_str(), mail.To.c_str(), mail.Data.c_str());
+		while (true)
+		{
+			MS_INFO("proxy: #%d %s -> %s \"%s\"", mail.SID, mail.From.c_str(), mail.To.c_str(), mail.Data.c_str());
+			co_yield {};
+		}
 	}
 };
 
@@ -20,11 +26,12 @@ struct LoginInfo
 class LoginMailbox : public MailBox
 {
 public:
-	explicit LoginMailbox(MSRaw<IMailContext> context) : MailBox(context) { }
-	void sign(IMail&& mail) override
+	explicit LoginMailbox(IMailContextRaw context) : MailBox(context) { }
+
+	IMailResult sign(IMail&& mail) override
 	{
 		auto login = TTextC<LoginInfo>::from_string(mail.Data);
-		if (login.user == "admin" && login.pass == "123456")
+		if (login.pass == "123456")
 		{
 			MS_INFO("login: success");
 			create<ProxyMailbox>("proxy_" + login.user);
@@ -34,6 +41,7 @@ public:
 		{
 			MS_INFO("login: failed");
 		}
+		co_return;
 	}
 };
 
@@ -43,14 +51,9 @@ void DemoService::onInit()
 	auto context = AUTOWIRE(MailContext)::bean();
 	context->createMailbox<LoginMailbox>("login");
 	MS_INFO("test");
-	for (size_t i=0; i<100; ++i)
-	{
-		context->sendToMailbox({"client", "login", R"({"user":"admin","pass":"123456"})" });
-		// std::this_thread::sleep_for(std::chrono::milliseconds(10));
-	}
+	context->sendToMailbox({"client", "login", R"({"user":"admin1","pass":"123456"})" });
+	context->sendToMailbox({"client", "login", R"({"user":"admin2","pass":"123456"})" });
 	MS_INFO("done");
-	context->cancelMailbox("login");
-	context->cancelMailbox("proxy_admin");
 #endif
 
 	// auto server = AUTOWIRE(DemoServer)::bean();

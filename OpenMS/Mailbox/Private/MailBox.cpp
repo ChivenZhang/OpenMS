@@ -23,9 +23,10 @@ bool MailBox::send(IMail&& mail)
 	return m_Context->sendToMailbox(std::forward<IMail>(mail));
 }
 
-void MailBox::sign(IMail&& mail)
+IMailResult MailBox::sign(IMail&& mail)
 {
 	MS_INFO("TODO:implement sign method");
+	co_return;
 }
 
 bool MailBox::create(MSString address, MSLambda<MSRef<IMailBox>(MSRaw<IMailContext>)> factory)

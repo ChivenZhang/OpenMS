@@ -32,3 +32,4 @@ public:
 		return createMailbox(address, [&](MSRaw<IMailContext> context){ return MSNew<T>(context, std::forward<Args>(args)...); });
 	}
 };
+using IMailContextRaw = MSRaw<IMailContext>;

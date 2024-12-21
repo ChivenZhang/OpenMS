@@ -10,14 +10,59 @@
 *
 * =================================================*/
 #include "MS.h"
+#include <coroutine>
 class IMailContext;
 
-/// @brief Interface for mail
-class IMail
+template <class T>
+struct IMailPromise
 {
-public:
+	struct promise_type
+	{
+		IMailPromise<T> get_return_object() { return std::coroutine_handle<promise_type>::from_promise(*this); }
+		static auto initial_suspend() { return std::suspend_never{}; }
+		auto final_suspend() noexcept { m_Finished = true; return std::suspend_never{}; }
+		static void return_void() {}
+		static void unhandled_exception() {}
+		static auto yield_value(std::nullptr_t) { return std::suspend_always{}; }
+		bool is_done() const { return m_Finished; }
+
+	private:
+		bool m_Finished = false;
+	};
+
+	IMailPromise(std::coroutine_handle<promise_type>&& handle = {})
+		: m_Handle(handle)
+	{
+	}
+
+	IMailPromise(IMailPromise&& value) noexcept
+		: m_Handle(value.m_Handle.from_promise(value.m_Handle.promise()))
+	{
+		value.m_Handle = nullptr;
+	}
+
+	IMailPromise& operator = (IMailPromise&& value) noexcept
+	{
+		m_Handle = value.m_Handle.from_promise(value.m_Handle.promise());
+		value.m_Handle = nullptr;
+		return *this;
+	}
+
+	static bool await_ready() { return false; }
+	static void await_suspend(std::coroutine_handle<>) {}
+	static void await_resume() {}
+	std::coroutine_handle<promise_type> const& get_handle() const { return m_Handle; }
+
+private:
+	std::coroutine_handle<promise_type> m_Handle;
+};
+using IMailResult = IMailPromise<void>;
+
+/// @brief Interface for mail
+struct IMail
+{
 	MSString From, To, Data;
-	uint32_t SID; // Session ID
+	uint32_t SID; // Session
 };
 
 /// @brief Interface for mailbox
@@ -28,9 +73,9 @@ public:
 
 	virtual bool send(IMail&& mail) = 0;
 
-	virtual bool send(IMail&& mail, IMail& response) = 0;
+	// virtual bool send(IMail&& mail, IMail& response) = 0;
 
-	virtual void sign(IMail&& mail) = 0;
+	virtual IMailResult sign(IMail&& mail) = 0;
 
 	virtual bool create(MSString address, MSLambda<MSRef<IMailBox>(MSRaw<IMailContext>)> factory) = 0;
 
