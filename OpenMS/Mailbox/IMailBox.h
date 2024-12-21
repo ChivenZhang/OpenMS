@@ -17,7 +17,7 @@ class IMail
 {
 public:
 	MSString From, To, Data;
-	uint32_t SID;
+	uint32_t SID; // Session ID
 };
 
 /// @brief Interface for mailbox
@@ -27,6 +27,8 @@ public:
 	virtual ~IMailBox() = default;
 
 	virtual bool send(IMail&& mail) = 0;
+
+	virtual bool send(IMail&& mail, IMail& response) = 0;
 
 	virtual void sign(IMail&& mail) = 0;
 

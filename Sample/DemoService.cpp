@@ -3,11 +3,7 @@
 class ProxyMailbox : public MailBox
 {
 public:
-	explicit ProxyMailbox(MSRaw<IMailContext> context)
-		: MailBox(context)
-	{
-	}
-
+	explicit ProxyMailbox(MSRaw<IMailContext> context) : MailBox(context) { }
 	void sign(IMail&& mail) override
 	{
 		MS_INFO("proxy: #%d %s -> %s \"%s\"", mail.SID, mail.From.c_str(), mail.To.c_str(), mail.Data.c_str());
@@ -24,11 +20,7 @@ struct LoginInfo
 class LoginMailbox : public MailBox
 {
 public:
-	explicit LoginMailbox(MSRaw<IMailContext> context)
-		: MailBox(context)
-	{
-	}
-
+	explicit LoginMailbox(MSRaw<IMailContext> context) : MailBox(context) { }
 	void sign(IMail&& mail) override
 	{
 		auto login = TTextC<LoginInfo>::from_string(mail.Data);
