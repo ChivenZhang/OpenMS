@@ -11,8 +11,8 @@ public:
 		// while (true)
 		{
 			MS_INFO("proxy: #%d %s -> %s \"%s\"", mail.SID, mail.From.c_str(), mail.To.c_str(), mail.Data.c_str());
-			co_yield {};
 		}
+		co_return;
 	}
 };
 
@@ -26,34 +26,22 @@ struct LoginInfo
 class LoginMailbox : public MailBox
 {
 public:
-	explicit LoginMailbox(IMailContextRaw context) : MailBox(context) { }
+	explicit LoginMailbox(IMailContextRaw context) : MailBox(context) {}
 
-	IMailResult sign(IMail&& mail) override
+	IMailTask<int> task()
 	{
-		auto login = TTextC<LoginInfo>::from_string(mail.Data);
-		if (login.pass == "123456")
-		{
-			MS_INFO("login: success");
-			create<ProxyMailbox>("proxy_" + login.user);
-			send({"login", "proxy_" + login.user, login.user, mail.SID });
-		}
-		else
-		{
-			MS_INFO("login: failed");
-		}
+		int i = 0;
+		while (true) co_yield ++i;
+	}
 
-		auto coroutine = []()->IMailPromise<int>
-		{
-			int i = 0;
-			while (true) co_yield ++i;
-		}();
+	IMailTask<void> sign(IMail&& mail) override
+	{
+		auto t = task();
 		for (auto i=0; i<100; ++i)
 		{
-			coroutine.resume();
-			MS_INFO("%d", (int)coroutine);
+			int n = co_await t;
+			MS_INFO("%d", n);
 		}
-
-		co_return;
 	}
 };
 

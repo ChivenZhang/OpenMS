@@ -10,174 +10,106 @@
 *
 * =================================================*/
 #include "MS.h"
+#include <variant>
 #include <coroutine>
 class IMailContext;
 
-template <class T>
-struct IMailPromise
+template <typename T>
+struct IMailTask
 {
-	struct IPromiseType
+	struct promise_type;
+	using handle_type = std::coroutine_handle<promise_type>;
+
+	struct promise_type
 	{
 		using value_type = std::remove_reference_t<T>;
-		using reference_type = std::conditional_t<std::is_reference_v<T>, T, T&>;
-		using pointer_type = value_type*;
-		using handle_type = std::coroutine_handle<IPromiseType>;
+		value_type value = value_type();
+		std::exception_ptr error = nullptr;
 
-		IMailPromise get_return_object() { return handle_type::from_promise(*this); }
-		static auto initial_suspend() { return std::suspend_always{}; }
-		auto final_suspend() noexcept { m_Done = true; return std::suspend_never{}; }
-		static void unhandled_exception() {}
-		static void return_void() {}
-		template<typename U = T, std::enable_if_t<!std::is_rvalue_reference_v<U>, int> = 0>
-		auto yield_value(std::remove_reference_t<T>& value) noexcept
-		{
-			m_Value = std::addressof(value);
-			return std::suspend_always{};
-		}
-		auto yield_value(std::remove_reference_t<T>&& value) noexcept
-		{
-			m_Value = std::addressof(value);
-			return std::suspend_always{};
-		}
-		reference_type value() const noexcept
-		{
-			return static_cast<reference_type>(*m_Value);
-		}
-
-		bool is_done() const { return m_Done; }
-
-	private:
-		bool m_Done = false;
-		pointer_type m_Value = nullptr;
+		IMailTask get_return_object() { return handle_type::from_promise(*this); }
+		static std::suspend_always initial_suspend() { return {}; }
+		static std::suspend_always final_suspend() noexcept { return {}; }
+		void unhandled_exception() { error = std::current_exception(); }
+		void return_value(T val) { value = std::move(val); }
+		std::suspend_always yield_value(T val) { value = std::move(val); return {}; }
 	};
-	using promise_type = IPromiseType;
 
-	IMailPromise() = default;
-	IMailPromise(IMailPromise const&) = delete;
-	IMailPromise(IMailPromise&& other) noexcept
-		: m_Handle(other.m_Handle)
-	{
-		other.m_Handle = nullptr;
-	}
-	IMailPromise& operator = (IMailPromise const&) = delete;
-	IMailPromise& operator = (IMailPromise&& other) noexcept
+	static bool await_ready() { return false; }
+	auto await_suspend(std::coroutine_handle<>) { return handle; }
+	auto await_resume() { return handle.promise().value; }
+
+	IMailTask(handle_type h) : handle(h) {}
+	~IMailTask() { if (handle) handle.destroy(); }
+	IMailTask(IMailTask const& other) noexcept = delete;
+	IMailTask& operator = (IMailTask const&) noexcept = delete;
+	IMailTask(IMailTask&& other) noexcept : handle(other.handle) { other.handle = nullptr; }
+	IMailTask& operator = (IMailTask&& other) noexcept
 	{
 		if (this != &other)
 		{
-			m_Handle = other.m_Handle.from_promise(other.m_Handle.promise());
-			other.m_Handle = nullptr;
+			if (handle) handle.destroy();
+			handle = other.handle;
+			other.handle = nullptr;
 		}
 		return *this;
 	}
 
-	static bool await_ready() { return false; }
-	static void await_suspend(std::coroutine_handle<>) {}
-	static void await_resume() {}
-
-	operator T() const { return m_Handle.promise().value(); }
-
-	constexpr operator std::coroutine_handle<>() const noexcept
-	{
-		return m_Handle.operator std::coroutine_handle<>();
-	}
-
-	bool valid() const noexcept
-	{
-		return m_Handle.operator bool();
-	}
-
-	bool done() const noexcept
-	{
-		return valid() && m_Handle.promise().is_done();
-	}
-
-	void resume() const
-	{
-		return m_Handle.resume();
-	}
-
-	void destroy() const noexcept
-	{
-		return m_Handle.destroy();
-	}
+	bool good() const { return handle.operator bool(); }
+	bool done() const { return handle.done(); }
+	void resume() const { handle.resume(); }
+	operator T() const { return handle.promise().value; }
 
 private:
-	IMailPromise(typename promise_type::handle_type&& handle) : m_Handle(handle){}
-	typename promise_type::handle_type m_Handle;
+	handle_type handle;
 };
 
 template <>
-struct IMailPromise<void>
+struct IMailTask<void>
 {
-	struct IPromiseType
+	struct promise_type;
+	using handle_type = std::coroutine_handle<promise_type>;
+
+	struct promise_type
 	{
-		using handle_type = std::coroutine_handle<IPromiseType>;
-		IMailPromise get_return_object() { return handle_type::from_promise(*this); }
-		static auto initial_suspend() { return std::suspend_always{}; }
-		auto final_suspend() noexcept { m_Done = true; return std::suspend_never{}; }
-		static void unhandled_exception() {}
+		std::exception_ptr error = nullptr;
+
+		IMailTask get_return_object() { return handle_type::from_promise(*this); }
+		static std::suspend_always initial_suspend() { return {}; }
+		static std::suspend_always final_suspend() noexcept { return {}; }
+		void unhandled_exception() { error = std::current_exception(); }
 		static void return_void() {}
-		static auto yield_value(std::nullptr_t) { return std::suspend_always{}; }
-		bool is_done() const { return m_Done; }
-
-	private:
-		bool m_Done = false;
+		static std::suspend_always yield_value(nullptr_t) { return {}; }
 	};
-	using promise_type = IPromiseType;
 
-	IMailPromise() = default;
-	IMailPromise(IMailPromise const&) = delete;
-	IMailPromise(IMailPromise&& other) noexcept
-		: m_Handle(other.m_Handle)
-	{
-		other.m_Handle = nullptr;
-	}
-	IMailPromise& operator = (IMailPromise const&) = delete;
-	IMailPromise& operator = (IMailPromise&& other) noexcept
+	static bool await_ready() { return false; }
+	auto await_suspend(std::coroutine_handle<>) const { return handle; }
+	static void await_resume() {}
+
+	IMailTask() = default;
+	~IMailTask() { if (handle) handle.destroy(); }
+	IMailTask(handle_type h) : handle(h) {}
+	IMailTask(IMailTask const& other) noexcept = delete;
+	IMailTask& operator = (IMailTask const&) noexcept = delete;
+	IMailTask(IMailTask&& other) noexcept : handle(other.handle) { other.handle = nullptr; }
+	IMailTask& operator = (IMailTask&& other) noexcept
 	{
 		if (this != &other)
 		{
-			m_Handle = other.m_Handle.from_promise(other.m_Handle.promise());
-			other.m_Handle = nullptr;
+			if (handle) handle.destroy();
+			handle = other.handle;
+			other.handle = nullptr;
 		}
 		return *this;
 	}
 
-	static bool await_ready() { return false; }
-	static void await_suspend(std::coroutine_handle<>) {}
-	static void await_resume() {}
-
-	constexpr operator std::coroutine_handle<>() const noexcept
-	{
-		return m_Handle.operator std::coroutine_handle<>();
-	}
-
-	bool valid() const noexcept
-	{
-		return m_Handle.operator bool();
-	}
-
-	bool done() const noexcept
-	{
-		return valid() && m_Handle.promise().is_done();
-	}
-
-	void resume() const
-	{
-		return m_Handle.resume();
-	}
-
-	void destroy() const noexcept
-	{
-		return m_Handle.destroy();
-	}
+	bool good() const { return handle.operator bool(); }
+	bool done() const { return handle.done(); }
+	void resume() const { handle.resume(); }
 
 private:
-	IMailPromise(promise_type::handle_type&& handle) : m_Handle(handle){}
-	promise_type::handle_type m_Handle;
+	handle_type handle;
 };
-
-using IMailResult = IMailPromise<void>;
+using IMailResult = IMailTask<void>;
 
 /// @brief Interface for mail
 struct IMail
