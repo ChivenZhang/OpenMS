@@ -10,7 +10,6 @@
 *
 * =================================================*/
 #include "MS.h"
-#include <variant>
 #include <coroutine>
 class IMailContext;
 

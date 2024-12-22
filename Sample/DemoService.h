@@ -10,9 +10,8 @@
 *
 * =================================================*/
 #include <OpenMS/Service/Private/Service.h>
-#include "DemoServer.h"
-
 #include <OpenMS/Mailbox/Private/MailContext.h>
+#include "DemoServer.h"
 
 class DemoConfig
 	:

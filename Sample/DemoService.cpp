@@ -1,5 +1,5 @@
 #include "DemoService.h"
-#include <coroutine>
+#include <OpenMS/Endpoint/RPC/RPCClient.h>
 
 class ProxyMailbox : public MailBox
 {
@@ -13,6 +13,8 @@ public:
 	}
 };
 
+// ========================================================================================
+
 struct LoginInfo
 {
 	MSString user;
@@ -20,12 +22,12 @@ struct LoginInfo
 	OPENMS_TYPE(LoginInfo, user, pass);
 };
 
-class LoginMailbox : public MailBox
+class LoginMailbox : public MailBox, public AUTOWIRE(RPCClient)
 {
 public:
 	explicit LoginMailbox(IMailContextRaw context) : MailBox(context) {}
 
-	IMailTask<void> sign(IMail&& mail) override
+	IMailResult sign(IMail&& mail) override
 	{
 		auto login = [](LoginInfo info)->IMailTask<MSString>
 		{
@@ -47,6 +49,8 @@ public:
 		}
 	}
 };
+
+// ========================================================================================
 
 void DemoService::onInit()
 {
