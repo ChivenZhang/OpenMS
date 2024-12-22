@@ -34,8 +34,8 @@ struct IMailTask
 		std::suspend_always yield_value(T val) { value = std::move(val); return {}; }
 	};
 
-	static bool await_ready() { return false; }
-	auto await_suspend(std::coroutine_handle<>) { return handle; }
+	bool await_ready() const { return handle.done(); }
+	auto await_suspend(std::coroutine_handle<>) const { return handle; }
 	auto await_resume() { return handle.promise().value; }
 
 	IMailTask(handle_type h) : handle(h) {}
@@ -81,7 +81,7 @@ struct IMailTask<void>
 		static std::suspend_always yield_value(nullptr_t) { return {}; }
 	};
 
-	static bool await_ready() { return false; }
+	bool await_ready() const { return handle.done(); }
 	auto await_suspend(std::coroutine_handle<>) const { return handle; }
 	static void await_resume() {}
 
