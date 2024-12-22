@@ -14,6 +14,13 @@
 # OpenMS
 The Distributed Network Framework based on Microservice Theory.
 
+# Features
+- [x] Support reactor network model
+- [x] Support cpp20 coroutine codes
+- [x] Support Erlang-style message
+- [ ] Support microservice cluster
+- [ ] Support Hot module replacement
+
 ## Architecture
 <div align="center">
   <img src="Framework.png" style="width:100%;" />
