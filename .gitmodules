@@ -17,6 +17,7 @@
 [submodule "External/xege"]
 	path = External/xege
 	url = https://github.com/wysaid/xege.git
+	branch = master
 [submodule "External/protobuf"]
 	path = External/protobuf
 	url = https://github.com/protocolbuffers/protobuf.git
