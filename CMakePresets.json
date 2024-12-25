@@ -1,0 +1,39 @@
+﻿{
+	"version": 6,
+	"configurePresets": [
+		{
+			"name": "x64-Debug",
+			"generator": "Ninja",
+			"binaryDir": "${sourceDir}/Output/${presetName}",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "Debug",
+
+				"OPENMS_ENABLE_SAMPLE": "ON",
+				"LIBUV_BUILD_SHARED": "False",
+				"protobuf_BUILD_TESTS": "False",
+				"protobuf_BUILD_EXAMPLES": "False",
+				"protobuf_BUILD_CONFORMANCE": "False",
+				"BUILD_TESTING": "False",
+				"ENABLE_TESTING": "False",
+				"ENABLE_PROGRAMS": "False"
+			}
+		},
+		{
+			"name": "x64-Release",
+			"generator": "Ninja",
+			"binaryDir": "${sourceDir}/Output/${presetName}",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "RelWithDebInfo",
+
+				"OPENMS_ENABLE_SAMPLE": "ON",
+				"LIBUV_BUILD_SHARED": "False",
+				"protobuf_BUILD_TESTS": "False",
+				"protobuf_BUILD_EXAMPLES": "False",
+				"protobuf_BUILD_CONFORMANCE": "False",
+				"BUILD_TESTING": "False",
+				"ENABLE_TESTING": "False",
+				"ENABLE_PROGRAMS": "False"
+			}
+		}
+	]
+}
