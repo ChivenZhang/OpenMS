@@ -1,6 +1,3 @@
-#include "RPCServer.h"
-#include "RPCServer.h"
-#include "RPCServer.h"
 /*=================================================
 * Copyright © 2020-2024 ChivenZhang.
 * All Rights Reserved.
@@ -100,7 +97,7 @@ bool RPCServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<
 		// Handle the request message
 
 		MSString output;
-		RPCServerRequest request;
+		RPCRequest request;
 		if (TTypeC(m_Buffer, request))
 		{
 			if (m_Server->invoke(request.name, request.args, output) == false)
@@ -111,7 +108,7 @@ bool RPCServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<
 
 		// Send the response message
 
-		RPCServerResponse response;
+		RPCResponse response;
 		response.indx = request.indx;
 		response.args = output;
 		auto _event = MSNew<IChannelEvent>();

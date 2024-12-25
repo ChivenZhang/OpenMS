@@ -10,12 +10,14 @@
 *
 * =================================================*/
 #include <OpenMS/Service/Private/Service.h>
+#include <OpenMS/Mailbox/Private/MailContext.h>
 #include "DemoServer.h"
 
 class DemoConfig
 	:
 	public RESOURCE(DemoServer),
-	public RESOURCE(DemoClient)
+	public RESOURCE(DemoClient),
+	public RESOURCE(MailContext)
 {
 };
 
@@ -23,7 +25,8 @@ class DemoService :
 	public Service,
 	public RESOURCE(DemoConfig),
 	public AUTOWIRE(DemoServer),
-	public AUTOWIRE(DemoClient)
+	public AUTOWIRE(DemoClient),
+	public AUTOWIRE(MailContext)
 {
 public:
 	void onInit() override;
