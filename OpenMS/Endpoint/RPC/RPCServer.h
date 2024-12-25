@@ -10,25 +10,10 @@
 *
 * =================================================*/
 #include "OpenMS/Endpoint/IEndpoint.h"
-#include "OpenMS/Service/IProperty.h"
 #include "OpenMS/Service/Private/Property.h"
+#include "OpenMS/Endpoint/RPC/RPCProtocol.h"
 #include "OpenMS/Reactor/TCP/TCPServerReactor.h"
 #include "OpenMS/Reactor/Private/ChannelHandler.h"
-
-struct RPCServerRequest
-{
-	uint32_t indx;
-	MSString name;
-	MSString args;
-	OPENMS_TYPE(RPCServerRequest, indx, name, args)
-};
-
-struct RPCServerResponse
-{
-	uint32_t indx;
-	MSString args;
-	OPENMS_TYPE(RPCServerResponse, indx, args)
-};
 
 class RPCServer : public IEndpoint
 {
@@ -39,7 +24,7 @@ public:
 		uint16_t PortNum = 0;
 		uint32_t Backlog = 0;
 		uint32_t Workers = 0;
-		uint32_t Buffers = UINT32_MAX;
+		uint32_t Buffers = UINT16_MAX;
 		TCPServerReactor::callback_tcp_t Callback;
 	};
 
@@ -109,7 +94,7 @@ protected:
 protected:
 	friend class RPCServerInboundHandler;
 	MSMutex m_Lock;
-	uint32_t m_Buffers = UINT32_MAX;	// bytes from property
+	uint32_t m_Buffers = UINT32_MAX;
 	MSRef<TCPServerReactor> m_Reactor;
 	MSMap<MSString, MSLambda<bool(MSString const& input, MSString& output)>> m_Methods;
 };
@@ -117,7 +102,7 @@ protected:
 class RPCServerInboundHandler : public ChannelInboundHandler
 {
 public:
-	RPCServerInboundHandler(MSRaw<RPCServer> server);
+	explicit RPCServerInboundHandler(MSRaw<RPCServer> server);
 	bool channelRead(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event) override;
 
 protected:

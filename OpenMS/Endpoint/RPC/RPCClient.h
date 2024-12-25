@@ -10,26 +10,11 @@
 *
 * =================================================*/
 #include "OpenMS/Endpoint/IEndpoint.h"
-#include "OpenMS/Toolkit/Timer.h"
-#include "OpenMS/Service/IProperty.h"
 #include "OpenMS/Service/Private/Property.h"
+#include "OpenMS/Endpoint/RPC/RPCProtocol.h"
 #include "OpenMS/Reactor/TCP/TCPClientReactor.h"
 #include "OpenMS/Reactor/Private/ChannelHandler.h"
-
-struct RPCClientRequest
-{
-	uint32_t indx;
-	MSString name;
-	MSString args;
-	OPENMS_TYPE(RPCClientRequest, indx, name, args)
-};
-
-struct RPCClientResponse
-{
-	uint32_t indx;
-	MSString args;
-	OPENMS_TYPE(RPCClientResponse, indx, args)
-};
+#include "OpenMS/Toolkit/Timer.h"
 
 class RPCClient : public IEndpoint
 {
@@ -39,7 +24,7 @@ public:
 		MSString IP;
 		uint16_t PortNum = 0;
 		uint32_t Workers = 0;
-		uint32_t Buffers = UINT32_MAX;
+		uint32_t Buffers = UINT16_MAX;
 		TCPClientReactor::callback_tcp_t Callback;
 	};
 
@@ -57,7 +42,7 @@ public:
 	virtual void configureEndpoint(config_t& config) = 0;
 
 	template<class T, class... Args, OPENMS_NOT_SAME(T, void)>
-	T call(MSStringView name, uint32_t timeout/*ms*/, Args... args)
+	T call(MSStringView name, uint32_t timeout, Args... args)
 	{
 		if (m_Reactor == nullptr || m_Reactor->connect() == false) return T();
 
@@ -68,8 +53,8 @@ public:
 		{
 			if (TTypeC(std::make_tuple(args...), input) == false) return T();
 		}
-		RPCClientRequest request;
-		request.indx = ++m_PackageID;
+		RPCRequest request;
+		request.indx = ++m_SessionID;
 		request.name = name;
 		request.args = input;
 		if (TTypeC(request, input) == false) return T();
@@ -80,8 +65,8 @@ public:
 		auto future = promise->get_future();
 		{
 			MSMutexLock lock(m_Lock);
-			auto& package = m_Packages[request.indx];
-			package.OnResult = [promise, &output](MSString&& response) {
+			auto& session = m_Sessions[request.indx];
+			session.OnResult = [promise, &output](MSString&& response) {
 				output = response;
 				promise->set_value();
 				};
@@ -98,7 +83,7 @@ public:
 		auto status = future.wait_for(std::chrono::milliseconds(timeout));
 		{
 			MSMutexLock lock(m_Lock);
-			m_Packages.erase(request.indx);
+			m_Sessions.erase(request.indx);
 		}
 		if (status == std::future_status::ready)
 		{
@@ -110,22 +95,22 @@ public:
 	}
 
 	template<class T, class... Args, OPENMS_IS_SAME(T, void)>
-	T call(MSStringView name, uint32_t timeout/*ms*/, Args... args)
+	void call(MSStringView name, uint32_t timeout, Args... args)
 	{
-		if (m_Reactor == nullptr || m_Reactor->connect() == false) return T();
+		if (m_Reactor == nullptr || m_Reactor->connect() == false) return;
 
 		// Convert arguments to string
 
 		MSString input;
 		if (std::is_same_v<MSTuple<Args...>, MSTuple<>> == false)
 		{
-			if (TTypeC(std::make_tuple(args...), input) == false) return T();
+			if (TTypeC(std::make_tuple(args...), input) == false) return;
 		}
-		RPCClientRequest request;
-		request.indx = ++m_PackageID;
+		RPCRequest request;
+		request.indx = ++m_SessionID;
 		request.name = name;
 		request.args = input;
-		if (TTypeC(request, input) == false) return T();
+		if (TTypeC(request, input) == false) return;
 
 		// Set up promise and callback
 
@@ -133,8 +118,8 @@ public:
 		auto future = promise->get_future();
 		{
 			MSMutexLock lock(m_Lock);
-			auto& package = m_Packages[request.indx];
-			package.OnResult = [promise](MSString&& response) { promise->set_value(); };
+			auto& session = m_Sessions[request.indx];
+			session.OnResult = [promise](MSString&& response) { promise->set_value(); };
 		}
 
 		// Send input to remote server
@@ -148,12 +133,12 @@ public:
 		future.wait_for(std::chrono::milliseconds(timeout));
 		{
 			MSMutexLock lock(m_Lock);
-			m_Packages.erase(request.indx);
+			m_Sessions.erase(request.indx);
 		}
 	}
 
 	template<class T, class... Args, OPENMS_NOT_SAME(T, void)>
-	bool async(MSStringView name, uint32_t timeout/*ms*/, MSTuple<Args...> args, MSLambda<void(T&&)> callback)
+	bool async(MSStringView name, uint32_t timeout, MSTuple<Args...> args, MSLambda<void(T&&)> callback)
 	{
 		if (m_Reactor == nullptr || m_Reactor->connect() == false) return false;
 
@@ -164,8 +149,8 @@ public:
 		{
 			if (TTypeC(args, input) == false) return false;
 		}
-		RPCClientRequest request;
-		request.indx = ++m_PackageID;
+		RPCRequest request;
+		request.indx = ++m_SessionID;
 		request.name = name;
 		request.args = input;
 		if (TTypeC(request, input) == false) return false;
@@ -174,21 +159,21 @@ public:
 
 		{
 			MSMutexLock lock(m_Lock);
-			auto& package = m_Packages[request.indx];
-			package.OnResult = [callback](MSString&& response) {
+			auto& session = m_Sessions[request.indx];
+			session.OnResult = [callback](MSString&& response) {
 				T result;
 				TTypeC(response, result);
 				if (callback) callback(std::move(result));
 				};
 		}
 
-		m_Timer.start(timeout, 0, [=, packageID = request.indx](uint32_t handle) {
+		m_Timer.start(timeout, 0, [=, sessionID = request.indx](uint32_t handle) {
 			MSMutexLock lock(m_Lock);
-			auto result = m_Packages.find(packageID);
-			if (result != m_Packages.end())
+			auto result = m_Sessions.find(sessionID);
+			if (result != m_Sessions.end())
 			{
 				result->second.OnResult(MSString());
-				m_Packages.erase(result);
+				m_Sessions.erase(result);
 			}
 			});
 
@@ -202,7 +187,7 @@ public:
 	}
 
 	template<class T, class... Args, OPENMS_IS_SAME(T, void)>
-	bool async(MSStringView name, uint32_t timeout/*ms*/, MSTuple<Args...> args, MSLambda<void()> callback)
+	bool async(MSStringView name, uint32_t timeout, MSTuple<Args...> args, MSLambda<void()> callback)
 	{
 		if (m_Reactor == nullptr || m_Reactor->connect() == false) return false;
 
@@ -213,8 +198,8 @@ public:
 		{
 			if (TTypeC(args, input) == false) return false;
 		}
-		RPCClientRequest request;
-		request.indx = ++m_PackageID;
+		RPCRequest request;
+		request.indx = ++m_SessionID;
 		request.name = name;
 		request.args = input;
 		if (TTypeC(request, input) == false) return false;
@@ -223,19 +208,19 @@ public:
 
 		{
 			MSMutexLock lock(m_Lock);
-			auto& package = m_Packages[request.indx];
-			package.OnResult = [callback](MSString&& response) {
+			auto& session = m_Sessions[request.indx];
+			session.OnResult = [callback](MSString&& response) {
 				if (callback) callback();
 				};
 		}
 
-		m_Timer.start(timeout, 0, [=, packageID = request.indx](uint32_t handle) {
+		m_Timer.start(timeout, 0, [=, sessionID = request.indx](uint32_t handle) {
 			MSMutexLock lock(m_Lock);
-			auto result = m_Packages.find(packageID);
-			if (result != m_Packages.end())
+			auto result = m_Sessions.find(sessionID);
+			if (result != m_Sessions.end())
 			{
 				result->second.OnResult(MSString());
-				m_Packages.erase(result);
+				m_Sessions.erase(result);
 			}
 			});
 
@@ -249,18 +234,18 @@ public:
 
 protected:
 	friend class RPCClientInboundHandler;
-	uint32_t m_PackageID = 0;
-	uint32_t m_Buffers = UINT32_MAX;	// bytes from property
-	MSMutex m_Lock;
 	Timer m_Timer;
+	MSMutex m_Lock;
+	uint32_t m_SessionID = 0;
+	uint32_t m_Buffers = UINT32_MAX;
 	MSRef<TCPClientReactor> m_Reactor;
-	MSMap<uint32_t, invoke_t> m_Packages;
+	MSMap<uint32_t, invoke_t> m_Sessions;
 };
 
 class RPCClientInboundHandler : public ChannelInboundHandler
 {
 public:
-	RPCClientInboundHandler(MSRaw<RPCClient> client);
+	explicit RPCClientInboundHandler(MSRaw<RPCClient> client);
 	bool channelRead(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event) override;
 
 protected:

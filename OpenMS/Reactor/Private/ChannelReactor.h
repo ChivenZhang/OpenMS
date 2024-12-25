@@ -24,7 +24,7 @@ public:
 
 public:
 	ChannelReactor(size_t workerNum, callback_t callback);
-	~ChannelReactor();
+	~ChannelReactor() override;
 	void startup() override;
 	void shutdown() override;
 	bool running() const override;

@@ -379,7 +379,13 @@ template<class T, class U, OPENMS_NOT_SAME(T, U), OPENMS_IS_TEXT(T), OPENMS_NOT_
 bool TTypeC(T const& src, U& dst)
 {
 	nlohmann::json json = nlohmann::json::parse(src, nullptr, false, true);
-	dst = json.get<U>();
+	try
+	{
+		dst = json.get<U>();
+	} catch (...)
+	{
+		return false;
+	}
 	return true;
 }
 

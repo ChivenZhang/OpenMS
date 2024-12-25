@@ -1,6 +1,3 @@
-#include "RPCClient.h"
-#include "RPCClient.h"
-#include "RPCClient.h"
 /*=================================================
 * Copyright © 2020-2024 ChivenZhang.
 * All Rights Reserved.
@@ -38,7 +35,7 @@ void RPCClient::shutdown()
 {
 	m_Reactor->shutdown();
 	m_Reactor = nullptr;
-	m_Packages.clear();
+	m_Sessions.clear();
 }
 
 bool RPCClient::running() const
@@ -75,15 +72,15 @@ bool RPCClientInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<
 	{
 		// Handle the response message
 
-		RPCClientResponse response;
+		RPCResponse response;
 		if (TTypeC(m_Buffer, response))
 		{
 			MSMutexLock lock(m_Client->m_Lock);
-			auto result = m_Client->m_Packages.find(response.indx);
-			if (result != m_Client->m_Packages.end())
+			auto result = m_Client->m_Sessions.find(response.indx);
+			if (result != m_Client->m_Sessions.end())
 			{
 				result->second.OnResult(std::move(response.args));
-				m_Client->m_Packages.erase(result);
+				m_Client->m_Sessions.erase(result);
 			}
 		}
 
