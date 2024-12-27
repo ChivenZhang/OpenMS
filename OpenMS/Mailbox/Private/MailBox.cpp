@@ -20,10 +20,11 @@ MailBox::MailBox(MSRaw<IMailContext> context)
 bool MailBox::send(IMail&& mail)
 {
 	if (m_Context == nullptr) return false;
+	mail.From = m_Address;
 	return m_Context->sendToMailbox(std::forward<IMail>(mail));
 }
 
-IMailResult MailBox::sign(IMail&& mail)
+IMailResult MailBox::read(IMail&& mail)
 {
 	MS_INFO("TODO:implement sign method");
 	co_return;

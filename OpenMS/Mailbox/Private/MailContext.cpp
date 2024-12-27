@@ -36,6 +36,7 @@ bool MailContext::createMailbox(MSString address, MSLambda<MSRef<IMailBox>(MSRaw
 	if (result.second == false) return false;
 	auto mailbox = MSCast<MailBox>(factory(this));
 	if (mailbox == nullptr) return false;
+	mailbox->m_Address = address;
 	m_Mailboxes.push_back(mailbox);
 	result.first->second = m_Mailboxes.back();
 	return true;

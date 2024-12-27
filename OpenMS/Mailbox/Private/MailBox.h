@@ -19,7 +19,7 @@ class MailBox : public IMailBox
 public:
 	explicit MailBox(MSRaw<IMailContext> context);
 	bool send(IMail&& mail) final override;
-	IMailResult sign(IMail&& mail) override;
+	IMailResult read(IMail&& mail) override;
 	using IMailBox::create;
 	bool create(MSString address, MSLambda<MSRef<IMailBox>(MSRaw<IMailContext>)> factory) final override;
 	bool cancel(MSString address) final override;
@@ -29,6 +29,7 @@ private:
 	friend class MailContext;
 	friend class MailDeliver;
 	MSMutex m_MailLock;
+	MSString m_Address;
 	struct mail_t { IMail Mail; IMailResult Handle; };
 	MSQueue<mail_t> m_MailQueue;
 	MSRaw<IMailContext> m_Context;

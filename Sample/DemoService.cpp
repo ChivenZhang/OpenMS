@@ -1,52 +1,69 @@
 #include "DemoService.h"
 #include <OpenMS/Endpoint/RPC/RPCClient.h>
+#include <OpenMS/Endpoint/RPC/RPCServer.h>
 
-class ProxyMailbox : public MailBox
+// ========================================================================================
+
+class AuthorMailbox : public MailBox, public RPCServer
 {
 public:
-	explicit ProxyMailbox(IMailContextRaw context) : MailBox(context) { }
-
-	IMailResult sign(IMailResult coro, IMail&& mail) override
+	explicit AuthorMailbox(IMailContextRaw context) : MailBox(context)
 	{
-		MS_INFO("proxy: #%d %s -> %s \"%s\"", mail.SID, mail.From.c_str(), mail.To.c_str(), mail.Data.c_str());
+		RPCServer::startup();
+		bind("author", []()->MSString
+		{
+			return "success";
+		});
+	}
+
+	~AuthorMailbox() override
+	{
+		RPCServer::shutdown();
+	}
+
+	IMailResult read(IMail&& mail) override
+	{
+		MS_INFO("read mail: %s -> %s \"%s\"", mail.From.c_str(), mail.To.c_str(), mail.Data.c_str());
 		co_return;
+	}
+
+	void configureEndpoint(config_t& config) override
+	{
+		config.IP = "127.0.0.1";
+		config.PortNum = 8080;
 	}
 };
 
 // ========================================================================================
 
-struct LoginInfo
-{
-	MSString user;
-	MSString pass;
-	OPENMS_TYPE(LoginInfo, user, pass);
-};
-
-class LoginMailbox : public MailBox, public AUTOWIRE(RPCClient)
+class LoginMailbox : public MailBox, public RPCClient
 {
 public:
-	explicit LoginMailbox(IMailContextRaw context) : MailBox(context) {}
-
-	IMailResult sign(IMailResult coro, IMail&& mail) override
+	explicit LoginMailbox(IMailContextRaw context) : MailBox(context)
 	{
-		auto login = [](LoginInfo info)->IMailTask<MSString>
-		{
-			for (auto i=0; i<10; ++i) co_yield "busy";
-			co_return "success";
-		};
+		RPCClient::startup();
+	}
 
-		auto _login = login(TTextC<LoginInfo>::from_string(mail.Data));
-		while (true)
-		{
-			auto result = co_await _login;
-			if (result == "success")
-			{
-				send({"login", "proxy", "login success" });
-				break;
-			}
-			if (result == "busy") continue;
-			break;
-		}
+	~LoginMailbox() override
+	{
+		RPCClient::shutdown();
+	}
+
+	IMailResult read(IMail&& mail) override
+	{
+		MS_INFO("send mail to author...");
+		send({ .To = "author", .Data = "login..." });
+
+		auto result = call<MSString>("author", 1000);
+		MS_INFO("authority: %s", result.c_str());
+
+		co_return;
+	}
+
+	void configureEndpoint(config_t& config) override
+	{
+		config.IP = "127.0.0.1";
+		config.PortNum = 8080;
 	}
 };
 
@@ -54,13 +71,11 @@ public:
 
 void DemoService::onInit()
 {
-#if 1
+#if 1 // Test
 	auto context = AUTOWIRE(MailContext)::bean();
-	MS_INFO("test");
+	context->createMailbox<AuthorMailbox>("author");
 	context->createMailbox<LoginMailbox>("login");
-	context->createMailbox<ProxyMailbox>("proxy");
-	context->sendToMailbox({"client", "login", R"({"user":"admin","pass":"123456"})" });
-	MS_INFO("done");
+	context->sendToMailbox({ .To = "login",  .Data = R"({"user":"admin","pass":"123456"})" });
 #endif
 
 	// auto server = AUTOWIRE(DemoServer)::bean();
