@@ -23,5 +23,8 @@
   }, {
     "name" : "cpptrace",
     "version>=" : "0.7.4"
+  }, {
+    "name" : "asio",
+    "version>=" : "1.32.0"
   } ]
 }

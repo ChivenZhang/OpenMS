@@ -25,7 +25,7 @@ struct IMailTask
 		value_type value = value_type();
 		std::exception_ptr error = nullptr;
 
-		IMailTask get_return_object() { return handle_type::from_promise(*this); }
+		IMailTask get_return_object() { return IMailTask(handle_type::from_promise(*this)); }
 		static std::suspend_always initial_suspend() { return {}; }
 		static std::suspend_always final_suspend() noexcept { return {}; }
 		void unhandled_exception() { error = std::current_exception(); }
@@ -37,7 +37,7 @@ struct IMailTask
 	auto await_suspend(std::coroutine_handle<>) const { return handle; }
 	auto await_resume() { return handle.promise().value; }
 
-	IMailTask(handle_type h) : handle(h) {}
+	explicit IMailTask(handle_type h) : handle(h) {}
 	~IMailTask() { if (handle) handle.destroy(); }
 	IMailTask(IMailTask const& other) noexcept = delete;
 	IMailTask& operator = (IMailTask const&) noexcept = delete;
@@ -56,7 +56,7 @@ struct IMailTask
 	bool good() const { return handle.operator bool(); }
 	bool done() const { return handle.done(); }
 	void resume() const { handle.resume(); }
-	operator T() const { return handle.promise().value; }
+	explicit operator T() const { return handle.promise().value; }
 
 private:
 	handle_type handle;
@@ -127,7 +127,7 @@ public:
 
 	// virtual bool send(IMail&& mail, IMail& response) = 0;
 
-	virtual IMailResult sign(IMail&& mail) = 0;
+	virtual IMailResult sign(IMailResult coro, IMail&& mail) = 0;
 
 	virtual bool create(MSString address, MSLambda<MSRef<IMailBox>(MSRaw<IMailContext>)> factory) = 0;
 

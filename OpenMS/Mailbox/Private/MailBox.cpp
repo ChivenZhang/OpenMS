@@ -8,7 +8,7 @@
 * Created by ChivenZhang at 2024/12/20 17:07:32.
 *
 * =================================================*/
-#include "Mailbox.h"
+#include "MailBox.h"
 #include "MailContext.h"
 
 MailBox::MailBox(MSRaw<IMailContext> context)

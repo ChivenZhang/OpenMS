@@ -6,7 +6,7 @@ class ProxyMailbox : public MailBox
 public:
 	explicit ProxyMailbox(IMailContextRaw context) : MailBox(context) { }
 
-	IMailResult sign(IMail&& mail) override
+	IMailResult sign(IMailResult coro, IMail&& mail) override
 	{
 		MS_INFO("proxy: #%d %s -> %s \"%s\"", mail.SID, mail.From.c_str(), mail.To.c_str(), mail.Data.c_str());
 		co_return;
@@ -27,7 +27,7 @@ class LoginMailbox : public MailBox, public AUTOWIRE(RPCClient)
 public:
 	explicit LoginMailbox(IMailContextRaw context) : MailBox(context) {}
 
-	IMailResult sign(IMail&& mail) override
+	IMailResult sign(IMailResult coro, IMail&& mail) override
 	{
 		auto login = [](LoginInfo info)->IMailTask<MSString>
 		{

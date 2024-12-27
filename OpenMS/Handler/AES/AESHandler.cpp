@@ -48,7 +48,7 @@ bool AESInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<IChann
 
 	if (ret == 0)
 	{
-		event->Message = result.c_str();
+		event->Message = std::move(result);
 		return true;
 	}
 	return false;
@@ -90,7 +90,7 @@ bool AESOutboundHandler::channelWrite(MSRaw<IChannelContext> context, MSRaw<ICha
 
 	if (ret == 0)
 	{
-		event->Message = result;
+		event->Message = std::move(result);
 		return true;
 	}
 	return false;
