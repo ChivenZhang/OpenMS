@@ -28,7 +28,7 @@ The Distributed Network Framework based on Microservice Theory.
 * Add "VCPKG_ROOT" path to environment.
 * Use vcpkg to install third-party on manifest mode.
 * Use cmake to open CMakeLists.txt and build.
-* See "Sample/DemoService.cpp" for more çs.
+* See "Sample/DemoService.cpp" for more details.
 
 ## Architecture
 <div align="center">
