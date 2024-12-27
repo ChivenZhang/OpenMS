@@ -10,7 +10,7 @@ public:
 	explicit AuthorMailbox(IMailContextRaw context) : MailBox(context)
 	{
 		RPCServer::startup();
-		bind("author", []()->MSString
+		bind("authority", []()->MSString
 		{
 			return "success";
 		});
@@ -54,7 +54,7 @@ public:
 		MS_INFO("send mail to author...");
 		send({ .To = "author", .Data = "login..." });
 
-		auto result = call<MSString>("author", 1000);
+		auto result = call<MSString>("authority", 1000);
 		MS_INFO("authority: %s", result.c_str());
 
 		co_return;
