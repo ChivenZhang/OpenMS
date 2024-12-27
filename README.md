@@ -25,6 +25,7 @@ The Distributed Network Framework based on Microservice Theory.
 
 ## How to install
 * Use git to clone this repository.
+* Add "VCPKG_ROOT" path to environment.
 * Use vcpkg to install third-party on manifest mode.
 * Use cmake to open CMakeLists.txt and build.
 * See "Sample/DemoService.cpp" for more çs.
