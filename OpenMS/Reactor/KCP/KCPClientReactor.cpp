@@ -10,7 +10,7 @@
 * =================================================*/
 #include "KCPClientReactor.h"
 #include "KCPChannel.h"
-#include "../../External/kcp/ikcp.h"
+#include <ikcp.h>
 
 #if 1 // From official kcp demo: https://github.com/skywind3000/kcp/blob/master/test.h
 
@@ -126,10 +126,10 @@ void KCPClientReactor::startup()
 
 			{
 				sockaddr_storage addr;
-				socklen_t addrlen = sizeof(addr);
+				int addrlen = sizeof(addr);
 				MSRef<ISocketAddress> localAddress;
 
-				auto result = uv_udp_getsockname((uv_udp_t*)&client, (sockaddr*)&addr, &addrlen);
+				auto result = uv_udp_getsockname((uv_udp_t*)&client, reinterpret_cast<sockaddr *>(&addr), &addrlen);
 				if (result == 0)
 				{
 					if (addr.ss_family == AF_INET)
@@ -278,7 +278,7 @@ void KCPClientReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 		// Get the actual ip and port number
 
 		sockaddr_storage addr;
-		socklen_t addrlen = sizeof(addr);
+		int addrlen = sizeof(addr);
 		MSRef<ISocketAddress> localAddress, remoteAddress;
 
 		auto result = uv_udp_getsockname((uv_udp_t*)client, (sockaddr*)&addr, &addrlen);

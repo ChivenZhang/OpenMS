@@ -7,6 +7,7 @@
 			"binaryDir": "${sourceDir}/Output/${presetName}",
 			"cacheVariables": {
 				"CMAKE_BUILD_TYPE": "Debug",
+				"CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
 
 				"OPENMS_ENABLE_SAMPLE": "ON",
 				"LIBUV_BUILD_SHARED": "False",
@@ -24,6 +25,7 @@
 			"binaryDir": "${sourceDir}/Output/${presetName}",
 			"cacheVariables": {
 				"CMAKE_BUILD_TYPE": "RelWithDebInfo",
+				"CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
 
 				"OPENMS_ENABLE_SAMPLE": "ON",
 				"LIBUV_BUILD_SHARED": "False",

@@ -88,6 +88,8 @@ Property::Property()
 		case nlohmann::ordered_json::value_t::number_unsigned:
 			m_PropertyMap[name] = TTextC<uint32_t>::to_string(value.get<uint32_t>());
 			break;
+		default:
+			break;
 		}
 		};
 	auto document = nlohmann::ordered_json::parse(text, nullptr, false, true);

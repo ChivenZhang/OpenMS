@@ -1,0 +1,27 @@
+{
+  "name" : "openms",
+  "version-string" : "1.0.0",
+  "builtin-baseline" : "80d54ff62d528339c626a6fbc3489a7f25956ade",
+  "dependencies" : [ {
+    "name" : "kcp",
+    "version>=" : "1.7"
+  }, {
+    "name" : "libuv",
+    "version>=" : "1.49.2"
+  }, {
+    "name" : "mbedtls",
+    "version>=" : "3.6.1"
+  }, {
+    "name" : "nlohmann-json",
+    "version>=" : "3.11.3#1"
+  }, {
+    "name" : "protobuf",
+    "version>=" : "5.29.1"
+  }, {
+    "name" : "http-parser",
+    "version>=" : "2.9.4#3"
+  }, {
+    "name" : "cpptrace",
+    "version>=" : "0.7.4"
+  } ]
+}

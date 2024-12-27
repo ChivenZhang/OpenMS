@@ -9,6 +9,7 @@
 *
 * =================================================*/
 #include "Service.h"
+#include <cpptrace/cpptrace.hpp>
 
 int IApplication::Argc = 0;
 char** IApplication::Argv = nullptr;
@@ -31,7 +32,7 @@ int Service::startup()
 	}
 	catch (...)
 	{
-		onError(std::exception("unknown exception"));
+		onError(cpptrace::logic_error("unknown exception"));
 	}
 
 	while (m_Running)
@@ -54,7 +55,7 @@ int Service::startup()
 				}
 				catch (...)
 				{
-					onError(std::exception("unknown exception"));
+					onError(cpptrace::logic_error("unknown exception"));
 				}
 			}
 		}
@@ -78,7 +79,7 @@ int Service::startup()
 	}
 	catch (...)
 	{
-		onError(std::exception("unknown exception"));
+		onError(cpptrace::logic_error("unknown exception"));
 	}
 
 	return 0;

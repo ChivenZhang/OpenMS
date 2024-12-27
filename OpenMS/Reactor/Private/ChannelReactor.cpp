@@ -19,8 +19,8 @@ ChannelReactor::ChannelReactor(size_t workerNum, callback_t callback)
 	m_Connect(false),
 	m_OnOnOpen(callback.OnOpen),
 	m_OnOnClose(callback.OnClose),
-	m_WorkerList(std::max(1ULL, workerNum)),
-	m_WorkerThreads(std::max(1ULL, workerNum))
+	m_WorkerList(std::max<size_t>(1, workerNum)),
+	m_WorkerThreads(std::max<size_t>(1, workerNum))
 {
 }
 

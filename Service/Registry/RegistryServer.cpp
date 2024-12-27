@@ -36,6 +36,7 @@ void RegistryServer::configureEndpoint(config_t& config)
 
 	bind("registry/register", [=](MSString service, MSString address)->MSString {
 		MSMutexLock lock(m_Lock);
+		MS_INFO("register");
 		m_IPTables[service].push_back(address);
 		return "ok";
 		});

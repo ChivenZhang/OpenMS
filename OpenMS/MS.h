@@ -13,7 +13,6 @@
 #if defined( _MSVC_LANG )
 #	define OPENMS_CPLUSPLUS _MSVC_LANG
 #else
-#	define __FUNCTION__ __func__
 #	define OPENMS_CPLUSPLUS __cplusplus
 #endif
 #if 201703L < OPENMS_CPLUSPLUS

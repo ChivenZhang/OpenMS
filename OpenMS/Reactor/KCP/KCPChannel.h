@@ -11,7 +11,7 @@
 * =================================================*/
 #include "../Private/Channel.h"
 #include <uv.h>
-#include "../../External/kcp/ikcp.h"
+#include <ikcp.h>
 
 class KCPChannel : public Channel
 {

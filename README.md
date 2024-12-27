@@ -11,15 +11,23 @@
 </pre>
 </div>
 
-# OpenMS
+## Description
 The Distributed Network Framework based on Microservice Theory.
 
-# Features
+## Features
 - [x] Support reactor network model
-- [x] Support cpp20 coroutine codes
+- [x] Support tcp, udp, kcp, rpc protocols
 - [x] Support Erlang-style message
+- [x] Support cpp20 coroutine codes
+- [x] Support windows, macOS deployed, linux under way
 - [ ] Support microservice cluster
 - [ ] Support Hot module replacement
+
+## How to install
+* Use git to clone this repository.
+* Use vcpkg to install third-party on manifest mode.
+* Use cmake to open CMakeLists.txt and build.
+* See "Sample/DemoService.cpp" for more çs.
 
 ## Architecture
 <div align="center">

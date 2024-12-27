@@ -8,20 +8,14 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY  ${CMAKE_BINARY_DIR})
 set(OPENMS_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
-#add_definitions(-DOPENMS_TEST)
-
 include_directories(${OPENMS_SOURCE_DIR})
 
-add_subdirectory(${OPENMS_SOURCE_DIR}/External/libuv)
-add_subdirectory(${OPENMS_SOURCE_DIR}/External/iocpp)
-add_subdirectory(${OPENMS_SOURCE_DIR}/External/xege)
-add_subdirectory(${OPENMS_SOURCE_DIR}/External/protobuf)
-add_subdirectory(${OPENMS_SOURCE_DIR}/External/mbedtls)
 add_subdirectory(${OPENMS_SOURCE_DIR}/OpenMS)
+add_subdirectory(${OPENMS_SOURCE_DIR}/External/iocpp)
 
 if(OPENMS_ENABLE_SAMPLE)
-
 add_subdirectory(${OPENMS_SOURCE_DIR}/Sample)
 add_subdirectory(${OPENMS_SOURCE_DIR}/Service)
 
+file(CREATE_LINK "${OPENMS_SOURCE_DIR}/APPLICATION.json" "${CMAKE_BINARY_DIR}/APPLICATION.json")
 endif()

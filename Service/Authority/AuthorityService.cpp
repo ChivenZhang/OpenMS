@@ -25,7 +25,11 @@ void AuthorityService::onInit()
 	client->startup();
 
 	auto address = server->address().lock();
-	if (address) client->call<MSString>("registry/register", 1000, serviceName, address->getString());
+	if (address)
+	{
+		auto result = client->call<MSString>("registry/register", 10000, serviceName, address->getString());
+		MS_INFO("register %s", result.c_str());
+	}
 
 	auto update_func = [=](uint32_t handle) {
 		auto address = server->address().lock();

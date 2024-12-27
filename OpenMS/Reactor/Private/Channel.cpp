@@ -1,5 +1,3 @@
-#include "Channel.h"
-#include "Channel.h"
 /*=================================================
 * Copyright © 2020-2024 ChivenZhang.
 * All Rights Reserved.
@@ -12,6 +10,7 @@
 * =================================================*/
 #include "Channel.h"
 #include "ChannelReactor.h"
+#include <cpptrace/cpptrace.hpp>
 
 Channel::Channel(MSRaw<ChannelReactor> reactor, MSRef<IChannelAddress> local, MSRef<IChannelAddress> remote, uint32_t workID)
 	:
@@ -91,7 +90,7 @@ void Channel::readChannel(MSRef<IChannelEvent> event)
 		}
 		catch (...)
 		{
-			auto ex = std::exception("unknown exception caught in " __FILE__ " [ " __FUNCTION__ " ]");
+			auto ex = cpptrace::logic_error("unknown exception");
 			inbounds[i].Handler->channelError(&m_Context, std::move(ex));
 		}
 	}
@@ -109,7 +108,7 @@ void Channel::readChannel(MSRef<IChannelEvent> event)
 		}
 		catch (...)
 		{
-			auto ex = std::exception("unknown exception caught in " __FILE__ " [ " __FUNCTION__ " ]");
+			auto ex = cpptrace::logic_error("unknown exception");
 			outbounds[i].Handler->channelError(&m_Context, std::move(ex));
 		}
 	}
@@ -133,7 +132,7 @@ void Channel::writeChannel(MSRef<IChannelEvent> event)
 		}
 		catch (...)
 		{
-			auto ex = std::exception("unknown exception caught in " __FILE__ " [ " __FUNCTION__ " ]");
+			auto ex = cpptrace::logic_error("unknown exception");
 			outbounds[i].Handler->channelError(&m_Context, std::move(ex));
 		}
 	}

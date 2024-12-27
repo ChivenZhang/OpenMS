@@ -71,7 +71,7 @@ void UDPClientReactor::startup()
 
 			{
 				sockaddr_storage addr;
-				socklen_t addrlen = sizeof(addr);
+				int addrlen = sizeof(addr);
 				MSRef<ISocketAddress> localAddress, remoteAddress;
 
 				auto result = uv_udp_getsockname((uv_udp_t*)&client, (sockaddr*)&addr, &addrlen);

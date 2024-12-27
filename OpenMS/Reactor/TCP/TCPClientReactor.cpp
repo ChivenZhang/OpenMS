@@ -62,7 +62,7 @@ void TCPClientReactor::startup()
 
 			{
 				sockaddr_storage addr;
-				socklen_t addrlen = sizeof(addr);
+				int addrlen = sizeof(addr);
 				MSRef<ISocketAddress> localAddress;
 
 				auto result = uv_tcp_getsockname((uv_tcp_t*)&client, (struct sockaddr*)&addr, &addrlen);
@@ -189,7 +189,7 @@ void TCPClientReactor::on_connect(uv_connect_t* req, int status)
 	// Get the actual ip and port number
 
 	sockaddr_storage addr;
-	socklen_t addrlen = sizeof(addr);
+	int addrlen = sizeof(addr);
 	MSRef<ISocketAddress> localAddress, remoteAddress;
 
 	auto client = (uv_tcp_t*)req->handle;

@@ -72,7 +72,7 @@ void UDPServerReactor::startup()
 
 			{
 				sockaddr_storage addr;
-				socklen_t addrlen = sizeof(addr);
+				int addrlen = sizeof(addr);
 				MSRef<ISocketAddress> localAddress;
 
 				auto result = uv_udp_getsockname((uv_udp_t*)&server, (sockaddr*)&addr, &addrlen);
@@ -231,7 +231,7 @@ void UDPServerReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 		// Get the actual ip and port number
 
 		sockaddr_storage addr;
-		socklen_t addrlen = sizeof(addr);
+		int addrlen = sizeof(addr);
 		MSRef<ISocketAddress> localAddress, remoteAddress;
 
 		auto result = uv_udp_getsockname((uv_udp_t*)server, (sockaddr*)&addr, &addrlen);

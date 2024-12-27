@@ -6,8 +6,9 @@ add_executable(DemoService
 	DemoService.h
 )
 add_dependencies(DemoService OpenMS)
-target_include_directories(DemoService PRIVATE ${OPENMS_SOURCE_DIR})
-target_link_libraries(DemoService OpenMS)
 
-add_subdirectory(FrameSync)
-add_subdirectory(StatusSync)
+target_include_directories(DemoService PRIVATE ${OPENMS_SOURCE_DIR})
+target_link_libraries(DemoService PRIVATE OpenMS)
+
+# add_subdirectory(FrameSync)
+# add_subdirectory(StatusSync)
