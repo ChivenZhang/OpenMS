@@ -17,10 +17,6 @@ public:
 	{
 	}
 
-	~LoginMailbox() override
-	{
-	}
-
 	IMailTask<void> read(IMail&& mail) override
 	{
 		MS_INFO("send mail to author...");

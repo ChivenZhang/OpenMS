@@ -17,10 +17,6 @@ public:
 	{
 	}
 
-	~AuthorMailbox() override
-	{
-	}
-
 	IMailTask<void> read(IMail&& mail) override
 	{
 		MS_INFO("read mail: %s -> %s \"%s\"", mail.From.c_str(), mail.To.c_str(), mail.Data.c_str());
