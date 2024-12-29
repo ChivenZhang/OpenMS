@@ -30,7 +30,7 @@ void MasterService::onInit()
 
 	// Register or update mail address
 
-	m_MailUpdateTime = ::clock();
+	m_MailUpdateTime = std::chrono::system_clock::now();
 
 	bind("push", [=](MSString address, MSList<MSString> mails)->bool
 	{
@@ -41,8 +41,8 @@ void MasterService::onInit()
 
 	bind("pull", [=]()->MSStringMap<MSSet<MSString>>
 	{
-		auto now = ::clock();
-		if (m_MailUpdateTime + 10000 <= now)
+		auto now = std::chrono::system_clock::now();
+		if (OPENMS_HEARTBEAT <= std::chrono::duration_cast<std::chrono::seconds>(now - m_MailUpdateTime).count())
 		{
 			m_MailUpdateTime = now;
 			m_MailRouteMap = m_MailRouteNewMap;
@@ -54,6 +54,8 @@ void MasterService::onInit()
 
 void MasterService::onExit()
 {
+	m_MailRouteMap.clear();
 	m_MailRouteNewMap.clear();
+
 	RPCServer::shutdown();
 }

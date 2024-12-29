@@ -11,8 +11,8 @@
 #include "Service.h"
 #include <cpptrace/cpptrace.hpp>
 
-int IApplication::Argc = 0;
-char** IApplication::Argv = nullptr;
+int OpenMS::Argc = 0;
+char** OpenMS::Argv = nullptr;
 
 int Service::startup()
 {

@@ -13,6 +13,10 @@
 #include "../IProperty.h"
 #include "OpenMS/Toolkit/Timer.h"
 
+#ifndef OPENMS_HEARTBEAT
+#define OPENMS_HEARTBEAT 10 /*second*/
+#endif
+
 class Service :
 	public IService,
 	public AUTOWIRE(IProperty)

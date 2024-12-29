@@ -84,9 +84,9 @@ void ClusterService::onInit()
 		return client->call<void>("mailbox", 0, mail.SID, mail.From, mail.To, mail.Data);
 	});
 
-	// Push mail address to master
+	// Push mail table to master
 
-	startTimer(0, 10000, [=](uint32_t handle)
+	startTimer(0, OPENMS_HEARTBEAT * 1000, [=](uint32_t handle)
 	{
 		if (connect() == false)
 		{
@@ -107,7 +107,7 @@ void ClusterService::onInit()
 			{
 				MSMutexLock lock(m_MailRouteLock);
 				m_MailRouteMap = call<MSMap<MSString, MSStringList>>("pull", 1000);
-				MS_INFO("pulled mail table");
+				MS_INFO("updated mail table");
 			}
 		}
 	});
@@ -115,6 +115,14 @@ void ClusterService::onInit()
 
 void ClusterService::onExit()
 {
+	m_MailRouteMap.clear();
+
+	for (auto& client : m_MailClientMap)
+	{
+		if (client.second) client.second->shutdown();
+	}
+	m_MailClientMap.clear();
+
 	if (m_MailServer) m_MailServer->shutdown();
 	m_MailServer = nullptr;
 

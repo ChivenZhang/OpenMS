@@ -28,7 +28,7 @@ protected:
 	void onExit() override;
 
 protected:
-	clock_t m_MailUpdateTime = 0;
 	MSStringMap<MSSet<MSString>> m_MailRouteMap;
 	MSStringMap<MSSet<MSString>> m_MailRouteNewMap;
+	std::chrono::time_point<std::chrono::system_clock> m_MailUpdateTime;
 };

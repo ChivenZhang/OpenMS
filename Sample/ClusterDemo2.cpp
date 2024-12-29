@@ -47,5 +47,5 @@ void ClusterDemo2::onExit()
 
 int main(int argc, char* argv[])
 {
-	return IApplication::Run<ClusterDemo2>(argc, argv);
+	return OpenMS::Run<ClusterDemo2>(argc, argv);
 }

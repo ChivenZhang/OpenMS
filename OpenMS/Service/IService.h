@@ -11,7 +11,6 @@
 * =================================================*/
 #include "MS.h"
 #include <iocpp.h>
-#include <csignal>
 
 #define OPENMS_LOGO \
 (R"(
@@ -53,20 +52,18 @@ public:
 	}
 };
 
-/// @brief Interface for application
-class OPENMS_API IApplication
-{
-public:
-	static int Argc;
-	static char** Argv;
+#include <csignal>
 
+/// @brief Interface for application
+class OPENMS_API OpenMS
+{
 public:
 	template <class T, OPENMS_BASE_OF(IService, T)>
 	static int Run(int argc, char* argv[])
 	{
 		printf(OPENMS_LOGO);
-		IApplication::Argc = argc;
-		IApplication::Argv = argv;
+		OpenMS::Argc = argc;
+		OpenMS::Argv = argv;
 		RESOURCE2_DATA(T, IService);
 		auto service = AUTOWIRE_DATA(IService);
 		signal(SIGINT, [](int) { AUTOWIRE_DATA(IService)->shutdown(); });
@@ -74,8 +71,12 @@ public:
 		auto result = service->startup();
 		signal(SIGINT, nullptr);
 		signal(SIGTERM, nullptr);
-		IApplication::Argc = 0;
-		IApplication::Argv = nullptr;
+		OpenMS::Argc = 0;
+		OpenMS::Argv = nullptr;
 		return result;
 	}
+
+public:
+	static int Argc;
+	static char** Argv;
 };

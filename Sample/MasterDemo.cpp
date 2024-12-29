@@ -17,5 +17,5 @@ void MasterDemo::onExit()
 
 int main(int argc, char* argv[])
 {
-	return IApplication::Run<MasterDemo>(argc, argv);
+	return OpenMS::Run<MasterDemo>(argc, argv);
 }

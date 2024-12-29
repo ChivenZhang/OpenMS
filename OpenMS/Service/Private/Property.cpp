@@ -28,8 +28,8 @@ void Value::setValue(MSString const& value)
 
 Property::Property()
 {
-	auto argc = IApplication::Argc;
-	auto argv = IApplication::Argv;
+	auto argc = OpenMS::Argc;
+	auto argv = OpenMS::Argv;
 
 	// Get config file path
 
