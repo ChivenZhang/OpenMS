@@ -99,10 +99,9 @@ void TCPClientReactor::startup()
 			// Run the event loop
 
 			{
-				loop.data = this;
-				m_Connect = true;
+				loop.data = this;;
+				uv_run(&loop, UV_RUN_ONCE);
 				promise.set_value();
-
 				while (m_Running == true && uv_run(&loop, UV_RUN_NOWAIT))
 				{
 					on_send(&client);
@@ -185,6 +184,7 @@ void TCPClientReactor::on_connect(uv_connect_t* req, int status)
 		MS_ERROR("failed to connect: %s", ::uv_strerror(status));
 		return;
 	}
+	reactor->m_Connect = true;
 
 	// Get the actual ip and port number
 
@@ -245,7 +245,6 @@ void TCPClientReactor::on_connect(uv_connect_t* req, int status)
 
 	if (localAddress == nullptr || remoteAddress == nullptr)
 	{
-		uv_close((uv_handle_t*)client, nullptr);
 		return;
 	}
 
@@ -259,7 +258,6 @@ void TCPClientReactor::on_connect(uv_connect_t* req, int status)
 	if (result)
 	{
 		MS_ERROR("readChannel start error: %s", ::uv_strerror(result));
-		uv_close((uv_handle_t*)&client, nullptr);
 
 		reactor->onDisconnect(channel->shared_from_this());
 	}
@@ -280,7 +278,6 @@ void TCPClientReactor::on_read(uv_stream_t* stream, ssize_t nread, const uv_buf_
 
 	if (nread < 0)
 	{
-		uv_close((uv_handle_t*)stream, nullptr);
 		free(buf->base);
 
 		reactor->onDisconnect(channel);
@@ -289,7 +286,6 @@ void TCPClientReactor::on_read(uv_stream_t* stream, ssize_t nread, const uv_buf_
 
 	if (nread == 0)
 	{
-		uv_close((uv_handle_t*)stream, nullptr);
 		free(buf->base);
 
 		reactor->onDisconnect(channel);
@@ -298,7 +294,6 @@ void TCPClientReactor::on_read(uv_stream_t* stream, ssize_t nread, const uv_buf_
 
 	if (channel->running() == false)
 	{
-		uv_close((uv_handle_t*)stream, nullptr);
 		free(buf->base);
 
 		reactor->onDisconnect(channel);

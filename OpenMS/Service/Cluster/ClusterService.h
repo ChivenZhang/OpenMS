@@ -10,8 +10,9 @@
 *
 * =================================================*/
 #include "../Private/Service.h"
-#include "Endpoint/RPC/RPCClient.h"
 #include "ClusterConfig.h"
+#include "ClusterClient.h"
+#include "ClusterServer.h"
 
 /// @brief 
 class ClusterService :
@@ -29,5 +30,9 @@ protected:
 	void onExit() override;
 
 protected:
-	MSMultiMap<MSString, MSString> m_MailRouteMap;
+	MSMutex m_MailRouteLock;
+	MSMutex m_MailClientLock;
+	MSRef<ClusterServer> m_MailServer;
+	MSStringMap<MSStringList> m_MailRouteMap;
+	MSStringMap<MSRef<ClusterClient>> m_MailClientMap;
 };

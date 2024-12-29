@@ -30,22 +30,30 @@ void MasterService::onInit()
 
 	// Register or update mail address
 
+	m_MailUpdateTime = ::clock();
+
 	bind("push", [=](MSString address, MSList<MSString> mails)->bool
 	{
-		for (auto& mail : mails)
-		{
-			m_MailRouteMap.insert({ mail, address });
-		}
+		for (auto& mail : mails) m_MailRouteMap[mail].insert(address);
+		for (auto& mail : mails) m_MailRouteNewMap[mail].insert(address);
 		return true;
 	});
 
-	bind("pull", [=]()->MSMultiMap<MSString, MSString>
+	bind("pull", [=]()->MSStringMap<MSSet<MSString>>
 	{
+		auto now = ::clock();
+		if (m_MailUpdateTime + 10000 <= now)
+		{
+			m_MailUpdateTime = now;
+			m_MailRouteMap = m_MailRouteNewMap;
+			m_MailRouteNewMap.clear();
+		}
 		return m_MailRouteMap;
 	});
 }
 
 void MasterService::onExit()
 {
+	m_MailRouteNewMap.clear();
 	RPCServer::shutdown();
 }

@@ -66,10 +66,13 @@ bool MailContext::sendToMailbox(IMail&& mail)
 	{
 		MSMutexLock lock(m_MailboxLock);
 		auto result = m_MailboxMap.find(mail.To);
-		if (result == m_MailboxMap.end()) return false;
+		if (result == m_MailboxMap.end() || result->second == nullptr)
+		{
+			if (m_RemoteCall == nullptr) return false;
+			return m_RemoteCall(std::forward<IMail>(mail));
+		}
 		mailbox = result->second;
 	}
-	if (mailbox == nullptr) return false;
 	{
 		MSMutexLock lock(mailbox->m_MailLock);
 		if (mail.SID == 0) mail.SID = ++mailbox->m_Session;
@@ -78,6 +81,13 @@ bool MailContext::sendToMailbox(IMail&& mail)
 		if (idle) enqueueMailbox(mailbox);
 		return true;
 	}
+}
+
+bool MailContext::sendToMailbox(MSLambda<bool(IMail&& mail)> func)
+{
+	if (m_RemoteCall) return false;
+	m_RemoteCall = func;
+	return true;
 }
 
 void MailContext::listMailbox(MSStringList& result)

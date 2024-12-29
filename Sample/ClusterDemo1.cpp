@@ -20,7 +20,7 @@ public:
 	IMailTask<void> read(IMail&& mail) override
 	{
 		MS_INFO("send mail to author...");
-		send({ .To = "author", .Data = "login..." });
+		send({ .To = "author", .Data = mail.Data });
 		co_return;
 	}
 };
@@ -38,7 +38,11 @@ void ClusterDemo1::onInit()
 
 	auto mails = AUTOWIRE(IMailContext)::bean();
 	mails->createMailbox<LoginMailbox>("login");
-	mails->sendToMailbox({.To = "login", .Data = R"({"user":"admin", "pass":"******"})" });
+
+	startTimer(0, 2000, [=](uint32_t handle)
+	{
+		mails->sendToMailbox({.To = "login", .Data = R"({"user":"admin", "pass":"******"})" });
+	});
 }
 
 void ClusterDemo1::onExit()

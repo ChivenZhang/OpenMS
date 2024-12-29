@@ -107,6 +107,10 @@ add_library(OpenMS STATIC
 		Service/Cluster/ClusterService.cpp
 		Service/Cluster/ClusterService.h
 		Service/Cluster/ClusterConfig.h
+		Service/Cluster/ClusterClient.cpp
+		Service/Cluster/ClusterClient.h
+		Service/Cluster/ClusterServer.cpp
+		Service/Cluster/ClusterServer.h
 )
 
 find_package(unofficial-http-parser CONFIG REQUIRED)

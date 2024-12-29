@@ -23,6 +23,7 @@ public:
 	bool cancelMailbox(MSString address) override;
 	bool existMailbox(MSString address) override;
 	bool sendToMailbox(IMail&& mail) override;
+	bool sendToMailbox(MSLambda<bool(IMail&& mail)> func) override;
 	void listMailbox(MSStringList& result) override;
 
 private:
@@ -36,6 +37,7 @@ protected:
 	MSMutex m_MailboxLock;
 	MSMutexUnlock m_MailboxUnlock;
 	MSAtomic<bool> m_Running;
+	MSLambda<bool(IMail&& mail)> m_RemoteCall;
 	MSList<MSRef<MailBox>> m_Mailboxes;
 	MSList<MSRef<MailDeliver>> m_Delivers;
 	MSMap<MSString, MSRef<MailBox>> m_MailboxMap;

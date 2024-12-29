@@ -13,14 +13,11 @@
 void RPCClient::startup()
 {
 	config_t config;
-	config.Callback =
-	{
-		[=](MSRef<IChannel> channel)
-		{
-			channel->getPipeline()->addFirst("rpc", MSNew<RPCClientInboundHandler>(this));
-		},
-	};
 	configureEndpoint(config);
+	config.Callback.OnOpen = [=](MSRef<IChannel> channel)
+	{
+		channel->getPipeline()->addFirst("rpc", MSNew<RPCClientInboundHandler>(this));
+	};
 	m_Buffers = config.Buffers;
 	m_Reactor = MSNew<TCPClientReactor>(
 		IPv4Address::New(config.IP, config.PortNum),

@@ -6,15 +6,19 @@
 *
 *
 * ====================History=======================
-* Created by ChivenZhang at 2024/12/29 16:02:46.
+* Created by ChivenZhang at 2024/12/30 00:48:10.
 *
 * =================================================*/
-#include "../Private/Property.h"
-#include "Mailbox/Private/MailContext.h"
+#include "Endpoint/RPC/RPCClient.h"
 
 /// @brief 
-class MasterConfig
-	:
-	RESOURCE2(Property, IProperty)
+class ClusterClient : public RPCClient
 {
+public:
+	ClusterClient(MSString ip, uint16_t port);
+	void configureEndpoint(config_t& config) const override;
+
+protected:
+	const MSString m_IP;
+	const uint16_t m_PortNum;
 };

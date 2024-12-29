@@ -37,6 +37,7 @@ void ClusterDemo2::onInit()
 
 	auto mails = AUTOWIRE(IMailContext)::bean();
 	mails->createMailbox<AuthorMailbox>("author");
+	mails->createMailbox<AuthorMailbox>("login");
 }
 
 void ClusterDemo2::onExit()

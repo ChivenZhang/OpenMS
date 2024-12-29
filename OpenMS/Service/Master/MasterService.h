@@ -17,8 +17,7 @@
 class MasterService :
 	public Service,
 	public RPCServer,
-	public RESOURCE(MasterConfig),
-	public AUTOWIRE(IMailContext)
+	public RESOURCE(MasterConfig)
 {
 public:
 	MSString identity() const override;
@@ -29,5 +28,7 @@ protected:
 	void onExit() override;
 
 protected:
-	MSMultiMap<MSString, MSString> m_MailRouteMap;
+	clock_t m_MailUpdateTime = 0;
+	MSStringMap<MSSet<MSString>> m_MailRouteMap;
+	MSStringMap<MSSet<MSString>> m_MailRouteNewMap;
 };
