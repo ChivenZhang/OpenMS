@@ -9,11 +9,11 @@
 * Created by ChivenZhang at 2024/12/28 02:49:42.
 *
 * =================================================*/
-#include "MS.h"
+#include "../MS.h"
 #include <coroutine>
 
 template <class T>
-struct ICoroutinePromise
+struct IMailPromise
 {
 	struct promise_type;
 	using handle_type = std::coroutine_handle<promise_type>;
@@ -22,12 +22,11 @@ struct ICoroutinePromise
 	{
 		using value_type = std::remove_reference_t<T>;
 		value_type value = value_type();
-		std::exception_ptr error = nullptr;
 
-		ICoroutinePromise get_return_object() { return ICoroutinePromise(handle_type::from_promise(*this)); }
+		IMailPromise get_return_object() { return ICoroutinePromise(handle_type::from_promise(*this)); }
 		static std::suspend_always initial_suspend() { return {}; }
 		static std::suspend_always final_suspend() noexcept { return {}; }
-		void unhandled_exception() { error = std::current_exception(); }
+		static void unhandled_exception() { std::rethrow_exception(std::current_exception()); }
 		void return_value(T val) { value = std::move(val); }
 		std::suspend_always yield_value(T val) { value = std::move(val); return {}; }
 	};
@@ -36,12 +35,12 @@ struct ICoroutinePromise
 	void await_suspend(std::coroutine_handle<>) const { handle.resume(); }
 	auto await_resume() { return handle.promise().value; }
 
-	explicit ICoroutinePromise(handle_type h) : handle(h) {}
-	~ICoroutinePromise() { if (handle) handle.destroy(); }
-	ICoroutinePromise(ICoroutinePromise const& other) noexcept = delete;
-	ICoroutinePromise& operator = (ICoroutinePromise const&) noexcept = delete;
-	ICoroutinePromise(ICoroutinePromise&& other) noexcept : handle(other.handle) { other.handle = nullptr; }
-	ICoroutinePromise& operator = (ICoroutinePromise&& other) noexcept
+	explicit IMailPromise(handle_type h) : handle(h) {}
+	~IMailPromise() { if (handle) handle.destroy(); }
+	IMailPromise(IMailPromise const& other) noexcept = delete;
+	IMailPromise& operator = (IMailPromise const&) noexcept = delete;
+	IMailPromise(IMailPromise&& other) noexcept : handle(other.handle) { other.handle = nullptr; }
+	IMailPromise& operator = (IMailPromise&& other) noexcept
 	{
 		if (this != &other)
 		{
@@ -62,19 +61,17 @@ private:
 };
 
 template <>
-struct ICoroutinePromise<void>
+struct IMailPromise<void>
 {
 	struct promise_type;
 	using handle_type = std::coroutine_handle<promise_type>;
 
 	struct promise_type
 	{
-		std::exception_ptr error = nullptr;
-
-		ICoroutinePromise get_return_object() { return ICoroutinePromise(handle_type::from_promise(*this)); }
+		IMailPromise get_return_object() { return IMailPromise(handle_type::from_promise(*this)); }
 		static std::suspend_always initial_suspend() { return {}; }
 		static std::suspend_always final_suspend() noexcept { return {}; }
-		void unhandled_exception() { error = std::current_exception(); }
+		static void unhandled_exception() { std::rethrow_exception(std::current_exception()); }
 		static void return_void() {}
 		static std::suspend_always yield_value(nullptr_t) { return {}; }
 	};
@@ -83,13 +80,13 @@ struct ICoroutinePromise<void>
 	void await_suspend(std::coroutine_handle<>) const { handle.resume(); }
 	static void await_resume() {}
 
-	ICoroutinePromise() = default;
-	~ICoroutinePromise() { if (handle) handle.destroy(); }
-	ICoroutinePromise(handle_type h) : handle(h) {}
-	ICoroutinePromise(ICoroutinePromise const& other) noexcept = delete;
-	ICoroutinePromise& operator = (ICoroutinePromise const&) noexcept = delete;
-	ICoroutinePromise(ICoroutinePromise&& other) noexcept : handle(other.handle) { other.handle = nullptr; }
-	ICoroutinePromise& operator = (ICoroutinePromise&& other) noexcept
+	IMailPromise() = default;
+	~IMailPromise() { if (handle) handle.destroy(); }
+	IMailPromise(handle_type h) : handle(h) {}
+	IMailPromise(IMailPromise const& other) noexcept = delete;
+	IMailPromise& operator = (IMailPromise const&) noexcept = delete;
+	IMailPromise(IMailPromise&& other) noexcept : handle(other.handle) { other.handle = nullptr; }
+	IMailPromise& operator = (IMailPromise&& other) noexcept
 	{
 		if (this != &other)
 		{

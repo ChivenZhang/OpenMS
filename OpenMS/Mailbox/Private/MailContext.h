@@ -23,6 +23,7 @@ public:
 	bool cancelMailbox(MSString address) override;
 	bool existMailbox(MSString address) override;
 	bool sendToMailbox(IMail&& mail) override;
+	void listMailbox(MSStringList& result) override;
 
 private:
 	friend class MailDeliver;

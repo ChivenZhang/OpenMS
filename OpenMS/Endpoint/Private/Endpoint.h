@@ -14,6 +14,4 @@
 
 class Endpoint : public IEndpoint
 {
-public:
-
 };

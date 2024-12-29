@@ -24,12 +24,6 @@ bool MailBox::send(IMail&& mail)
 	return m_Context->sendToMailbox(std::forward<IMail>(mail));
 }
 
-IMailResult MailBox::read(IMail&& mail)
-{
-	MS_INFO("TODO:implement sign method");
-	co_return;
-}
-
 bool MailBox::create(MSString address, MSLambda<MSRef<IMailBox>(MSRaw<IMailContext>)> factory)
 {
 	if (m_Context == nullptr) return false;
@@ -46,4 +40,15 @@ bool MailBox::exist(MSString address) const
 {
 	if (m_Context == nullptr) return false;
 	return m_Context->existMailbox(address);
+}
+
+void MailBox::error(MSError&& info)
+{
+	MS_INFO("%s", info.what());
+}
+
+IMailTask<void> MailBox::read(IMail&& mail)
+{
+	MS_INFO("TODO:implement sign method");
+	co_return;
 }

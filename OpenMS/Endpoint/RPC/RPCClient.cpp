@@ -33,7 +33,7 @@ void RPCClient::startup()
 
 void RPCClient::shutdown()
 {
-	m_Reactor->shutdown();
+	if (m_Reactor) m_Reactor->shutdown();
 	m_Reactor = nullptr;
 	m_Sessions.clear();
 }
@@ -62,7 +62,6 @@ RPCClientInboundHandler::RPCClientInboundHandler(MSRaw<RPCClient> client)
 bool RPCClientInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)
 {
 	// Use '\0' to split the message
-
 	auto index = event->Message.find(char());
 	if (index == MSString::npos) m_Buffer += event->Message;
 	else m_Buffer += event->Message.substr(0, index);

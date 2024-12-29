@@ -17,5 +17,5 @@ class FrameServer :
 	public AUTOWIRE(IService)
 {
 public:
-	void configureEndpoint(config_t & config) override;
+	void configureEndpoint(config_t& config) const override;
 };

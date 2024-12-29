@@ -25,6 +25,8 @@ public:
 
 	virtual bool sendToMailbox(IMail&& mail) = 0;
 
+	virtual void listMailbox(MSStringList& result) = 0;
+
 	template<class T, class... Args>
 	bool createMailbox(MSString address, Args... args)
 	{

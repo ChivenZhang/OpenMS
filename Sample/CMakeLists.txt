@@ -1,14 +1,17 @@
 
-add_executable(DemoService
-	DemoServer.cpp
-	DemoServer.h
-	DemoService.cpp
-	DemoService.h
+add_executable(MasterDemo
+		MasterDemo.cpp
+		MasterDemo.h
 )
-add_dependencies(DemoService OpenMS)
+add_dependencies(MasterDemo OpenMS)
+target_include_directories(MasterDemo PRIVATE ${OPENMS_SOURCE_DIR})
+target_link_libraries(MasterDemo PRIVATE OpenMS)
 
-target_include_directories(DemoService PRIVATE ${OPENMS_SOURCE_DIR})
-target_link_libraries(DemoService PRIVATE OpenMS)
 
-# add_subdirectory(FrameSync)
-# add_subdirectory(StatusSync)
+add_executable(ClusterDemo
+		ClusterDemo.cpp
+		ClusterDemo.h
+)
+add_dependencies(ClusterDemo OpenMS)
+target_include_directories(ClusterDemo PRIVATE ${OPENMS_SOURCE_DIR})
+target_link_libraries(ClusterDemo PRIVATE OpenMS)

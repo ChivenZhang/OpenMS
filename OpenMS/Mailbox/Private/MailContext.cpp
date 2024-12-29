@@ -16,7 +16,7 @@ MailContext::MailContext(uint32_t overload)
 {
 	m_Running = true;
 
-	for (size_t i=0; i<m_Delivers.size(); ++i)
+	for (size_t i = 0; i < m_Delivers.size(); ++i)
 	{
 		m_Delivers[i] = MSNew<MailDeliver>(this);
 	}
@@ -72,11 +72,20 @@ bool MailContext::sendToMailbox(IMail&& mail)
 	if (mailbox == nullptr) return false;
 	{
 		MSMutexLock lock(mailbox->m_MailLock);
-		if (mail.SID == 0) mail.SID = ++mailbox->m_MailSession;
+		if (mail.SID == 0) mail.SID = ++mailbox->m_Session;
 		auto idle = mailbox->m_MailQueue.empty();
-		mailbox->m_MailQueue.push({ std::forward<IMail>(mail) });
+		mailbox->m_MailQueue.push({std::forward<IMail>(mail)});
 		if (idle) enqueueMailbox(mailbox);
 		return true;
+	}
+}
+
+void MailContext::listMailbox(MSStringList& result)
+{
+	MSMutexLock lock(m_MailboxLock);
+	for (auto mailbox : m_Mailboxes)
+	{
+		result.push_back(mailbox->m_Address);
 	}
 }
 

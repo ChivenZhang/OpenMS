@@ -10,11 +10,10 @@
 *
 * =================================================*/
 #include "MS.h"
-#include "Coroutine/ICoroutinePromise.h"
+#include "IMailPromise.h"
 class IMailContext;
 template <class T>
-using IMailTask = ICoroutinePromise<T>;
-using IMailResult = IMailTask<void>;
+using IMailTask = IMailPromise<T>;
 
 /// @brief Interface for mail
 struct IMail
@@ -33,8 +32,6 @@ public:
 
 	// virtual bool send(IMail&& mail, IMail& response) = 0;
 
-	virtual IMailResult read(IMail&& mail) = 0;
-
 	virtual bool create(MSString address, MSLambda<MSRef<IMailBox>(MSRaw<IMailContext>)> factory) = 0;
 
 	virtual bool cancel(MSString address) = 0;
@@ -47,4 +44,9 @@ public:
 		static_assert(std::is_base_of_v<IMailBox, T>);
 		return create(address, [&](MSRaw<IMailContext> context){ return MSNew<T>(context, std::forward<Args>(args)...); });
 	}
+
+protected:
+	virtual void error(MSError&& info) = 0;
+
+	virtual IMailTask<void> read(IMail&& mail) = 0;
 };

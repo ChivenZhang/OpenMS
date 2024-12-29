@@ -1,23 +1,19 @@
 #pragma once
 /*=================================================
-* Copyright © 2020-2024 ChivenZhang.
+* Copyright @ 2020-2024 ChivenZhang.
 * All Rights Reserved.
 * =====================Note=========================
 *
 *
 * ====================History=======================
-* Created by ChivenZhang@gmail.com.
+* Created by ChivenZhang at 2024/12/29 19:54:44.
 *
 * =================================================*/
-#include "OpenMS/Service/Private/Service.h"
-#include "RegistryConfig.h"
+#include <OpenMS/Service/Cluster/ClusterService.h>
 
-class RegistryService :
-	public Service,
-	public RESOURCE(RegistryConfig),
-	public AUTOWIRE(RegistryServer)
+class ClusterDemo : public ClusterService
 {
-public:
+protected:
 	void onInit() override;
 	void onExit() override;
 };

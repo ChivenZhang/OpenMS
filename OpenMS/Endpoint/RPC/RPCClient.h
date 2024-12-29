@@ -28,18 +28,13 @@ public:
 		TCPClientReactor::callback_tcp_t Callback;
 	};
 
-	struct invoke_t
-	{
-		MSLambda<void(MSString&&)> OnResult;
-	};
-
 public:
 	void startup() override;
 	void shutdown() override;
 	bool running() const override;
 	bool connect() const override;
 	MSHnd<IChannelAddress> address() const override;
-	virtual void configureEndpoint(config_t& config) = 0;
+	virtual void configureEndpoint(config_t& config) const = 0;
 
 	template<class T, class... Args, OPENMS_NOT_SAME(T, void)>
 	T call(MSStringView name, uint32_t timeout, Args... args)
@@ -54,7 +49,7 @@ public:
 			if (TTypeC(std::make_tuple(args...), input) == false) return T();
 		}
 		RPCRequest request;
-		request.indx = ++m_SessionID;
+		request.indx = ++m_Session;
 		request.name = name;
 		request.args = input;
 		if (TTypeC(request, input) == false) return T();
@@ -107,7 +102,7 @@ public:
 			if (TTypeC(std::make_tuple(args...), input) == false) return;
 		}
 		RPCRequest request;
-		request.indx = ++m_SessionID;
+		request.indx = ++m_Session;
 		request.name = name;
 		request.args = input;
 		if (TTypeC(request, input) == false) return;
@@ -150,7 +145,7 @@ public:
 			if (TTypeC(args, input) == false) return false;
 		}
 		RPCRequest request;
-		request.indx = ++m_SessionID;
+		request.indx = ++m_Session;
 		request.name = name;
 		request.args = input;
 		if (TTypeC(request, input) == false) return false;
@@ -199,7 +194,7 @@ public:
 			if (TTypeC(args, input) == false) return false;
 		}
 		RPCRequest request;
-		request.indx = ++m_SessionID;
+		request.indx = ++m_Session;
 		request.name = name;
 		request.args = input;
 		if (TTypeC(request, input) == false) return false;
@@ -236,9 +231,13 @@ protected:
 	friend class RPCClientInboundHandler;
 	Timer m_Timer;
 	MSMutex m_Lock;
-	uint32_t m_SessionID = 0;
+	uint32_t m_Session = 0;
 	uint32_t m_Buffers = UINT32_MAX;
 	MSRef<TCPClientReactor> m_Reactor;
+	struct invoke_t
+	{
+		MSLambda<void(MSString&&)> OnResult;
+	};
 	MSMap<uint32_t, invoke_t> m_Sessions;
 };
 

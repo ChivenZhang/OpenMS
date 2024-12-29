@@ -26,7 +26,7 @@ void TCPServer::startup()
 
 void TCPServer::shutdown()
 {
-	m_Reactor->shutdown();
+	if (m_Reactor) m_Reactor->shutdown();
 	m_Reactor = nullptr;
 }
 

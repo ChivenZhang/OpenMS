@@ -9,15 +9,11 @@
 * Created by ChivenZhang@gmail.com.
 *
 * =================================================*/
-#include "OpenMS/Service/Private/Property.h"
-#include "OpenMS/Toolkit/Timer.h"
-#include "AuthorityServer.h"
+#include <OpenMS/Service/Master/MasterService.h>
 
-class AuthorityConfig :
-	public RESOURCE2(Property, IProperty),
-	public RESOURCE2N(Value, IValue, "iptable"),
-	public RESOURCE2N(Value, IValue, "service"),
-	public RESOURCE(AuthorityServer),
-	public RESOURCE(AuthorityClient)
+class MasterDemo : public MasterService
 {
+protected:
+	void onInit() override;
+	void onExit() override;
 };

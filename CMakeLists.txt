@@ -14,6 +14,5 @@ add_subdirectory(${OPENMS_SOURCE_DIR}/External/iocpp)
 
 if(OPENMS_ENABLE_SAMPLE)
 add_subdirectory(${OPENMS_SOURCE_DIR}/Sample)
-add_subdirectory(${OPENMS_SOURCE_DIR}/Service)
 file(CREATE_LINK "${OPENMS_SOURCE_DIR}/APPLICATION.json" "${CMAKE_BINARY_DIR}/APPLICATION.json")
 endif()

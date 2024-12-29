@@ -16,6 +16,7 @@
 class OPENMS_API IProperty
 {
 public:
+	virtual ~IProperty() = default;
 	virtual MSString property(MSString const& name) const = 0;
 
 	template <class T>
@@ -29,6 +30,7 @@ public:
 class OPENMS_API IValue
 {
 public:
+	virtual ~IValue() = default;
 	virtual MSString value() const = 0;
 
 	template <class T>

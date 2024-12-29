@@ -100,7 +100,13 @@ add_library(OpenMS STATIC
 		Mailbox/Private/MailDeliver.h
 		Mailbox/Private/Mailbox.cpp
 		Mailbox/Private/Mailbox.h
-        Coroutine/ICoroutinePromise.h
+		Mailbox/IMailPromise.h
+		Service/Master/MasterConfig.h
+		Service/Master/MasterService.cpp
+		Service/Master/MasterService.h
+		Service/Cluster/ClusterService.cpp
+		Service/Cluster/ClusterService.h
+		Service/Cluster/ClusterConfig.h
 )
 
 find_package(unofficial-http-parser CONFIG REQUIRED)

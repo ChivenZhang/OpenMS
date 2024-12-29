@@ -16,7 +16,7 @@
 #define OPENMS_AES256_IV "y8WOkCzXZHmRLMq6"
 #define OPENMS_AES256_KEY "6BGtsnEW9s2QJalfTHFcXUi46JgJmmDe"
 
-void FrameServer::configureEndpoint(config_t& config)
+void FrameServer::configureEndpoint(config_t& config) const
 {
 	config.IP = "0.0.0.0";
 	config.PortNum = 8080;

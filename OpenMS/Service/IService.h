@@ -49,30 +49,31 @@ public:
 	{
 		return TTextC<T>::from_string(property(name), value);
 	}
-  };
+};
 
-  /// @brief Interface for application
-  class OPENMS_API IApplication
-  {
-  public:
-	  static int Argc;
-	  static char** Argv;
+/// @brief Interface for application
+class OPENMS_API IApplication
+{
+public:
+	static int Argc;
+	static char** Argv;
 
-  public:
-	  template <class T, OPENMS_BASE_OF(IService, T)>
-	  static int Run(int argc, char* argv[])
-	  {
-		  printf(OPENMS_LOGO);
-		  IApplication::Argc = argc;
-		  IApplication::Argv = argv;
-		  auto service = RESOURCE2_DATA(T, IService);
-		  signal(SIGINT, [](int) { RESOURCE2_DATA(T, IService)->shutdown(); });
-		  signal(SIGTERM, [](int) { RESOURCE2_DATA(T, IService)->shutdown(); });
-		  auto result = service->startup();
-		  signal(SIGINT, nullptr);
-		  signal(SIGTERM, nullptr);
-		  IApplication::Argc = 0;
-		  IApplication::Argv = nullptr;
-		  return result;
-	  }
-  };
+public:
+	template <class T, OPENMS_BASE_OF(IService, T)>
+	static int Run(int argc, char* argv[])
+	{
+		printf(OPENMS_LOGO);
+		IApplication::Argc = argc;
+		IApplication::Argv = argv;
+		RESOURCE2_DATA(T, IService);
+		auto service = AUTOWIRE_DATA(IService);
+		signal(SIGINT, [](int) { AUTOWIRE_DATA(IService)->shutdown(); });
+		signal(SIGTERM, [](int) { AUTOWIRE_DATA(IService)->shutdown(); });
+		auto result = service->startup();
+		signal(SIGINT, nullptr);
+		signal(SIGTERM, nullptr);
+		IApplication::Argc = 0;
+		IApplication::Argv = nullptr;
+		return result;
+	}
+};

@@ -13,7 +13,7 @@
 #include "../Message.pb.h"
 #include <OpenMS/Handler/AES/AESHandler.h>
 
-void FrameClient::configureEndpoint(config_t& config)
+void FrameClient::configureEndpoint(config_t& config) const
 {
 	config.IP = "127.0.0.1";
 	config.PortNum = 8080;

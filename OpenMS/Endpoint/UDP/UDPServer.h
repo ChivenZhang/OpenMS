@@ -33,7 +33,7 @@ public:
 	bool running() const override;
 	bool connect() const override;
 	MSHnd<IChannelAddress> address() const override;
-	virtual void configureEndpoint(config_t& config) = 0;
+	virtual void configureEndpoint(config_t& config) const = 0;
 
 protected:
 	MSRef<UDPServerReactor> m_Reactor;

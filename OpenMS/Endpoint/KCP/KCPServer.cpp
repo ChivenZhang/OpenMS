@@ -26,7 +26,7 @@ void KCPServer::startup()
 
 void KCPServer::shutdown()
 {
-	m_Reactor->shutdown();
+	if (m_Reactor) m_Reactor->shutdown();
 	m_Reactor = nullptr;
 }
 

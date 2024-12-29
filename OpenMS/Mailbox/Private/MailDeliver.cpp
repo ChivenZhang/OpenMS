@@ -11,6 +11,7 @@
 #include "MailDeliver.h"
 #include "MailContext.h"
 #include <coroutine>
+#include <cpptrace/cpptrace.hpp>
 
 MailDeliver::MailDeliver(MSRaw<MailContext> context)
 	: m_Context(context)
@@ -31,7 +32,21 @@ MailDeliver::MailDeliver(MSRaw<MailContext> context)
 				{
 					auto& mail = mailbox->m_MailQueue.front();
 					if (mail.Handle.good() == false) mail.Handle = std::move(mailbox->read(std::move(mail.Mail)));
-					if (mail.Handle.good() && mail.Handle.done() == false) mail.Handle.resume();
+					if (mail.Handle.good() && mail.Handle.done() == false)
+					{
+						try
+						{
+							mail.Handle.resume();
+						}
+						catch (MSError ex)
+						{
+							mailbox->error(std::move(ex));
+						}
+						catch (...)
+						{
+							mailbox->error(cpptrace::logic_error("unknown exception"));
+						}
+					}
 					if (mail.Handle.good() && mail.Handle.done()) mailbox->m_MailQueue.pop();
 				}
 				if (mailbox->m_MailQueue.size())
