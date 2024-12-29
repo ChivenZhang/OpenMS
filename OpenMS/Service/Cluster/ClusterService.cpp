@@ -107,7 +107,6 @@ void ClusterService::onInit()
 			{
 				MSMutexLock lock(m_MailRouteLock);
 				m_MailRouteMap = call<MSMap<MSString, MSStringList>>("pull", 1000);
-				MS_INFO("updated mail table");
 			}
 		}
 	});
