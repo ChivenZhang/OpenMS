@@ -88,7 +88,6 @@ int Service::startup()
 void Service::shutdown()
 {
 	m_Running = false;
-	m_Unlock.notify_one();
 }
 
 MSString Service::identity() const
@@ -110,12 +109,9 @@ bool Service::stopTimer(uint32_t handle)
 
 void Service::sendEvent(MSLambda<void()>&& event)
 {
-	{
-		MSMutexLock lock(m_Mutex);
-		m_Working = true;
-		m_Events.emplace(std::move(event));
-	}
-	m_Unlock.notify_one();
+	MSMutexLock lock(m_Mutex);
+	m_Working = true;
+	m_Events.emplace(std::move(event));
 }
 
 MSString Service::property(MSString const& name) const

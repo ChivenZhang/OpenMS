@@ -17,8 +17,8 @@ MSString ClusterService::identity() const
 
 void ClusterService::configureEndpoint(config_t& config) const
 {
-	auto ip = property(identity() + ".server.ip");
-	auto port = property(identity() + ".server.port", 0U);
+	auto ip = property(identity() + ".master.ip");
+	auto port = property(identity() + ".master.port", 0U);
 	config.IP = ip;
 	config.PortNum = port;
 	config.Workers = 1;
@@ -33,7 +33,8 @@ void ClusterService::onInit()
 	// Route remote mail to local
 
 	auto ip = property(identity() + ".server.ip");
-	m_MailServer = MSNew<ClusterServer>(ip, 0, 0, 0);
+	auto port = property(identity() + ".server.port", 0U);
+	m_MailServer = MSNew<ClusterServer>(ip, port, 0, 0);
 	m_MailServer->startup();
 	m_MailServer->bind("mailbox", [=](uint32_t sid, MSString from, MSString to, MSString data)
 	{

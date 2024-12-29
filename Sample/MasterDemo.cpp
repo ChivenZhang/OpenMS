@@ -2,7 +2,7 @@
 
 MSString MasterDemo::identity() const
 {
-	return "master";
+	return "master1";
 }
 
 void MasterDemo::onInit()
