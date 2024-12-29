@@ -20,7 +20,7 @@ The Distributed Network Framework based on Microservice Theory.
 - [x] Support Erlang-style message
 - [x] Support cpp20 coroutine codes
 - [x] Support windows, macOS deployed, linux under way
-- [ ] Support microservice cluster
+- [x] Support microservice cluster
 - [ ] Support Hot module replacement
 
 ## How to install
