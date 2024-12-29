@@ -91,6 +91,11 @@ void Service::shutdown()
 	m_Unlock.notify_one();
 }
 
+MSString Service::identity() const
+{
+	return "service";
+}
+
 uint32_t Service::startTimer(uint64_t timeout, uint64_t repeat, MSLambda<void(uint32_t handle)>&& task)
 {
 	return m_Timer.start(timeout, repeat, [=](uint32_t handle) {

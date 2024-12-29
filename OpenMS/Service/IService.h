@@ -36,6 +36,8 @@ public:
 
 	virtual void shutdown() = 0;
 
+	virtual MSString identity() const = 0;
+
 	virtual void sendEvent(MSLambda<void()>&& event) = 0;
 
 	virtual uint32_t startTimer(uint64_t timeout, uint64_t repeat, MSLambda<void(uint32_t handle)>&& task) = 0;

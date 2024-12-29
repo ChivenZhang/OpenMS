@@ -5,47 +5,50 @@
 *
 *
 * ====================History=======================
-* Created by ChivenZhang at 2024/12/29 19:54:44.
+* Created by ChivenZhang at 2024/12/29 21:47:04.
 *
 * =================================================*/
-#include "ClusterDemo.h"
+#include "ClusterDemo2.h"
 
-class LoginMailbox : public MailBox
+class AuthorMailbox : public MailBox
 {
 public:
-	explicit LoginMailbox(IMailContextRaw context) : MailBox(context)
+	explicit AuthorMailbox(IMailContextRaw context) : MailBox(context)
 	{
 	}
 
-	~LoginMailbox() override
+	~AuthorMailbox() override
 	{
 	}
 
 	IMailTask<void> read(IMail&& mail) override
 	{
-		MS_INFO("send mail to author...");
-		send({ .To = "author", .Data = "login..." });
+		MS_INFO("read mail: %s -> %s \"%s\"", mail.From.c_str(), mail.To.c_str(), mail.Data.c_str());
 		co_return;
 	}
 };
 
 // ========================================================================================
 
-void ClusterDemo::onInit()
+MSString ClusterDemo2::identity() const
+{
+	return "cluster2";
+}
+
+void ClusterDemo2::onInit()
 {
 	ClusterService::onInit();
 
 	auto mails = AUTOWIRE(IMailContext)::bean();
-	mails->createMailbox<LoginMailbox>("login");
-	mails->sendToMailbox({.To = "login", .Data = R"({"user":"admin", "pass":"******"})" });
+	mails->createMailbox<AuthorMailbox>("author");
 }
 
-void ClusterDemo::onExit()
+void ClusterDemo2::onExit()
 {
 	ClusterService::onExit();
 }
 
 int main(int argc, char* argv[])
 {
-	return IApplication::Run<ClusterDemo>(argc, argv);
+	return IApplication::Run<ClusterDemo2>(argc, argv);
 }

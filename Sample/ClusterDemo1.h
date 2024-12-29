@@ -11,8 +11,11 @@
 * =================================================*/
 #include <OpenMS/Service/Cluster/ClusterService.h>
 
-class ClusterDemo : public ClusterService
+class ClusterDemo1 : public ClusterService
 {
+public:
+	MSString identity() const override;
+
 protected:
 	void onInit() override;
 	void onExit() override;

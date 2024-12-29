@@ -10,6 +10,20 @@
 * =================================================*/
 #include "ClusterService.h"
 
+MSString ClusterService::identity() const
+{
+	return "cluster";
+}
+
+void ClusterService::configureEndpoint(config_t& config) const
+{
+	auto ip = property(identity() + ".server.ip");
+	auto port = property(identity() + ".server.port", 0U);
+	config.IP = ip;
+	config.PortNum = port;
+	config.Workers = 1;
+}
+
 void ClusterService::onInit()
 {
 	RPCClient::startup();
@@ -43,13 +57,4 @@ void ClusterService::onInit()
 void ClusterService::onExit()
 {
 	RPCClient::shutdown();
-}
-
-void ClusterService::configureEndpoint(config_t& config) const
-{
-	auto ip = property("cluster.server.ip");
-	auto port = property("cluster.server.port", 0U);
-	config.IP = ip;
-	config.PortNum = port;
-	config.Workers = 1;
 }

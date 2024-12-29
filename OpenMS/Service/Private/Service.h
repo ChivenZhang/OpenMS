@@ -20,6 +20,7 @@ class Service :
 public:
 	int startup() override final;
 	void shutdown() override final;
+	MSString identity() const override;
 	void sendEvent(MSLambda<void()> && event) override final;
 	uint32_t startTimer(uint64_t timeout, uint64_t repeat, MSLambda<void(uint32_t handle)> && task) override final;
 	bool stopTimer(uint32_t handle) override final;

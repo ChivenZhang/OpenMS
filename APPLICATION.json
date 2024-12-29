@@ -1,29 +1,17 @@
 {
-	"registry": {
-		"name": "registry",
-		"server": {
-			"ip": "127.0.0.1",
-			"port": 8080
-		}
-	},
-	"authority": {
-		"name": "authority",
-		"server": {
-			"ip": "127.0.0.1",
-			"port": 8090
-		},
-		"master": {
-			"ip": "127.0.0.1",
-			"port": 8080
-		}
-	},
 	"master": {
 		"server": {
 			"ip": "127.0.0.1",
 			"port": 8080
 		}
 	},
-	"cluster": {
+	"cluster1": {
+		"server": {
+			"ip": "127.0.0.1",
+			"port": 8080
+		}
+	},
+	"cluster2": {
 		"server": {
 			"ip": "127.0.0.1",
 			"port": 8080

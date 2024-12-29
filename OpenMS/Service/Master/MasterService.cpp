@@ -10,6 +10,20 @@
 * =================================================*/
 #include "MasterService.h"
 
+MSString MasterService::identity() const
+{
+	return "master";
+}
+
+void MasterService::configureEndpoint(config_t& config) const
+{
+	auto ip = property(identity() + ".server.ip");
+	auto port = property(identity() + ".server.port", 0U);
+	config.IP = ip;
+	config.PortNum = port;
+	config.Workers = 1;
+}
+
 void MasterService::onInit()
 {
 	RPCServer::startup();
@@ -34,13 +48,4 @@ void MasterService::onInit()
 void MasterService::onExit()
 {
 	RPCServer::shutdown();
-}
-
-void MasterService::configureEndpoint(config_t& config) const
-{
-	auto ip = property("master.server.ip");
-	auto port = property("master.server.port", 0U);
-	config.IP = ip;
-	config.PortNum = port;
-	config.Workers = 1;
 }

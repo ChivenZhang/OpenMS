@@ -20,12 +20,13 @@ class MasterService :
 	public RESOURCE(MasterConfig),
 	public AUTOWIRE(IMailContext)
 {
+public:
+	MSString identity() const override;
+	void configureEndpoint(config_t& config) const override;
+
 protected:
 	void onInit() override;
 	void onExit() override;
-
-public:
-	void configureEndpoint(config_t& config) const override;
 
 protected:
 	MSMultiMap<MSString, MSString> m_MailRouteMap;
