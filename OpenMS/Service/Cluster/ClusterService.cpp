@@ -15,15 +15,6 @@ MSString ClusterService::identity() const
 	return "cluster";
 }
 
-void ClusterService::configureEndpoint(config_t& config) const
-{
-	auto ip = property(identity() + ".master.ip");
-	auto port = property(identity() + ".master.port", 0U);
-	config.IP = ip;
-	config.PortNum = port;
-	config.Workers = 1;
-}
-
 void ClusterService::onInit()
 {
 	RPCClient::startup();
@@ -32,9 +23,12 @@ void ClusterService::onInit()
 
 	// Route remote mail to local
 
-	auto ip = property(identity() + ".server.ip");
-	auto port = property(identity() + ".server.port", 0U);
-	m_MailServer = MSNew<ClusterServer>(ip, port, 0, 4);
+	m_MailServer = MSNew<ClusterServer>(
+		property(identity() + ".server.ip", MSString("127.0.0.1")),
+		property(identity() + ".server.port", 0U),
+		property(identity() + ".server.backlog", 0U),
+		property(identity() + ".server.workers", 0U)
+		);
 	m_MailServer->startup();
 	m_MailServer->bind("mailbox", [=](uint32_t sid, MSString from, MSString to, MSString data)
 	{
@@ -68,8 +62,8 @@ void ClusterService::onInit()
 				auto index = address.find(':');
 				if (index == std::string::npos) return false;
 				auto ip = address.substr(0, index);
-				auto port = static_cast<uint16_t>(std::stoul(address.substr(index + 1)));
-				result.first->second = MSNew<ClusterClient>(ip, port, 4);
+				auto port = std::stoul(address.substr(index + 1));
+				result.first->second = MSNew<ClusterClient>(ip, port, 1);
 				result.first->second->startup();
 			}
 			client = result.first->second;
@@ -81,7 +75,6 @@ void ClusterService::onInit()
 			client->startup();
 		}
 		if (client->connect() == false) return false;
-
 		return client->call<void>("mailbox", 0, mail.SID, mail.From, mail.To, mail.Data);
 	});
 
@@ -117,14 +110,23 @@ void ClusterService::onExit()
 {
 	m_MailRouteMap.clear();
 
+	if (m_MailServer) m_MailServer->shutdown();
+	m_MailServer = nullptr;
+
 	for (auto& client : m_MailClientMap)
 	{
 		if (client.second) client.second->shutdown();
 	}
 	m_MailClientMap.clear();
 
-	if (m_MailServer) m_MailServer->shutdown();
-	m_MailServer = nullptr;
-
 	RPCClient::shutdown();
+}
+
+void ClusterService::configureEndpoint(config_t& config) const
+{
+	auto ip = property(identity() + ".master.ip", MSString("127.0.0.1"));
+	auto port = property(identity() + ".master.port", 0U);
+	config.IP = ip;
+	config.PortNum = port;
+	config.Workers = 1;
 }

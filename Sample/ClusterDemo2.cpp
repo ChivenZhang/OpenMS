@@ -21,7 +21,6 @@ public:
 	{
 		static int count = 0;
 		count++;
-
 		static int t0 = ::clock();
 		int t1 = ::clock();
 		if (t0 + CLOCKS_PER_SEC <= t1)
@@ -30,6 +29,7 @@ public:
 			count = 0;
 			t0 = t1;
 		}
+
 		co_return;
 	}
 };

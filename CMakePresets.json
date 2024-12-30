@@ -9,14 +9,7 @@
 				"CMAKE_BUILD_TYPE": "Debug",
 				"CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT_CUSTOM}/scripts/buildsystems/vcpkg.cmake",
 
-				"OPENMS_ENABLE_SAMPLE": "ON",
-				"LIBUV_BUILD_SHARED": "False",
-				"protobuf_BUILD_TESTS": "False",
-				"protobuf_BUILD_EXAMPLES": "False",
-				"protobuf_BUILD_CONFORMANCE": "False",
-				"BUILD_TESTING": "False",
-				"ENABLE_TESTING": "False",
-				"ENABLE_PROGRAMS": "False"
+				"OPENMS_ENABLE_SAMPLE": "ON"
 			}
 		},
 		{
@@ -27,14 +20,7 @@
 				"CMAKE_BUILD_TYPE": "RelWithDebInfo",
 				"CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT_CUSTOM}/scripts/buildsystems/vcpkg.cmake",
 
-				"OPENMS_ENABLE_SAMPLE": "ON",
-				"LIBUV_BUILD_SHARED": "False",
-				"protobuf_BUILD_TESTS": "False",
-				"protobuf_BUILD_EXAMPLES": "False",
-				"protobuf_BUILD_CONFORMANCE": "False",
-				"BUILD_TESTING": "False",
-				"ENABLE_TESTING": "False",
-				"ENABLE_PROGRAMS": "False"
+				"OPENMS_ENABLE_SAMPLE": "ON"
 			}
 		}
 	]

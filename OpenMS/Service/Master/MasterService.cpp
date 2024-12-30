@@ -53,7 +53,7 @@ void MasterService::onExit()
 
 void MasterService::configureEndpoint(config_t& config) const
 {
-	auto ip = property(identity() + ".server.ip");
+	auto ip = property(identity() + ".server.ip", MSString("127.0.0.1"));
 	auto port = property(identity() + ".server.port", 0U);
 	config.IP = ip;
 	config.PortNum = port;
