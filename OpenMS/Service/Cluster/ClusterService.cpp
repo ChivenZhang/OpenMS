@@ -34,7 +34,7 @@ void ClusterService::onInit()
 
 	auto ip = property(identity() + ".server.ip");
 	auto port = property(identity() + ".server.port", 0U);
-	m_MailServer = MSNew<ClusterServer>(ip, port, 0, 0);
+	m_MailServer = MSNew<ClusterServer>(ip, port, 0, 4);
 	m_MailServer->startup();
 	m_MailServer->bind("mailbox", [=](uint32_t sid, MSString from, MSString to, MSString data)
 	{
@@ -69,7 +69,7 @@ void ClusterService::onInit()
 				if (index == std::string::npos) return false;
 				auto ip = address.substr(0, index);
 				auto port = static_cast<uint16_t>(std::stoul(address.substr(index + 1)));
-				result.first->second = MSNew<ClusterClient>(ip, port);
+				result.first->second = MSNew<ClusterClient>(ip, port, 4);
 				result.first->second->startup();
 			}
 			client = result.first->second;
