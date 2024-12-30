@@ -22,7 +22,7 @@ MailDeliver::MailDeliver(MSRaw<MailContext> context)
 		{
 			MSUniqueLock lock(m_MailLock);
 			MSHnd<IMailBox> element;
-			m_Context->m_MailUnlock.wait(lock, [&](){ return m_Context->m_Running == false || m_Context->dequeueMailbox(element); });
+			m_Context->m_MailUnlock.wait(lock, [&]() { return m_Context->m_Running == false || m_Context->dequeueMailbox(element); });
 			if (m_Context->m_Running == false) break;
 
 			if (auto mailbox = MSCast<MailBox>(element.lock()))
@@ -60,7 +60,6 @@ MailDeliver::MailDeliver(MSRaw<MailContext> context)
 
 MailDeliver::~MailDeliver()
 {
-	m_Context->m_MailUnlock.notify_one();
 	if (m_MailThread.joinable()) m_MailThread.join();
 	m_Context = nullptr;
 }

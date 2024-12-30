@@ -19,7 +19,17 @@ public:
 
 	IMailTask<void> read(IMail&& mail) override
 	{
-		MS_INFO("read mail: %s -> %s \"%s\"", mail.From.c_str(), mail.To.c_str(), mail.Data.c_str());
+		static int count = 0;
+		count++;
+
+		static int t0 = ::clock();
+		int t1 = ::clock();
+		if (t0 + CLOCKS_PER_SEC <= t1)
+		{
+			MS_INFO("read %.0f mails per second", count * 1.0f * CLOCKS_PER_SEC / (t1 - t0));
+			count = 0;
+			t0 = t1;
+		}
 		co_return;
 	}
 };

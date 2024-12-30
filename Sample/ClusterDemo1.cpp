@@ -19,7 +19,17 @@ public:
 
 	IMailTask<void> read(IMail&& mail) override
 	{
-		MS_INFO("send mail to author...");
+		/*static int count = 0;
+		count++;
+
+		static int t0 = ::clock();
+		int t1 = ::clock();
+		if (t0 + CLOCKS_PER_SEC <= t1)
+		{
+			MS_INFO("send %.0f mails per second", count * 1.0f * CLOCKS_PER_SEC / (t1 - t0));
+			count = 0;
+			t0 = t1;
+		}*/
 		send({ .To = "author", .Data = mail.Data });
 		co_return;
 	}
@@ -39,8 +49,20 @@ void ClusterDemo1::onInit()
 	auto mails = AUTOWIRE(IMailContext)::bean();
 	mails->createMailbox<LoginMailbox>("login");
 
-	startTimer(0, 2000, [=](uint32_t handle)
+	startTimer(0, 2/*ms*/, [=](uint32_t handle)
 	{
+		static int count = 0;
+		count++;
+
+		static int t0 = ::clock();
+		int t1 = ::clock();
+		if (t0 + CLOCKS_PER_SEC <= t1)
+		{
+			MS_INFO("send %.0f mails per second", count * 1.0f * CLOCKS_PER_SEC / (t1 - t0));
+			count = 0;
+			t0 = t1;
+		}
+
 		mails->sendToMailbox({.To = "login", .Data = R"({"user":"admin", "pass":"******"})" });
 	});
 }

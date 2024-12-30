@@ -10,10 +10,11 @@
 * =================================================*/
 #include "ClusterClient.h"
 
-ClusterClient::ClusterClient(MSString ip, uint16_t port)
+ClusterClient::ClusterClient(MSString ip, uint16_t port, uint32_t workers)
 	:
 	m_IP(ip),
-	m_PortNum(port)
+	m_PortNum(port),
+	m_Workers(workers)
 {
 }
 
@@ -21,5 +22,5 @@ void ClusterClient::configureEndpoint(config_t& config) const
 {
 	config.IP = m_IP;
 	config.PortNum = m_PortNum;
-	config.Workers = 1;
+	config.Workers = m_Workers;
 }

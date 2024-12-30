@@ -15,7 +15,7 @@
 class ClusterClient : public RPCClient
 {
 public:
-	ClusterClient(MSString ip, uint16_t port);
+	ClusterClient(MSString ip, uint16_t port, uint32_t workers);
 
 protected:
 	void configureEndpoint(config_t& config) const override;
@@ -23,4 +23,5 @@ protected:
 protected:
 	const MSString m_IP;
 	const uint16_t m_PortNum;
+	const uint32_t m_Workers;
 };

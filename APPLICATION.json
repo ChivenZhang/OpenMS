@@ -2,27 +2,27 @@
 	"master1": {
 		"server": {
 			"ip": "127.0.0.1",
-			"port": 8070
+			"port": 8080
 		}
 	},
 	"cluster1": {
 		"server": {
 			"ip": "127.0.0.1",
-			"port": 8080
+			"port": 0
 		},
 		"master": {
 			"ip": "127.0.0.1",
-			"port": 8070
+			"port": 8080
 		}
 	},
 	"cluster2": {
 		"server": {
 			"ip": "127.0.0.1",
-			"port": 8090
+			"port": 0
 		},
 		"master": {
 			"ip": "127.0.0.1",
-			"port": 8070
+			"port": 8080
 		}
 	}
 }
