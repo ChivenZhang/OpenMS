@@ -19,4 +19,8 @@ public:
 protected:
 	void onInit() override;
 	void onExit() override;
+
+protected:
+	MSThread m_SendThread;
+	MSAtomic<bool> m_Running;
 };

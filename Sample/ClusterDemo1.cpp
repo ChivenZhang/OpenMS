@@ -31,7 +31,7 @@ public:
 			t0 = t1;
 		}
 
-		send({ .To = "author", .Data = mail.Data });
+		send({.To = "author", .Data = mail.Data});
 		co_return;
 	}
 };
@@ -50,14 +50,21 @@ void ClusterDemo1::onInit()
 	auto mails = AUTOWIRE(IMailContext)::bean();
 	mails->createMailbox<LoginMailbox>("login");
 
-	startTimer(0, 10/*ms*/, [=](uint32_t handle)
+	m_Running = true;
+	m_SendThread = MSThread([=]()
 	{
-		mails->sendToMailbox({.To = "login", .Data = R"({"user":"admin", "pass":"******"})" });
+		while (m_Running)
+		{
+			mails->sendToMailbox({.To = "login", .Data = R"({"user":"admin", "pass":"******"})"});
+		}
 	});
 }
 
 void ClusterDemo1::onExit()
 {
+	m_Running = false;
+	if (m_SendThread.joinable()) m_SendThread.join();
+
 	ClusterService::onExit();
 }
 
