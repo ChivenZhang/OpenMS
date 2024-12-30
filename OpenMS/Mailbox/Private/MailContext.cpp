@@ -25,7 +25,7 @@ MailContext::MailContext(uint32_t overload)
 MailContext::~MailContext()
 {
 	m_Running = false;
-	m_MailUnlock.notify_one();
+	m_MailUnlock.notify_all();
 	m_Delivers.clear();
 }
 
@@ -77,7 +77,7 @@ bool MailContext::sendToMailbox(IMail&& mail)
 		MSMutexLock lock(mailbox->m_MailLock);
 		if (mail.SID == 0) mail.SID = ++mailbox->m_Session;
 		auto idle = mailbox->m_MailQueue.empty();
-		mailbox->m_MailQueue.push({std::forward<IMail>(mail)});
+		mailbox->m_MailQueue.push({ std::forward<IMail>(mail) });
 		if (idle) enqueueMailbox(mailbox);
 		return true;
 	}
