@@ -131,8 +131,6 @@ find_package(nlohmann_json CONFIG REQUIRED)
 target_link_libraries(OpenMS PUBLIC nlohmann_json::nlohmann_json)
 find_package(cpptrace CONFIG REQUIRED)
 target_link_libraries(OpenMS PRIVATE cpptrace::cpptrace)
-find_package(asio CONFIG REQUIRED)
-target_link_libraries(OpenMS PUBLIC asio::asio)
 
 target_include_directories(OpenMS PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(OpenMS PUBLIC ${OPENMS_SOURCE_DIR}/External/iocpp)
