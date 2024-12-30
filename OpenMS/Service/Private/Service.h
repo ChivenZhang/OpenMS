@@ -17,7 +17,8 @@
 #define OPENMS_HEARTBEAT 10 /*second*/
 #endif
 
-class Service :
+class Service
+	:
 	public IService,
 	public AUTOWIRE(IProperty)
 {
@@ -40,8 +41,7 @@ protected:
 
 protected:
 	Timer m_Timer;
-	MSMutex m_Mutex;
-	MSMutexUnlock m_Unlock;
+	MSMutex m_Lock;
 	MSAtomic<bool> m_Running;
 	MSAtomic<bool> m_Working;
 	MSQueue<MSLambda<void()>> m_Events;

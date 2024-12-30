@@ -14,18 +14,19 @@
 #include "Endpoint/RPC/RPCServer.h"
 
 /// @brief 
-class MasterService :
+class MasterService
+	:
 	public Service,
 	public RPCServer,
 	public RESOURCE(MasterConfig)
 {
 public:
 	MSString identity() const override;
-	void configureEndpoint(config_t& config) const override;
 
 protected:
 	void onInit() override;
 	void onExit() override;
+	void configureEndpoint(config_t& config) const final;
 
 protected:
 	MSStringMap<MSSet<MSString>> m_MailRouteMap;

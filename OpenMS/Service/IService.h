@@ -48,35 +48,10 @@ public:
 	template <class T>
 	T property(MSString const& name, T const& value = T()) const
 	{
-		return TTextC<T>::from_string(property(name), value);
+		T result;
+		if (TTypeC(property(name), result)) return result;
+		return value;
 	}
 };
 
-#include <csignal>
-
-/// @brief Interface for application
-class OPENMS_API OpenMS
-{
-public:
-	template <class T, OPENMS_BASE_OF(IService, T)>
-	static int Run(int argc, char* argv[])
-	{
-		printf(OPENMS_LOGO);
-		OpenMS::Argc = argc;
-		OpenMS::Argv = argv;
-		RESOURCE2_DATA(T, IService);
-		auto service = AUTOWIRE_DATA(IService);
-		signal(SIGINT, [](int) { AUTOWIRE_DATA(IService)->shutdown(); });
-		signal(SIGTERM, [](int) { AUTOWIRE_DATA(IService)->shutdown(); });
-		auto result = service->startup();
-		signal(SIGINT, nullptr);
-		signal(SIGTERM, nullptr);
-		OpenMS::Argc = 0;
-		OpenMS::Argv = nullptr;
-		return result;
-	}
-
-public:
-	static int Argc;
-	static char** Argv;
-};
+#include "IBootstrap.h"

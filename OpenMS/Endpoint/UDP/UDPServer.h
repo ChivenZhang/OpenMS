@@ -33,6 +33,8 @@ public:
 	bool running() const override;
 	bool connect() const override;
 	MSHnd<IChannelAddress> address() const override;
+
+protected:
 	virtual void configureEndpoint(config_t& config) const = 0;
 
 protected:

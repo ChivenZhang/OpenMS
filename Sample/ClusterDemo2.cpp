@@ -37,7 +37,6 @@ void ClusterDemo2::onInit()
 
 	auto mails = AUTOWIRE(IMailContext)::bean();
 	mails->createMailbox<AuthorMailbox>("author");
-	mails->createMailbox<AuthorMailbox>("login");
 }
 
 void ClusterDemo2::onExit()
@@ -45,7 +44,4 @@ void ClusterDemo2::onExit()
 	ClusterService::onExit();
 }
 
-int main(int argc, char* argv[])
-{
-	return OpenMS::Run<ClusterDemo2>(argc, argv);
-}
+OPENMS_RUN(ClusterDemo2)

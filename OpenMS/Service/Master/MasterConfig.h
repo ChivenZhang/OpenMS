@@ -10,7 +10,6 @@
 *
 * =================================================*/
 #include "../Private/Property.h"
-#include "Mailbox/Private/MailContext.h"
 
 /// @brief 
 class MasterConfig

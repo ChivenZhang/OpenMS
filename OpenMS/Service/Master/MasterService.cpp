@@ -15,15 +15,6 @@ MSString MasterService::identity() const
 	return "master";
 }
 
-void MasterService::configureEndpoint(config_t& config) const
-{
-	auto ip = property(identity() + ".server.ip");
-	auto port = property(identity() + ".server.port", 0U);
-	config.IP = ip;
-	config.PortNum = port;
-	config.Workers = 1;
-}
-
 void MasterService::onInit()
 {
 	RPCServer::startup();
@@ -58,4 +49,13 @@ void MasterService::onExit()
 	m_MailRouteNewMap.clear();
 
 	RPCServer::shutdown();
+}
+
+void MasterService::configureEndpoint(config_t& config) const
+{
+	auto ip = property(identity() + ".server.ip");
+	auto port = property(identity() + ".server.port", 0U);
+	config.IP = ip;
+	config.PortNum = port;
+	config.Workers = 1;
 }

@@ -18,11 +18,11 @@ class MailBox : public IMailBox
 {
 public:
 	explicit MailBox(MSRaw<IMailContext> context);
-	bool send(IMail&& mail) final override;
+	bool send(IMail&& mail) final;
 	using IMailBox::create;
-	bool create(MSString address, MSLambda<MSRef<IMailBox>(MSRaw<IMailContext>)> factory) final override;
-	bool cancel(MSString address) final override;
-	bool exist(MSString address) const final override;
+	bool create(MSString address, MSLambda<MSRef<IMailBox>(MSRaw<IMailContext>)> factory) final;
+	bool cancel(MSString address) final;
+	bool exist(MSString address) const final;
 
 protected:
 	void error(MSError&& info) override;

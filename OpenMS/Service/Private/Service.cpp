@@ -11,8 +11,8 @@
 #include "Service.h"
 #include <cpptrace/cpptrace.hpp>
 
-int OpenMS::Argc = 0;
-char** OpenMS::Argv = nullptr;
+int IBootstrap::Argc = 0;
+char** IBootstrap::Argv = nullptr;
 
 int Service::startup()
 {
@@ -39,7 +39,7 @@ int Service::startup()
 	{
 		if (m_Working)
 		{
-			MSMutexLock lock(m_Mutex);
+			MSMutexLock lock(m_Lock);
 			m_Working = false;
 			while (m_Running && m_Events.size())
 			{
@@ -109,7 +109,7 @@ bool Service::stopTimer(uint32_t handle)
 
 void Service::sendEvent(MSLambda<void()>&& event)
 {
-	MSMutexLock lock(m_Mutex);
+	MSMutexLock lock(m_Lock);
 	m_Working = true;
 	m_Events.emplace(std::move(event));
 }

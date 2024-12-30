@@ -16,6 +16,8 @@ class ClusterClient : public RPCClient
 {
 public:
 	ClusterClient(MSString ip, uint16_t port);
+
+protected:
 	void configureEndpoint(config_t& config) const override;
 
 protected:

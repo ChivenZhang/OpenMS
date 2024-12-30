@@ -15,7 +15,8 @@
 #include "ClusterServer.h"
 
 /// @brief 
-class ClusterService :
+class ClusterService
+	:
 	public Service,
 	public RPCClient,
 	public RESOURCE(ClusterConfig),
@@ -23,11 +24,11 @@ class ClusterService :
 {
 public:
 	MSString identity() const override;
-	void configureEndpoint(config_t& config) const override;
 
 protected:
 	void onInit() override;
 	void onExit() override;
+	void configureEndpoint(config_t& config) const final;
 
 protected:
 	MSMutex m_MailRouteLock;

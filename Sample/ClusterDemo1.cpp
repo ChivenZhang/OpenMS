@@ -50,7 +50,4 @@ void ClusterDemo1::onExit()
 	ClusterService::onExit();
 }
 
-int main(int argc, char* argv[])
-{
-	return OpenMS::Run<ClusterDemo1>(argc, argv);
-}
+OPENMS_RUN(ClusterDemo1)

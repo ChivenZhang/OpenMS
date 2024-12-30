@@ -34,7 +34,6 @@ public:
 	bool running() const override;
 	bool connect() const override;
 	MSHnd<IChannelAddress> address() const override;
-	virtual void configureEndpoint(config_t& config) const = 0;
 
 	template <class T, class... Args, OPENMS_NOT_SAME(T, void)>
 	T call(MSStringView name, uint32_t timeout, Args... args)
@@ -259,6 +258,9 @@ public:
 		m_Reactor->writeAndFlush(event, nullptr);
 		return true;
 	}
+
+protected:
+	virtual void configureEndpoint(config_t& config) const = 0;
 
 protected:
 	friend class RPCClientInboundHandler;

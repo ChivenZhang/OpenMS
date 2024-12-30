@@ -36,7 +36,6 @@ public:
 	MSHnd<IChannelAddress> address() const override;
 	bool unbind(MSStringView name);
 	bool invoke(MSStringView name, MSString const& input, MSString& output);
-	virtual void configureEndpoint(config_t& config) const = 0;
 
 	template<class F, OPENMS_NOT_SAME(typename std::function_traits<F>::result_type, void)>
 	bool bind(MSStringView name, F method)
@@ -89,6 +88,8 @@ public:
 	}
 
 protected:
+	virtual void configureEndpoint(config_t& config) const = 0;
+
 	bool bind_internal(MSStringView name, MSLambda<bool(MSString const&, MSString&)> method);
 
 protected:
