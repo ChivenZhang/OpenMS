@@ -78,7 +78,7 @@ void ClusterService::onInit()
 		return client->call<void>("mailbox", 0, mail.SID, mail.From, mail.To, mail.Data);
 	});
 
-	// Push mail table to master
+	// Push and pull mail table
 
 	startTimer(0, OPENMS_HEARTBEAT * 1000, [=](uint32_t handle)
 	{

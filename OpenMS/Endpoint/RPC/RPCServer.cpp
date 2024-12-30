@@ -15,9 +15,9 @@ void RPCServer::startup()
 	config_t config;
 	configureEndpoint(config);
 	config.Callback.OnOpen = [=](MSRef<IChannel> channel)
-	{
-		channel->getPipeline()->addFirst("rpc", MSNew<RPCServerInboundHandler>(this));
-	};
+		{
+			channel->getPipeline()->addFirst("rpc", MSNew<RPCServerInboundHandler>(this));
+		};
 	m_Buffers = config.Buffers;
 	m_Reactor = MSNew<TCPServerReactor>(
 		IPv4Address::New(config.IP, config.PortNum),
@@ -83,38 +83,46 @@ RPCServerInboundHandler::RPCServerInboundHandler(MSRaw<RPCServer> server)
 
 bool RPCServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)
 {
-	// Use '\0' to split the message
-	auto index = event->Message.find(char());
-	if (index == MSString::npos) m_Buffer += event->Message;
-	else m_Buffer += event->Message.substr(0, index);
-	if (m_Server->m_Buffers <= m_Buffer.size()) context->close();
+	m_Buffer += event->Message;
 
+	auto index = event->Message.find(char());
 	if (index != MSString::npos)
 	{
-		// Handle the request message
-
-		MSString output;
-		RPCRequest request;
-		if (TTypeC(m_Buffer, request))
+		for (size_t i = 0; i < m_Buffer.size(); ++i)
 		{
-			if (m_Server->invoke(request.name, request.args, output) == false)
+			// Use '\0' to split the message
+			auto start = m_Buffer.find(char(), i);
+			if (start == MSString::npos) break;
+			auto message = m_Buffer.substr(i, start - i);
+
+			// Handle the request message
+
+			MSString output;
+			RPCRequest request;
+			if (TTypeC(message, request))
 			{
-				context->close();
+				if (m_Server->invoke(request.name, request.args, output) == false)
+				{
+					context->close();
+				}
 			}
+
+			// Send the response message
+
+			RPCResponse response;
+			response.indx = request.indx;
+			response.args = output;
+			auto _event = MSNew<IChannelEvent>();
+			TTypeC(response, _event->Message);
+			// Use '\0' to split the message
+			_event->Message += char();
+			context->writeAndFlush(_event);
+
+			i = start;
 		}
-
-		// Send the response message
-
-		RPCResponse response;
-		response.indx = request.indx;
-		response.args = output;
-		auto _event = MSNew<IChannelEvent>();
-		TTypeC(response, _event->Message);
-		// Use '\0' to split the message
-		_event->Message += char();
-		context->writeAndFlush(_event);
 
 		m_Buffer = event->Message.substr(index + 1);
 	}
+
 	return false;
 }

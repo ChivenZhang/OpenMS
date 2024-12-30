@@ -15,9 +15,9 @@ void RPCClient::startup()
 	config_t config;
 	configureEndpoint(config);
 	config.Callback.OnOpen = [=](MSRef<IChannel> channel)
-	{
-		channel->getPipeline()->addFirst("rpc", MSNew<RPCClientInboundHandler>(this));
-	};
+		{
+			channel->getPipeline()->addFirst("rpc", MSNew<RPCClientInboundHandler>(this));
+		};
 	m_Buffers = config.Buffers;
 	m_Reactor = MSNew<TCPClientReactor>(
 		IPv4Address::New(config.IP, config.PortNum),
@@ -58,29 +58,35 @@ RPCClientInboundHandler::RPCClientInboundHandler(MSRaw<RPCClient> client)
 
 bool RPCClientInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)
 {
-	// Use '\0' to split the message
-	auto index = event->Message.find(char());
-	if (index == MSString::npos) m_Buffer += event->Message;
-	else m_Buffer += event->Message.substr(0, index);
-	if (m_Client->m_Buffers <= m_Buffer.size()) context->close();
+	m_Buffer += event->Message;
 
+	auto index = event->Message.find(char());
 	if (index != MSString::npos)
 	{
-		// Handle the response message
-
-		RPCResponse response;
-		if (TTypeC(m_Buffer, response))
+		for (size_t i = 0; i < m_Buffer.size(); ++i)
 		{
-			MSMutexLock lock(m_Client->m_Lock);
-			auto result = m_Client->m_Sessions.find(response.indx);
-			if (result != m_Client->m_Sessions.end())
+			// Use '\0' to split the message
+			auto start = m_Buffer.find(char(), i);
+			if (start == MSString::npos) break;
+			auto message = m_Buffer.substr(i, start - i);
+
+			RPCResponse response;
+			if (TTypeC(message, response))
 			{
-				result->second.OnResult(std::move(response.args));
-				m_Client->m_Sessions.erase(result);
+				MSMutexLock lock(m_Client->m_Lock);
+				auto result = m_Client->m_Sessions.find(response.indx);
+				if (result != m_Client->m_Sessions.end())
+				{
+					result->second.OnResult(std::move(response.args));
+					m_Client->m_Sessions.erase(result);
+				}
 			}
+
+			i = start;
 		}
 
 		m_Buffer = event->Message.substr(index + 1);
 	}
+
 	return false;
 }

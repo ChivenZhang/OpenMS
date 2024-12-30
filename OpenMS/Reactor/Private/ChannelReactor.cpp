@@ -102,11 +102,13 @@ MSFuture<bool> ChannelReactor::writeAndFlush(MSRef<IChannelEvent> event, MSRef<I
 
 void ChannelReactor::onConnect(MSRef<Channel> channel)
 {
+	if (channel == nullptr) return;
 	if (m_OnOnOpen) m_OnOnOpen(channel);
 }
 
 void ChannelReactor::onDisconnect(MSRef<Channel> channel)
 {
+	if (channel == nullptr) return;
 	channel->close();
 	if (m_OnOnClose) m_OnOnClose(channel);
 }

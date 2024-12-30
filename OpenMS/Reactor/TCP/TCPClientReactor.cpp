@@ -273,7 +273,7 @@ void TCPClientReactor::on_read(uv_stream_t* stream, ssize_t nread, const uv_buf_
 {
 	auto reactor = (TCPClientReactor*)stream->loop->data;
 	auto client = (uv_tcp_t*)stream;
-	auto channel = ((Channel*)client->data)->shared_from_this();
+	auto channel = reactor->m_Channel;
 	if (channel == nullptr) return;
 
 	if (nread < 0)

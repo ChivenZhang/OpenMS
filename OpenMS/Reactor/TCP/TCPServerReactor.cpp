@@ -286,7 +286,7 @@ void TCPServerReactor::on_read(uv_stream_t* stream, ssize_t nread, const uv_buf_
 {
 	auto reactor = (TCPServerReactor*)stream->loop->data;
 	auto client = (uv_tcp_t*)stream;
-	auto channel = ((Channel*)client->data)->shared_from_this();
+	auto channel = ((TCPChannel*)client->data)->shared_from_this();
 	if (channel == nullptr) return;
 
 	if (nread < 0)
