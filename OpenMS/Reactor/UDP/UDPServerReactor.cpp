@@ -41,6 +41,7 @@ void UDPServerReactor::startup()
 		{
 			// Bind and listen to the socket
 
+			if (true)
 			{
 				sockaddr_storage addr;
 				uint32_t result = uv_errno_t::UV_EINVAL;
@@ -70,6 +71,7 @@ void UDPServerReactor::startup()
 
 			// Get the actual ip and port number
 
+			if (true)
 			{
 				sockaddr_storage addr;
 				int addrlen = sizeof(addr);
@@ -108,6 +110,7 @@ void UDPServerReactor::startup()
 
 			// Start receiving data
 
+			if (true)
 			{
 				auto result = uv_udp_recv_start(&server, on_alloc, on_read);
 				if (result) MS_ERROR("recv start error: %s", ::uv_strerror(result));
@@ -116,11 +119,11 @@ void UDPServerReactor::startup()
 
 			// Run the event loop
 
+			if (true)
 			{
 				loop.data = this;
 				m_Connect = true;
 				promise.set_value();
-
 				while (m_Running == true && uv_run(&loop, UV_RUN_NOWAIT))
 				{
 					on_send(&server);
@@ -130,6 +133,7 @@ void UDPServerReactor::startup()
 
 			// Close all channels
 
+			if (true)
 			{
 				auto channels = m_Channels;
 				for (auto channel : channels)
@@ -361,22 +365,16 @@ void UDPServerReactor::on_send(uv_udp_t* handle)
 		if (result) MS_ERROR("invalid address: %s", ::uv_strerror(result));
 		if (result) continue;
 
-		size_t sentNum = 0;
-		while (sentNum < event->Message.size())
+		size_t i = 0;
+		while (i < event->Message.size())
 		{
-			auto buf = uv_buf_init(event->Message.data() + sentNum, (unsigned)(event->Message.size() - sentNum));
-			result = uv_udp_try_send(server, &buf, 1, (sockaddr*)&addr);
-			if (result < 0)
-			{
-				reactor->onDisconnect(channel);
-				break;
-			}
-			else if (result == UV_EAGAIN) continue;
-			else sentNum += result;
+			auto buf = uv_buf_init(event->Message.data() + i, (unsigned)(event->Message.size() - i));
+			auto result = uv_udp_try_send(server, &buf, 1, (sockaddr*)&addr);
+			if (result == UV_EAGAIN) continue;
+			else if (result < 0) break;
+			else i += result;
 		}
-		if (event->Promise)
-		{
-			event->Promise->set_value(sentNum == event->Message.size());
-		}
+		if (i != event->Message.size()) reactor->onDisconnect(channel);
+		if (event->Promise) event->Promise->set_value(i == event->Message.size());
 	}
 }

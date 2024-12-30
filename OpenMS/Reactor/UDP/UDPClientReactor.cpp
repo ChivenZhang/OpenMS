@@ -40,6 +40,7 @@ void UDPClientReactor::startup()
 		{
 			// Bind and listen to the socket
 
+			if (true)
 			{
 				sockaddr_storage addr;
 				uint32_t result = uv_errno_t::UV_EINVAL;
@@ -69,6 +70,7 @@ void UDPClientReactor::startup()
 
 			// Get the actual ip and port number
 
+			if (true)
 			{
 				sockaddr_storage addr;
 				int addrlen = sizeof(addr);
@@ -136,6 +138,7 @@ void UDPClientReactor::startup()
 
 			// Start receiving data
 
+			if (true)
 			{
 				auto result = uv_udp_recv_start(&client, on_alloc, on_read);
 				if (result) MS_ERROR("recv start error: %s", ::uv_strerror(result));
@@ -144,11 +147,11 @@ void UDPClientReactor::startup()
 
 			// Run the event loop
 
+			if (true)
 			{
 				loop.data = this;
 				m_Connect = true;
 				promise.set_value();
-
 				while (m_Running == true && uv_run(&loop, UV_RUN_NOWAIT))
 				{
 					on_send(&client);
@@ -158,6 +161,7 @@ void UDPClientReactor::startup()
 
 			// Close all channels
 
+			if (true)
 			{
 				if (m_Channel) onDisconnect(m_Channel);
 				m_Channel = nullptr;
@@ -281,22 +285,16 @@ void UDPClientReactor::on_send(uv_udp_t* handle)
 		if (event->Message.empty()) continue;
 		auto client = channel->getHandle();
 
-		size_t sentNum = 0;
-		while (sentNum < event->Message.size())
+		size_t i = 0;
+		while (i < event->Message.size())
 		{
-			auto buf = uv_buf_init(event->Message.data() + sentNum, (unsigned)(event->Message.size() - sentNum));
+			auto buf = uv_buf_init(event->Message.data() + i, (unsigned)(event->Message.size() - i));
 			auto result = uv_udp_try_send(client, &buf, 1, nullptr);
-			if (result < 0)
-			{
-				reactor->onDisconnect(channel);
-				break;
-			}
-			else if (result == UV_EAGAIN) continue;
-			else sentNum += result;
+			if (result == UV_EAGAIN) continue;
+			else if (result < 0) break;
+			else i += result;
 		}
-		if (event->Promise)
-		{
-			event->Promise->set_value(sentNum == event->Message.size());
-		}
+		if (i != event->Message.size()) reactor->onDisconnect(channel);
+		if (event->Promise) event->Promise->set_value(i == event->Message.size());
 	}
 }

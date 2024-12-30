@@ -99,6 +99,7 @@ void KCPClientReactor::startup()
 		{
 			// Bind and listen to the socket
 
+			if(true)
 			{
 				sockaddr_storage addr;
 				uint32_t result = uv_errno_t::UV_EINVAL;
@@ -124,6 +125,7 @@ void KCPClientReactor::startup()
 
 			// Get the actual ip and port number
 
+			if (true)
 			{
 				sockaddr_storage addr;
 				int addrlen = sizeof(addr);
@@ -162,6 +164,7 @@ void KCPClientReactor::startup()
 
 			// Send the initial data for session id
 
+			if (true)
 			{
 				size_t sentNum = 0;
 				MSStringView message("\0", 1);
@@ -177,12 +180,12 @@ void KCPClientReactor::startup()
 
 			// Run the event loop
 
+			if (true)
 			{
 				loop.data = this;
 				m_Connect = true;
 				promise.set_value();
-
-				while (m_Running == true && uv_run(&loop, UV_RUN_NOWAIT))
+				while (m_Running && uv_run(&loop, UV_RUN_NOWAIT))
 				{
 					on_send(&client);
 					if (m_ChannelRemoved) m_ChannelRemoved = nullptr;
@@ -192,6 +195,7 @@ void KCPClientReactor::startup()
 
 			// Close all channels
 
+			if (true)
 			{
 				if (m_Channel) onDisconnect(m_Channel);
 				m_Channel = nullptr;
@@ -460,22 +464,15 @@ void KCPClientReactor::on_send(uv_udp_t* handle)
 		if (event->Message.empty()) continue;
 		auto session = channel->getSession();
 
-		size_t sentNum = 0;
-		while (sentNum < event->Message.size())
+		size_t i = 0;
+		while (i < event->Message.size())
 		{
-			auto buf = uv_buf_init(event->Message.data() + sentNum, (unsigned)(event->Message.size() - sentNum));
+			auto buf = uv_buf_init(event->Message.data() + i, (unsigned)(event->Message.size() - i));
 			auto result = ikcp_send(session, (char*)buf.base, buf.len);
-			if (result < 0)
-			{
-				reactor->onDisconnect(channel);
-				break;
-			}
-			else if (result == UV_EAGAIN) continue;
-			else sentNum += result;
+			if (result < 0) break;
+			else i += result;
 		}
-		if (event->Promise)
-		{
-			event->Promise->set_value(sentNum == event->Message.size());
-		}
+		if (i != event->Message.size()) reactor->onDisconnect(channel);
+		if (event->Promise) event->Promise->set_value(i == event->Message.size());
 	}
 }

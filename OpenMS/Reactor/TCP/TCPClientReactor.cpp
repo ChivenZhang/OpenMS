@@ -313,8 +313,6 @@ void TCPClientReactor::on_read(uv_stream_t* stream, ssize_t nread, const uv_buf_
 void TCPClientReactor::on_send(uv_tcp_t* handle)
 {
 	auto reactor = (TCPClientReactor*)handle->loop->data;
-	auto server = (uv_udp_t*)handle;
-
 	if (reactor->m_Sending == false) return;
 
 	MSMutexLock lock(reactor->m_EventLock);
@@ -333,22 +331,16 @@ void TCPClientReactor::on_send(uv_tcp_t* handle)
 		if (event->Message.empty()) continue;
 		auto client = channel->getHandle();
 
-		size_t sentNum = 0;
-		while (sentNum < event->Message.size())
+		size_t i = 0;
+		while (i < event->Message.size())
 		{
-			auto buf = uv_buf_init(event->Message.data() + sentNum, (unsigned)(event->Message.size() - sentNum));
+			auto buf = uv_buf_init(event->Message.data() + i, (unsigned)(event->Message.size() - i));
 			auto result = uv_try_write((uv_stream_t*)client, &buf, 1);
-			if (result < 0)
-			{
-				reactor->onDisconnect(channel);
-				break;
-			}
-			else if (result == UV_EAGAIN) continue;
-			else sentNum += result;
+			if (result == UV_EAGAIN) continue;
+			else if (result < 0) break;
+			else i += result;
 		}
-		if (event->Promise)
-		{
-			event->Promise->set_value(sentNum == event->Message.size());
-		}
+		if (i != event->Message.size()) reactor->onDisconnect(channel);
+		if (event->Promise) event->Promise->set_value(i == event->Message.size());
 	}
 }
