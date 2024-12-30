@@ -13,9 +13,6 @@
 
 class MasterDemo : public MasterService
 {
-public:
-	MSString identity() const override;
-
 protected:
 	void onInit() override;
 	void onExit() override;

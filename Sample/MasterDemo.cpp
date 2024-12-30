@@ -1,10 +1,5 @@
 #include "MasterDemo.h"
 
-MSString MasterDemo::identity() const
-{
-	return "master1";
-}
-
 void MasterDemo::onInit()
 {
 	MasterService::onInit();
