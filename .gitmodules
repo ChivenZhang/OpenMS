@@ -1,27 +1,3 @@
-[submodule "External/libuv"]
-	path = External/libuv
-	url = https://github.com/libuv/libuv.git
-[submodule "External/kcp"]
-	path = External/kcp
-	url = https://github.com/skywind3000/kcp.git
-[submodule "External/nlohmann"]
-	path = External/nlohmann
-	url = https://github.com/nlohmann/json.git
-	branch = master
-[submodule "External/http-parser"]
-	path = External/http-parser
-	url = https://github.com/nodejs/http-parser.git
 [submodule "External/iocpp"]
 	path = External/iocpp
 	url = https://github.com/ChivenZhang/iocpp.git
-[submodule "External/xege"]
-	path = External/xege
-	url = https://github.com/wysaid/xege.git
-	branch = master
-[submodule "External/protobuf"]
-	path = External/protobuf
-	url = https://github.com/protocolbuffers/protobuf.git
-[submodule "External/mbedtls"]
-	path = External/mbedtls
-	url = https://github.com/Mbed-TLS/mbedtls
-	branch = master
