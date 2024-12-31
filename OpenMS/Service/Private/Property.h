@@ -10,6 +10,7 @@
 *
 * =================================================*/
 #include "../IProperty.h"
+#define OPENMS_CONFIG_FILE "APPLICATION.json"
 
 class Value : public IValue
 {

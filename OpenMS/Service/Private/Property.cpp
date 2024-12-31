@@ -14,7 +14,6 @@
 #include "OpenMS/Service/IService.h"
 #include <fstream>
 #include <filesystem>
-#define OPENMS_CONFIG_FILE "application.json"
 
 MSString Value::value() const
 {

@@ -32,7 +32,7 @@ private:
 	};
 	struct clause_t
 	{
-		Timer::timer_t& Timer;
+		timer_t& Timer;
 		MSPromise<void>& Promise;
 	};
 	MSThread m_Thread;
