@@ -19,8 +19,8 @@ The Distributed Network Framework based on Microservice Theory.
 - [x] Support tcp, udp, kcp, rpc protocols
 - [x] Support Erlang-style message
 - [x] Support cpp20 coroutine codes
-- [x] Support windows, macOS deployed, linux under way
 - [x] Support microservice cluster
+- [x] Support Windows, macOS, Linux
 - [ ] Support Hot module replacement
 
 ## How to install
