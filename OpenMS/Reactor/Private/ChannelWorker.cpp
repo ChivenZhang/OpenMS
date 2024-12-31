@@ -19,14 +19,16 @@ ChannelWorker::ChannelWorker(MSRaw<ChannelReactor> reactor)
 
 void ChannelWorker::startup()
 {
-	MS_DEBUG("startup worker: %d", std::this_thread::get_id());
+	MS_DEBUG("startup worker");
 
 	m_Running = true;
 	while (m_Running == true && m_Reactor->running())
 	{
 		MSUniqueLock lock(m_EventLock);
-		m_EventUnlock.wait(lock, [=]() {
-			return m_EventQueue.size() || m_Running == false || m_Reactor->running() == false; });
+		m_EventUnlock.wait(lock, [=]()
+		{
+			return m_EventQueue.size() || m_Running == false || m_Reactor->running() == false;
+		});
 
 		while (m_EventQueue.empty() == false && m_Running == true && m_Reactor->running() == true)
 		{
@@ -37,7 +39,7 @@ void ChannelWorker::startup()
 		}
 	}
 
-	MS_DEBUG("shutdown worker: %d", std::this_thread::get_id());
+	MS_DEBUG("shutdown worker");
 }
 
 void ChannelWorker::shutdown()

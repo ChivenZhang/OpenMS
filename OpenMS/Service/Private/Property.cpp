@@ -73,19 +73,19 @@ Property::Property()
 			}
 			break;
 		case nlohmann::ordered_json::value_t::boolean:
-			m_PropertyMap[name] = TTextC<bool>::to_string(value.get<bool>());
+			m_PropertyMap[name] = TTextC::to_string(value.get<bool>());
 			break;
 		case nlohmann::ordered_json::value_t::string:
 			m_PropertyMap[name] = value.get<std::string>();
 			break;
 		case nlohmann::ordered_json::value_t::number_float:
-			m_PropertyMap[name] = TTextC<float>::to_string(value.get<float>());
+			m_PropertyMap[name] = TTextC::to_string(value.get<float>());
 			break;
 		case nlohmann::ordered_json::value_t::number_integer:
-			m_PropertyMap[name] = TTextC<int32_t>::to_string(value.get<int32_t>());
+			m_PropertyMap[name] = TTextC::to_string(value.get<int32_t>());
 			break;
 		case nlohmann::ordered_json::value_t::number_unsigned:
-			m_PropertyMap[name] = TTextC<uint32_t>::to_string(value.get<uint32_t>());
+			m_PropertyMap[name] = TTextC::to_string(value.get<uint32_t>());
 			break;
 		default:
 			break;

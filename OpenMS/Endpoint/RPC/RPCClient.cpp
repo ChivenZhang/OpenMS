@@ -14,10 +14,13 @@ void RPCClient::startup()
 {
 	config_t config;
 	configureEndpoint(config);
-	config.Callback.OnOpen = [=](MSRef<IChannel> channel)
+	if (config.Callback.OnOpen == nullptr)
+	{
+		config.Callback.OnOpen = [=](MSRef<IChannel> channel)
 		{
-			channel->getPipeline()->addFirst("rpc", MSNew<RPCClientInboundHandler>(this));
+			channel->getPipeline()->addLast("default", MSNew<RPCClientInboundHandler>(this));
 		};
+	}
 	m_Buffers = config.Buffers;
 	m_Reactor = MSNew<TCPClientReactor>(
 		IPv4Address::New(config.IP, config.PortNum),
@@ -60,6 +63,7 @@ bool RPCClientInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<
 {
 	m_Buffer += event->Message;
 
+	// Use '\0' to split the message
 	auto index = event->Message.find(char());
 	if (index != MSString::npos)
 	{
@@ -68,17 +72,22 @@ bool RPCClientInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<
 			// Use '\0' to split the message
 			auto start = m_Buffer.find(char(), i);
 			if (start == MSString::npos) break;
-			auto message = m_Buffer.substr(i, start - i);
+			auto message = MSStringView(m_Buffer.data() + i, start - i);
 
-			RPCResponse response;
-			if (TTypeC(message, response))
+			// Handle remote response message
+
+			if (message.size() < m_Client->m_Buffers)
 			{
-				MSMutexLock lock(m_Client->m_Lock);
-				auto result = m_Client->m_Sessions.find(response.indx);
-				if (result != m_Client->m_Sessions.end())
+				RPCResponse response;
+				if (TTypeC(message, response))
 				{
-					result->second.OnResult(std::move(response.args));
-					m_Client->m_Sessions.erase(result);
+					MSMutexLock lock(m_Client->m_Lock);
+					auto result = m_Client->m_Sessions.find(response.indx);
+					if (result != m_Client->m_Sessions.end())
+					{
+						result->second.OnResult(std::move(response.args));
+						m_Client->m_Sessions.erase(result);
+					}
 				}
 			}
 

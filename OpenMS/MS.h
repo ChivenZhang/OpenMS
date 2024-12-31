@@ -351,8 +351,13 @@ inline const uint32_t MSHash(MSStringView value) noexcept
 #define OPENMS_BASE_OF(T, U) std::enable_if_t<std::is_base_of_v<T, U>, int> = 0
 #define OPENMS_IS_SAME(T, U) std::enable_if_t<std::is_same_v<T, U>, int> = 0
 #define OPENMS_NOT_SAME(T, U) std::enable_if_t<!std::is_same_v<T, U>, int> = 0
+#if 17 <= OPENMS_CPP_VERSION
+#define OPENMS_IS_TEXT(T) std::enable_if_t<std::is_same_v<T, std::string> || std::is_same_v<T, std::string_view>, int> = 0
+#define OPENMS_NOT_TEXT(T) std::enable_if_t<!std::is_same_v<T, std::string> && !std::is_same_v<T, std::string_view>, int> = 0
+#else
 #define OPENMS_IS_TEXT(T) std::enable_if_t<std::is_same_v<T, std::string>, int> = 0
 #define OPENMS_NOT_TEXT(T) std::enable_if_t<!std::is_same_v<T, std::string>, int> = 0
+#endif
 
 namespace std
 {
@@ -532,15 +537,32 @@ bool TTypeC(MSString const& src, const char*& dst)
 	return true;
 }
 
-template <class T>
+#if 17 <= OPENMS_CPP_VERSION
+template <class T = MSStringView, class U = MSString, OPENMS_NOT_SAME(T, U)>
+bool TTypeC(MSStringView const& src, MSString& dst)
+{
+	dst = MSString(src);
+	return true;
+}
+template <class T = MSString, class U = MSStringView, OPENMS_NOT_SAME(T, U)>
+bool TTypeC(MSString const& src, MSStringView& dst)
+{
+	dst = src;
+	return true;
+}
+#endif
+
 struct TTextC
 {
+	template <class T>
 	static MSString to_string(T const& value, MSString const& string = MSString())
 	{
 		MSString result;
 		if (TTypeC(value, result)) return result;
 		return string;
 	}
+
+	template <class T>
 	static T from_string(MSString const& string, T const& value = T())
 	{
 		T result;
