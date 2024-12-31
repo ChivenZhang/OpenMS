@@ -112,7 +112,7 @@ do { \
 char __DATETIME__[32]; auto __NOWTIME__ = std::time(nullptr); \
 std::strftime(__DATETIME__, sizeof(__DATETIME__), "%Y-%m-%d %H:%M:%S", std::localtime(&__NOWTIME__)); \
 auto __THREAD__ = []()->uint32_t { std::stringstream ss; ss << std::this_thread::get_id(); return std::stoul(ss.str()); }(); \
-std::fprintf(TARGET, "%s:%d\n" "%s " #LEVEL " %d --- " FORMAT "\n\n", __FILE__, __LINE__, __DATETIME__, __THREAD__, ##__VA_ARGS__); \
+std::fprintf(TARGET, "%s:%d\n" "%s " #LEVEL " %u --- " FORMAT "\n\n", __FILE__, __LINE__, __DATETIME__, __THREAD__, ##__VA_ARGS__); \
 std::fflush(TARGET); \
 } while (0)
 
