@@ -112,6 +112,7 @@ add_library(OpenMS STATIC
 		Service/Private/Service.h
 		Toolkit/Timer.cpp
 		Toolkit/Timer.h
+		Endpoint/HTTP/HTTPProtocol.h
 )
 
 find_package(unofficial-http-parser CONFIG REQUIRED)

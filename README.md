@@ -16,21 +16,19 @@ The Distributed Network Framework based on Microservice Theory.
 
 ## Features
 - [x] Support reactor network model
-- [x] Support tcp, udp, kcp, rpc protocols
+- [x] Support tcp, udp, kcp, rpc, [http under way]
+- [x] Support Cpp20 coroutine coding
 - [x] Support Erlang-style message
-- [x] Support cpp20 coroutine codes
 - [x] Support microservice cluster
 - [x] Support Windows, macOS, Linux
 - [ ] Support Hot module replacement
 
 ## How to install
 * Use git to clone this repository.
-* Add "VCPKG_ROOT_CUSTOM" variable to environment.
+* Add "VCPKG_ROOT_CUSTOM" to environment.
 * Use vcpkg to install third-party on manifest mode.
-* Use cmake to open CMakeLists.txt and build.
-* See "Sample/DemoService.cpp" for more details.
+* Use Clion or Visual studio to open CMakeLists.txt.
+* See folder "Sample" for more details.
 
 ## Architecture
-<div align="center">
-  <img src="Framework.png" style="width:100%;" />
-</div>
+<div><img src="Framework.png" style="width:100%;"  alt="missing"/></div>

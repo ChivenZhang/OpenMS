@@ -42,7 +42,7 @@ public:
 
 		// Convert arguments to string
 
-		MSString input, output;
+		MSString input;
 		if (std::is_same_v<MSTuple<Args...>, MSTuple<>> == false)
 		{
 			if (TTypeC(std::make_tuple(args...), input) == false) return T();
@@ -53,10 +53,11 @@ public:
 		request.args = input;
 		if (TTypeC(request, input) == false) return T();
 
-		// Set up promise and callback
+		// Setup promise and callback
 
 		if (timeout)
 		{
+			MSString output;
 			auto promise = MSNew<MSPromise<void>>();
 			auto future = promise->get_future();
 			{
@@ -173,7 +174,7 @@ public:
 		request.args = input;
 		if (TTypeC(request, input) == false) return false;
 
-		// Set up promise and callback
+		// Setup promise and callback
 
 		if (timeout)
 		{
@@ -226,7 +227,7 @@ public:
 		request.args = input;
 		if (TTypeC(request, input) == false) return false;
 
-		// Set up promise and callback
+		// Setup promise and callback
 
 		if (timeout)
 		{
@@ -274,7 +275,6 @@ protected:
 	{
 		MSLambda<void(MSString&&)> OnResult;
 	};
-
 	MSMap<uint32_t, invoke_t> m_Sessions;
 };
 

@@ -97,7 +97,7 @@ protected:
 	MSMutex m_Lock;
 	uint32_t m_Buffers = UINT32_MAX;
 	MSRef<TCPServerReactor> m_Reactor;
-	MSMap<MSString, MSLambda<bool(MSString const& input, MSString& output)>> m_Methods;
+	MSStringMap<MSLambda<bool(MSString const& input, MSString& output)>> m_Methods;
 };
 
 class RPCServerInboundHandler : public ChannelInboundHandler
