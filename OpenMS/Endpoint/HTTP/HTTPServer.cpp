@@ -89,24 +89,6 @@ bool HTTPServer::bind(uint8_t method, MSString path, callback_t callback)
 	return true;
 }
 
-int on_message_begin(http_parser* parser)
-{
-	printf("Message Begin\n");
-	return 0;
-}
-
-int on_headers_complete(http_parser* parser)
-{
-	printf("Headers Complete\n");
-	return 0;
-}
-
-int on_message_complete(http_parser* parser)
-{
-	printf("Message Complete\n");
-	return 0;
-}
-
 HTTPServerInboundHandler::HTTPServerInboundHandler(MSRaw<HTTPServer> server)
 	:
 	m_Server(server), m_Parser(), m_Settings()
@@ -123,6 +105,7 @@ bool HTTPServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw
 		auto handler = (HTTPServerInboundHandler*)parser->data;
 		handler->m_LastField = MSString();
 		handler->m_Request.Url = MSString();
+		handler->m_Request.Params.clear();
 		handler->m_Request.Header.clear();
 		handler->m_Request.Body = MSString();
 
@@ -134,7 +117,34 @@ bool HTTPServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw
 	m_Settings.on_url = [](http_parser* parser, const char* at, size_t length)
 	{
 		auto handler = (HTTPServerInboundHandler*)parser->data;
-		handler->m_Request.Url = MSString(at, length);
+		auto url = MSString(at, length);
+
+		// ex: url = /path/to/resource?param1=value1&param2=value2&...
+
+		auto index = url.find('?');
+		if (index != MSString::npos)
+		{
+			for (size_t i = index + 1, start = i; i < url.size();)
+			{
+				auto index1 = url.find('&', start);
+				MSString param, key, value;
+				if (index1 != MSString::npos) param = url.substr(start, index1 - start);
+				else param = url.substr(start);
+
+				auto index2 = param.find('=');
+				if (index2 != MSString::npos) key = param.substr(0, index2);
+				else key = param;
+				if (index2 != MSString::npos) value = param.substr(index2 + 1);
+
+				if (key.empty() == false) handler->m_Request.Params[key] = value;
+
+				if (index1 == MSString::npos) break;
+				i = index1 + 1;
+				start = i;
+			}
+		}
+
+		handler->m_Request.Url = url.substr(0, index);
 		return 0;
 	};
 	m_Settings.on_header_field = [](http_parser* parser, const char* at, size_t length)
@@ -146,7 +156,8 @@ bool HTTPServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw
 	m_Settings.on_header_value = [](http_parser* parser, const char* at, size_t length)
 	{
 		auto handler = (HTTPServerInboundHandler*)parser->data;
-		handler->m_Request.Header[handler->m_LastField] = MSString(at, length);
+		auto result = handler->m_Request.Header.emplace(handler->m_LastField, MSString(at, length));
+		if (result.second == false) result.first->second += "," + MSString(at, length);
 		return 0;
 	};
 	m_Settings.on_headers_complete = [](http_parser* parser)
@@ -199,7 +210,12 @@ bool HTTPServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw
 			break;
 		}
 
-		if (method)
+		if (method == nullptr)
+		{
+			handler->m_Response.Code = HTTP_STATUS_NOT_FOUND;
+			handler->m_Response.Body = "Not Found";
+		}
+		else
 		{
 			method(handler->m_Request, handler->m_Response);
 			if (handler->m_Response.Code == 0)
@@ -207,13 +223,6 @@ bool HTTPServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw
 				handler->m_Response.Code = HTTP_STATUS_INTERNAL_SERVER_ERROR;
 				handler->m_Response.Body = "Internal Server Error";
 			}
-			return 0;
-		}
-
-		if (handler->m_Response.Code == 0)
-		{
-			handler->m_Response.Code = HTTP_STATUS_NOT_FOUND;
-			handler->m_Response.Body = "Not Found";
 		}
 		return 0;
 	};
@@ -223,12 +232,11 @@ bool HTTPServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw
 	{
 		if (m_Response.Code)
 		{
-			MSString contentType = m_Response.ContentType;
-			MSString contentLength = std::to_string(m_Response.Body.size());
-			MSString status_line = "HTTP/1.0 " + std::to_string(m_Response.Code);
-			MSString headers = "Content-Type: " + contentType + "\r\nContent-Length: " + contentLength + "\r\n";
-			MSString& body = m_Response.Body;
-			auto response = status_line + "\r\n" + headers + "\r\n" + body;
+			MSString headers;
+			m_Response.Header.emplace("Content-Type", "text/plain; charset=UTF-8");
+			m_Response.Header["Content-Length"] = std::to_string(m_Response.Body.size());
+			for (auto& header : m_Response.Header) headers += header.first + ": " + header.second + "\r\n";
+			auto response = "HTTP/1.0 " + std::to_string(m_Response.Code) + "\r\n" + headers + "\r\n" + m_Response.Body;
 			context->writeAndFlush(IChannelEvent::New(response));
 		}
 	}
