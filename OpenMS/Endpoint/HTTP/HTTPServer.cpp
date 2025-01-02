@@ -184,14 +184,10 @@ bool HTTPServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw
 		if (result.second == false) result.first->second += "," + MSString(at, length);
 		return 0;
 	};
-	m_Settings.on_headers_complete = [](http_parser* parser)
-	{
-		return 0;
-	};
 	m_Settings.on_body = [](http_parser* parser, const char* at, size_t length)
 	{
 		auto handler = (HTTPServerInboundHandler*)parser->data;
-		handler->m_Request.Body = MSString(at, length);
+		handler->m_Request.Body += MSString(at, length);
 		return 0;
 	};
 	m_Settings.on_message_complete = [](http_parser* parser)
@@ -285,8 +281,8 @@ bool HTTPServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw
 			MSString headers;
 			m_Response.Header.emplace("Content-Type", "text/plain; charset=UTF-8");
 			m_Response.Header["Content-Length"] = std::to_string(m_Response.Body.size());
-			for (auto& header : m_Response.Header) headers += header.first + ": " + header.second + "\r\n";
-			auto response = "HTTP/1.0 " + std::to_string(m_Response.Code) + "\r\n" + headers + "\r\n" + m_Response.Body;
+			for (auto& header : m_Response.Header) headers += header.first + ":" + header.second + "\r\n";
+			auto response = "HTTP/1.1" " " + std::to_string(m_Response.Code) + "\r\n" + headers + "\r\n" + m_Response.Body;
 			context->writeAndFlush(IChannelEvent::New(response));
 		}
 	}

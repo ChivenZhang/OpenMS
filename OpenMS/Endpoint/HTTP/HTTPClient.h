@@ -23,13 +23,11 @@ public:
 		MSString IP;
 		uint16_t PortNum = 0;
 		uint32_t Workers = 0;
-		uint32_t Buffers = UINT32_MAX;
 		TCPClientReactor::callback_tcp_t Callback;
 	};
 
 	using request_t = HTTPRequest;
 	using response_t = HTTPResponse;
-	using callback_t = MSLambda<void(request_t const& request, response_t& response)>;
 
 public:
 	void startup() override;
@@ -40,50 +38,39 @@ public:
 
 	bool call_get(request_t const& request, uint32_t timeout, response_t& response)
 	{
-		return false;
+		return call_internal(request, HTTP_GET, timeout, response);
 	}
 
 	bool call_post(request_t const& request, uint32_t timeout, response_t& response)
 	{
-		return false;
+		return call_internal(request, HTTP_POST, timeout, response);
 	}
 
 	bool call_put(request_t const& request, uint32_t timeout, response_t& response)
 	{
-		return false;
+		return call_internal(request, HTTP_PUT, timeout, response);
 	}
 
 	bool call_delete(request_t const& request, uint32_t timeout, response_t& response)
 	{
-		return false;
-	}
-
-	bool async_get(request_t const& request, uint32_t timeout, MSLambda<void(response_t& response)> callback)
-	{
-		return false;
-	}
-
-	bool async_post(request_t const& request, uint32_t timeout, MSLambda<void(response_t& response)> callback)
-	{
-		return false;
-	}
-
-	bool async_put(request_t const& request, uint32_t timeout, MSLambda<void(response_t& response)> callback)
-	{
-		return false;
-	}
-
-	bool async_delete(request_t const& request, uint32_t timeout, MSLambda<void(response_t& response)> callback)
-	{
-		return false;
+		return call_internal(request, HTTP_DELETE, timeout, response);
 	}
 
 protected:
+	bool call_internal(request_t const& request, uint8_t type, uint32_t timeout, response_t& response);
+
 	virtual void configureEndpoint(config_t& config) const = 0;
 
 protected:
-	uint32_t m_Buffers = UINT32_MAX;
+	friend class HTTPClientInboundHandler;
+	MSMutex m_Lock;
 	MSRef<TCPClientReactor> m_Reactor;
+
+	struct invoke_t
+	{
+		MSLambda<void(response_t&&)> OnResult;
+	};
+	MSQueue<invoke_t> m_Sessions;
 };
 
 class HTTPClientInboundHandler : public ChannelInboundHandler
@@ -97,6 +84,5 @@ protected:
 	http_parser m_Parser;
 	http_parser_settings m_Settings;
 	MSString m_LastField;
-	HTTPClient::request_t m_Request;
 	HTTPClient::response_t m_Response;
 };

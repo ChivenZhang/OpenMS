@@ -11,11 +11,12 @@
 * =================================================*/
 #include <OpenMS/Service/Master/MasterService.h>
 #include <OpenMS/Endpoint/HTTP/HTTPServer.h>
+#include <OpenMS/Endpoint/HTTP/HTTPClient.h>
 
-class MasterDemo : public MasterService, public HTTPServer
+class MasterDemo : public MasterService, public HTTPClient
 {
 protected:
 	void onInit() override;
 	void onExit() override;
-	void configureEndpoint(HTTPServer::config_t& config) const override;
+	void configureEndpoint(HTTPClient::config_t& config) const override;
 };
