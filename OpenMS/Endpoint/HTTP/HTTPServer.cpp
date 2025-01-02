@@ -54,31 +54,38 @@ MSHnd<IChannelAddress> HTTPServer::address() const
 	return m_Reactor ? m_Reactor->address() : MSHnd<IChannelAddress>();
 }
 
-bool HTTPServer::bind_get(MSString path, callback_t callback)
+bool HTTPServer::bind(uint8_t method, MSString path, callback_t callback)
 {
-	MSMutexLock lock(m_LockGet);
-	m_GetMethods[path] = {HTTP_GET, callback};
-	return true;
-}
-
-bool HTTPServer::bind_post(MSString path, callback_t callback)
-{
-	MSMutexLock lock(m_LockPost);
-	m_PostMethods[path] = {HTTP_POST, callback};
-	return true;
-}
-
-bool HTTPServer::bind_put(MSString path, callback_t callback)
-{
-	MSMutexLock lock(m_LockPut);
-	m_PutMethods[path] = {HTTP_PUT, callback};
-	return true;
-}
-
-bool HTTPServer::bind_delete(MSString path, callback_t callback)
-{
-	MSMutexLock lock(m_LockDelete);
-	m_DeleteMethods[path] = {HTTP_DELETE, callback};
+	switch (method)
+	{
+	case HTTP_DELETE:
+		{
+			MSMutexLock lock(m_LockDelete);
+			m_DeleteMethods[path] = {HTTP_DELETE, callback};
+		}
+		break;
+	case HTTP_GET:
+		{
+			MSMutexLock lock(m_LockGet);
+			m_GetMethods[path] = {HTTP_GET, callback};
+		}
+		break;
+	case HTTP_POST:
+		{
+			MSMutexLock lock(m_LockPost);
+			m_PostMethods[path] = {HTTP_POST, callback};
+		}
+		break;
+	case HTTP_PUT:
+		{
+			MSMutexLock lock(m_LockPut);
+			m_PutMethods[path] = {HTTP_PUT, callback};
+		}
+		break;
+	default:
+		MS_WARN("unknown method %d", method);
+		return false;
+	}
 	return true;
 }
 
@@ -102,7 +109,7 @@ int on_message_complete(http_parser* parser)
 
 HTTPServerInboundHandler::HTTPServerInboundHandler(MSRaw<HTTPServer> server)
 	:
-	m_Server(server)
+	m_Server(server), m_Parser(), m_Settings()
 {
 	http_parser_init(&m_Parser, HTTP_REQUEST);
 	http_parser_settings_init(&m_Settings);
@@ -119,7 +126,7 @@ bool HTTPServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw
 		handler->m_Request.Header.clear();
 		handler->m_Request.Body = MSString();
 
-		handler->m_Response.Code = 404;
+		handler->m_Response.Code = 0;
 		handler->m_Response.Header.clear();
 		handler->m_Response.Body = MSString();
 		return 0;
@@ -195,15 +202,37 @@ bool HTTPServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw
 		if (method)
 		{
 			method(handler->m_Request, handler->m_Response);
+			if (handler->m_Response.Code == 0)
+			{
+				handler->m_Response.Code = HTTP_STATUS_INTERNAL_SERVER_ERROR;
+				handler->m_Response.Body = "Internal Server Error";
+			}
 			return 0;
 		}
 
-		MS_INFO("error %s", handler->m_Request.Url.c_str());
+		if (handler->m_Response.Code == 0)
+		{
+			handler->m_Response.Code = HTTP_STATUS_NOT_FOUND;
+			handler->m_Response.Body = "Not Found";
+		}
 		return 0;
 	};
 
 	auto parsedNum = http_parser_execute(&m_Parser, &m_Settings, event->Message.data(), event->Message.size());
-	if (parsedNum != event->Message.size())
+	if (parsedNum == event->Message.size())
+	{
+		if (m_Response.Code)
+		{
+			MSString contentType = m_Response.ContentType;
+			MSString contentLength = std::to_string(m_Response.Body.size());
+			MSString status_line = "HTTP/1.0 " + std::to_string(m_Response.Code);
+			MSString headers = "Content-Type: " + contentType + "\r\nContent-Length: " + contentLength + "\r\n";
+			MSString& body = m_Response.Body;
+			auto response = status_line + "\r\n" + headers + "\r\n" + body;
+			context->writeAndFlush(IChannelEvent::New(response));
+		}
+	}
+	else
 	{
 		context->close();
 	}

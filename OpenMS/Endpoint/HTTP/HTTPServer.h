@@ -39,13 +39,14 @@ public:
 	bool connect() const override;
 	MSHnd<IChannelAddress> address() const override;
 
-	bool bind_get(MSString path, callback_t callback);
-
-	bool bind_post(MSString path, callback_t callback);
-
-	bool bind_put(MSString path, callback_t callback);
-
-	bool bind_delete(MSString path, callback_t callback);
+	/**
+	 * Bind action to path
+	 * @param method HTTP_GET,HTTP_POST,HTTP_PUT or HTTP_DELETE
+	 * @param path Url
+	 * @param callback Action
+	 * @return Feedback
+	 */
+	bool bind(uint8_t method, MSString path, callback_t callback);
 
 protected:
 	virtual void configureEndpoint(config_t& config) const = 0;

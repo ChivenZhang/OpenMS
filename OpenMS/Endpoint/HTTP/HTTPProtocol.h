@@ -22,5 +22,6 @@ struct HTTPResponse
 {
 	uint32_t Code;
 	MSString Body;
+	MSString ContentType = "text/plain; charset=UTF-8";
 	MSStringMap<MSString> Header;
 };

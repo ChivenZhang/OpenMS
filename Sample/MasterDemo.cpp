@@ -6,9 +6,11 @@ void MasterDemo::onInit()
 
 	HTTPServer::startup();
 
-	bind_get("/index", [](HTTPServer::request_t const& request, HTTPServer::response_t& response)
+	HTTPServer::bind(HTTP_GET, "/index", [](HTTPServer::request_t const& request, HTTPServer::response_t& response)
 	{
 		MS_INFO("handle %s", request.Url.c_str());
+		response.Code = HTTP_STATUS_OK;
+		response.Body = "Hello,OpenMS!";
 	});
 }
 
