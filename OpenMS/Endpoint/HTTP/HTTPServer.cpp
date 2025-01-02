@@ -9,6 +9,8 @@
 * 
 * =================================================*/
 #include "HTTPServer.h"
+#include <regex>
+#include <cpptrace.hpp>
 
 void HTTPServer::startup()
 {
@@ -21,12 +23,25 @@ void HTTPServer::startup()
 			channel->getPipeline()->addLast("default", MSNew<HTTPServerInboundHandler>(this));
 		};
 	}
-	m_Buffers = config.Buffers;
+	if (config.Callback.OnRoute == nullptr)
+	{
+		config.Callback.OnRoute = [](MSString const& rule, MSString const& url)->bool
+		{
+			try
+			{
+				std::regex regex(rule);
+				return std::regex_match(url, regex);
+			}
+			catch (...) {}
+			return false;
+		};
+	}
+	m_OnRoute = config.Callback.OnRoute;
 	m_Reactor = MSNew<TCPServerReactor>(
 		IPv4Address::New(config.IP, config.PortNum),
 		config.Backlog,
 		config.Workers,
-		config.Callback
+		TCPServerReactor::callback_tcp_t{ config.Callback.OnOpen, config.Callback.OnClose }
 	);
 	m_Reactor->startup();
 	if (m_Reactor->running() == false)
@@ -54,36 +69,44 @@ MSHnd<IChannelAddress> HTTPServer::address() const
 	return m_Reactor ? m_Reactor->address() : MSHnd<IChannelAddress>();
 }
 
-bool HTTPServer::bind(uint8_t method, MSString path, callback_t callback)
+bool HTTPServer::bind_internal(MSStringView path, uint8_t type, method_t&& method)
 {
-	switch (method)
+	switch (type)
 	{
 	case HTTP_DELETE:
 		{
 			MSMutexLock lock(m_LockDelete);
-			m_DeleteMethods[path] = {HTTP_DELETE, callback};
+			auto result = std::find_if(m_DeleteRouter.begin(), m_DeleteRouter.end(), [=](auto& e)->bool{ return e.first == path;});
+			if (result == m_DeleteRouter.end()) m_DeleteRouter.emplace_back(MSString(path), method);
+			else result->second = method;
 		}
 		break;
 	case HTTP_GET:
 		{
 			MSMutexLock lock(m_LockGet);
-			m_GetMethods[path] = {HTTP_GET, callback};
+			auto result = std::find_if(m_GetRouter.begin(), m_GetRouter.end(), [=](auto& e)->bool{ return e.first == path;});
+			if (result == m_GetRouter.end()) m_GetRouter.emplace_back(MSString(path), method);
+			else result->second = method;
 		}
 		break;
 	case HTTP_POST:
 		{
 			MSMutexLock lock(m_LockPost);
-			m_PostMethods[path] = {HTTP_POST, callback};
+			auto result = std::find_if(m_PostRouter.begin(), m_PostRouter.end(), [=](auto& e)->bool{ return e.first == path;});
+			if (result == m_PostRouter.end()) m_PostRouter.emplace_back(MSString(path), method);
+			else result->second = method;
 		}
 		break;
 	case HTTP_PUT:
 		{
 			MSMutexLock lock(m_LockPut);
-			m_PutMethods[path] = {HTTP_PUT, callback};
+			auto result = std::find_if(m_PutRouter.begin(), m_PutRouter.end(), [=](auto& e)->bool{ return e.first == path;});
+			if (result == m_PutRouter.end()) m_PutRouter.emplace_back(MSString(path), method);
+			else result->second = method;
 		}
 		break;
 	default:
-		MS_WARN("unknown method %d", method);
+		MS_WARN("unknown method %d", type);
 		return false;
 	}
 	return true;
@@ -145,6 +168,7 @@ bool HTTPServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw
 		}
 
 		handler->m_Request.Url = url.substr(0, index);
+		if (handler->m_Request.Url.empty()) handler->m_Request.Url = "/";
 		return 0;
 	};
 	m_Settings.on_header_field = [](http_parser* parser, const char* at, size_t length)
@@ -174,55 +198,81 @@ bool HTTPServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw
 	{
 		auto handler = (HTTPServerInboundHandler*)parser->data;
 
-		HTTPServer::callback_t method;
+		HTTPServer::method_t method;
 
 		switch (parser->method)
 		{
 		case HTTP_DELETE:
 			{
 				MSMutexLock lock(handler->m_Server->m_LockDelete);
-				auto result = handler->m_Server->m_DeleteMethods.find(handler->m_Request.Url);
-				if (result != handler->m_Server->m_DeleteMethods.end() && result->second.Method == HTTP_DELETE) method = result->second.Callback;
+				for (auto& route : handler->m_Server->m_DeleteRouter)
+				{
+					if (handler->m_Server->m_OnRoute(route.first, handler->m_Request.Url) == false) continue;
+					method = route.second;
+				}
 			}
 			break;
 		case HTTP_GET:
 			{
 				MSMutexLock lock(handler->m_Server->m_LockGet);
-				auto result = handler->m_Server->m_GetMethods.find(handler->m_Request.Url);
-				if (result != handler->m_Server->m_GetMethods.end() && result->second.Method == HTTP_GET) method = result->second.Callback;
+				for (auto& route : handler->m_Server->m_GetRouter)
+				{
+					if (handler->m_Server->m_OnRoute(route.first, handler->m_Request.Url) == false) continue;
+					method = route.second;
+				}
 			}
 			break;
 		case HTTP_POST:
 			{
 				MSMutexLock lock(handler->m_Server->m_LockPost);
-				auto result = handler->m_Server->m_PostMethods.find(handler->m_Request.Url);
-				if (result != handler->m_Server->m_PostMethods.end() && result->second.Method == HTTP_POST) method = result->second.Callback;
+				for (auto& route : handler->m_Server->m_PostRouter)
+				{
+					if (handler->m_Server->m_OnRoute(route.first, handler->m_Request.Url) == false) continue;
+					method = route.second;
+				}
 			}
 			break;
 		case HTTP_PUT:
 			{
 				MSMutexLock lock(handler->m_Server->m_LockPut);
-				auto result = handler->m_Server->m_PutMethods.find(handler->m_Request.Url);
-				if (result != handler->m_Server->m_PutMethods.end() && result->second.Method == HTTP_PUT) method = result->second.Callback;
+				for (auto& route : handler->m_Server->m_PutRouter)
+				{
+					if (handler->m_Server->m_OnRoute(route.first, handler->m_Request.Url) == false) continue;
+					method = route.second;
+				}
 			}
 			break;
 		default:
 			break;
 		}
 
-		if (method == nullptr)
+		if (method)
 		{
-			handler->m_Response.Code = HTTP_STATUS_NOT_FOUND;
-			handler->m_Response.Body = "Not Found";
-		}
-		else
-		{
-			method(handler->m_Request, handler->m_Response);
+			try
+			{
+				method(handler->m_Request, handler->m_Response);
+			}
+			catch (MSError const& ex)
+			{
+				cpptrace::logic_error error(ex.what());
+				MS_ERROR("%s", error.what());
+			}
+			catch (...)
+			{
+				cpptrace::logic_error error("unhandled exception");
+				MS_ERROR("%s", error.what());
+			}
+
 			if (handler->m_Response.Code == 0)
 			{
 				handler->m_Response.Code = HTTP_STATUS_INTERNAL_SERVER_ERROR;
 				handler->m_Response.Body = "Internal Server Error";
 			}
+		}
+		else
+		{
+			handler->m_Response.Code = HTTP_STATUS_NOT_FOUND;
+			handler->m_Response.Body = "Not Found";
 		}
 		return 0;
 	};

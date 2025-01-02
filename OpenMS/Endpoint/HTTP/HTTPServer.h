@@ -24,13 +24,18 @@ public:
 		uint16_t PortNum = 0;
 		uint32_t Backlog = 0;
 		uint32_t Workers = 0;
-		uint32_t Buffers = UINT32_MAX;
-		TCPServerReactor::callback_tcp_t Callback;
+
+		struct
+		{
+			MSLambda<void(MSRef<IChannel>)> OnOpen;
+			MSLambda<void(MSRef<IChannel>)> OnClose;
+			MSLambda<bool(MSString const& rule, MSString const& url)> OnRoute;
+		} Callback;
 	};
 
 	using request_t = HTTPRequest;
 	using response_t = HTTPResponse;
-	using callback_t = MSLambda<void(request_t const& request, response_t& response)>;
+	using method_t = MSLambda<void(request_t const& request, response_t& response)>;
 
 public:
 	void startup() override;
@@ -39,30 +44,36 @@ public:
 	bool connect() const override;
 	MSHnd<IChannelAddress> address() const override;
 
-	/**
-	 * Bind action to path
-	 * @param method HTTP_GET,HTTP_POST,HTTP_PUT or HTTP_DELETE
-	 * @param path Url
-	 * @param callback Action
-	 * @return Feedback
-	 */
-	bool bind(uint8_t method, MSString path, callback_t callback);
+	bool bind_get(MSStringView path, method_t&& method)
+	{
+		return bind_internal(path, HTTP_GET, std::move(method));
+	}
+
+	bool bind_post(MSStringView path, method_t&& method)
+	{
+		return bind_internal(path, HTTP_POST, std::move(method));
+	}
+
+	bool bind_put(MSStringView path, method_t&& method)
+	{
+		return bind_internal(path, HTTP_PUT, std::move(method));
+	}
+
+	bool bind_delete(MSStringView path, method_t&& method)
+	{
+		return bind_internal(path, HTTP_DELETE, std::move(method));
+	}
 
 protected:
+	bool bind_internal(MSStringView path, uint8_t type, method_t&& method);
 	virtual void configureEndpoint(config_t& config) const = 0;
 
 protected:
 	friend class HTTPServerInboundHandler;
-	uint32_t m_Buffers = UINT32_MAX;
 	MSRef<TCPServerReactor> m_Reactor;
+	MSLambda<bool(MSString const& rule, MSString const& url)> m_OnRoute;
 	MSMutex m_LockGet, m_LockPost, m_LockPut, m_LockDelete;
-
-	struct method_t
-	{
-		uint8_t Method;
-		callback_t Callback;
-	};
-	MSStringMap<method_t> m_GetMethods, m_PostMethods, m_PutMethods, m_DeleteMethods;
+	MSList<MSBinary<MSString, method_t>> m_GetRouter, m_PostRouter, m_PutRouter, m_DeleteRouter;
 };
 
 class HTTPServerInboundHandler : public ChannelInboundHandler

@@ -6,10 +6,23 @@ void MasterDemo::onInit()
 
 	HTTPServer::startup();
 
-	HTTPServer::bind(HTTP_GET, "/index", [](auto const& request, auto& response)
+	HTTPServer::bind_get(R"(/index.*)", [](auto const& request, auto& response)
 	{
-		response.Code = HTTP_STATUS_OK;
 		response.Body = "Hello,OpenMS!";
+		response.Code = HTTP_STATUS_OK;
+	});
+
+	HTTPServer::bind_get(R"(/version)", [](auto const& request, auto& response)
+	{
+		response.Body = "1.0.0.0";
+		response.Code = HTTP_STATUS_OK;
+	});
+
+	HTTPServer::bind_get(R"(/api)", [](auto const& request, auto& response)
+	{
+		MSStringList api = {"/index", "/version", "/api"};
+		response.Body = TTextC::to_string(api);
+		response.Code = HTTP_STATUS_OK;
 	});
 }
 
