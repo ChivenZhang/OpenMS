@@ -16,7 +16,7 @@ The Distributed Network Framework based on Microservice Theory.
 
 ## Features
 - [x] Support reactor network model
-- [x] Support tcp, udp, kcp, rpc, [http under way]
+- [x] Support tcp, udp, kcp, rpc, http
 - [x] Support Cpp20 coroutine coding
 - [x] Support Erlang-style message
 - [x] Support microservice cluster
