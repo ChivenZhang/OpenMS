@@ -25,14 +25,16 @@ void HTTPServer::startup()
 	}
 	if (config.Callback.OnRoute == nullptr)
 	{
-		config.Callback.OnRoute = [](MSString const& rule, MSString const& url)->bool
+		config.Callback.OnRoute = [](MSString const& rule, MSString const& url)-> bool
 		{
 			try
 			{
 				std::regex regex(rule);
 				return std::regex_match(url, regex);
 			}
-			catch (...) {}
+			catch (...)
+			{
+			}
 			return false;
 		};
 	}
@@ -40,12 +42,11 @@ void HTTPServer::startup()
 	m_Reactor = MSNew<TCPServerReactor>(
 		IPv4Address::New(config.IP, config.PortNum),
 		config.Backlog,
-		1,
-		TCPServerReactor::callback_tcp_t{ config.Callback.OnOpen, config.Callback.OnClose }
+		config.Workers,
+		TCPServerReactor::callback_tcp_t{config.Callback.OnOpen, config.Callback.OnClose}
 	);
 	m_Reactor->startup();
-	if (m_Reactor->running() == false)
-		MS_FATAL("failed to start reactor");
+	if (m_Reactor->running() == false) MS_FATAL("failed to start reactor");
 }
 
 void HTTPServer::shutdown()
@@ -76,7 +77,7 @@ bool HTTPServer::bind_internal(MSStringView path, uint8_t type, method_t&& metho
 	case HTTP_DELETE:
 		{
 			MSMutexLock lock(m_LockDelete);
-			auto result = std::find_if(m_DeleteRouter.begin(), m_DeleteRouter.end(), [=](auto& e)->bool{ return e.first == path;});
+			auto result = std::find_if(m_DeleteRouter.begin(), m_DeleteRouter.end(), [=](auto& e)-> bool { return e.first == path; });
 			if (result == m_DeleteRouter.end()) m_DeleteRouter.emplace_back(MSString(path), method);
 			else result->second = method;
 		}
@@ -84,7 +85,7 @@ bool HTTPServer::bind_internal(MSStringView path, uint8_t type, method_t&& metho
 	case HTTP_GET:
 		{
 			MSMutexLock lock(m_LockGet);
-			auto result = std::find_if(m_GetRouter.begin(), m_GetRouter.end(), [=](auto& e)->bool{ return e.first == path;});
+			auto result = std::find_if(m_GetRouter.begin(), m_GetRouter.end(), [=](auto& e)-> bool { return e.first == path; });
 			if (result == m_GetRouter.end()) m_GetRouter.emplace_back(MSString(path), method);
 			else result->second = method;
 		}
@@ -92,7 +93,7 @@ bool HTTPServer::bind_internal(MSStringView path, uint8_t type, method_t&& metho
 	case HTTP_POST:
 		{
 			MSMutexLock lock(m_LockPost);
-			auto result = std::find_if(m_PostRouter.begin(), m_PostRouter.end(), [=](auto& e)->bool{ return e.first == path;});
+			auto result = std::find_if(m_PostRouter.begin(), m_PostRouter.end(), [=](auto& e)-> bool { return e.first == path; });
 			if (result == m_PostRouter.end()) m_PostRouter.emplace_back(MSString(path), method);
 			else result->second = method;
 		}
@@ -100,7 +101,7 @@ bool HTTPServer::bind_internal(MSStringView path, uint8_t type, method_t&& metho
 	case HTTP_PUT:
 		{
 			MSMutexLock lock(m_LockPut);
-			auto result = std::find_if(m_PutRouter.begin(), m_PutRouter.end(), [=](auto& e)->bool{ return e.first == path;});
+			auto result = std::find_if(m_PutRouter.begin(), m_PutRouter.end(), [=](auto& e)-> bool { return e.first == path; });
 			if (result == m_PutRouter.end()) m_PutRouter.emplace_back(MSString(path), method);
 			else result->second = method;
 		}
