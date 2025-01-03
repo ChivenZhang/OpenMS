@@ -32,11 +32,13 @@ bool AESInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<IChann
 	mbedtls_aes_init(&aes_ctx);
 	do
 	{
-		if (ret = mbedtls_aes_setkey_dec(&aes_ctx, key.data(), (int)key.size() * 8))break;
+		ret = mbedtls_aes_setkey_dec(&aes_ctx, key.data(), (int)key.size() * 8);
+		if (ret)break;
 		size_t count0 = length / 16 * 16;
 		size_t count1 = count0 + ((length % 16) ? 16 : 0);
 		result.resize(count1);
-		if (ret = mbedtls_aes_crypt_cbc(&aes_ctx, MBEDTLS_AES_DECRYPT, count0, iv.data(), input, (uint8_t*)result.data())) break;
+		ret = mbedtls_aes_crypt_cbc(&aes_ctx, MBEDTLS_AES_DECRYPT, count0, iv.data(), input, (uint8_t*)result.data());
+		if (ret) break;
 		if (count0 != count1)
 		{
 			uint8_t block[16]{ 0 };
@@ -74,11 +76,13 @@ bool AESOutboundHandler::channelWrite(MSRaw<IChannelContext> context, MSRaw<ICha
 	mbedtls_aes_init(&aes_ctx);
 	do
 	{
-		if (ret = mbedtls_aes_setkey_enc(&aes_ctx, key.data(), (int)key.size() * 8))break;
+		ret = mbedtls_aes_setkey_enc(&aes_ctx, key.data(), (int)key.size() * 8);
+		if (ret)break;
 		size_t count0 = length / 16 * 16;
 		size_t count1 = count0 + ((length % 16) ? 16 : 0);
 		result.resize(count1);
-		if (ret = mbedtls_aes_crypt_cbc(&aes_ctx, MBEDTLS_AES_ENCRYPT, count0, iv.data(), input, (uint8_t*)result.data())) break;
+		ret = mbedtls_aes_crypt_cbc(&aes_ctx, MBEDTLS_AES_ENCRYPT, count0, iv.data(), input, (uint8_t*)result.data());
+		if (ret) break;
 		if (count0 != count1)
 		{
 			uint8_t block[16]{ 0 };

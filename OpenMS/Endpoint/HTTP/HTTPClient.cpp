@@ -55,6 +55,8 @@ MSHnd<IChannelAddress> HTTPClient::address() const
 
 bool HTTPClient::call_internal(request_t const& request, uint8_t type, uint32_t timeout, response_t& response)
 {
+	// Resolve request method type
+
 	MSString method;
 	switch (type)
 	{
@@ -68,6 +70,8 @@ bool HTTPClient::call_internal(request_t const& request, uint8_t type, uint32_t 
 		break;
 	default: return false;
 	}
+
+	// Generate request headers
 
 	MSString headers;
 	if (request.Header.find("Content-Type") == request.Header.end())
@@ -84,6 +88,8 @@ bool HTTPClient::call_internal(request_t const& request, uint8_t type, uint32_t 
 	}
 	for (auto& header : request.Header) headers += header.first + ":" + header.second + "\r\n";
 
+	// Generate request url params
+
 	MSString params;
 	for (auto& param : request.Params)
 	{
@@ -96,6 +102,8 @@ bool HTTPClient::call_internal(request_t const& request, uint8_t type, uint32_t 
 	}
 	if (params.empty()) params = request.Url;
 	else params = request.Url + "?" + params;
+
+	// Send request to remote server
 
 	if (timeout)
 	{
@@ -138,6 +146,8 @@ HTTPClientInboundHandler::HTTPClientInboundHandler(MSRaw<HTTPClient> client)
 
 bool HTTPClientInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)
 {
+	// Parse response from server
+
 	m_Settings.on_message_begin = [](http_parser* parser)
 	{
 		auto handler = (HTTPClientInboundHandler*)parser->data;

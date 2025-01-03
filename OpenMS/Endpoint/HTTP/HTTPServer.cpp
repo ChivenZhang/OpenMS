@@ -123,6 +123,8 @@ HTTPServerInboundHandler::HTTPServerInboundHandler(MSRaw<HTTPServer> server)
 
 bool HTTPServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)
 {
+	// Parse request from client
+
 	m_Settings.on_message_begin = [](http_parser* parser)
 	{
 		auto handler = (HTTPServerInboundHandler*)parser->data;
@@ -262,13 +264,13 @@ bool HTTPServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw
 			if (handler->m_Response.Code == 0)
 			{
 				handler->m_Response.Code = HTTP_STATUS_INTERNAL_SERVER_ERROR;
-				handler->m_Response.Body = "Internal Server Error";
+				handler->m_Response.Body = "500 Internal Server Error";
 			}
 		}
 		else
 		{
 			handler->m_Response.Code = HTTP_STATUS_NOT_FOUND;
-			handler->m_Response.Body = "Not Found";
+			handler->m_Response.Body = "404 Not Found";
 		}
 		return 0;
 	};
@@ -278,11 +280,16 @@ bool HTTPServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw
 	{
 		if (m_Response.Code)
 		{
+			// Generate response headers
+
 			MSString headers;
 			m_Response.Header.emplace("Content-Type", "text/plain; charset=UTF-8");
 			m_Response.Header["Content-Length"] = std::to_string(m_Response.Body.size());
 			for (auto& header : m_Response.Header) headers += header.first + ":" + header.second + "\r\n";
 			auto response = "HTTP/1.1" " " + std::to_string(m_Response.Code) + "\r\n" + headers + "\r\n" + m_Response.Body;
+
+			// Send response to remote client
+
 			context->writeAndFlush(IChannelEvent::New(response));
 		}
 	}
