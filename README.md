@@ -24,11 +24,10 @@ The Distributed Network Framework based on Microservice Theory.
 - [ ] Support Hot module replacement
 
 ## How to install
-* Use git to clone this repository.
-* Add "VCPKG_ROOT_CUSTOM" to environment.
-* Use vcpkg to install third-party on manifest mode.
+* Set the environment variable "VCPKG_ROOT_CUSTOM".
+* Use [vcpkg](https://learn.microsoft.com/zh-cn/vcpkg/get_started/overview) to install dependency on manifest mode.
 * Use Clion or Visual studio to open CMakeLists.txt.
-* See folder "Sample" for more details.
+* See directory "Sample" for more details.
 
 ## Architecture
 <div><img src="Framework.png" style="width:100%;"  alt="missing"/></div>

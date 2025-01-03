@@ -23,7 +23,6 @@ public:
 		MSString IP;
 		uint16_t PortNum = 0;
 		uint32_t Backlog = 0;
-
 		struct
 		{
 			MSLambda<void(MSRef<IChannel>)> OnOpen;
@@ -65,6 +64,7 @@ public:
 
 protected:
 	bool bind_internal(MSStringView path, uint8_t type, method_t&& method);
+
 	virtual void configureEndpoint(config_t& config) const = 0;
 
 protected:

@@ -1,16 +1,9 @@
 cmake_minimum_required (VERSION 3.8)
 
-add_definitions(
-		#-DOPENMS_SHARED_LIBRARY
-)
-
-include_directories(
-		${OPENMS_SOURCE_DIR}/External/kcp
-)
-
 add_library(OpenMS STATIC
 		Endpoint/HTTP/HTTPClient.cpp
 		Endpoint/HTTP/HTTPClient.h
+		Endpoint/HTTP/HTTPProtocol.h
 		Endpoint/HTTP/HTTPServer.cpp
 		Endpoint/HTTP/HTTPServer.h
 		Endpoint/IEndpoint.h
@@ -39,6 +32,7 @@ add_library(OpenMS STATIC
 		Endpoint/WS/WSServer.h
 		Handler/AES/AESHandler.cpp
 		Handler/AES/AESHandler.h
+		MS.h
 		Mailbox/IMailBox.h
 		Mailbox/IMailContext.h
 		Mailbox/IMailPromise.h
@@ -48,7 +42,6 @@ add_library(OpenMS STATIC
 		Mailbox/Private/MailContext.h
 		Mailbox/Private/MailDeliver.cpp
 		Mailbox/Private/MailDeliver.h
-		MS.h
 		Reactor/IChannel.h
 		Reactor/IChannelAddress.h
 		Reactor/IChannelBuffer.h
@@ -112,7 +105,6 @@ add_library(OpenMS STATIC
 		Service/Private/Service.h
 		Toolkit/Timer.cpp
 		Toolkit/Timer.h
-		Endpoint/HTTP/HTTPProtocol.h
 )
 
 find_package(unofficial-http-parser CONFIG REQUIRED)
