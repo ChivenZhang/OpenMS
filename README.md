@@ -26,7 +26,7 @@ The Distributed Network Framework based on Microservice Theory.
 ## How to install
 * Set the environment variable "VCPKG_ROOT_CUSTOM".
 * Use [vcpkg](https://learn.microsoft.com/zh-cn/vcpkg/get_started/overview) to install dependency on manifest mode.
-* Use Clion or Visual studio to open CMakeLists.txt.
+* Use Clion or Visual studio to open folder where contains CMakeLists.txt .
 * See directory "Sample" for more details.
 
 ## Architecture
