@@ -38,6 +38,7 @@ public:
 
 MSString ClusterDemo2::identity() const
 {
+	// Use config in Application.json
 	return "cluster2";
 }
 
