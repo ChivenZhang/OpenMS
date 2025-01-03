@@ -43,7 +43,7 @@ void UDPServerReactor::startup()
 
 			if (true)
 			{
-				sockaddr_storage addr;
+				sockaddr_storage addr {};
 				uint32_t result = uv_errno_t::UV_EINVAL;
 				if (auto ipv4 = MSCast<IPv4Address>(m_Address))
 				{
@@ -73,7 +73,7 @@ void UDPServerReactor::startup()
 
 			if (true)
 			{
-				sockaddr_storage addr;
+				sockaddr_storage addr {};
 				int addrlen = sizeof(addr);
 				MSRef<ISocketAddress> localAddress;
 
@@ -149,7 +149,7 @@ void UDPServerReactor::startup()
 
 			MS_PRINT("closed server");
 			return;
-		} while (0);
+		} while (false);
 
 		uv_close((uv_handle_t*)&server, nullptr);
 		uv_loop_close(&loop);
@@ -234,7 +234,7 @@ void UDPServerReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 	{
 		// Get the actual ip and port number
 
-		sockaddr_storage addr;
+		sockaddr_storage addr {};
 		int addrlen = sizeof(addr);
 		MSRef<ISocketAddress> localAddress, remoteAddress;
 
@@ -327,7 +327,6 @@ void UDPServerReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 void UDPServerReactor::on_send(uv_udp_t* handle)
 {
 	auto reactor = (UDPServerReactor*)handle->loop->data;
-
 	if (reactor->m_Sending == false) return;
 
 	MSMutexLock lock(reactor->m_EventLock);

@@ -42,7 +42,7 @@ void UDPClientReactor::startup()
 
 			if (true)
 			{
-				sockaddr_storage addr;
+				sockaddr_storage addr {};
 				uint32_t result = uv_errno_t::UV_EINVAL;
 				if (auto ipv4 = MSCast<IPv4Address>(m_Address))
 				{
@@ -72,7 +72,7 @@ void UDPClientReactor::startup()
 
 			if (true)
 			{
-				sockaddr_storage addr;
+				sockaddr_storage addr {};
 				int addrlen = sizeof(addr);
 				MSRef<ISocketAddress> localAddress, remoteAddress;
 
@@ -172,7 +172,7 @@ void UDPClientReactor::startup()
 
 			MS_PRINT("closed client");
 			return;
-		} while (0);
+		} while (false);
 
 		uv_close((uv_handle_t*)&client, nullptr);
 		uv_loop_close(&loop);
@@ -266,8 +266,6 @@ void UDPClientReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 void UDPClientReactor::on_send(uv_udp_t* handle)
 {
 	auto reactor = (UDPClientReactor*)handle->loop->data;
-	auto client = (uv_udp_t*)handle;
-
 	if (reactor->m_Sending == false) return;
 
 	MSMutexLock lock(reactor->m_EventLock);

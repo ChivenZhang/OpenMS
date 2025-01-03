@@ -101,7 +101,7 @@ void KCPClientReactor::startup()
 
 			if(true)
 			{
-				sockaddr_storage addr;
+				sockaddr_storage addr {};
 				uint32_t result = uv_errno_t::UV_EINVAL;
 				if (auto ipv4 = MSCast<IPv4Address>(m_Address))
 				{
@@ -127,7 +127,7 @@ void KCPClientReactor::startup()
 
 			if (true)
 			{
-				sockaddr_storage addr;
+				sockaddr_storage addr {};
 				int addrlen = sizeof(addr);
 				MSRef<ISocketAddress> localAddress;
 
@@ -207,7 +207,7 @@ void KCPClientReactor::startup()
 
 			MS_PRINT("closed client");
 			return;
-		} while (0);
+		} while (false);
 
 		uv_close((uv_handle_t*)&client, nullptr);
 		uv_loop_close(&loop);
@@ -281,7 +281,7 @@ void KCPClientReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 	{
 		// Get the actual ip and port number
 
-		sockaddr_storage addr;
+		sockaddr_storage addr {};
 		int addrlen = sizeof(addr);
 		MSRef<ISocketAddress> localAddress, remoteAddress;
 
