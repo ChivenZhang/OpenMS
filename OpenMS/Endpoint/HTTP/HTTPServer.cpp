@@ -40,7 +40,7 @@ void HTTPServer::startup()
 	m_Reactor = MSNew<TCPServerReactor>(
 		IPv4Address::New(config.IP, config.PortNum),
 		config.Backlog,
-		config.Workers,
+		1,
 		TCPServerReactor::callback_tcp_t{ config.Callback.OnOpen, config.Callback.OnClose }
 	);
 	m_Reactor->startup();

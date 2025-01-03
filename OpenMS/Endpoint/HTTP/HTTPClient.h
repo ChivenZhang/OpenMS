@@ -22,7 +22,6 @@ public:
 	{
 		MSString IP;
 		uint16_t PortNum = 0;
-		uint32_t Workers = 0;
 		TCPClientReactor::callback_tcp_t Callback;
 	};
 

@@ -107,13 +107,13 @@ bool RPCServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<
 				RPCRequest request;
 				if (TTypeC(message, request))
 				{
-					if (m_Server->invoke(request.name, request.args, output))
+					if (m_Server->invoke(request.Name, request.Args, output))
 					{
 						// Send the response message
 
 						RPCResponse response;
-						response.indx = request.indx;
-						response.args = output;
+						response.ID = request.ID;
+						response.Args = output;
 						auto _event = MSNew<IChannelEvent>();
 						TTypeC(response, _event->Message);
 						// Use '\0' to split the message

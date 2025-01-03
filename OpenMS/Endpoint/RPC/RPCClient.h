@@ -48,9 +48,9 @@ public:
 			if (TTypeC(std::make_tuple(args...), input) == false) return T();
 		}
 		RPCRequest request;
-		request.indx = ++m_Session;
-		request.name = name;
-		request.args = input;
+		request.ID = ++m_Session;
+		request.Name = name;
+		request.Args = input;
 		if (TTypeC(request, input) == false) return T();
 
 		// Setup promise and callback
@@ -62,7 +62,7 @@ public:
 			auto future = promise->get_future();
 			{
 				MSMutexLock lock(m_Lock);
-				auto& session = m_Sessions[request.indx];
+				auto& session = m_Sessions[request.ID];
 				session.OnResult = [promise, &output](MSString&& response)
 				{
 					output = response;
@@ -79,7 +79,7 @@ public:
 			auto status = future.wait_for(std::chrono::milliseconds(timeout));
 			{
 				MSMutexLock lock(m_Lock);
-				m_Sessions.erase(request.indx);
+				m_Sessions.erase(request.ID);
 			}
 			if (status == std::future_status::ready)
 			{
@@ -110,9 +110,9 @@ public:
 			if (TTypeC(std::make_tuple(args...), input) == false) return false;
 		}
 		RPCRequest request;
-		request.indx = ++m_Session;
-		request.name = name;
-		request.args = input;
+		request.ID = ++m_Session;
+		request.Name = name;
+		request.Args = input;
 		if (TTypeC(request, input) == false) return false;
 
 		// Set up promise and callback
@@ -123,7 +123,7 @@ public:
 			auto future = promise->get_future();
 			{
 				MSMutexLock lock(m_Lock);
-				auto& session = m_Sessions[request.indx];
+				auto& session = m_Sessions[request.ID];
 				session.OnResult = [promise](MSString&& response) { promise->set_value(); };
 			}
 
@@ -136,7 +136,7 @@ public:
 			future.wait_for(std::chrono::milliseconds(timeout));
 			{
 				MSMutexLock lock(m_Lock);
-				m_Sessions.erase(request.indx);
+				m_Sessions.erase(request.ID);
 			}
 		}
 		else
@@ -161,9 +161,9 @@ public:
 			if (TTypeC(args, input) == false) return false;
 		}
 		RPCRequest request;
-		request.indx = ++m_Session;
-		request.name = name;
-		request.args = input;
+		request.ID = ++m_Session;
+		request.Name = name;
+		request.Args = input;
 		if (TTypeC(request, input) == false) return false;
 
 		// Setup promise and callback
@@ -172,7 +172,7 @@ public:
 		{
 			{
 				MSMutexLock lock(m_Lock);
-				auto& session = m_Sessions[request.indx];
+				auto& session = m_Sessions[request.ID];
 				session.OnResult = [callback](MSString&& response)
 				{
 					T result;
@@ -181,7 +181,7 @@ public:
 				};
 			}
 
-			m_Timer.start(timeout, 0, [=, sessionID = request.indx](uint32_t handle)
+			m_Timer.start(timeout, 0, [=, sessionID = request.ID](uint32_t handle)
 			{
 				MSMutexLock lock(m_Lock);
 				auto result = m_Sessions.find(sessionID);
@@ -212,9 +212,9 @@ public:
 			if (TTypeC(args, input) == false) return false;
 		}
 		RPCRequest request;
-		request.indx = ++m_Session;
-		request.name = name;
-		request.args = input;
+		request.ID = ++m_Session;
+		request.Name = name;
+		request.Args = input;
 		if (TTypeC(request, input) == false) return false;
 
 		// Setup promise and callback
@@ -223,14 +223,14 @@ public:
 		{
 			{
 				MSMutexLock lock(m_Lock);
-				auto& session = m_Sessions[request.indx];
+				auto& session = m_Sessions[request.ID];
 				session.OnResult = [callback](MSString&& response)
 				{
 					if (callback) callback();
 				};
 			}
 
-			m_Timer.start(timeout, 0, [=, sessionID = request.indx](uint32_t handle)
+			m_Timer.start(timeout, 0, [=, sessionID = request.ID](uint32_t handle)
 			{
 				MSMutexLock lock(m_Lock);
 				auto result = m_Sessions.find(sessionID);

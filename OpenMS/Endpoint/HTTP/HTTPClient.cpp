@@ -14,7 +14,6 @@ void HTTPClient::startup()
 {
 	config_t config;
 	configureEndpoint(config);
-	config.Workers = 1;
 	if (config.Callback.OnOpen == nullptr)
 	{
 		config.Callback.OnOpen = [=](MSRef<IChannel> channel)
@@ -24,7 +23,7 @@ void HTTPClient::startup()
 	}
 	m_Reactor = MSNew<TCPClientReactor>(
 		IPv4Address::New(config.IP, config.PortNum),
-		config.Workers,
+		1,
 		config.Callback
 	);
 	m_Reactor->startup();

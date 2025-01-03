@@ -82,10 +82,10 @@ bool RPCClientInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<
 				if (TTypeC(message, response))
 				{
 					MSMutexLock lock(m_Client->m_Lock);
-					auto result = m_Client->m_Sessions.find(response.indx);
+					auto result = m_Client->m_Sessions.find(response.ID);
 					if (result != m_Client->m_Sessions.end())
 					{
-						result->second.OnResult(std::move(response.args));
+						result->second.OnResult(std::move(response.Args));
 						m_Client->m_Sessions.erase(result);
 					}
 				}

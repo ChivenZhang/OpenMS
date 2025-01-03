@@ -13,16 +13,16 @@
 
 struct RPCRequest
 {
-	uint32_t indx;
-	MSString name;
-	MSString args;
-	OPENMS_TYPE(RPCRequest, indx, name, args)
+	uint32_t ID;
+	MSString Name;
+	MSString Args;
+	OPENMS_TYPE(RPCRequest, ID, Name, Args)
 };
 
 struct RPCResponse
 {
-	uint32_t indx;
-	MSString args;
-	OPENMS_TYPE(RPCResponse, indx, args)
+	uint32_t ID;
+	MSString Args;
+	OPENMS_TYPE(RPCResponse, ID, Args)
 };
 

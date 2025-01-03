@@ -23,7 +23,6 @@ public:
 		MSString IP;
 		uint16_t PortNum = 0;
 		uint32_t Backlog = 0;
-		uint32_t Workers = 0;
 
 		struct
 		{
