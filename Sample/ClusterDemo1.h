@@ -21,6 +21,6 @@ protected:
 	void onExit() override;
 
 protected:
-	MSThread m_SendThread;
+	MSThread m_Thread;
 	MSAtomic<bool> m_Running;
 };

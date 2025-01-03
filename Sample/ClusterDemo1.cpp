@@ -52,7 +52,7 @@ void ClusterDemo1::onInit()
 	mails->createMailbox<LoginMailbox>("login");
 
 	m_Running = true;
-	m_SendThread = MSThread([=]()
+	m_Thread = MSThread([=]()
 	{
 		while (m_Running)
 		{
@@ -65,7 +65,7 @@ void ClusterDemo1::onInit()
 void ClusterDemo1::onExit()
 {
 	m_Running = false;
-	if (m_SendThread.joinable()) m_SendThread.join();
+	if (m_Thread.joinable()) m_Thread.join();
 
 	ClusterService::onExit();
 }
