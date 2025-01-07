@@ -1,4 +1,4 @@
-<div style="text-align: center;">
+<div align="center">
 <pre>
   ___                   __  __ ____  
  / _ \ _ __   ___ _ __ |  \/  / ___| 
@@ -70,4 +70,4 @@ OPENMS_RUN(Cluster2)
 ```
 
 ## Architecture
-<div><img src="Architecture.png" style="width:100%;text-align: center;"  alt="missing"/></div>
+<div><img src="Architecture.png" style="width:100%;"  alt="missing"/></div>
