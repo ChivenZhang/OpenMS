@@ -17,6 +17,8 @@ MSString ClusterService::identity() const
 
 void ClusterService::onInit()
 {
+	if (AUTOWIRE(IProperty)::bean()->property(identity() + ".master").empty()) return;
+
 	RPCClient::startup();
 
 	auto context = AUTOWIRE(IMailContext)::bean();
@@ -108,6 +110,8 @@ void ClusterService::onInit()
 
 void ClusterService::onExit()
 {
+	if (AUTOWIRE(IProperty)::bean()->property(identity() + ".master").empty()) return;
+
 	m_MailRouteMap.clear();
 
 	if (m_MailServer) m_MailServer->shutdown();

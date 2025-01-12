@@ -30,5 +30,5 @@ public:
 	MSString property(MSString const& name) const override;
 
 protected:
-	MSMap<MSString, MSString> m_PropertyMap;
+	MSStringMap<MSString> m_PropertyMap;
 };
