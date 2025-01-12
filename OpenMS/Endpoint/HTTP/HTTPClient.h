@@ -58,7 +58,7 @@ public:
 protected:
 	bool call_internal(request_t const& request, uint8_t type, uint32_t timeout, response_t& response);
 
-	virtual void configureEndpoint(config_t& config) const = 0;
+	virtual void configureEndpoint(config_t& config) = 0;
 
 protected:
 	friend class HTTPClientInboundHandler;

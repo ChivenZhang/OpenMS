@@ -18,7 +18,7 @@ public:
 	ClusterServer(MSString ip, uint16_t port, uint32_t backlog, uint32_t workers);
 
 protected:
-	void configureEndpoint(config_t& config) const override;
+	void configureEndpoint(config_t& config) override;
 
 protected:
 	const MSString m_IP;

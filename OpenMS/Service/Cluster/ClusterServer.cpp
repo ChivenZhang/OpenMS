@@ -19,7 +19,7 @@ ClusterServer::ClusterServer(MSString ip, uint16_t port, uint32_t backlog, uint3
 {
 }
 
-void ClusterServer::configureEndpoint(config_t& config) const
+void ClusterServer::configureEndpoint(config_t& config)
 {
 	config.IP = m_IP;
 	config.PortNum = m_PortNum;

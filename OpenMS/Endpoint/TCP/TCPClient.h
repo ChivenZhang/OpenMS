@@ -32,7 +32,7 @@ public:
 	MSHnd<IChannelAddress> address() const override;
 
 protected:
-	virtual void configureEndpoint(config_t& config) const = 0;
+	virtual void configureEndpoint(config_t& config) = 0;
 
 protected:
 	MSRef<TCPClientReactor> m_Reactor;

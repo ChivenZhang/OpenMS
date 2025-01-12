@@ -18,7 +18,7 @@ ClusterClient::ClusterClient(MSString ip, uint16_t port, uint32_t workers)
 {
 }
 
-void ClusterClient::configureEndpoint(config_t& config) const
+void ClusterClient::configureEndpoint(config_t& config)
 {
 	config.IP = m_IP;
 	config.PortNum = m_PortNum;

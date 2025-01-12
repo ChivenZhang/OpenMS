@@ -51,7 +51,7 @@ void MasterService::onExit()
 	RPCServer::shutdown();
 }
 
-void MasterService::configureEndpoint(config_t& config) const
+void MasterService::configureEndpoint(config_t& config)
 {
 	auto ip = property(identity() + ".server.ip", MSString("127.0.0.1"));
 	auto port = property(identity() + ".server.port", 0U);

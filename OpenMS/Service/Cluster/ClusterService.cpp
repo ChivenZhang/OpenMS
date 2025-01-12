@@ -62,7 +62,7 @@ void ClusterService::onInit()
 			if (result.second || result.first->second == nullptr)
 			{
 				auto index = address.find(':');
-				if (index == std::string::npos) return false;
+				if (index == MSString::npos) return false;
 				auto ip = address.substr(0, index);
 				auto port = std::stoul(address.substr(index + 1));
 				result.first->second = MSNew<ClusterClient>(ip, port, 1);
@@ -126,7 +126,7 @@ void ClusterService::onExit()
 	RPCClient::shutdown();
 }
 
-void ClusterService::configureEndpoint(config_t& config) const
+void ClusterService::configureEndpoint(config_t& config)
 {
 	auto ip = property(identity() + ".master.ip", MSString("127.0.0.1"));
 	auto port = property(identity() + ".master.port", 0U);

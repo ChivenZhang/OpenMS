@@ -88,7 +88,7 @@ public:
 	}
 
 protected:
-	virtual void configureEndpoint(config_t& config) const = 0;
+	virtual void configureEndpoint(config_t& config) = 0;
 
 	bool bind_internal(MSStringView name, MSLambda<bool(MSString const&, MSString&)> method);
 

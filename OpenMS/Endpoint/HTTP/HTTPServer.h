@@ -66,7 +66,7 @@ public:
 protected:
 	bool bind_internal(MSStringView path, uint8_t type, method_t&& method);
 
-	virtual void configureEndpoint(config_t& config) const = 0;
+	virtual void configureEndpoint(config_t& config) = 0;
 
 protected:
 	friend class HTTPServerInboundHandler;

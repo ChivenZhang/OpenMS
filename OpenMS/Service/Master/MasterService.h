@@ -26,7 +26,7 @@ public:
 protected:
 	void onInit() override;
 	void onExit() override;
-	void configureEndpoint(config_t& config) const final;
+	void configureEndpoint(config_t& config) final;
 
 protected:
 	MSStringMap<MSSet<MSString>> m_MailRouteMap;
