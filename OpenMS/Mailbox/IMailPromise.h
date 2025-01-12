@@ -24,9 +24,9 @@ struct IMailPromise
 		value_type value = value_type();
 
 		IMailPromise get_return_object() { return ICoroutinePromise(handle_type::from_promise(*this)); }
-		static std::suspend_always initial_suspend() { return {}; }
-		static std::suspend_always final_suspend() noexcept { return {}; }
-		static void unhandled_exception() { std::rethrow_exception(std::current_exception()); }
+		std::suspend_always initial_suspend() { return {}; }
+		std::suspend_always final_suspend() noexcept { return {}; }
+		void unhandled_exception() { std::rethrow_exception(std::current_exception()); }
 		void return_value(T val) { value = std::move(val); }
 		std::suspend_always yield_value(T val) { value = std::move(val); return {}; }
 	};
@@ -69,16 +69,16 @@ struct IMailPromise<void>
 	struct promise_type
 	{
 		IMailPromise get_return_object() { return IMailPromise(handle_type::from_promise(*this)); }
-		static std::suspend_always initial_suspend() { return {}; }
-		static std::suspend_always final_suspend() noexcept { return {}; }
-		static void unhandled_exception() { std::rethrow_exception(std::current_exception()); }
-		static void return_void() {}
-		static std::suspend_always yield_value(nullptr_t) { return {}; }
+		std::suspend_always initial_suspend() { return {}; }
+		std::suspend_always final_suspend() noexcept { return {}; }
+		void unhandled_exception() { std::rethrow_exception(std::current_exception()); }
+		void return_void() {}
+		std::suspend_always yield_value(nullptr_t) { return {}; }
 	};
 
 	bool await_ready() const { return handle.done(); }
 	void await_suspend(std::coroutine_handle<>) const { handle.resume(); }
-	static void await_resume() {}
+	void await_resume() {}
 
 	IMailPromise() = default;
 	~IMailPromise() { if (handle) handle.destroy(); }
