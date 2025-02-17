@@ -73,7 +73,7 @@ struct IMailPromise<void>
 		std::suspend_always final_suspend() noexcept { return {}; }
 		void unhandled_exception() { std::rethrow_exception(std::current_exception()); }
 		void return_void() {}
-		std::suspend_always yield_value(nullptr_t) { return {}; }
+		std::suspend_always yield_value(std::nullptr_t) { return {}; }
 	};
 
 	bool await_ready() const { return handle.done(); }
