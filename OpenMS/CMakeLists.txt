@@ -1,5 +1,3 @@
-cmake_minimum_required (VERSION 3.8)
-
 add_library(OpenMS STATIC
 		Endpoint/HTTP/HTTPClient.cpp
 		Endpoint/HTTP/HTTPClient.h

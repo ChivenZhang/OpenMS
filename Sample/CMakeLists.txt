@@ -1,4 +1,3 @@
-
 add_executable(MasterDemo
 		MasterDemo.cpp
 		MasterDemo.h
