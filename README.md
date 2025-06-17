@@ -39,14 +39,6 @@ protected:
 	void onExit() override;
 };
 OPENMS_RUN(Master)
-
-// Apply config in Application.json
-// "master": {
-//      "server": {
-//          "ip": "127.0.0.1",
-//          "port": 8080
-//      }
-// }
 ```
 ```c++
 // First cluster instance joined to master
@@ -70,4 +62,4 @@ OPENMS_RUN(Cluster2)
 ```
 
 ## Architecture
-<div><img src="Architecture.png" style="width:100%;"  alt="missing"/></div>
+<div><img src="Framework.png" style="width:100%;"  alt="missing"/></div>
