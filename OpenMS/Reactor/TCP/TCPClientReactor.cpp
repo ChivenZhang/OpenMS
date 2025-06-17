@@ -40,7 +40,7 @@ void TCPClientReactor::startup()
 			// Set up the client
 
 			{
-				sockaddr_storage addr;
+				sockaddr_storage addr = {};
 				uint32_t result = uv_errno_t::UV_EINVAL;
 				if (auto ipv4 = MSCast<IPv4Address>(m_Address))
 				{
@@ -61,11 +61,11 @@ void TCPClientReactor::startup()
 			// Get the actual ip and port number
 
 			{
-				sockaddr_storage addr;
-				int addrlen = sizeof(addr);
+				sockaddr_storage addr = {};
+				int addrLen = sizeof(addr);
 				MSRef<ISocketAddress> localAddress;
 
-				auto result = uv_tcp_getsockname((uv_tcp_t*)&client, (struct sockaddr*)&addr, &addrlen);
+				auto result = uv_tcp_getsockname((uv_tcp_t*)&client, (struct sockaddr*)&addr, &addrLen);
 				if (result == 0)
 				{
 					if (addr.ss_family == AF_INET)
@@ -121,7 +121,7 @@ void TCPClientReactor::startup()
 
 			MS_PRINT("closed client");
 			return;
-		} while (0);
+		} while (false);
 
 		uv_close((uv_handle_t*)&client, nullptr);
 		uv_loop_close(&loop);

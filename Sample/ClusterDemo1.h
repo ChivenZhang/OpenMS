@@ -24,3 +24,5 @@ protected:
 	MSThread m_Thread;
 	MSAtomic<bool> m_Running;
 };
+
+OPENMS_RUN(ClusterDemo1)

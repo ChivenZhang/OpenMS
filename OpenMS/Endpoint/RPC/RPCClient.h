@@ -84,8 +84,7 @@ public:
 			if (status == std::future_status::ready)
 			{
 				T result;
-				if (TTypeC(output, result) == false) return T();
-				return result;
+				if (TTypeC(output, result) == true) return result;
 			}
 		}
 		else

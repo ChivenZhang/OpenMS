@@ -373,7 +373,7 @@ namespace std
 }
 
 template<class T, class U, OPENMS_IS_SAME(T, U)>
-inline bool TTypeC(T const& src, U& dst)
+bool TTypeC(T const& src, U& dst)
 {
 	dst = src;
 	return true;

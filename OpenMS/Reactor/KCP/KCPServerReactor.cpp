@@ -105,7 +105,7 @@ void KCPServerReactor::startup()
 
 			if (true)
 			{
-				sockaddr_storage addr;
+				sockaddr_storage addr = {};
 				uint32_t result = uv_errno_t::UV_EINVAL;
 				if (auto ipv4 = MSCast<IPv4Address>(m_Address))
 				{
@@ -127,11 +127,11 @@ void KCPServerReactor::startup()
 
 			if (true)
 			{
-				sockaddr_storage addr;
-				int addrlen = sizeof(addr);
+				sockaddr_storage addr = {};
+				int client = sizeof(addr);
 				MSRef<ISocketAddress> localAddress;
 
-				auto result = uv_udp_getsockname((uv_udp_t*)&server, (sockaddr*)&addr, &addrlen);
+				auto result = uv_udp_getsockname(&server, (sockaddr*)&addr, &client);
 				if (result == 0)
 				{
 					if (addr.ss_family == AF_INET)
@@ -205,7 +205,7 @@ void KCPServerReactor::startup()
 
 			MS_PRINT("closed server");
 			return;
-		} while (0);
+		} while (false);
 
 		uv_close((uv_handle_t*)&server, nullptr);
 		uv_loop_close(&loop);

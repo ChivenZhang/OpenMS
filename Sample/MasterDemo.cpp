@@ -19,5 +19,3 @@ void MasterDemo::onExit()
 {
 	MasterService::onExit();
 }
-
-OPENMS_RUN(MasterDemo)

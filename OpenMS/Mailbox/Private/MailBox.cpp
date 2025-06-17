@@ -49,6 +49,6 @@ void MailBox::error(MSError&& info)
 
 IMailTask<void> MailBox::read(IMail&& mail)
 {
-	MS_INFO("TODO:implement sign method");
+	MS_INFO("TODO:implement read method");
 	co_return;
 }

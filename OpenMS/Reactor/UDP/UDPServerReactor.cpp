@@ -43,7 +43,7 @@ void UDPServerReactor::startup()
 
 			if (true)
 			{
-				sockaddr_storage addr;
+				sockaddr_storage addr = {};
 				uint32_t result = uv_errno_t::UV_EINVAL;
 				if (auto ipv4 = MSCast<IPv4Address>(m_Address))
 				{
@@ -73,11 +73,11 @@ void UDPServerReactor::startup()
 
 			if (true)
 			{
-				sockaddr_storage addr;
-				int addrlen = sizeof(addr);
+				sockaddr_storage addr = {};
+				int addrLen = sizeof(addr);
 				MSRef<ISocketAddress> localAddress;
 
-				auto result = uv_udp_getsockname((uv_udp_t*)&server, (sockaddr*)&addr, &addrlen);
+				auto result = uv_udp_getsockname((uv_udp_t*)&server, (sockaddr*)&addr, &addrLen);
 				if (result == 0)
 				{
 					if (addr.ss_family == AF_INET)
@@ -149,7 +149,7 @@ void UDPServerReactor::startup()
 
 			MS_PRINT("closed server");
 			return;
-		} while (0);
+		} while (false);
 
 		uv_close((uv_handle_t*)&server, nullptr);
 		uv_loop_close(&loop);

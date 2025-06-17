@@ -14,6 +14,7 @@ void KCPClient::startup()
 {
 	config_t config;
 	configureEndpoint(config);
+
 	m_Reactor = MSNew<KCPClientReactor>(
 		IPv4Address::New(config.IP, config.PortNum),
 		config.Workers,

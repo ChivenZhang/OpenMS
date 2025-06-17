@@ -45,7 +45,7 @@ bool AESInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<IChann
 			::memcpy(block, input + count0, length - count0);
 			ret = mbedtls_aes_crypt_cbc(&aes_ctx, MBEDTLS_AES_DECRYPT, sizeof(block), iv.data(), block, (uint8_t*)result.data() + count0);
 		}
-	} while (0);
+	} while (false);
 	mbedtls_aes_free(&aes_ctx);
 
 	if (ret == 0)
@@ -89,7 +89,7 @@ bool AESOutboundHandler::channelWrite(MSRaw<IChannelContext> context, MSRaw<ICha
 			::memcpy(block, input + count0, length - count0);
 			ret = mbedtls_aes_crypt_cbc(&aes_ctx, MBEDTLS_AES_ENCRYPT, sizeof(block), iv.data(), block, (uint8_t*)result.data() + count0);
 		}
-	} while (0);
+	} while (false);
 	mbedtls_aes_free(&aes_ctx);
 
 	if (ret == 0)

@@ -17,3 +17,5 @@ protected:
 	void onInit() override;
 	void onExit() override;
 };
+
+OPENMS_RUN(MasterDemo)

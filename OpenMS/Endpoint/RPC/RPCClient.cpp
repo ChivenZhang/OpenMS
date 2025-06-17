@@ -14,6 +14,7 @@ void RPCClient::startup()
 {
 	config_t config;
 	configureEndpoint(config);
+
 	if (config.Callback.OnOpen == nullptr)
 	{
 		config.Callback.OnOpen = [=](MSRef<IChannel> channel)

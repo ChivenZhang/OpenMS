@@ -54,5 +54,3 @@ void ClusterDemo2::onExit()
 {
 	ClusterService::onExit();
 }
-
-OPENMS_RUN(ClusterDemo2)

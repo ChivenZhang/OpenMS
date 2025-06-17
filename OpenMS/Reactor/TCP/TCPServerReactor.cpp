@@ -42,7 +42,7 @@ void TCPServerReactor::startup()
 			// Bind and listen to the socket
 
 			{
-				sockaddr_storage addr;
+				sockaddr_storage addr = {};
 				uint32_t result = uv_errno_t::UV_ERRNO_MAX;
 				if (auto ipv4 = MSCast<IPv4Address>(m_Address))
 				{
@@ -59,7 +59,7 @@ void TCPServerReactor::startup()
 				if (result) MS_ERROR("bind error: %s", ::uv_strerror(result));
 				if (result) break;
 
-				result = uv_listen((uv_stream_t*)&server, m_Backlog, on_connect);
+				result = uv_listen((uv_stream_t*)&server, (int)m_Backlog, on_connect);
 				if (result) MS_ERROR("listen error: %s", ::uv_strerror(result));
 				if (result) break;
 			}
@@ -67,11 +67,11 @@ void TCPServerReactor::startup()
 			// Get the actual ip and port number
 
 			{
-				sockaddr_storage addr;
-				int addrlen = sizeof(addr);
+				sockaddr_storage addr = {};
+				int addrLen = sizeof(addr);
 				MSRef<ISocketAddress> localAddress;
 
-				auto result = uv_tcp_getsockname((uv_tcp_t*)&server, (sockaddr*)&addr, &addrlen);
+				auto result = uv_tcp_getsockname(&server, (sockaddr*)&addr, &addrLen);
 				if (result == 0)
 				{
 					if (addr.ss_family == AF_INET)
@@ -132,7 +132,7 @@ void TCPServerReactor::startup()
 
 			MS_PRINT("closed server");
 			return;
-		} while (0);
+		} while (false);
 
 		uv_close((uv_handle_t*)&server, nullptr);
 		uv_loop_close(&loop);

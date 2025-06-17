@@ -16,6 +16,7 @@ void HTTPServer::startup()
 {
 	config_t config;
 	configureEndpoint(config);
+
 	if (config.Callback.OnOpen == nullptr)
 	{
 		config.Callback.OnOpen = [=](MSRef<IChannel> channel)
@@ -292,6 +293,7 @@ bool HTTPServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw
 			// Send response to remote client
 
 			context->writeAndFlush(IChannelEvent::New(response));
+			return true;
 		}
 	}
 	else

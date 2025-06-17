@@ -21,7 +21,7 @@ public:
 	};
 
 public:
-	AESInboundHandler(config_t const& config);
+	explicit AESInboundHandler(config_t const& config);
 	bool channelRead(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event) override;
 
 protected:
@@ -38,7 +38,7 @@ public:
 	};
 
 public:
-	AESOutboundHandler(config_t const& config);
+	explicit AESOutboundHandler(config_t const& config);
 	bool channelWrite(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event) override;
 
 protected:

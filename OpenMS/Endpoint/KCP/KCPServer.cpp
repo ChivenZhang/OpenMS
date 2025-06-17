@@ -14,6 +14,7 @@ void KCPServer::startup()
 {
 	config_t config;
 	configureEndpoint(config);
+
 	m_Reactor = MSNew<KCPServerReactor>(
 		IPv4Address::New(config.IP, config.PortNum),
 		config.Backlog,

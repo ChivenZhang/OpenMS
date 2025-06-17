@@ -14,6 +14,7 @@ void HTTPClient::startup()
 {
 	config_t config;
 	configureEndpoint(config);
+
 	if (config.Callback.OnOpen == nullptr)
 	{
 		config.Callback.OnOpen = [=](MSRef<IChannel> channel)
@@ -197,6 +198,7 @@ bool HTTPClientInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw
 				}
 			}
 			session.OnResult(std::move(m_Response));
+			return true;
 		}
 	}
 	else

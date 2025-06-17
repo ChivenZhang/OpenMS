@@ -14,6 +14,7 @@ void UDPClient::startup()
 {
 	config_t config;
 	configureEndpoint(config);
+
 	m_Reactor = MSNew<UDPClientReactor>(
 		IPv4Address::New(config.IP, config.PortNum),
 		config.Broadcast,
