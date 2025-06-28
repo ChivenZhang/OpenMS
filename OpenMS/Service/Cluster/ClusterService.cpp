@@ -5,7 +5,7 @@
 *
 *
 * ====================History=======================
-* Created by ChivenZhang at 2024/12/29 15:57:15.
+* Created by chivenzhang@gmail.com.
 *
 * =================================================*/
 #include "ClusterService.h"
@@ -21,7 +21,7 @@ void ClusterService::onInit()
 
 	RPCClient::startup();
 
-	auto context = AUTOWIRE(IMailContext)::bean();
+	auto mails = AUTOWIRE(IMailContext)::bean();
 
 	// Route remote mail to local
 
@@ -34,12 +34,12 @@ void ClusterService::onInit()
 	m_MailServer->startup();
 	m_MailServer->bind("mailbox", [=](uint32_t sid, MSString from, MSString to, MSString data)
 	{
-		context->sendToMailbox({from, to, data, sid });
+		mails->sendToMailbox({from, to, data, sid });
 	});
 
 	// Send mail to remote mailbox
 
-	context->sendToMailbox([=](IMail&& mail)-> bool
+	mails->sendToMailbox([=](IMail&& mail)-> bool
 	{
 		// Select remote address to send
 
@@ -55,7 +55,7 @@ void ClusterService::onInit()
 
 		// Select an RPC client to send
 
-		MSRef<ClusterClient> client;
+		MSRef<ClusterClient> mailClient;
 		{
 			MSMutexLock lock(m_MailClientLock);
 			auto result = m_MailClientMap.emplace(address, nullptr);
@@ -68,16 +68,16 @@ void ClusterService::onInit()
 				result.first->second = MSNew<ClusterClient>(ip, port, 1);
 				result.first->second->startup();
 			}
-			client = result.first->second;
+			mailClient = result.first->second;
 		}
-		if (client == nullptr) return false;
-		if (client->connect() == false)
+		if (mailClient == nullptr) return false;
+		if (mailClient->connect() == false)
 		{
-			client->shutdown();
-			client->startup();
+			mailClient->shutdown();
+			mailClient->startup();
 		}
-		if (client->connect() == false) return false;
-		return client->call<void>("mailbox", 0, mail.SID, mail.From, mail.To, mail.Data);
+		if (mailClient->connect() == false) return false;
+		return mailClient->call<void>("mailbox", 0, mail.SID, mail.From, mail.To, mail.Data);
 	});
 
 	// Push and pull mail table

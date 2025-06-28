@@ -6,11 +6,11 @@
 *
 *
 * ====================History=======================
-* Created by ChivenZhang@gmail.com.
+* Created by chivenzhang@gmail.com.
 *
 * =================================================*/
 #include "../IProperty.h"
-#define OPENMS_CONFIG_FILE "Application.json"
+#define OPENMS_CONFIG_FILE "APPLICATION.json"
 
 class Value : public IValue
 {

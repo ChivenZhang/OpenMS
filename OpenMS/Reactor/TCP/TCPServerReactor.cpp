@@ -6,7 +6,7 @@
 *
 *
 * ====================History=======================
-* Created by ChivenZhang@gmail.com.
+* Created by chivenzhang@gmail.com.
 *
 * =================================================*/
 #include "TCPServerReactor.h"
@@ -18,7 +18,7 @@ TCPServerReactor::TCPServerReactor(MSRef<ISocketAddress> address, uint32_t backl
 	m_Backlog(backlog ? backlog : 128),
 	m_Address(address)
 {
-	if (m_Address == nullptr) m_Address = MSNew<IPv4Address>("0.0.0.0", 0);
+	if (m_Address == nullptr || m_Address->getAddress().empty()) m_Address = MSNew<IPv4Address>("0.0.0.0", 0);
 }
 
 void TCPServerReactor::startup()
@@ -29,7 +29,8 @@ void TCPServerReactor::startup()
 	MSPromise<void> promise;
 	auto future = promise.get_future();
 
-	m_EventThread = MSThread([=, &promise]() {
+	m_EventThread = MSThread([=, &promise]()
+	{
 		uv_loop_t loop;
 		uv_tcp_t server;
 
@@ -106,13 +107,13 @@ void TCPServerReactor::startup()
 
 			{
 				loop.data = this;
+				uv_timer_t timer;
+				uv_timer_init(&loop, &timer);
+				uv_timer_start(&timer, on_send, 0, 1);
+
 				m_Connect = true;
 				promise.set_value();
-
-				while (m_Running == true && uv_run(&loop, UV_RUN_NOWAIT))
-				{
-					on_send(&server);
-				}
+				uv_run(&loop, UV_RUN_DEFAULT);
 				m_Connect = false;
 			}
 
@@ -147,6 +148,8 @@ void TCPServerReactor::shutdown()
 	if (m_Running == false) return;
 	ChannelReactor::shutdown();
 
+	for (auto& e : m_EventCache) if (e.second->Promise) e.second->Promise->set_value(false);
+	m_EventCache.clear();
 	m_ChannelMap.clear();
 }
 
@@ -192,11 +195,11 @@ void TCPServerReactor::on_connect(uv_stream_t* server, int status)
 	{
 		// Get the actual ip and port number
 
-		sockaddr_storage addr;
-		int addrlen = sizeof(addr);
+		sockaddr_storage addr = {};
+		int addrLen = sizeof(addr);
 		MSRef<ISocketAddress> localAddress, remoteAddress;
 
-		auto result = uv_tcp_getsockname((uv_tcp_t*)client, (sockaddr*)&addr, &addrlen);
+		auto result = uv_tcp_getsockname((uv_tcp_t*)client, (sockaddr*)&addr, &addrLen);
 		if (result == 0)
 		{
 			if (addr.ss_family == AF_INET)
@@ -221,7 +224,7 @@ void TCPServerReactor::on_connect(uv_stream_t* server, int status)
 		}
 		else MS_ERROR("failed to get socket name: %s", ::uv_strerror(result));
 
-		result = uv_tcp_getpeername((uv_tcp_t*)client, (sockaddr*)&addr, &addrlen);
+		result = uv_tcp_getpeername((uv_tcp_t*)client, (sockaddr*)&addr, &addrLen);
 		if (result == 0)
 		{
 			if (addr.ss_family == AF_INET)
@@ -290,25 +293,7 @@ void TCPServerReactor::on_read(uv_stream_t* stream, ssize_t nread, const uv_buf_
 	auto channel = ((TCPChannel*)client->data)->shared_from_this();
 	if (channel == nullptr) return;
 
-	if (nread < 0)
-	{
-		uv_close((uv_handle_t*)stream, nullptr);
-		free(buf->base);
-
-		reactor->onDisconnect(channel);
-		return;
-	}
-
-	if (nread == 0)
-	{
-		uv_close((uv_handle_t*)stream, nullptr);
-		free(buf->base);
-
-		reactor->onDisconnect(channel);
-		return;
-	}
-
-	if (channel->running() == false)
+	if (nread <= 0 || channel->running() == false)
 	{
 		uv_close((uv_handle_t*)stream, nullptr);
 		free(buf->base);
@@ -325,10 +310,11 @@ void TCPServerReactor::on_read(uv_stream_t* stream, ssize_t nread, const uv_buf_
 	free(buf->base);
 }
 
-void TCPServerReactor::on_send(uv_tcp_t* handle)
+void TCPServerReactor::on_send(uv_timer_t* handle)
 {
 	auto reactor = (TCPServerReactor*)handle->loop->data;
-	if (reactor->m_Sending == false) return;
+	if (reactor->m_Running == false) uv_stop(handle->loop);
+	if (reactor->m_Running == false || reactor->m_Sending == false) return;
 
 	MSMutexLock lock(reactor->m_EventLock);
 	reactor->m_Sending = false;
@@ -337,6 +323,7 @@ void TCPServerReactor::on_send(uv_tcp_t* handle)
 	{
 		auto event = reactor->m_EventQueue.front();
 		reactor->m_EventQueue.pop();
+		reactor->m_EventCache[event.get()] = event;
 
 		auto channel = MSCast<TCPChannel>(event->Channel.lock());
 		if (channel == nullptr) continue;
@@ -345,16 +332,34 @@ void TCPServerReactor::on_send(uv_tcp_t* handle)
 		if (event->Message.empty()) continue;
 		auto client = channel->getHandle();
 
-		size_t i = 0;
-		while(i < event->Message.size())
+		auto req = (uv_write_t*)malloc(sizeof(uv_write_t));
+		req->data = event.get();
+		auto buf = uv_buf_init(event->Message.data(), (uint32_t)event->Message.size());
+		auto result = uv_write(req, (uv_stream_t*)client, &buf, 1, [](uv_write_t* req, int status)
 		{
-			auto buf = uv_buf_init(event->Message.data() + i, (unsigned)(event->Message.size() - i));
-			auto result = uv_try_write((uv_stream_t*)client, &buf, 1);
-			if (result == UV_EAGAIN) continue;
-			else if (result < 0) break;
-			else i += result;
+			auto event = (IChannelEvent*)req->data;
+			auto reactor = (TCPServerReactor*)req->handle->loop->data;
+			auto channel = MSCast<TCPChannel>(event->Channel.lock());
+			free(req);
+
+			if (event->Promise) event->Promise->set_value(status == 0);
+			reactor->m_EventCache.erase(event);
+
+			if (channel && status)
+			{
+				MS_ERROR("write error: %s", uv_strerror(status));
+				reactor->onDisconnect(channel);
+			}
+		});
+		if (result)
+		{
+			free(req);
+
+			if (event->Promise) event->Promise->set_value(false);
+			reactor->m_EventCache.erase(event.get());
+
+			MS_ERROR("write error: %s", uv_strerror(result));
+			reactor->onDisconnect(channel);
 		}
-		if(i != event->Message.size()) reactor->onDisconnect(channel);
-		if (event->Promise) event->Promise->set_value(i == event->Message.size());
 	}
 }

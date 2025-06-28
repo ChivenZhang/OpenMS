@@ -5,7 +5,7 @@
 *
 *
 * ====================History=======================
-* Created by ChivenZhang@gmail.com.
+* Created by chivenzhang@gmail.com.
 *
 * =================================================*/
 #include "UDPClientReactor.h"
@@ -18,7 +18,7 @@ UDPClientReactor::UDPClientReactor(MSRef<ISocketAddress> address, bool broadcast
 	m_Multicast(multicast),
 	m_Address(address)
 {
-	if (m_Address == nullptr) m_Address = MSNew<IPv4Address>("0.0.0.0", 0);
+	if (m_Address == nullptr || m_Address->getAddress().empty()) m_Address = MSNew<IPv4Address>("0.0.0.0", 0);
 }
 
 void UDPClientReactor::startup()
@@ -101,7 +101,7 @@ void UDPClientReactor::startup()
 				}
 				else MS_ERROR("failed to get socket name: %s", ::uv_strerror(result));
 
-				result = uv_udp_getpeername((uv_udp_t*)&client, (sockaddr*)&addr, &addrLen);
+				result = uv_udp_getpeername(&client, (sockaddr*)&addr, &addrLen);
 				if (result == 0)
 				{
 					if (addr.ss_family == AF_INET)
@@ -147,15 +147,15 @@ void UDPClientReactor::startup()
 
 			// Run the event loop
 
-			if (true)
 			{
 				loop.data = this;
+				uv_timer_t timer;
+				uv_timer_init(&loop, &timer);
+				uv_timer_start(&timer, on_send, 0, 1);
+
 				m_Connect = true;
 				promise.set_value();
-				while (m_Running == true && uv_run(&loop, UV_RUN_NOWAIT))
-				{
-					on_send(&client);
-				}
+				uv_run(&loop, UV_RUN_DEFAULT);
 				m_Connect = false;
 			}
 
@@ -187,6 +187,9 @@ void UDPClientReactor::shutdown()
 	if (m_Running == false) return;
 	ChannelReactor::shutdown();
 	m_Channel = nullptr;
+
+	for (auto& e : m_EventCache) if (e.second->Promise) e.second->Promise->set_value(false);
+	m_EventCache.clear();
 }
 
 MSHnd<IChannelAddress> UDPClientReactor::address() const
@@ -237,17 +240,13 @@ void UDPClientReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 	auto reactor = (UDPClientReactor*)req->loop->data;
 	auto channel = reactor->m_Channel;
 
-	if (nread == 0 || peer == nullptr) return;
-
-	if (nread < 0)
+	if (nread == 0 || peer == nullptr)
 	{
 		free(buf->base);
-
-		reactor->onDisconnect(channel);
 		return;
 	}
 
-	if (channel->running() == false)
+	if (nread < 0 || channel->running() == false)
 	{
 		free(buf->base);
 
@@ -263,12 +262,11 @@ void UDPClientReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 	free(buf->base);
 }
 
-void UDPClientReactor::on_send(uv_udp_t* handle)
+void UDPClientReactor::on_send(uv_timer_t* handle)
 {
 	auto reactor = (UDPClientReactor*)handle->loop->data;
-	auto client = (uv_udp_t*)handle;
-
-	if (reactor->m_Sending == false) return;
+	if (reactor->m_Running == false) uv_stop(handle->loop);
+	if (reactor->m_Running == false || reactor->m_Sending == false) return;
 
 	MSMutexLock lock(reactor->m_EventLock);
 	reactor->m_Sending = false;
@@ -277,6 +275,7 @@ void UDPClientReactor::on_send(uv_udp_t* handle)
 	{
 		auto event = reactor->m_EventQueue.front();
 		reactor->m_EventQueue.pop();
+		reactor->m_EventCache[event.get()] = event;
 
 		auto channel = MSCast<UDPChannel>(event->Channel.lock());
 		if (channel == nullptr) continue;
@@ -285,16 +284,34 @@ void UDPClientReactor::on_send(uv_udp_t* handle)
 		if (event->Message.empty()) continue;
 		auto client = channel->getHandle();
 
-		size_t i = 0;
-		while (i < event->Message.size())
+		auto req = (uv_udp_send_t*)malloc(sizeof(uv_udp_send_t));
+		req->data = event.get();
+		auto buf = uv_buf_init(event->Message.data(), (uint32_t)event->Message.size());
+		auto result = uv_udp_send(req, client, &buf, 1, nullptr, [](uv_udp_send_t* req, int status)
 		{
-			auto buf = uv_buf_init(event->Message.data() + i, (unsigned)(event->Message.size() - i));
-			auto result = uv_udp_try_send(client, &buf, 1, nullptr);
-			if (result == UV_EAGAIN) continue;
-			else if (result < 0) break;
-			else i += result;
+			auto event = (IChannelEvent*)req->data;
+			auto reactor = (UDPClientReactor*)req->handle->loop->data;
+			auto channel = MSCast<UDPChannel>(event->Channel.lock());
+			free(req);
+
+			if (event->Promise) event->Promise->set_value(status == 0);
+			reactor->m_EventCache.erase(event);
+
+			if (channel && status)
+			{
+				MS_ERROR("write error: %s", uv_strerror(status));
+				reactor->onDisconnect(channel);
+			}
+		});
+		if (result)
+		{
+			free(req);
+
+			if (event->Promise) event->Promise->set_value(false);
+			reactor->m_EventCache.erase(event.get());
+
+			MS_ERROR("write error: %s", uv_strerror(result));
+			reactor->onDisconnect(channel);
 		}
-		if (i != event->Message.size()) reactor->onDisconnect(channel);
-		if (event->Promise) event->Promise->set_value(i == event->Message.size());
 	}
 }

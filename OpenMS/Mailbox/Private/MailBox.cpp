@@ -5,7 +5,7 @@
 *
 *
 * ====================History=======================
-* Created by ChivenZhang at 2024/12/20 17:07:32.
+* Created by chivenzhang@gmail.com.
 *
 * =================================================*/
 #include "MailBox.h"

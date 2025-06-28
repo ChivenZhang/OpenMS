@@ -5,7 +5,7 @@
 *
 *
 * ====================History=======================
-* Created by ChivenZhang at 2024/12/29 19:54:44.
+* Created by chivenzhang@gmail.com.
 *
 * =================================================*/
 #include "ClusterDemo1.h"
@@ -57,7 +57,7 @@ void ClusterDemo1::onInit()
 		while (m_Running)
 		{
 			mails->sendToMailbox({.To = "login", .Data = R"({"user":"admin", "pass":"******"})"});
-			std::this_thread::sleep_for(std::chrono::milliseconds(1));
+			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		}
 	});
 }

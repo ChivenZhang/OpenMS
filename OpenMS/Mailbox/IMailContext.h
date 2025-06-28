@@ -6,7 +6,7 @@
 *
 *
 * ====================History=======================
-* Created by ChivenZhang at 2024/12/20 16:56:36.
+* Created by chivenzhang@gmail.com.
 *
 * =================================================*/
 #include "IMailBox.h"

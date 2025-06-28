@@ -5,7 +5,7 @@
 *
 *
 * ====================History=======================
-* Created by ChivenZhang at 2024/12/20 17:04:01.
+* Created by chivenzhang@gmail.com.
 *
 * =================================================*/
 #include "MailDeliver.h"
