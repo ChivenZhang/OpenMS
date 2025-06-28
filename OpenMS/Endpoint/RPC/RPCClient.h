@@ -262,6 +262,7 @@ protected:
 	{
 		MSLambda<void(MSString&&)> OnResult;
 	};
+
 	MSMap<uint32_t, invoke_t> m_Sessions;
 };
 

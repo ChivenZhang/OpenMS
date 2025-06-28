@@ -47,8 +47,7 @@ protected:
 				.OnRead = [](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)->bool
 				{
 					MS_INFO("%s", event->Message.c_str());
-					auto event2 = IChannelEvent::New("This is client");
-					context->write(event2);
+					context->write(IChannelEvent::New("This is client"));
 					return true;
 				}
 			});
