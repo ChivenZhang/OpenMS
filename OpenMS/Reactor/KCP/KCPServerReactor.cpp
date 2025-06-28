@@ -92,7 +92,8 @@ void KCPServerReactor::startup()
 	MSPromise<void> promise;
 	auto future = promise.get_future();
 
-	m_EventThread = MSThread([=, &promise]() {
+	m_EventThread = MSThread([=, &promise]()
+	{
 		uv_loop_t loop;
 		uv_udp_t server;
 
@@ -173,16 +174,15 @@ void KCPServerReactor::startup()
 
 			// Run the event loop
 
-			if (true)
 			{
 				loop.data = this;
+				uv_timer_t timer;
+				uv_timer_init(&loop, &timer);
+				uv_timer_start(&timer, on_send, 0, 1);
+
 				m_Connect = true;
 				promise.set_value();
-				while (m_Running == true && uv_run(&loop, UV_RUN_NOWAIT))
-				{
-					on_send(&server);
-					if (m_ChannelsRemoved.size()) m_ChannelsRemoved.clear();
-				}
+				uv_run(&loop, UV_RUN_DEFAULT);
 				m_Connect = false;
 			}
 
@@ -442,9 +442,10 @@ int KCPServerReactor::on_output(const char* buf, int len, IKCPCB* kcp, void* use
 	return (uint32_t)sentNum;
 }
 
-void KCPServerReactor::on_send(uv_udp_t* handle)
+void KCPServerReactor::on_send(uv_timer_t* handle)
 {
 	auto reactor = (KCPServerReactor*)handle->loop->data;
+	if (reactor->m_ChannelsRemoved.size()) reactor->m_ChannelsRemoved.clear();
 
 	// Update all kcp sessions
 
@@ -475,7 +476,8 @@ void KCPServerReactor::on_send(uv_udp_t* handle)
 		}
 	}
 
-	if (reactor->m_Sending == false) return;
+	if (reactor->m_Running == false) uv_stop(handle->loop);
+	if (reactor->m_Running == false || reactor->m_Sending == false) return;
 
 	// Send all pending data
 

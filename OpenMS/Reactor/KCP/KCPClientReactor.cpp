@@ -180,16 +180,15 @@ void KCPClientReactor::startup()
 
 			// Run the event loop
 
-			if (true)
 			{
 				loop.data = this;
-				m_Connect = true;
+				uv_timer_t timer;
+				uv_timer_init(&loop, &timer);
+				uv_timer_start(&timer, on_send, 0, 1);
+
+				uv_run(&loop, UV_RUN_ONCE);
 				promise.set_value();
-				while (m_Running && uv_run(&loop, UV_RUN_NOWAIT))
-				{
-					on_send(&client);
-					if (m_ChannelRemoved) m_ChannelRemoved = nullptr;
-				}
+				uv_run(&loop, UV_RUN_DEFAULT);
 				m_Connect = false;
 			}
 
@@ -360,15 +359,7 @@ void KCPClientReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 
 	// Process the incoming data : nread >= 0
 
-	if (nread < 0)
-	{
-		free(buf->base);
-
-		reactor->onDisconnect(channel);
-		return;
-	}
-
-	if (channel->running() == false)
+	if (nread < 0 || channel->running() == false)
 	{
 		free(buf->base);
 
@@ -393,7 +384,7 @@ int KCPClientReactor::on_output(const char* buf, int len, IKCPCB* kcp, void* use
 {
 	auto channel = (KCPChannel*)user;
 	auto reactor = MSCast<KCPClientReactor>(channel->getReactor());
-	auto client = (uv_udp_t*)channel->getHandle();
+	auto client = channel->getHandle();
 	auto remote = channel->getRemote().lock();
 
 	// Send the data
@@ -415,10 +406,10 @@ int KCPClientReactor::on_output(const char* buf, int len, IKCPCB* kcp, void* use
 	return (uint32_t)sentNum;
 }
 
-void KCPClientReactor::on_send(uv_udp_t* handle)
+void KCPClientReactor::on_send(uv_timer_t* handle)
 {
 	auto reactor = (KCPClientReactor*)handle->loop->data;
-	auto client = (uv_udp_t*)handle;
+	reactor->m_ChannelRemoved = nullptr;
 
 	if (reactor->m_Channel)
 	{
@@ -447,7 +438,8 @@ void KCPClientReactor::on_send(uv_udp_t* handle)
 		}
 	}
 
-	if (reactor->m_Sending == false) return;
+	if (reactor->m_Running == false) uv_stop(handle->loop);
+	if (reactor->m_Running == false || reactor->m_Sending == false) return;
 
 	MSMutexLock lock(reactor->m_EventLock);
 	reactor->m_Sending = false;
@@ -468,9 +460,9 @@ void KCPClientReactor::on_send(uv_udp_t* handle)
 		while (i < event->Message.size())
 		{
 			auto buf = uv_buf_init(event->Message.data() + i, (unsigned)(event->Message.size() - i));
-			auto result = ikcp_send(session, (char*)buf.base, buf.len);
+			auto result = ikcp_send(session, buf.base, buf.len);
 			if (result < 0) break;
-			else i += result;
+			i += result;
 		}
 		if (i != event->Message.size()) reactor->onDisconnect(channel);
 		if (event->Promise) event->Promise->set_value(i == event->Message.size());
