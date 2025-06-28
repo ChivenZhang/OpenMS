@@ -88,7 +88,8 @@ void KCPClientReactor::startup()
 	MSPromise<void> promise;
 	auto future = promise.get_future();
 
-	m_EventThread = MSThread([=, &promise]() {
+	m_EventThread = MSThread([=, &promise]()
+	{
 		uv_loop_t loop;
 		uv_udp_t client;
 
@@ -102,7 +103,7 @@ void KCPClientReactor::startup()
 			if(true)
 			{
 				sockaddr_storage addr = {};
-				uint32_t result = uv_errno_t::UV_EINVAL;
+				uint32_t result = UV_EINVAL;
 				if (auto ipv4 = MSCast<IPv4Address>(m_Address))
 				{
 					result = uv_ip4_addr(ipv4->getAddress().c_str(), ipv4->getPort(), (sockaddr_in*)&addr);
@@ -355,8 +356,6 @@ void KCPClientReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 		ikcp_nodelay(session, 1, 20, 2, 1);
 		reactor->onConnect(channel);
 
-		MS_DEBUG("accepted from %s:%d", remoteAddress->getAddress().c_str(), remoteAddress->getPort());
-
 		free(buf->base);
 		return;
 	}
@@ -460,15 +459,8 @@ void KCPClientReactor::on_send(uv_timer_t* handle)
 		if (event->Message.empty()) continue;
 		auto session = channel->getSession();
 
-		size_t i = 0;
-		while (i < event->Message.size())
-		{
-			auto buf = uv_buf_init(event->Message.data() + i, (unsigned)(event->Message.size() - i));
-			auto result = ikcp_send(session, buf.base, buf.len);
-			if (result < 0) break;
-			i += result;
-		}
-		if (i != event->Message.size()) reactor->onDisconnect(channel);
-		if (event->Promise) event->Promise->set_value(i == event->Message.size());
+		auto result = ikcp_send(session, event->Message.data(), (int)event->Message.size());
+		if (result < 0) reactor->onDisconnect(channel);
+		if (event->Promise) event->Promise->set_value(result == 0);
 	}
 }

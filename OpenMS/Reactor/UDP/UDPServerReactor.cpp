@@ -30,7 +30,8 @@ void UDPServerReactor::startup()
 	MSPromise<void> promise;
 	auto future = promise.get_future();
 
-	m_EventThread = MSThread([=, &promise]() {
+	m_EventThread = MSThread([=, &promise]()
+	{
 		uv_loop_t loop;
 		uv_udp_t server;
 
@@ -44,7 +45,7 @@ void UDPServerReactor::startup()
 			if (true)
 			{
 				sockaddr_storage addr = {};
-				uint32_t result = uv_errno_t::UV_EINVAL;
+				uint32_t result = UV_EINVAL;
 				if (auto ipv4 = MSCast<IPv4Address>(m_Address))
 				{
 					result = uv_ip4_addr(ipv4->getAddress().c_str(), ipv4->getPort(), (sockaddr_in*)&addr);
