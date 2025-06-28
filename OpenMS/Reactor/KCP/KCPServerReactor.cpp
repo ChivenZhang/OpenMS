@@ -129,10 +129,10 @@ void KCPServerReactor::startup()
 			if (true)
 			{
 				sockaddr_storage addr = {};
-				int client = sizeof(addr);
+				int addrLen = sizeof(addr);
 				MSRef<ISocketAddress> localAddress;
 
-				auto result = uv_udp_getsockname(&server, (sockaddr*)&addr, &client);
+				auto result = uv_udp_getsockname(&server, (sockaddr*)&addr, &addrLen);
 				if (result == 0)
 				{
 					if (addr.ss_family == AF_INET)
@@ -298,11 +298,11 @@ void KCPServerReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 	{
 		// Get the actual ip and port number
 
-		sockaddr_storage addr;
-		int addrlen = sizeof(addr);
+		sockaddr_storage addr = {};
+		int addrLen = sizeof(addr);
 		MSRef<ISocketAddress> localAddress, remoteAddress;
 
-		auto result = uv_udp_getsockname((uv_udp_t*)server, (sockaddr*)&addr, &addrlen);
+		auto result = uv_udp_getsockname((uv_udp_t*)server, (sockaddr*)&addr, &addrLen);
 		if (result == 0)
 		{
 			if (addr.ss_family == AF_INET)
@@ -368,14 +368,12 @@ void KCPServerReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 		ikcp_nodelay(session, 1, 20, 2, 1);
 		// Pass the session id to remote client
 		result = ikcp_send(session, nullptr, 0);
-		if (result < 0) return;
+		if (result < 0)
 		{
 			free(buf->base);
 			return;
 		}
 		reactor->onConnect(channel);
-
-		MS_DEBUG("accepted from %s:%d", remoteAddress->getAddress().c_str(), remoteAddress->getPort());
 
 		free(buf->base);
 		return;
@@ -419,7 +417,7 @@ int KCPServerReactor::on_output(const char* buf, int len, IKCPCB* kcp, void* use
 	auto server = (uv_udp_t*)channel->getHandle();
 	auto remote = channel->getRemote().lock();
 
-	sockaddr_storage addr;
+	sockaddr_storage addr = {};
 	int result = UV_EINVAL;
 	if (auto ipv4 = MSCast<IPv4Address>(remote))
 	{
@@ -436,8 +434,8 @@ int KCPServerReactor::on_output(const char* buf, int len, IKCPCB* kcp, void* use
 	MSStringView message(buf, len);
 	while (sentNum < message.size())
 	{
-		auto buf = uv_buf_init((char*)message.data() + sentNum, (unsigned)(message.size() - sentNum));
-		auto result = uv_udp_try_send(server, &buf, 1, (sockaddr*)&addr);
+		auto buffer = uv_buf_init((char*)message.data() + sentNum, (unsigned)(message.size() - sentNum));
+		result = uv_udp_try_send(server, &buffer, 1, (sockaddr*)&addr);
 		if (result < 0)
 		{
 			reactor->onDisconnect(channel->shared_from_this());
@@ -505,15 +503,8 @@ void KCPServerReactor::on_send(uv_timer_t* handle)
 		auto session = channel->getSession();
 		auto remote = channel->getRemote();
 
-		size_t i = 0;
-		while (i < event->Message.size())
-		{
-			auto buf = uv_buf_init(event->Message.data() + i, (unsigned)(event->Message.size() - i));
-			auto result = ikcp_send(session, (char*)buf.base, buf.len);
-			if (result < 0) break;
-			else i += result;
-		}
-		if (i != event->Message.size()) reactor->onDisconnect(channel);
-		if (event->Promise) event->Promise->set_value(i == event->Message.size());
+		auto result = ikcp_send(session, event->Message.data(), (int)event->Message.size());
+		if (result < 0) reactor->onDisconnect(channel);
+		if (event->Promise) event->Promise->set_value(result == 0);
 	}
 }
