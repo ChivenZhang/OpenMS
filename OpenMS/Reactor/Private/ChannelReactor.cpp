@@ -7,7 +7,7 @@
 *
 *
 * ====================History=======================
-* Created by ChivenZhang@gmail.com.
+* Created by chivenzhang@gmail.com.
 *
 * =================================================*/
 #include "ChannelReactor.h"
@@ -17,8 +17,8 @@ ChannelReactor::ChannelReactor(size_t workerNum, callback_t callback)
 	m_Running(false),
 	m_Sending(false),
 	m_Connect(false),
-	m_OnOnOpen(callback.OnOpen),
-	m_OnOnClose(callback.OnClose),
+	m_OnOpen(callback.OnOpen),
+	m_OnClose(callback.OnClose),
 	m_WorkerList(std::max<size_t>(1, workerNum)),
 	m_WorkerThreads(std::max<size_t>(1, workerNum))
 {
@@ -103,14 +103,14 @@ MSFuture<bool> ChannelReactor::writeAndFlush(MSRef<IChannelEvent> event, MSRef<I
 void ChannelReactor::onConnect(MSRef<Channel> channel)
 {
 	if (channel == nullptr) return;
-	if (m_OnOnOpen) m_OnOnOpen(channel);
+	if (m_OnOpen) m_OnOpen(channel);
 }
 
 void ChannelReactor::onDisconnect(MSRef<Channel> channel)
 {
 	if (channel == nullptr) return;
 	channel->close();
-	if (m_OnOnClose) m_OnOnClose(channel);
+	if (m_OnClose) m_OnClose(channel);
 }
 
 void ChannelReactor::onInbound(MSRef<IChannelEvent> event)

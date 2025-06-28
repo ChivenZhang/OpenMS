@@ -5,7 +5,7 @@
 *
 *
 * ====================History=======================
-* Created by ChivenZhang@gmail.com.
+* Created by chivenzhang@gmail.com.
 *
 * =================================================*/
 #include "UDPServerReactor.h"
@@ -19,7 +19,7 @@ UDPServerReactor::UDPServerReactor(MSRef<ISocketAddress> address, uint32_t backl
 	m_Multicast(multicast),
 	m_Address(address)
 {
-	if (m_Address == nullptr) m_Address = MSNew<IPv4Address>("0.0.0.0", 0);
+	if (m_Address == nullptr || m_Address->getAddress().empty()) m_Address = MSNew<IPv4Address>("0.0.0.0", 0);
 }
 
 void UDPServerReactor::startup()
@@ -209,7 +209,11 @@ void UDPServerReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 	auto reactor = (UDPServerReactor*)req->loop->data;
 	auto server = (uv_udp_t*)req;
 
-	if (nread == 0 || peer == nullptr) return;
+	if (nread == 0 || peer == nullptr)
+	{
+		free(buf->base);
+		return;
+	}
 
 	auto hashName = 0U;
 	if (peer->sa_family == AF_INET)
@@ -368,12 +372,12 @@ void UDPServerReactor::on_send(uv_timer_t* handle)
 		{
 			auto event = (IChannelEvent*)req->data;
 			auto reactor = (UDPServerReactor*)req->handle->loop->data;
+			auto channel = MSCast<UDPChannel>(event->Channel.lock());
 			free(req);
 
 			if (event->Promise) event->Promise->set_value(status == 0);
 			reactor->m_EventCache.erase(event);
 
-			auto channel = MSCast<UDPChannel>(event->Channel.lock());
 			if (channel && status)
 			{
 				MS_ERROR("write error: %s", uv_strerror(status));

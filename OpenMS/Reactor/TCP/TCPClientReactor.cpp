@@ -6,7 +6,7 @@
 *
 *
 * ====================History=======================
-* Created by ChivenZhang@gmail.com.
+* Created by chivenzhang@gmail.com.
 *
 * =================================================*/
 #include "TCPClientReactor.h"
@@ -17,7 +17,7 @@ TCPClientReactor::TCPClientReactor(MSRef<ISocketAddress> address, size_t workerN
 	ChannelReactor(workerNum, callback),
 	m_Address(address)
 {
-	if (m_Address == nullptr) m_Address = MSNew<IPv4Address>("0.0.0.0", 0);
+	if (m_Address == nullptr || m_Address->getAddress().empty()) m_Address = MSNew<IPv4Address>("0.0.0.0", 0);
 }
 
 void TCPClientReactor::startup()
@@ -329,12 +329,12 @@ void TCPClientReactor::on_send(uv_timer_t* handle)
 		{
 			auto event = (IChannelEvent*)req->data;
 			auto reactor = (TCPClientReactor*)req->handle->loop->data;
+			auto channel = MSCast<TCPChannel>(event->Channel.lock());
 			free(req);
 
 			if (event->Promise) event->Promise->set_value(status == 0);
 			reactor->m_EventCache.erase(event);
 
-			auto channel = MSCast<TCPChannel>(event->Channel.lock());
 			if (channel && status)
 			{
 				MS_ERROR("write error: %s", uv_strerror(status));

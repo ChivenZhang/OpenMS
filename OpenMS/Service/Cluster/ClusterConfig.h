@@ -6,7 +6,7 @@
 *
 *
 * ====================History=======================
-* Created by ChivenZhang at 2024/12/29 19:21:53.
+* Created by chivenzhang@gmail.com.
 *
 * =================================================*/
 #include "../Private/Property.h"

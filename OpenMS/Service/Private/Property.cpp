@@ -7,7 +7,7 @@
 *
 *
 * ====================History=======================
-* Created by ChivenZhang@gmail.com.
+* Created by chivenzhang@gmail.com.
 *
 * =================================================*/
 #include "Property.h"
@@ -32,7 +32,7 @@ Property::Property()
 
 	// Get config file path
 
-	auto directory = std::filesystem::path(argv[0]).parent_path().generic_string();
+	auto directory = std::filesystem::absolute(argv[0]).parent_path().generic_string();
 	auto configFile = directory + "/" + OPENMS_CONFIG_FILE;
 	if (std::filesystem::exists(configFile) == false) MS_FATAL("config file not found: %s", configFile.c_str());
 

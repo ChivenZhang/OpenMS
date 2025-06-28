@@ -6,7 +6,7 @@
 *
 *
 * ====================History=======================
-* Created by ChivenZhang@gmail.com.
+* Created by chivenzhang@gmail.com.
 *
 * =================================================*/
 #include "TCPServerReactor.h"
@@ -18,7 +18,7 @@ TCPServerReactor::TCPServerReactor(MSRef<ISocketAddress> address, uint32_t backl
 	m_Backlog(backlog ? backlog : 128),
 	m_Address(address)
 {
-	if (m_Address == nullptr) m_Address = MSNew<IPv4Address>("0.0.0.0", 0);
+	if (m_Address == nullptr || m_Address->getAddress().empty()) m_Address = MSNew<IPv4Address>("0.0.0.0", 0);
 }
 
 void TCPServerReactor::startup()
@@ -339,12 +339,12 @@ void TCPServerReactor::on_send(uv_timer_t* handle)
 		{
 			auto event = (IChannelEvent*)req->data;
 			auto reactor = (TCPServerReactor*)req->handle->loop->data;
+			auto channel = MSCast<TCPChannel>(event->Channel.lock());
 			free(req);
 
 			if (event->Promise) event->Promise->set_value(status == 0);
 			reactor->m_EventCache.erase(event);
 
-			auto channel = MSCast<TCPChannel>(event->Channel.lock());
 			if (channel && status)
 			{
 				MS_ERROR("write error: %s", uv_strerror(status));

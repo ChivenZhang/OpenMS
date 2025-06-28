@@ -6,12 +6,12 @@
 *
 *
 * ====================History=======================
-* Created by ChivenZhang at 2024/12/29 21:47:04.
+* Created by chivenzhang@gmail.com.
 *
 * =================================================*/
 #include <OpenMS/Service/Cluster/ClusterService.h>
 
-class ClusterDemo2 : public ClusterService
+class ClusterDemo1 : public ClusterService
 {
 public:
 	MSString identity() const override;
@@ -19,6 +19,10 @@ public:
 protected:
 	void onInit() override;
 	void onExit() override;
+
+protected:
+	MSThread m_Thread;
+	MSAtomic<bool> m_Running;
 };
 
-OPENMS_RUN(ClusterDemo2)
+OPENMS_RUN(ClusterDemo1)

@@ -5,7 +5,7 @@
 *
 *
 * ====================History=======================
-* Created by ChivenZhang@gmail.com.
+* Created by chivenzhang@gmail.com.
 *
 * =================================================*/
 #include "KCPClientReactor.h"
@@ -77,7 +77,7 @@ KCPClientReactor::KCPClientReactor(MSRef<ISocketAddress> address, size_t workerN
 	ChannelReactor(workerNum, callback),
 	m_Address(address)
 {
-	if (m_Address == nullptr) m_Address = MSNew<IPv4Address>("0.0.0.0", 0);
+	if (m_Address == nullptr || m_Address->getAddress().empty()) m_Address = MSNew<IPv4Address>("0.0.0.0", 0);
 }
 
 void KCPClientReactor::startup()
@@ -186,7 +186,7 @@ void KCPClientReactor::startup()
 				uv_timer_init(&loop, &timer);
 				uv_timer_start(&timer, on_send, 0, 1);
 
-				uv_run(&loop, UV_RUN_ONCE);
+				m_Connect = true;
 				promise.set_value();
 				uv_run(&loop, UV_RUN_DEFAULT);
 				m_Connect = false;
@@ -274,7 +274,11 @@ void KCPClientReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 	auto channel = reactor->m_Channel;
 	auto client = req;
 
-	if (nread == 0 || peer == nullptr) return;
+	if (nread == 0 || peer == nullptr)
+	{
+		free(buf->base);
+		return;
+	}
 
 	if (channel == nullptr)
 	{

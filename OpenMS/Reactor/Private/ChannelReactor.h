@@ -6,7 +6,7 @@
 *
 *
 * ====================History=======================
-* Created by ChivenZhang@gmail.com.
+* Created by chivenzhang@gmail.com.
 *
 * =================================================*/
 #include "../IChannelReactor.h"
@@ -50,8 +50,8 @@ protected:
 	MSList<MSThread> m_WorkerThreads;
 	MSList<MSRef<ChannelWorker>> m_WorkerList;
 	MSQueue<MSRef<IChannelEvent>> m_EventQueue;
-	MSLambda<void(MSRef<IChannel>)> m_OnOnOpen;
-	MSLambda<void(MSRef<IChannel>)> m_OnOnClose;
+	MSLambda<void(MSRef<IChannel>)> m_OnOpen;
+	MSLambda<void(MSRef<IChannel>)> m_OnClose;
 
 private:
 	friend class Channel;

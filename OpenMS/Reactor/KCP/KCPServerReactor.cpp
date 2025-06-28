@@ -5,7 +5,7 @@
 *
 *
 * ====================History=======================
-* Created by ChivenZhang@gmail.com.
+* Created by chivenzhang@gmail.com.
 *
 * =================================================*/
 #include "KCPServerReactor.h"
@@ -80,7 +80,7 @@ KCPServerReactor::KCPServerReactor(MSRef<ISocketAddress> address, uint32_t backl
 	m_Address(address),
 	m_OnSession(callback.Session)
 {
-	if (m_Address == nullptr) m_Address = MSNew<IPv4Address>("0.0.0.0", 0);
+	if (m_Address == nullptr || m_Address->getAddress().empty()) m_Address = MSNew<IPv4Address>("0.0.0.0", 0);
 	if (m_OnSession == nullptr) m_OnSession = [=](MSRef<IChannelAddress>) { return m_Session++; };
 }
 
@@ -107,7 +107,7 @@ void KCPServerReactor::startup()
 			if (true)
 			{
 				sockaddr_storage addr = {};
-				uint32_t result = uv_errno_t::UV_EINVAL;
+				uint32_t result = UV_EINVAL;
 				if (auto ipv4 = MSCast<IPv4Address>(m_Address))
 				{
 					result = uv_ip4_addr(ipv4->getAddress().c_str(), ipv4->getPort(), (sockaddr_in*)&addr);
@@ -264,7 +264,11 @@ void KCPServerReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 	auto reactor = (KCPServerReactor*)req->loop->data;
 	auto server = (uv_udp_t*)req;
 
-	if (nread == 0 || peer == nullptr) return;
+	if (nread == 0 || peer == nullptr)
+	{
+		free(buf->base);
+		return;
+	}
 
 	// Get the remote address hash
 
@@ -364,8 +368,11 @@ void KCPServerReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 		ikcp_nodelay(session, 1, 20, 2, 1);
 		// Pass the session id to remote client
 		result = ikcp_send(session, nullptr, 0);
-		if (result < 0) free(buf->base);
-		if (result < 0)return;
+		if (result < 0) return;
+		{
+			free(buf->base);
+			return;
+		}
 		reactor->onConnect(channel);
 
 		MS_DEBUG("accepted from %s:%d", remoteAddress->getAddress().c_str(), remoteAddress->getPort());
@@ -413,7 +420,7 @@ int KCPServerReactor::on_output(const char* buf, int len, IKCPCB* kcp, void* use
 	auto remote = channel->getRemote().lock();
 
 	sockaddr_storage addr;
-	int result = uv_errno_t::UV_EINVAL;
+	int result = UV_EINVAL;
 	if (auto ipv4 = MSCast<IPv4Address>(remote))
 	{
 		result = uv_ip4_addr(ipv4->getAddress().c_str(), ipv4->getPort(), (sockaddr_in*)&addr);

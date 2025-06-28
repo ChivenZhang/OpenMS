@@ -5,7 +5,7 @@
 *
 *
 * ====================History=======================
-* Created by ChivenZhang@gmail.com.
+* Created by chivenzhang@gmail.com.
 *
 * =================================================*/
 #include "UDPClientReactor.h"
@@ -18,7 +18,7 @@ UDPClientReactor::UDPClientReactor(MSRef<ISocketAddress> address, bool broadcast
 	m_Multicast(multicast),
 	m_Address(address)
 {
-	if (m_Address == nullptr) m_Address = MSNew<IPv4Address>("0.0.0.0", 0);
+	if (m_Address == nullptr || m_Address->getAddress().empty()) m_Address = MSNew<IPv4Address>("0.0.0.0", 0);
 }
 
 void UDPClientReactor::startup()
@@ -101,7 +101,7 @@ void UDPClientReactor::startup()
 				}
 				else MS_ERROR("failed to get socket name: %s", ::uv_strerror(result));
 
-				result = uv_udp_getpeername((uv_udp_t*)&client, (sockaddr*)&addr, &addrLen);
+				result = uv_udp_getpeername(&client, (sockaddr*)&addr, &addrLen);
 				if (result == 0)
 				{
 					if (addr.ss_family == AF_INET)
@@ -240,7 +240,11 @@ void UDPClientReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 	auto reactor = (UDPClientReactor*)req->loop->data;
 	auto channel = reactor->m_Channel;
 
-	if (nread == 0 || peer == nullptr) return;
+	if (nread == 0 || peer == nullptr)
+	{
+		free(buf->base);
+		return;
+	}
 
 	if (nread < 0 || channel->running() == false)
 	{
@@ -287,12 +291,12 @@ void UDPClientReactor::on_send(uv_timer_t* handle)
 		{
 			auto event = (IChannelEvent*)req->data;
 			auto reactor = (UDPClientReactor*)req->handle->loop->data;
+			auto channel = MSCast<UDPChannel>(event->Channel.lock());
 			free(req);
 
 			if (event->Promise) event->Promise->set_value(status == 0);
 			reactor->m_EventCache.erase(event);
 
-			auto channel = MSCast<UDPChannel>(event->Channel.lock());
 			if (channel && status)
 			{
 				MS_ERROR("write error: %s", uv_strerror(status));
