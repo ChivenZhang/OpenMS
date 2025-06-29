@@ -41,7 +41,7 @@ int Service::startup()
 		{
 			MSMutexLock lock(m_Lock);
 			m_Working = false;
-			while (m_Running && !m_Events.empty())
+			while (m_Running && m_Events.empty() == false)
 			{
 				auto event = m_Events.front();
 				m_Events.pop();
