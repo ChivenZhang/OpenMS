@@ -23,14 +23,14 @@ class Service
 	public AUTOWIRE(IProperty)
 {
 public:
-	int startup() override final;
-	void shutdown() override final;
+	int startup() final;
+	void shutdown() final;
 	MSString identity() const override;
-	void sendEvent(MSLambda<void()> && event) override final;
-	uint32_t startTimer(uint64_t timeout, uint64_t repeat, MSLambda<void(uint32_t handle)> && task) override final;
-	bool stopTimer(uint32_t handle) override final;
+	void sendEvent(MSLambda<void()> && event) final;
+	uint32_t startTimer(uint64_t timeout, uint64_t repeat, MSLambda<void(uint32_t handle)> && task) final;
+	bool stopTimer(uint32_t handle) final;
 	using IService::property;
-	MSString property(MSString const& name) const override final;
+	MSString property(MSString const& name) const final;
 
 protected:
 	virtual void onInit();

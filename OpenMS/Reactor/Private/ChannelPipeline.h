@@ -26,14 +26,14 @@ public:
 	bool addLast(MSStringView name, MSRef<IChannelOutboundHandler> handler) override;
 	bool addBefore(MSStringView which, MSStringView name, MSRef<IChannelOutboundHandler> handler) override;
 	bool addAfter(MSStringView which, MSStringView name, MSRef<IChannelOutboundHandler> handler) override;
-	bool addFirst(MSStringView name, inconfig_t config) override;
-	bool addLast(MSStringView name, inconfig_t config) override;
-	bool addBefore(MSStringView which, MSStringView name, inconfig_t config) override;
-	bool addAfter(MSStringView which, MSStringView name, inconfig_t config) override;
-	bool addFirst(MSStringView name, outconfig_t config) override;
-	bool addLast(MSStringView name, outconfig_t config) override;
-	bool addBefore(MSStringView which, MSStringView name, outconfig_t config) override;
-	bool addAfter(MSStringView which, MSStringView name, outconfig_t config) override;
+	bool addFirst(MSStringView name, handler_in handler) override;
+	bool addLast(MSStringView name, handler_in handler) override;
+	bool addBefore(MSStringView which, MSStringView name, handler_in handler) override;
+	bool addAfter(MSStringView which, MSStringView name, handler_in handler) override;
+	bool addFirst(MSStringView name, handler_out handler) override;
+	bool addLast(MSStringView name, handler_out handler) override;
+	bool addBefore(MSStringView which, MSStringView name, handler_out handler) override;
+	bool addAfter(MSStringView which, MSStringView name, handler_out handler) override;
 
 protected:
 	MSRaw<Channel> m_Channel;

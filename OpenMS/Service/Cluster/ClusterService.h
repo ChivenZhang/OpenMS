@@ -31,6 +31,7 @@ protected:
 	void configureEndpoint(config_t& config) final;
 
 protected:
+	uint32_t m_Heartbeat = 0;
 	MSMutex m_MailRouteLock;
 	MSMutex m_MailClientLock;
 	MSRef<ClusterServer> m_MailServer;

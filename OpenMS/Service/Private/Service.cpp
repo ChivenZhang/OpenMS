@@ -41,7 +41,7 @@ int Service::startup()
 		{
 			MSMutexLock lock(m_Lock);
 			m_Working = false;
-			while (m_Running && m_Events.size())
+			while (m_Running && !m_Events.empty())
 			{
 				auto event = m_Events.front();
 				m_Events.pop();
@@ -49,7 +49,7 @@ int Service::startup()
 				{
 					event();
 				}
-				catch (MSError ex)
+				catch (MSError&& ex)
 				{
 					onError(std::forward<MSError>(ex));
 				}
@@ -61,7 +61,7 @@ int Service::startup()
 		}
 
 		frameTime = ::clock();
-		onUpdate(frameTime * 0.001f);
+		onUpdate((float)frameTime * 0.001f);
 		while (frameNext < frameTime)
 		{
 			onFrame(frame++);
@@ -73,7 +73,7 @@ int Service::startup()
 	{
 		onExit();
 	}
-	catch (MSError ex)
+	catch (MSError&& ex)
 	{
 		onError(std::forward<MSError>(ex));
 	}
@@ -97,9 +97,10 @@ MSString Service::identity() const
 
 uint32_t Service::startTimer(uint64_t timeout, uint64_t repeat, MSLambda<void(uint32_t handle)>&& task)
 {
-	return m_Timer.start(timeout, repeat, [=](uint32_t handle) {
+	return m_Timer.start(timeout, repeat, [=](uint32_t handle)
+	{
 		sendEvent([&]() { task(handle); });
-		});
+	});
 }
 
 bool Service::stopTimer(uint32_t handle)
@@ -117,7 +118,7 @@ void Service::sendEvent(MSLambda<void()>&& event)
 MSString Service::property(MSString const& name) const
 {
 	auto source = AUTOWIRE_DATA(IProperty);
-	if (source == nullptr) return MSString();
+	if (source == nullptr) return {};
 	return source->property(name);
 }
 

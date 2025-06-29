@@ -17,13 +17,6 @@
 class OPENMS_API IChannelInboundHandler
 {
 public:
-	struct callback_t
-	{
-		MSLambda<bool(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)> OnRead;
-		MSLambda<void(MSRaw<IChannelContext> context, MSError&& exception)> OnError;
-	};
-
-public:
 	virtual ~IChannelInboundHandler() = default;
 
 	virtual bool channelRead(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event) = 0;
@@ -34,13 +27,6 @@ public:
 /// @brief Interface for outbound handler
 class OPENMS_API IChannelOutboundHandler
 {
-public:
-	struct callback_t
-	{
-		MSLambda<bool(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)> OnWrite;
-		MSLambda<void(MSRaw<IChannelContext> context, MSError&& exception)> OnError;
-	};
-
 public:
 	virtual ~IChannelOutboundHandler() = default;
 

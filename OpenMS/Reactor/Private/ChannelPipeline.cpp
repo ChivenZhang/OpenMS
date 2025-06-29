@@ -128,42 +128,42 @@ bool ChannelPipeline::addAfter(MSStringView which, MSStringView name, MSRef<ICha
 	return true;
 }
 
-bool ChannelPipeline::addFirst(MSStringView name, inconfig_t config)
+bool ChannelPipeline::addFirst(MSStringView name, handler_in handler)
 {
-	return addFirst(name, MSNew<LambdaInboundHandler>(LambdaInboundHandler::callback_t{ config.OnRead, config.OnError, }));
+	return addFirst(name, MSNew<LambdaInboundHandler>(LambdaInboundHandler::callback_t{ handler.OnHandle, handler.OnError, }));
 }
 
-bool ChannelPipeline::addLast(MSStringView name, inconfig_t config)
+bool ChannelPipeline::addLast(MSStringView name, handler_in handler)
 {
-	return addLast(name, MSNew<LambdaInboundHandler>(LambdaInboundHandler::callback_t{ config.OnRead, config.OnError, }));
+	return addLast(name, MSNew<LambdaInboundHandler>(LambdaInboundHandler::callback_t{ handler.OnHandle, handler.OnError, }));
 }
 
-bool ChannelPipeline::addBefore(MSStringView which, MSStringView name, inconfig_t config)
+bool ChannelPipeline::addBefore(MSStringView which, MSStringView name, handler_in handler)
 {
-	return addBefore(which, name, MSNew<LambdaInboundHandler>(LambdaInboundHandler::callback_t{ config.OnRead, config.OnError, }));
+	return addBefore(which, name, MSNew<LambdaInboundHandler>(LambdaInboundHandler::callback_t{ handler.OnHandle, handler.OnError, }));
 }
 
-bool ChannelPipeline::addAfter(MSStringView which, MSStringView name, inconfig_t config)
+bool ChannelPipeline::addAfter(MSStringView which, MSStringView name, handler_in handler)
 {
-	return addAfter(which, name, MSNew<LambdaInboundHandler>(LambdaInboundHandler::callback_t{ config.OnRead, config.OnError, }));
+	return addAfter(which, name, MSNew<LambdaInboundHandler>(LambdaInboundHandler::callback_t{ handler.OnHandle, handler.OnError, }));
 }
 
-bool ChannelPipeline::addFirst(MSStringView name, outconfig_t config)
+bool ChannelPipeline::addFirst(MSStringView name, handler_out handler)
 {
-	return addFirst(name, MSNew<LambdaOutboundHandler>(LambdaOutboundHandler::callback_t{ config.OnWrite, config.OnError, }));
+	return addFirst(name, MSNew<LambdaOutboundHandler>(LambdaOutboundHandler::callback_t{ handler.OnHandle, handler.OnError, }));
 }
 
-bool ChannelPipeline::addLast(MSStringView name, outconfig_t config)
+bool ChannelPipeline::addLast(MSStringView name, handler_out handler)
 {
-	return addLast(name, MSNew<LambdaOutboundHandler>(LambdaOutboundHandler::callback_t{ config.OnWrite, config.OnError, }));
+	return addLast(name, MSNew<LambdaOutboundHandler>(LambdaOutboundHandler::callback_t{ handler.OnHandle, handler.OnError, }));
 }
 
-bool ChannelPipeline::addBefore(MSStringView which, MSStringView name, outconfig_t config)
+bool ChannelPipeline::addBefore(MSStringView which, MSStringView name, handler_out handler)
 {
-	return addBefore(which, name, MSNew<LambdaOutboundHandler>(LambdaOutboundHandler::callback_t{ config.OnWrite, config.OnError, }));
+	return addBefore(which, name, MSNew<LambdaOutboundHandler>(LambdaOutboundHandler::callback_t{ handler.OnHandle, handler.OnError, }));
 }
 
-bool ChannelPipeline::addAfter(MSStringView which, MSStringView name, outconfig_t config)
+bool ChannelPipeline::addAfter(MSStringView which, MSStringView name, handler_out handler)
 {
-	return addAfter(which, name, MSNew<LambdaOutboundHandler>(LambdaOutboundHandler::callback_t{ config.OnWrite, config.OnError, }));
+	return addAfter(which, name, MSNew<LambdaOutboundHandler>(LambdaOutboundHandler::callback_t{ handler.OnHandle, handler.OnError, }));
 }

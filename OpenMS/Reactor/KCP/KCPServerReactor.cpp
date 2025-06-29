@@ -104,7 +104,6 @@ void KCPServerReactor::startup()
 		{
 			// Bind and listen to the socket
 
-			if (true)
 			{
 				sockaddr_storage addr = {};
 				uint32_t result = UV_EINVAL;
@@ -126,7 +125,6 @@ void KCPServerReactor::startup()
 
 			// Get the actual ip and port number
 
-			if (true)
 			{
 				sockaddr_storage addr = {};
 				int addrLen = sizeof(addr);
@@ -165,7 +163,6 @@ void KCPServerReactor::startup()
 
 			// Start receiving data
 
-			if (true)
 			{
 				auto result = uv_udp_recv_start(&server, on_alloc, on_read);
 				if (result) MS_ERROR("recv start error: %s", ::uv_strerror(result));
@@ -188,7 +185,6 @@ void KCPServerReactor::startup()
 
 			// Close all channels
 
-			if (true)
 			{
 				auto channels = m_Channels;
 				for (auto channel : channels)

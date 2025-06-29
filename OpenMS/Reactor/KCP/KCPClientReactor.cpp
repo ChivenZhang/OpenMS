@@ -100,7 +100,6 @@ void KCPClientReactor::startup()
 		{
 			// Bind and listen to the socket
 
-			if(true)
 			{
 				sockaddr_storage addr = {};
 				uint32_t result = UV_EINVAL;
@@ -126,7 +125,6 @@ void KCPClientReactor::startup()
 
 			// Get the actual ip and port number
 
-			if (true)
 			{
 				sockaddr_storage addr = {};
 				int addrLen = sizeof(addr);
@@ -165,7 +163,6 @@ void KCPClientReactor::startup()
 
 			// Send the initial data for session id
 
-			if (true)
 			{
 				size_t sentNum = 0;
 				MSStringView message("\0", 1);
@@ -195,7 +192,6 @@ void KCPClientReactor::startup()
 
 			// Close all channels
 
-			if (true)
 			{
 				if (m_Channel) onDisconnect(m_Channel);
 				m_Channel = nullptr;
@@ -207,7 +203,7 @@ void KCPClientReactor::startup()
 
 			MS_PRINT("closed client");
 			return;
-		} while (0);
+		} while (false);
 
 		uv_close((uv_handle_t*)&client, nullptr);
 		uv_loop_close(&loop);
