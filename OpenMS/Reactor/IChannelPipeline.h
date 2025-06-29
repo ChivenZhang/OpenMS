@@ -21,16 +21,21 @@ public:
 		MSRef<IChannelInboundHandler> Handler;
 		uint32_t HashName;
 	};
-
 	struct outbound_t
 	{
 		MSRef<IChannelOutboundHandler> Handler;
 		uint32_t HashName;
 	};
-
-	using inconfig_t = IChannelInboundHandler::callback_t;
-
-	using outconfig_t = IChannelOutboundHandler::callback_t;
+	struct handler_in
+	{
+		MSLambda<bool(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)> OnHandle;
+		MSLambda<void(MSRaw<IChannelContext> context, MSError&& exception)> OnError;
+	};
+	struct handler_out
+	{
+		MSLambda<bool(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)> OnHandle;
+		MSLambda<void(MSRaw<IChannelContext> context, MSError&& exception)> OnError;
+	};
 
 public:
 	virtual ~IChannelPipeline() = default;
@@ -55,19 +60,19 @@ public:
 
 	virtual bool addAfter(MSStringView which, MSStringView name, MSRef<IChannelOutboundHandler> handler) = 0;
 
-	virtual bool addFirst(MSStringView name, inconfig_t config) = 0;
+	virtual bool addFirst(MSStringView name, handler_in handler) = 0;
 
-	virtual bool addLast(MSStringView name, inconfig_t config) = 0;
+	virtual bool addLast(MSStringView name, handler_in handler) = 0;
 
-	virtual bool addBefore(MSStringView which, MSStringView name, inconfig_t config) = 0;
+	virtual bool addBefore(MSStringView which, MSStringView name, handler_in handler) = 0;
 
-	virtual bool addAfter(MSStringView which, MSStringView name, inconfig_t config) = 0;
+	virtual bool addAfter(MSStringView which, MSStringView name, handler_in handler) = 0;
 
-	virtual bool addFirst(MSStringView name, outconfig_t config) = 0;
+	virtual bool addFirst(MSStringView name, handler_out handler) = 0;
 
-	virtual bool addLast(MSStringView name, outconfig_t config) = 0;
+	virtual bool addLast(MSStringView name, handler_out handler) = 0;
 
-	virtual bool addBefore(MSStringView which, MSStringView name, outconfig_t config) = 0;
+	virtual bool addBefore(MSStringView which, MSStringView name, handler_out handler) = 0;
 
-	virtual bool addAfter(MSStringView which, MSStringView name, outconfig_t config) = 0;
+	virtual bool addAfter(MSStringView which, MSStringView name, handler_out handler) = 0;
 };

@@ -42,7 +42,7 @@ void TCPClientReactor::startup()
 
 			{
 				sockaddr_storage addr = {};
-				uint32_t result = uv_errno_t::UV_EINVAL;
+				uint32_t result = UV_EINVAL;
 				if (auto ipv4 = MSCast<IPv4Address>(m_Address))
 				{
 					result = uv_ip4_addr(ipv4->getAddress().c_str(), ipv4->getPort(), (sockaddr_in*)&addr);
@@ -168,6 +168,7 @@ void TCPClientReactor::onConnect(MSRef<Channel> channel)
 {
 	MS_DEBUG("accepted from %s", channel->getRemote().lock()->getString().c_str());
 
+	m_Connect = true;
 	m_Channel = channel;
 	ChannelReactor::onConnect(channel);
 }
@@ -176,6 +177,7 @@ void TCPClientReactor::onDisconnect(MSRef<Channel> channel)
 {
 	MS_DEBUG("rejected from %s", channel->getRemote().lock()->getString().c_str());
 
+	m_Connect = false;
 	m_Channel = nullptr;
 	ChannelReactor::onDisconnect(channel);
 }
@@ -189,7 +191,6 @@ void TCPClientReactor::on_connect(uv_connect_t* req, int status)
 		MS_ERROR("failed to connect: %s", ::uv_strerror(status));
 		return;
 	}
-	reactor->m_Connect = true;
 
 	// Get the actual ip and port number
 
@@ -277,7 +278,6 @@ void TCPClientReactor::on_alloc(uv_handle_t* handle, size_t suggested_size, uv_b
 void TCPClientReactor::on_read(uv_stream_t* stream, ssize_t nread, const uv_buf_t* buf)
 {
 	auto reactor = (TCPClientReactor*)stream->loop->data;
-	auto client = (uv_tcp_t*)stream;
 	auto channel = reactor->m_Channel;
 	if (channel == nullptr) return;
 

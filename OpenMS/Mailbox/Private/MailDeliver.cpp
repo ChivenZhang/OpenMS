@@ -14,7 +14,8 @@
 #include <cpptrace/cpptrace.hpp>
 
 MailDeliver::MailDeliver(MSRaw<MailContext> context)
-	: m_Context(context)
+	:
+	m_Context(context)
 {
 	m_MailThread = MSThread([=]()
 	{
@@ -28,7 +29,7 @@ MailDeliver::MailDeliver(MSRaw<MailContext> context)
 			if (auto mailbox = MSCast<MailBox>(element.lock()))
 			{
 				MSMutexLock lock2(mailbox->m_MailLock);
-				if (mailbox->m_MailQueue.size())
+				if (mailbox->m_MailQueue.empty() == false)
 				{
 					auto& mail = mailbox->m_MailQueue.front();
 					if (mail.Handle.good() == false) mail.Handle = std::move(mailbox->read(std::move(mail.Mail)));
@@ -38,9 +39,9 @@ MailDeliver::MailDeliver(MSRaw<MailContext> context)
 						{
 							mail.Handle.resume();
 						}
-						catch (MSError ex)
+						catch (MSError&& ex)
 						{
-							mailbox->error(std::move(ex));
+							mailbox->error(std::forward<MSError>(ex));
 						}
 						catch (...)
 						{
@@ -49,7 +50,7 @@ MailDeliver::MailDeliver(MSRaw<MailContext> context)
 					}
 					if (mail.Handle.good() && mail.Handle.done()) mailbox->m_MailQueue.pop();
 				}
-				if (mailbox->m_MailQueue.size())
+				if (mailbox->m_MailQueue.empty() == false)
 				{
 					m_Context->enqueueMailbox(mailbox);
 				}

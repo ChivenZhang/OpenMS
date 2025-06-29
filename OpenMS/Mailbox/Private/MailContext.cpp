@@ -16,9 +16,9 @@ MailContext::MailContext(uint32_t overload)
 {
 	m_Running = true;
 
-	for (size_t i = 0; i < m_Delivers.size(); ++i)
+	for (auto& deliver : m_Delivers)
 	{
-		m_Delivers[i] = MSNew<MailDeliver>(this);
+		deliver = MSNew<MailDeliver>(this);
 	}
 }
 
@@ -93,7 +93,7 @@ bool MailContext::sendToMailbox(MSLambda<bool(IMail&& mail)> func)
 void MailContext::listMailbox(MSStringList& result)
 {
 	MSMutexLock lock(m_MailboxLock);
-	for (auto mailbox : m_Mailboxes)
+	for (auto& mailbox : m_Mailboxes)
 	{
 		result.push_back(mailbox->m_Address);
 	}

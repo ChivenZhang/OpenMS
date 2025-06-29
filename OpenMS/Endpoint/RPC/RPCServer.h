@@ -37,11 +37,11 @@ public:
 	bool unbind(MSStringView name);
 	bool invoke(MSStringView name, MSString const& input, MSString& output);
 
-	template<class F, OPENMS_NOT_SAME(typename std::function_traits<F>::result_type, void)>
+	template <class F, OPENMS_NOT_SAME(typename std::function_traits<F>::result_type, void)>
 	bool bind(MSStringView name, F method)
 	{
-		auto callback = [method](MSString const& input, MSString& output) -> bool {
-
+		auto callback = [method](MSString const& input, MSString& output)-> bool
+		{
 			// Convert input to tuple
 
 			typename std::function_traits<F>::argument_tuple args;
@@ -58,16 +58,16 @@ public:
 
 			if (TTypeC(result, output) == false) return false;
 			return true;
-			};
+		};
 
 		return bind_internal(name, callback);
 	}
 
-	template<class F, OPENMS_IS_SAME(typename std::function_traits<F>::result_type, void)>
+	template <class F, OPENMS_IS_SAME(typename std::function_traits<F>::result_type, void)>
 	bool bind(MSStringView name, F method)
 	{
-		auto callback = [method](MSString const& input, MSString& output) -> bool {
-
+		auto callback = [method](MSString const& input, MSString& output) -> bool
+		{
 			// Convert input to tuple
 
 			typename std::function_traits<F>::argument_tuple args;
@@ -82,7 +82,7 @@ public:
 
 			// Return void output
 			return true;
-			};
+		};
 
 		return bind_internal(name, callback);
 	}

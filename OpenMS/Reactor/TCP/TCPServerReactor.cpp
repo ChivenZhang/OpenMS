@@ -44,7 +44,7 @@ void TCPServerReactor::startup()
 
 			{
 				sockaddr_storage addr = {};
-				uint32_t result = uv_errno_t::UV_ERRNO_MAX;
+				uint32_t result = UV_ERRNO_MAX;
 				if (auto ipv4 = MSCast<IPv4Address>(m_Address))
 				{
 					result = uv_ip4_addr(ipv4->getAddress().c_str(), ipv4->getPort(), (sockaddr_in*)&addr);

@@ -12,7 +12,7 @@
 #include "MailBox.h"
 class MailContext;
 
-/// @brief 
+/// @brief Implement for mail deliver
 class MailDeliver
 {
 public:

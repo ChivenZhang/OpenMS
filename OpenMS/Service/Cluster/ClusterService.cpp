@@ -82,7 +82,7 @@ void ClusterService::onInit()
 
 	// Push and pull mail table
 
-	startTimer(0, OPENMS_HEARTBEAT * 1000, [=](uint32_t handle)
+	m_Heartbeat = startTimer(0, OPENMS_HEARTBEAT * 1000, [=](uint32_t handle)
 	{
 		if (connect() == false)
 		{
@@ -112,16 +112,15 @@ void ClusterService::onExit()
 {
 	if (AUTOWIRE(IProperty)::bean()->property(identity() + ".master").empty()) return;
 
-	m_MailRouteMap.clear();
+	if (m_Heartbeat) stopTimer(m_Heartbeat);
+	m_Heartbeat = 0;
 
 	if (m_MailServer) m_MailServer->shutdown();
 	m_MailServer = nullptr;
 
-	for (auto& client : m_MailClientMap)
-	{
-		if (client.second) client.second->shutdown();
-	}
+	for (auto& client : m_MailClientMap) client.second->shutdown();
 	m_MailClientMap.clear();
+	m_MailRouteMap.clear();
 
 	RPCClient::shutdown();
 }

@@ -104,7 +104,6 @@ void KCPServerReactor::startup()
 		{
 			// Bind and listen to the socket
 
-			if (true)
 			{
 				sockaddr_storage addr = {};
 				uint32_t result = UV_EINVAL;
@@ -126,7 +125,6 @@ void KCPServerReactor::startup()
 
 			// Get the actual ip and port number
 
-			if (true)
 			{
 				sockaddr_storage addr = {};
 				int addrLen = sizeof(addr);
@@ -165,7 +163,6 @@ void KCPServerReactor::startup()
 
 			// Start receiving data
 
-			if (true)
 			{
 				auto result = uv_udp_recv_start(&server, on_alloc, on_read);
 				if (result) MS_ERROR("recv start error: %s", ::uv_strerror(result));
@@ -188,7 +185,6 @@ void KCPServerReactor::startup()
 
 			// Close all channels
 
-			if (true)
 			{
 				auto channels = m_Channels;
 				for (auto channel : channels)
@@ -381,15 +377,7 @@ void KCPServerReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 
 	// Process the incoming data : nread >= 0
 
-	if (nread < 0)
-	{
-		free(buf->base);
-
-		reactor->onDisconnect(channel);
-		return;
-	}
-
-	if (channel->running() == false)
+	if (nread < 0 || channel->running() == false)
 	{
 		free(buf->base);
 
@@ -401,9 +389,9 @@ void KCPServerReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 	auto result = ikcp_input(_channel->getSession(), (char*)buf->base, (uint32_t)nread);
 	if (result < 0)
 	{
-		reactor->onDisconnect(channel);
-
 		free(buf->base);
+
+		reactor->onDisconnect(channel);
 		return;
 	}
 
@@ -430,21 +418,21 @@ int KCPServerReactor::on_output(const char* buf, int len, IKCPCB* kcp, void* use
 	if (result) MS_ERROR("invalid address: %s", ::uv_strerror(result));
 	if (result) return -1;
 
-	size_t sentNum = 0;
+	size_t count = 0;
 	MSStringView message(buf, len);
-	while (sentNum < message.size())
+	while (count < message.size())
 	{
-		auto buffer = uv_buf_init((char*)message.data() + sentNum, (unsigned)(message.size() - sentNum));
+		auto buffer = uv_buf_init((char*)message.data() + count, (unsigned)(message.size() - count));
 		result = uv_udp_try_send(server, &buffer, 1, (sockaddr*)&addr);
+		if (result == UV_EAGAIN) continue;
 		if (result < 0)
 		{
 			reactor->onDisconnect(channel->shared_from_this());
 			return -1;
 		}
-		else if (result == UV_EAGAIN) continue;
-		else sentNum += result;
+		count += result;
 	}
-	return (uint32_t)sentNum;
+	return (int)count;
 }
 
 void KCPServerReactor::on_send(uv_timer_t* handle)
@@ -499,7 +487,6 @@ void KCPServerReactor::on_send(uv_timer_t* handle)
 		if (channel->running() == false) reactor->onDisconnect(channel);
 		if (channel->running() == false) continue;
 		if (event->Message.empty()) continue;
-		auto server = channel->getHandle();
 		auto session = channel->getSession();
 		auto remote = channel->getRemote();
 

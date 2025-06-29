@@ -20,9 +20,9 @@ protected:
 		config.PortNum = 8080;
 		config.Callback.OnOpen = [](MSRef<IChannel> channel)
 		{
-			channel->getPipeline()->addFirst("handler", IChannelPipeline::inconfig_t
+			channel->getPipeline()->addFirst("handler", IChannelPipeline::handler_in
 			{
-				.OnRead = [](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)->bool
+				.OnHandle = [](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)
 				{
 					MS_INFO("%s", event->Message.c_str());
 					context->write(IChannelEvent::New("This is server"));
@@ -42,13 +42,12 @@ protected:
 		config.PortNum = 8080;
 		config.Callback.OnOpen = [](MSRef<IChannel> channel)
 		{
-			channel->getPipeline()->addFirst("handler", IChannelPipeline::inconfig_t
+			channel->getPipeline()->addFirst("handler", IChannelPipeline::handler_in
 			{
-				.OnRead = [](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)->bool
+				.OnHandle = [](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)
 				{
 					MS_INFO("%s", event->Message.c_str());
-					auto event2 = IChannelEvent::New("This is client");
-					context->write(event2);
+					context->write(IChannelEvent::New("This is client"));
 					return true;
 				}
 			});

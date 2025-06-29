@@ -29,7 +29,8 @@ void UDPClientReactor::startup()
 	MSPromise<void> promise;
 	auto future = promise.get_future();
 
-	m_EventThread = MSThread([=, &promise]() {
+	m_EventThread = MSThread([=, &promise]()
+	{
 		uv_loop_t loop;
 		uv_udp_t client;
 
@@ -217,6 +218,7 @@ void UDPClientReactor::onConnect(MSRef<Channel> channel)
 {
 	MS_DEBUG("accepted from %s", channel->getRemote().lock()->getString().c_str());
 
+	m_Connect = true;
 	m_Channel = channel;
 	ChannelReactor::onConnect(channel);
 }
@@ -225,6 +227,7 @@ void UDPClientReactor::onDisconnect(MSRef<Channel> channel)
 {
 	MS_DEBUG("rejected from %s", channel->getRemote().lock()->getString().c_str());
 
+	m_Connect = false;
 	m_Channel = nullptr;
 	ChannelReactor::onDisconnect(channel);
 }
@@ -271,7 +274,7 @@ void UDPClientReactor::on_send(uv_timer_t* handle)
 	MSMutexLock lock(reactor->m_EventLock);
 	reactor->m_Sending = false;
 
-	while (reactor->m_EventQueue.size())
+	while (reactor->m_EventQueue.empty() == false)
 	{
 		auto event = reactor->m_EventQueue.front();
 		reactor->m_EventQueue.pop();

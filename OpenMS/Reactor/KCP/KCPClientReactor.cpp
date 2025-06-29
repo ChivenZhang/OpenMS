@@ -100,7 +100,6 @@ void KCPClientReactor::startup()
 		{
 			// Bind and listen to the socket
 
-			if(true)
 			{
 				sockaddr_storage addr = {};
 				uint32_t result = UV_EINVAL;
@@ -126,7 +125,6 @@ void KCPClientReactor::startup()
 
 			// Get the actual ip and port number
 
-			if (true)
 			{
 				sockaddr_storage addr = {};
 				int addrLen = sizeof(addr);
@@ -165,17 +163,16 @@ void KCPClientReactor::startup()
 
 			// Send the initial data for session id
 
-			if (true)
 			{
-				size_t sentNum = 0;
+				size_t count = 0;
 				MSStringView message("\0", 1);
-				while (sentNum < message.size())
+				while (count < message.size())
 				{
-					auto buf = uv_buf_init((char*)message.data() + sentNum, (unsigned)(message.size() - sentNum));
+					auto buf = uv_buf_init((char*)message.data() + count, (unsigned)(message.size() - count));
 					auto result = uv_udp_try_send(&client, &buf, 1, nullptr);
+					if (result == UV_EAGAIN) continue;
 					if (result < 0) break;
-					else if (result == UV_EAGAIN) continue;
-					else sentNum += result;
+					count += result;
 				}
 			}
 
@@ -195,7 +192,6 @@ void KCPClientReactor::startup()
 
 			// Close all channels
 
-			if (true)
 			{
 				if (m_Channel) onDisconnect(m_Channel);
 				m_Channel = nullptr;
@@ -207,7 +203,7 @@ void KCPClientReactor::startup()
 
 			MS_PRINT("closed client");
 			return;
-		} while (0);
+		} while (false);
 
 		uv_close((uv_handle_t*)&client, nullptr);
 		uv_loop_close(&loop);
@@ -250,6 +246,7 @@ void KCPClientReactor::onConnect(MSRef<Channel> channel)
 {
 	MS_DEBUG("accepted from %s", channel->getRemote().lock()->getString().c_str());
 
+	m_Connect = true;
 	m_Channel = channel;
 	ChannelReactor::onConnect(channel);
 }
@@ -258,8 +255,9 @@ void KCPClientReactor::onDisconnect(MSRef<Channel> channel)
 {
 	MS_DEBUG("rejected from %s", channel->getRemote().lock()->getString().c_str());
 
-	m_Channel = nullptr;
 	m_ChannelRemoved = channel;
+	m_Connect = false;
+	m_Channel = nullptr;
 	ChannelReactor::onDisconnect(channel);
 }
 
@@ -392,21 +390,21 @@ int KCPClientReactor::on_output(const char* buf, int len, IKCPCB* kcp, void* use
 
 	// Send the data
 
-	size_t sentNum = 0;
+	size_t count = 0;
 	MSStringView message(buf, len);
-	while (sentNum < message.size())
+	while (count < message.size())
 	{
-		auto buf = uv_buf_init((char*)message.data() + sentNum, (unsigned)(message.size() - sentNum));
-		auto result = uv_udp_try_send(client, &buf, 1, nullptr);
+		auto buffer = uv_buf_init((char*)message.data() + count, (unsigned)(message.size() - count));
+		auto result = uv_udp_try_send(client, &buffer, 1, nullptr);
+		if (result == UV_EAGAIN) continue;
 		if (result < 0)
 		{
 			reactor->onDisconnect(channel->shared_from_this());
 			return -1;
 		}
-		else if (result == UV_EAGAIN) continue;
-		else sentNum += result;
+		count += result;
 	}
-	return (uint32_t)sentNum;
+	return (int)count;
 }
 
 void KCPClientReactor::on_send(uv_timer_t* handle)
