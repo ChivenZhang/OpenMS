@@ -17,7 +17,7 @@ public:
 	{
 	}
 
-	IMailTask<void> read(IMail&& mail) override
+	IMailTask read(IMail&& mail) override
 	{
 		static int count = 0;
 		count++;

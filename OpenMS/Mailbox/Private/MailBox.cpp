@@ -47,7 +47,7 @@ void MailBox::error(MSError&& info)
 	MS_INFO("%s", info.what());
 }
 
-IMailTask<void> MailBox::read(IMail&& mail)
+IMailTask MailBox::read(IMail&& mail)
 {
 	MS_INFO("TODO:implement read method");
 	co_return;
