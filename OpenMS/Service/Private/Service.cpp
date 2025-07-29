@@ -49,7 +49,7 @@ int Service::startup()
 				{
 					event();
 				}
-				catch (MSError&& ex)
+				catch (MSError& ex)
 				{
 					onError(std::forward<MSError>(ex));
 				}
@@ -73,7 +73,7 @@ int Service::startup()
 	{
 		onExit();
 	}
-	catch (MSError&& ex)
+	catch (MSError& ex)
 	{
 		onError(std::forward<MSError>(ex));
 	}
@@ -97,7 +97,7 @@ MSString Service::identity() const
 
 uint32_t Service::startTimer(uint64_t timeout, uint64_t repeat, MSLambda<void(uint32_t handle)>&& task)
 {
-	return m_Timer.start(timeout, repeat, [=](uint32_t handle)
+	return m_Timer.start(timeout, repeat, [=, this](uint32_t handle)
 	{
 		sendEvent([&]() { task(handle); });
 	});

@@ -39,7 +39,7 @@ MailDeliver::MailDeliver(MSRaw<MailContext> context)
 						{
 							mail.Handle.resume();
 						}
-						catch (MSError&& ex)
+						catch (MSError& ex)
 						{
 							mailbox->error(std::forward<MSError>(ex));
 						}
