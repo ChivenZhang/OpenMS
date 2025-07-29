@@ -22,6 +22,6 @@
     "version>=" : "0.7.4"
   }, {
     "name" : "spdlog",
-    "version>=" : "1.15.3"
+    "version>=" : "1.15.1"
   } ]
 }

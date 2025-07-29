@@ -35,15 +35,15 @@ public:
 	bool connect() const override;
 	MSHnd<IChannelAddress> address() const override;
 
-	template <class T, class... Args, OPENMS_NOT_SAME(T, void)>
-	T call(MSStringView name, uint32_t timeout, Args... args)
+	template <class T, class... ARGS, OPENMS_NOT_SAME(T, void)>
+	T call(MSStringView name, uint32_t timeout, ARGS... args)
 	{
 		if (m_Reactor == nullptr || m_Reactor->connect() == false) return T();
 
 		// Convert arguments to string
 
 		MSString input;
-		if (std::is_same_v<MSTuple<Args...>, MSTuple<>> == false)
+		if (std::is_same_v<MSTuple<ARGS...>, MSTuple<>> == false)
 		{
 			if (TTypeC(std::make_tuple(args...), input) == false) return T();
 		}
@@ -96,15 +96,15 @@ public:
 		return T();
 	}
 
-	template <class T, class... Args, OPENMS_IS_SAME(T, void)>
-	bool call(MSStringView name, uint32_t timeout, Args... args)
+	template <class T, class... ARGS, OPENMS_IS_SAME(T, void)>
+	bool call(MSStringView name, uint32_t timeout, ARGS... args)
 	{
 		if (m_Reactor == nullptr || m_Reactor->connect() == false) return false;
 
 		// Convert arguments to string
 
 		MSString input;
-		if (std::is_same_v<MSTuple<Args...>, MSTuple<>> == false)
+		if (std::is_same_v<MSTuple<ARGS...>, MSTuple<>> == false)
 		{
 			if (TTypeC(std::make_tuple(args...), input) == false) return false;
 		}
@@ -147,15 +147,15 @@ public:
 		return true;
 	}
 
-	template <class T, class... Args, OPENMS_NOT_SAME(T, void)>
-	bool async(MSStringView name, uint32_t timeout, MSTuple<Args...> args, MSLambda<void(T&&)> callback)
+	template <class T, class... ARGS, OPENMS_NOT_SAME(T, void)>
+	bool async(MSStringView name, uint32_t timeout, MSTuple<ARGS...> args, MSLambda<void(T&&)> callback)
 	{
 		if (m_Reactor == nullptr || m_Reactor->connect() == false) return false;
 
 		// Convert arguments to string
 
 		MSString input;
-		if (std::is_same_v<MSTuple<Args...>, MSTuple<>> == false)
+		if (std::is_same_v<MSTuple<ARGS...>, MSTuple<>> == false)
 		{
 			if (TTypeC(args, input) == false) return false;
 		}
@@ -198,15 +198,15 @@ public:
 		return true;
 	}
 
-	template <class T, class... Args, OPENMS_IS_SAME(T, void)>
-	bool async(MSStringView name, uint32_t timeout, MSTuple<Args...> args, MSLambda<void()> callback)
+	template <class T, class... ARGS, OPENMS_IS_SAME(T, void)>
+	bool async(MSStringView name, uint32_t timeout, MSTuple<ARGS...> args, MSLambda<void()> callback)
 	{
 		if (m_Reactor == nullptr || m_Reactor->connect() == false) return false;
 
 		// Convert arguments to string
 
 		MSString input;
-		if (std::is_same_v<MSTuple<Args...>, MSTuple<>> == false)
+		if (std::is_same_v<MSTuple<ARGS...>, MSTuple<>> == false)
 		{
 			if (TTypeC(args, input) == false) return false;
 		}
