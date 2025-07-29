@@ -10,8 +10,14 @@
 *
 * =================================================*/
 #include <OpenMS/Service/Cluster/ClusterService.h>
+#include <OpenMS/Endpoint/MySQL/MySQLClient.h>
+#include "MySQLConfig.h"
 
-class MySQLService : public ClusterService
+class MySQLService
+	:
+	public ClusterService,
+	public MySQLClient,
+	public MySQLConfig
 {
 public:
 	MSString identity() const override;
@@ -19,6 +25,7 @@ public:
 protected:
 	void onInit() override;
 	void onExit() override;
+	void configureEndpoint(MySQLClient::config_t& config) override;
 };
 
 OPENMS_RUN(MySQLService)

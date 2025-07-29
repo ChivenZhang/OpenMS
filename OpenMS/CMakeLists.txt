@@ -14,7 +14,7 @@ set(REDIS_SOURCES
 		Endpoint/Redis/RedisClient.h
 )
 else()
-set(REDIS_SOURCES "")
+set(REDIS_SOURCES)
 endif()
 
 add_library(OpenMS STATIC
@@ -127,9 +127,9 @@ add_library(OpenMS STATIC
 )
 
 if(OPENMS_ENABLE_MYSQL)
-target_include_directories(OpenMS PUBLIC D:/ChivenZhang/bin/mysql-connector-c++-9.4.0-winx64/include)
-target_link_directories(OpenMS PUBLIC D:/ChivenZhang/bin/mysql-connector-c++-9.4.0-winx64/lib64/vs14)
-target_link_libraries(OpenMS PRIVATE mysqlcppconn-static)
+target_include_directories(OpenMS PUBLIC $ENV{MYSQL_CLIENT_CUSTOM}/include)
+target_link_directories(OpenMS PUBLIC $ENV{MYSQL_CLIENT_CUSTOM}/lib64/vs14)
+target_link_libraries(OpenMS PRIVATE mysqlcppconn mysqlcppconnx)
 endif()
 
 if(OPENMS_ENABLE_REDIS)

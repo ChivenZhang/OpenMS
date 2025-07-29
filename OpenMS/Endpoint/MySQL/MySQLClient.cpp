@@ -9,46 +9,84 @@
 * 
 * =================================================*/
 #include "MySQLClient.h"
-#include <format>
-#include <mysql/jdbc.h>
 
 void MySQLClient::startup()
 {
 	config_t config;
 	configureEndpoint(config);
 
-    auto driver = sql::mysql::get_mysql_driver_instance();
-    auto url = std::format("tcp://{}:{}", config.IP, config.PortNum);
-    auto connection = driver->connect(url, config.UserName.c_str(), config.Password.c_str());
-    auto statement = connection->createStatement();
-    auto resultSet = statement->executeQuery("select * from db");
-    while(resultSet->next())
-    {
-        resultSet->getInt("age");
-        resultSet->getString("name");
-    }
-    resultSet->close();
-    statement->close();
-    connection->close();
+	auto driver = sql::mysql::get_mysql_driver_instance();
+	MS_INFO("MySQL Driver： %d.%d.%d", driver->getMajorVersion(), driver->getMinorVersion(), driver->getPatchVersion());
 
-    delete connection;
+	auto hostName = std::format("tcp://{}:{}", config.IP, config.PortNum);
+	m_Connection.reset(driver->connect(hostName, config.UserName, config.Password));
+	MS_INFO("accepted from %s:%d", config.IP.c_str(), config.PortNum);
+
+	m_Connection->setSchema(config.Database);
+
+	MSRef<sql::Statement> statement(m_Connection->createStatement());
+	MSRef<sql::ResultSet> resultSet(statement->executeQuery("select * from userinfo"));
+	while (resultSet->next())
+	{
+		auto id = resultSet->getInt("id");
+		auto age = resultSet->getInt("age");
+		auto name = resultSet->getString("name");
+		MS_INFO("%d %s %d", id, name.c_str(), age);
+	}
+	resultSet->close();
+	statement->close();
 }
 
 void MySQLClient::shutdown()
 {
+	if (m_Connection) m_Connection->close();
+	m_Connection = nullptr;
 }
 
 bool MySQLClient::running() const
 {
-    return false;
+	if (m_Connection == nullptr) return false;
+	return true;
 }
 
 bool MySQLClient::connect() const
 {
-    return false;
+	if (m_Connection == nullptr) return false;
+	return m_Connection->isValid() && m_Connection->isClosed() == false;
 }
 
 MSHnd<IChannelAddress> MySQLClient::address() const
 {
-    return MSHnd<IChannelAddress>();
+	return MSHnd<IChannelAddress>();
+}
+
+bool MySQLClient::query(MSString const& sql, MSStringList& names, MSStringList& result)
+{
+	try
+	{
+		if (connect() == false) return false;
+		MSRef<sql::Statement> statement(m_Connection->createStatement());
+		MSRef<sql::ResultSet> resultSet(statement->executeQuery(sql));
+		auto metaData = resultSet->getMetaData();
+		auto columnCount = metaData->getColumnCount();
+		for (auto i = 1; i <= columnCount; ++i)
+		{
+			names.push_back(metaData->getColumnName(i));
+		}
+		while (resultSet->next())
+		{
+			for (auto i = 1; i <= columnCount; ++i)
+			{
+				result.push_back(resultSet->getString(i));
+			}
+		}
+		resultSet->close();
+		statement->close();
+		return true;
+	}
+	catch (sql::SQLException& ex)
+	{
+		MS_ERROR("%s", ex.what());
+	}
+	return false;
 }

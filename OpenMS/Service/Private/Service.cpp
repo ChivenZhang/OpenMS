@@ -29,10 +29,12 @@ int Service::startup()
 	catch (MSError& ex)
 	{
 		onError(std::move(ex));
+		m_Running = false;
 	}
 	catch (...)
 	{
 		onError(cpptrace::logic_error("unknown exception"));
+		m_Running = false;
 	}
 
 	while (m_Running)
@@ -76,10 +78,12 @@ int Service::startup()
 	catch (MSError& ex)
 	{
 		onError(std::forward<MSError>(ex));
+		m_Running = false;
 	}
 	catch (...)
 	{
 		onError(cpptrace::logic_error("unknown exception"));
+		m_Running = false;
 	}
 
 	return 0;
