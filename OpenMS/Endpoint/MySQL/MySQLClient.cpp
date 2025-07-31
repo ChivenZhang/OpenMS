@@ -9,6 +9,7 @@
 * 
 * =================================================*/
 #include "MySQLClient.h"
+#include <format>
 
 void MySQLClient::startup()
 {
@@ -72,6 +73,41 @@ bool MySQLClient::query(MSString const& sql, MSStringList& names, MSStringList& 
 		for (auto i = 1; i <= columnCount; ++i)
 		{
 			names.push_back(metaData->getColumnName(i));
+		}
+		while (resultSet->next())
+		{
+			for (auto i = 1; i <= columnCount; ++i)
+			{
+				result.push_back(resultSet->getString(i));
+			}
+		}
+		resultSet->close();
+		statement->close();
+		return true;
+	}
+	catch (sql::SQLException& ex)
+	{
+		MS_ERROR("%s", ex.what());
+	}
+	return false;
+}
+
+bool MySQLClient::query(MSString const& sql, MSStringList& names, MSList<type_t>& types, MSStringList& result)
+{
+	try
+	{
+		if (connect() == false) return false;
+		MSRef<sql::Statement> statement(m_Connection->createStatement());
+		MSRef<sql::ResultSet> resultSet(statement->executeQuery(sql));
+		auto metaData = resultSet->getMetaData();
+		auto columnCount = metaData->getColumnCount();
+		for (auto i = 1; i <= columnCount; ++i)
+		{
+			names.push_back(metaData->getColumnName(i));
+		}
+		for (auto i = 1; i <= columnCount; ++i)
+		{
+			types.push_back((type_t)metaData->getColumnType(i));
 		}
 		while (resultSet->next())
 		{

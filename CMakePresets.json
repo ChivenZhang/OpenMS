@@ -30,7 +30,7 @@
 			}
 		},
 		{
-			"name": "x64-Mingw-Test",
+			"name": "x64-Mingw-Release",
 			"generator": "Ninja",
 			"binaryDir": "${sourceDir}/Output/${presetName}",
 			"cacheVariables": {
