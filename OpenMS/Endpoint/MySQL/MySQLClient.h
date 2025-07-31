@@ -66,15 +66,9 @@ public:
 
 	bool query(MSString const& sql, MSStringList& names, MSList<type_t>& types, MSStringList& result);
 
-	bool insert(MSString const& sql, MSStringList const& result)
-	{
-		return false;
-	}
+	bool insert(MSString const& sql, MSStringList const& data);
 
-	uint32_t update(MSString const& sql)
-	{
-		return 0;
-	}
+	uint32_t update(MSString const& sql);
 
 	template<class T>
 	bool query(MSString const& sql, MSList<T>& result)
@@ -83,9 +77,7 @@ public:
 		MSStringList names, output;
 		if (query(sql, names, types, output) == false) return false;
 		auto columns = names.size();
-		if(columns == 0) return true;
-
-		for(size_t i=0; i+columns<=result.size(); i+=columns)
+		for(size_t i = 0; columns && i + columns <= output.size(); i += columns)
 		{
 			nlohmann::json json;
 			for(size_t k=0; k<columns; ++k)
@@ -102,14 +94,12 @@ public:
 					TTypeC(output[i+k], value);
 					json[names[k]] = value;
 				} break;
-					
 				case sql::DataType::BIGINT:
 				{
 					int64_t value = 0;
 					TTypeC(output[i+k], value);
 					json[names[k]] = value;
 				} break;
-					
 				case sql::DataType::REAL:
 				case sql::DataType::DOUBLE:
 				case sql::DataType::DECIMAL:
@@ -119,30 +109,27 @@ public:
 					TTypeC(output[i+k], value);
 					json[names[k]] = value;
 				} break;
-					
 				case sql::DataType::CHAR:
 				case sql::DataType::VARCHAR:
 				case sql::DataType::LONGVARCHAR:
 				{
 					json[names[k]] = output[i+k];
 				} break;
-
 				case sql::DataType::BINARY:
 				case sql::DataType::VARBINARY:
 				case sql::DataType::LONGVARBINARY:
 				{
-					json[names[k]] = MSList<uint8_t>(output[i+k].begin(), output[i+k].begin() + output[i+k].size());
+					json[names[k]] = MSList<uint8_t>(output[i+k].begin(), output[i+k].end());
 				} break;
-					
 				default:
 				{
 					json[names[k]] = output[i+k];
 				} break;
 				}
-
-				auto& object = result.emplace_back();
-				json.get_to(object);
 			}
+
+			auto& object = result.emplace_back();
+			json.get_to(object);
 		}
 		return true;
 	}

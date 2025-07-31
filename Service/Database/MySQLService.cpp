@@ -33,7 +33,7 @@ void MySQLService::onInit()
 	MySQLClient::startup();
 
 	MSList<UserInfo> result;
-	if (query("select * from userinfo", result))
+	if (MySQLClient::query("select * from userinfo order by money", result))
 	{
 		for (auto& user : result)
 		{

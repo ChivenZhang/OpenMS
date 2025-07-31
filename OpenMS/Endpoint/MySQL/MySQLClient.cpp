@@ -22,20 +22,7 @@ void MySQLClient::startup()
 	auto hostName = std::format("tcp://{}:{}", config.IP, config.PortNum);
 	m_Connection.reset(driver->connect(hostName, config.UserName, config.Password));
 	MS_INFO("accepted from %s:%d", config.IP.c_str(), config.PortNum);
-
 	m_Connection->setSchema(config.Database);
-
-	MSRef<sql::Statement> statement(m_Connection->createStatement());
-	MSRef<sql::ResultSet> resultSet(statement->executeQuery("select * from userinfo"));
-	while (resultSet->next())
-	{
-		auto id = resultSet->getInt("id");
-		auto age = resultSet->getInt("age");
-		auto name = resultSet->getString("name");
-		MS_INFO("%d %s %d", id, name.c_str(), age);
-	}
-	resultSet->close();
-	statement->close();
 }
 
 void MySQLClient::shutdown()
@@ -117,6 +104,40 @@ bool MySQLClient::query(MSString const& sql, MSStringList& names, MSList<type_t>
 			}
 		}
 		resultSet->close();
+		statement->close();
+		return true;
+	}
+	catch (sql::SQLException& ex)
+	{
+		MS_ERROR("%s", ex.what());
+	}
+	return false;
+}
+
+bool MySQLClient::insert(MSString const& sql, MSStringList const& data)
+{
+	try
+	{
+		if (connect() == false) return false;
+		MSRef<sql::Statement> statement(m_Connection->createStatement());
+		auto result = statement->executeUpdate(sql);
+		statement->close();
+		return true;
+	}
+	catch (sql::SQLException& ex)
+	{
+		MS_ERROR("%s", ex.what());
+	}
+	return false;
+}
+
+uint32_t MySQLClient::update(MSString const& sql)
+{
+	try
+	{
+		if (connect() == false) return false;
+		MSRef<sql::Statement> statement(m_Connection->createStatement());
+		auto result = statement->executeUpdate(sql);
 		statement->close();
 		return true;
 	}
