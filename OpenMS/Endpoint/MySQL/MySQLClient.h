@@ -10,7 +10,10 @@
 * 
 * =================================================*/
 #include "OpenMS/Endpoint/IEndpoint.h"
-#include <mysql/jdbc.h>
+namespace sql
+{
+	class Connection;
+}
 
 class MySQLClient : public IEndpoint
 {
@@ -62,25 +65,32 @@ public:
 	bool connect() const override;
 	MSHnd<IChannelAddress> address() const override;
 
-	bool query(MSString const& sql, MSStringList& names, MSStringList& result);
+	uint64_t execute(MSString const& sql);
 
-	bool query(MSString const& sql, MSStringList& names, MSList<type_t>& types, MSStringList& result);
+	uint64_t execute(MSString const& sql, MSStringList& names, MSStringList& result);
 
-	bool insert(MSString const& sql, MSStringList const& data);
+	uint64_t execute(MSString const& sql, MSStringList& names, MSList<type_t>& types, MSStringList& result);
 
-	uint32_t update(MSString const& sql);
+	uint64_t prepare(MSString const& sql);
+
+	uint64_t prepare(MSString const& sql, MSList<type_t> const& types, MSStringList const& data);
+
+	uint64_t prepare(MSString const& sql, MSStringList& names, MSStringList& result);
+
+	uint64_t prepare(MSString const& sql, MSStringList& names, MSList<type_t>& types, MSStringList& result);
 
 	template<class T>
-	bool query(MSString const& sql, MSList<T>& result)
+	uint64_t query(MSString const& sql, MSList<T>& result)
 	{
 		MSList<type_t> types;
 		MSStringList names, output;
-		if (query(sql, names, types, output) == false) return false;
+		auto updateCount = prepare(sql, names, types, output);
+		if(updateCount == -1) return updateCount;
 		auto columns = names.size();
 		for(size_t i = 0; columns && i + columns <= output.size(); i += columns)
 		{
 			nlohmann::json json;
-			for(size_t k=0; k<columns; ++k)
+			for(size_t k=0; k < columns; ++k)
 			{
 				switch(types[k])
 				{
@@ -127,11 +137,26 @@ public:
 				} break;
 				}
 			}
-
 			auto& object = result.emplace_back();
 			json.get_to(object);
 		}
-		return true;
+		return updateCount;
+	}
+
+	template<class T>
+	uint64_t update(MSString const& sql, MSStringList const& names, MSList<type_t> const& types, MSList<T> const& data)
+	{
+		MSStringList input;
+		auto columns = names.size();
+		for(size_t i=0; i<data.size(); ++i)
+		{
+			nlohmann::json json = nlohmann::to_json(data[i]);
+			for(size_t k = 0; k < columns; ++k)
+			{
+				input.emplace_back(json[names[k]].get<MSString>());
+			}
+		}
+		return prepare(sql, types, input);
 	}
 
 protected:
