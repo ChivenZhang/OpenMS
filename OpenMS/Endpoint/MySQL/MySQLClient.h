@@ -83,57 +83,57 @@ public:
 	uint64_t query(MSString const& sql, MSList<T>& result)
 	{
 		MSList<type_t> types;
-		MSStringList names, output;
-		auto updateCount = prepare(sql, names, types, output);
+		MSStringList names, outputs;
+		auto updateCount = prepare(sql, names, types, outputs);
 		if(updateCount == -1) return updateCount;
 		auto columns = names.size();
-		for(size_t i = 0; columns && i + columns <= output.size(); i += columns)
+		for(size_t i = 0; columns && i + columns <= outputs.size(); i += columns)
 		{
 			nlohmann::json json;
 			for(size_t k=0; k < columns; ++k)
 			{
 				switch(types[k])
 				{
-				case sql::DataType::BIT:
-				case sql::DataType::TINYINT:
-				case sql::DataType::SMALLINT:
-				case sql::DataType::MEDIUMINT:
-				case sql::DataType::INTEGER:
+				case type_t::BIT:
+				case type_t::TINYINT:
+				case type_t::SMALLINT:
+				case type_t::MEDIUMINT:
+				case type_t::INTEGER:
 				{
 					int32_t value = 0;
-					TTypeC(output[i+k], value);
+					TTypeC(outputs[i+k], value);
 					json[names[k]] = value;
 				} break;
-				case sql::DataType::BIGINT:
+				case type_t::BIGINT:
 				{
 					int64_t value = 0;
-					TTypeC(output[i+k], value);
+					TTypeC(outputs[i+k], value);
 					json[names[k]] = value;
 				} break;
-				case sql::DataType::REAL:
-				case sql::DataType::DOUBLE:
-				case sql::DataType::DECIMAL:
-				case sql::DataType::NUMERIC:
+				case type_t::REAL:
+				case type_t::DOUBLE:
+				case type_t::DECIMAL:
+				case type_t::NUMERIC:
 				{
 					double value = 0;
-					TTypeC(output[i+k], value);
+					TTypeC(outputs[i+k], value);
 					json[names[k]] = value;
 				} break;
-				case sql::DataType::CHAR:
-				case sql::DataType::VARCHAR:
-				case sql::DataType::LONGVARCHAR:
+				case type_t::CHAR:
+				case type_t::VARCHAR:
+				case type_t::LONGVARCHAR:
 				{
-					json[names[k]] = output[i+k];
+					json[names[k]] = outputs[i+k];
 				} break;
-				case sql::DataType::BINARY:
-				case sql::DataType::VARBINARY:
-				case sql::DataType::LONGVARBINARY:
+				case type_t::BINARY:
+				case type_t::VARBINARY:
+				case type_t::LONGVARBINARY:
 				{
-					json[names[k]] = MSList<uint8_t>(output[i+k].begin(), output[i+k].end());
+					json[names[k]] = MSList<uint8_t>(outputs[i+k].begin(), outputs[i+k].end());
 				} break;
 				default:
 				{
-					json[names[k]] = output[i+k];
+					json[names[k]] = outputs[i+k];
 				} break;
 				}
 			}
@@ -146,17 +146,17 @@ public:
 	template<class T>
 	uint64_t update(MSString const& sql, MSStringList const& names, MSList<type_t> const& types, MSList<T> const& data)
 	{
-		MSStringList input;
+		MSStringList inputs;
 		auto columns = names.size();
 		for(size_t i=0; i<data.size(); ++i)
 		{
 			nlohmann::json json = nlohmann::to_json(data[i]);
 			for(size_t k = 0; k < columns; ++k)
 			{
-				input.emplace_back(json[names[k]].get<MSString>());
+				inputs.emplace_back(json[names[k]].get<MSString>());
 			}
 		}
-		return prepare(sql, types, input);
+		return prepare(sql, types, inputs);
 	}
 
 protected:

@@ -38,7 +38,7 @@
 				"CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT_CUSTOM}/scripts/buildsystems/vcpkg.cmake",
 				"OPENMS_ENABLE_SAMPLE": "ON",
 				"OPENMS_ENABLE_DISCOVERY": "ON",
-				"OPENMS_ENABLE_MYSQL": "ON",
+				"OPENMS_ENABLE_MYSQL": "OFF",
 				"OPENMS_ENABLE_REDIS": "ON",
 				"MYSQL_CLIENT_CUSTOM": "$env{MYSQL_CLIENT_CUSTOM}",
 				"VCPKG_TARGET_TRIPLET": "x64-mingw-static",

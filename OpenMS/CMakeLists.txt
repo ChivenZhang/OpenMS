@@ -133,6 +133,9 @@ target_link_libraries(OpenMS PRIVATE mysqlcppconn mysqlcppconnx)
 endif()
 
 if(OPENMS_ENABLE_REDIS)
+# this is heuristically generated, and may not be correct
+find_package(hiredis CONFIG REQUIRED)
+target_link_libraries(OpenMS PRIVATE hiredis::hiredis)
 endif()
 
 find_package(unofficial-http-parser CONFIG REQUIRED)

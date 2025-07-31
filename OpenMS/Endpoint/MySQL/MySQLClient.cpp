@@ -9,9 +9,9 @@
 * 
 * =================================================*/
 #include "MySQLClient.h"
+#include "Reactor/Private/ChannelAddress.h"
 #include <format>
 #include <mysql/jdbc.h>
-#include <D:\ChivenZhang\bin\mysql-connector-c++-9.4.0-winx64\include/mysql/jdbc.h>
 
 void MySQLClient::startup()
 {
@@ -25,7 +25,7 @@ void MySQLClient::startup()
 	MS_INFO("accepted from %s:%d", config.IP.c_str(), config.PortNum);
 	m_Connection->setSchema(config.Database);
 
-	m_Address = MSNew<IPv4Address>(config.IP, config.PortNum);
+	m_Address = IPv4Address::New(MSStringView(config.IP), config.PortNum);
 }
 
 void MySQLClient::shutdown()
@@ -176,30 +176,37 @@ uint64_t MySQLClient::prepare(MSString const &sql, MSList<type_t> const& types, 
 				case sql::DataType::SMALLINT:
 				case sql::DataType::MEDIUMINT:
 				case sql::DataType::INTEGER:
+				{
 					statement->setInt(k+1, std::stoi(data[i+k]));
-					break;
+				} break;
 				case sql::DataType::BIGINT:
+				{
 					statement->setInt64(k+1, std::stoll(data[i+k]));
-					break;
+				} break;
 				case sql::DataType::REAL:
 				case sql::DataType::DOUBLE:
 				case sql::DataType::DECIMAL:
 				case sql::DataType::NUMERIC:
+				{
 					statement->setDouble(k+1, std::stod(data[i+k]));
-					break;
+				} break;
 				case sql::DataType::CHAR:
 				case sql::DataType::VARCHAR:
 				case sql::DataType::LONGVARCHAR:
+				{
 					statement->setString(k+1, data[i+k]);
-					break;
+				} break;
 				case sql::DataType::BINARY:
 				case sql::DataType::VARBINARY:
 				case sql::DataType::LONGVARBINARY:
-					statement->setBlob(k+1, std::make_shared<std::istringstream>(data[i+k]));
-					break;
+				{
+					std::istringstream stream(data[i+k]);
+					statement->setBlob(k+1, &stream);
+				} break;
 				default:
+				{
 					statement->setString(k+1, data[i+k]);
-					break;
+				} break;
 				}
 			}
 			result += statement->executeUpdate();
