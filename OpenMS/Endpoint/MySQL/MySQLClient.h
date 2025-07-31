@@ -163,5 +163,6 @@ protected:
 	virtual void configureEndpoint(config_t& config) = 0;
 
 protected:
+	MSRef<ISocketAddress> m_Address;
 	MSRef<sql::Connection> m_Connection;
 };

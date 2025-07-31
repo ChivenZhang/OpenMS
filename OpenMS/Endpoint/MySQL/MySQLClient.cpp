@@ -11,6 +11,7 @@
 #include "MySQLClient.h"
 #include <format>
 #include <mysql/jdbc.h>
+#include <D:\ChivenZhang\bin\mysql-connector-c++-9.4.0-winx64\include/mysql/jdbc.h>
 
 void MySQLClient::startup()
 {
@@ -23,13 +24,16 @@ void MySQLClient::startup()
 	m_Connection.reset(driver->connect(hostName, config.UserName, config.Password));
 	MS_INFO("accepted from %s:%d", config.IP.c_str(), config.PortNum);
 	m_Connection->setSchema(config.Database);
+
+	m_Address = MSNew<IPv4Address>(config.IP, config.PortNum);
 }
 
 void MySQLClient::shutdown()
 {
 	if (m_Connection) m_Connection->close();
 	m_Connection = nullptr;
-	MS_INFO("rejected from %s:%d", config.IP.c_str(), config.PortNum);
+	MS_INFO("rejected from %s:%d", m_Address->getAddress().c_str(), m_Address->getPort());
+	m_Address = nullptr;
 }
 
 bool MySQLClient::running() const
@@ -46,14 +50,14 @@ bool MySQLClient::connect() const
 
 MSHnd<IChannelAddress> MySQLClient::address() const
 {
-	return MSHnd<IChannelAddress>();
+	return m_Address;
 }
 
 uint64_t MySQLClient::execute(MSString const &sql)
 {
 	try
 	{
-		if (connect() == false) return 0;
+		if (connect() == false) return -1;
 		MSRef<sql::Statement> statement(m_Connection->createStatement());
 		if(statement->execute(sql) == false) return false;
 		auto result = statement->getUpdateCount();
@@ -71,7 +75,7 @@ uint64_t MySQLClient::execute(MSString const &sql, MSStringList &names, MSString
 {
 	try
 	{
-		if (connect() == false) return false;
+		if (connect() == false) return -1;
 		MSRef<sql::Statement> statement(m_Connection->createStatement());
 		MSRef<sql::ResultSet> resultSet(statement->executeQuery(sql));
 		auto metaData = resultSet->getMetaData();
@@ -103,7 +107,7 @@ uint64_t MySQLClient::execute(MSString const &sql, MSStringList &names, MSList<t
 {
 	try
 	{
-		if (connect() == false) return false;
+		if (connect() == false) return -1;
 		MSRef<sql::Statement> statement(m_Connection->createStatement());
 		MSRef<sql::ResultSet> resultSet(statement->executeQuery(sql));
 		auto metaData = resultSet->getMetaData();
@@ -139,7 +143,7 @@ uint64_t MySQLClient::prepare(MSString const &sql)
 {
 	try
 	{
-		if (connect() == false) return 0;
+		if (connect() == false) return -1;
 		MSRef<sql::PreparedStatement> statement(m_Connection->prepareStatement(sql));
 		if(statement->execute() == false) return false;
 		auto result = statement->getUpdateCount();
@@ -157,7 +161,7 @@ uint64_t MySQLClient::prepare(MSString const &sql, MSList<type_t> const& types, 
 {
 	try
 	{
-		if (connect() == false) return 0;
+		if (connect() == false) return -1;
 		MSRef<sql::PreparedStatement> statement(m_Connection->prepareStatement(sql));
 		uint64_t result = 0;
 		size_t columns = types.size();
@@ -214,7 +218,7 @@ uint64_t MySQLClient::prepare(MSString const& sql, MSStringList& names, MSString
 {
 	try
 	{
-		if (connect() == false) return false;
+		if (connect() == false) return -1;
 		MSRef<sql::PreparedStatement> statement(m_Connection->prepareStatement(sql));
 		MSRef<sql::ResultSet> resultSet(statement->executeQuery());
 		auto metaData = resultSet->getMetaData();
@@ -235,7 +239,7 @@ uint64_t MySQLClient::prepare(MSString const& sql, MSStringList& names, MSString
 		statement->close();
 		return updateCount;
 	}
-	catch (sql::SQLException& ex)
+	catch (MSError& ex)
 	{
 		MS_ERROR("%s", ex.what());
 	}
@@ -246,7 +250,7 @@ uint64_t MySQLClient::prepare(MSString const& sql, MSStringList& names, MSList<t
 {
 	try
 	{
-		if (connect() == false) return false;
+		if (connect() == false) return -1;
 		MSRef<sql::PreparedStatement> statement(m_Connection->prepareStatement(sql));
 		MSRef<sql::ResultSet> resultSet(statement->executeQuery());
 		auto metaData = resultSet->getMetaData();
