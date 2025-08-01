@@ -10,8 +10,14 @@
 *
 * =================================================*/
 #include <OpenMS/Service/Cluster/ClusterService.h>
+#include <OpenMS/Endpoint/Redis/RedisClient.h>
+#include "RedisConfig.h"
 
-class RedisService : public ClusterService
+class RedisService 
+	:
+	public ClusterService,
+	public RedisClient,
+	public RedisConfig
 {
 public:
 	MSString identity() const override;
@@ -19,6 +25,7 @@ public:
 protected:
 	void onInit() override;
 	void onExit() override;
+	void configureEndpoint(RedisClient::config_t& config) override;
 };
 
 OPENMS_RUN(RedisService)
