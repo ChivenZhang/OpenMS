@@ -29,9 +29,7 @@ public:
 	bool running() const override;
 	bool connect() const override;
 	MSHnd<IChannelAddress> address() const override;
-
 	bool execute(MSString const& cmd, MSString& result);
-	bool execute(MSString const& cmd, MSStringList& result);
 
 protected:
 	virtual void configureEndpoint(config_t& config) = 0;
