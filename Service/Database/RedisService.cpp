@@ -24,19 +24,19 @@ void RedisService::onInit()
 #if 1 // TEST
 
 	MSString result;
+	if(RedisClient::execute("exists mykey", result))
+	{
+		MS_INFO("has mykey:%s", result.c_str());
+	}
 	if(RedisClient::execute("del mykey", result))
 	{
 		MS_INFO("del mykey:%s", result.c_str());
 	}
-	if(RedisClient::execute("exists mykey", result))
-	{
-		MS_INFO("exist mykey:%s", result.c_str());
-	}
-	if(RedisClient::execute("set mykey Hello", result))
+	if(RedisClient::execute("hmset mykey a1 b1 a2 b2", result))
 	{
 		MS_INFO("set mykey:%s", result.c_str());
 	}
-	if(RedisClient::execute("get mykey", result))
+	if(RedisClient::execute("hgetall mykey", result))
 	{
 		MS_INFO("get mykey:%s", result.c_str());
 	}
@@ -56,5 +56,5 @@ void RedisService::configureEndpoint(RedisClient::config_t &config)
 	config.IP = "127.0.0.1";
 	config.PortNum = 6379;
 	config.UserName = {};
-	config.Password = {};
+	config.Password = {"123456"};
 }

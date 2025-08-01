@@ -29,6 +29,7 @@ public:
 	bool running() const override;
 	bool connect() const override;
 	MSHnd<IChannelAddress> address() const override;
+	
 	bool execute(MSString const& cmd, MSString& result);
 
 protected:
