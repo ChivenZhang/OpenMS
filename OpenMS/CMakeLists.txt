@@ -3,6 +3,8 @@ if(OPENMS_ENABLE_MYSQL)
 set(MYSQL_SOURCES
 		Endpoint/MySQL/MySQLClient.cpp
 		Endpoint/MySQL/MySQLClient.h
+		Endpoint/MySQL/MySQLPool.cpp
+		Endpoint/MySQL/MySQLPool.h
 )
 else()
 set(MYSQL_SOURCES)
@@ -12,6 +14,8 @@ if(OPENMS_ENABLE_REDIS)
 set(REDIS_SOURCES
 		Endpoint/Redis/RedisClient.cpp
 		Endpoint/Redis/RedisClient.h
+		Endpoint/Redis/RedisPool.cpp
+		Endpoint/Redis/RedisPool.h
 )
 else()
 set(REDIS_SOURCES)

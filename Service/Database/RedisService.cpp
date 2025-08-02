@@ -19,28 +19,28 @@ void RedisService::onInit()
 {
 	ClusterService::onInit();
 
-	RedisClient::startup();
+	RedisPool::startup();
 
-#if 1 // TEST
-
-	MSString result;
-	if(RedisClient::execute("exists mykey", result))
+#if 0 // TEST
+	for (size_t i = 0; i < 10; ++i)
 	{
-		MS_INFO("has mykey:%s", result.c_str());
+		RedisPool::execute("exists mykey" + std::to_string(i), [](bool update, MSString const& result)
+		{
+			MS_INFO("del mykey:%s", result.c_str());
+		});
+		RedisPool::execute("del mykey" + std::to_string(i), [](bool update, MSString const& result)
+		{
+			MS_INFO("del mykey:%s", result.c_str());
+		});
+		RedisPool::execute("hmset mykey" + std::to_string(i) + " a1 b1 a2 b2", [](bool update, MSString const& result)
+		{
+			MS_INFO("set mykey:%s", result.c_str());
+		});
+		RedisPool::execute("hgetall mykey" + std::to_string(i), [](bool update, MSString const& result)
+		{
+			MS_INFO("get mykey:%s", result.c_str());
+		});
 	}
-	if(RedisClient::execute("del mykey", result))
-	{
-		MS_INFO("del mykey:%s", result.c_str());
-	}
-	if(RedisClient::execute("hmset mykey a1 b1 a2 b2", result))
-	{
-		MS_INFO("set mykey:%s", result.c_str());
-	}
-	if(RedisClient::execute("hgetall mykey", result))
-	{
-		MS_INFO("get mykey:%s", result.c_str());
-	}
-
 #endif
 }
 
@@ -48,13 +48,14 @@ void RedisService::onExit()
 {
 	ClusterService::onExit();
 
-	RedisClient::shutdown();
+	RedisPool::shutdown();
 }
 
-void RedisService::configureEndpoint(RedisClient::config_t &config)
+void RedisService::configureEndpoint(RedisPool::config_t& config)
 {
 	config.IP = "127.0.0.1";
 	config.PortNum = 6379;
 	config.UserName = {};
-	config.Password = {"123456"};
+	config.Password = {};
+	config.Instance = 2;
 }

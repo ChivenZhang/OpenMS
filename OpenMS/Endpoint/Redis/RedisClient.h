@@ -37,5 +37,5 @@ protected:
 
 protected:
 	MSRef<ISocketAddress> m_Address;
-	MSRaw<redisContext> m_Context;
+	MSRaw<redisContext> m_Context = nullptr;
 };

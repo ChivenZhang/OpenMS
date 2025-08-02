@@ -11,12 +11,13 @@
 * =================================================*/
 #include <OpenMS/Service/Cluster/ClusterService.h>
 #include <OpenMS/Endpoint/Redis/RedisClient.h>
+#include <OpenMS/Endpoint/Redis/RedisPool.h>
 #include "RedisConfig.h"
 
 class RedisService 
 	:
 	public ClusterService,
-	public RedisClient,
+	public RedisPool,
 	public RedisConfig
 {
 public:
@@ -25,7 +26,7 @@ public:
 protected:
 	void onInit() override;
 	void onExit() override;
-	void configureEndpoint(RedisClient::config_t& config) override;
+	void configureEndpoint(RedisPool::config_t& config) override;
 };
 
 OPENMS_RUN(RedisService)

@@ -3,20 +3,15 @@
 * Copyright © 2020-2025 ChivenZhang.
 * All Rights Reserved.
 * =====================Note=========================
-* 
-* 
+*
+*
 * ====================History=======================
 * Created by chivenzhang@gmail.com.
-* 
+*
 * =================================================*/
 #include "OpenMS/Endpoint/IEndpoint.h"
 
-namespace sql
-{
-	class Connection;
-}
-
-class MySQLClient : public IEndpoint
+class MySQLPool : public IEndpoint
 {
 public:
 	struct config_t
@@ -26,6 +21,8 @@ public:
 		MSString UserName;
 		MSString Password;
 		MSString Database;
+		uint8_t Instance = 1;	// Maximum instance
+		uint8_t Reconnect = 1;	// Reconnect times
 	};
 
 public:
@@ -35,13 +32,24 @@ public:
 	bool connect() const override;
 	MSHnd<IChannelAddress> address() const override;
 
-	uint64_t execute(MSString const& sql, MSStringList& result);
-	uint64_t prepare(MSString const& sql, MSStringList const& vars, MSStringList& result);
+	bool execute(MSString const& sql, MSLambda<void(uint64_t update, MSStringList const& data)> result);
+	bool prepare(MSString const& sql, MSStringList const& vars, MSLambda<void(uint64_t update, MSStringList const& data)> result);
 
 protected:
 	virtual void configureEndpoint(config_t& config) = 0;
 
 protected:
 	MSRef<ISocketAddress> m_Address;
-	MSRef<sql::Connection> m_Context;
+	MSMutex m_MutexLock;
+	MSMutexUnlock m_MutexUnlock;
+	MSAtomic<bool> m_Running;
+	MSList<MSThread> m_ThreadList;
+
+	struct execute_t
+	{
+		MSString Command;
+		MSStringList Variables;
+		MSLambda<void(uint64_t update, MSStringList const& data)> Callback;
+	};
+	MSQueue<execute_t> m_ExecuteQueue;
 };

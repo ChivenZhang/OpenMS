@@ -25,8 +25,8 @@ void RedisClient::startup()
 	}
 	if(context->err)
 	{
-		redisFree(context);
 		MS_ERROR("%s", context->errstr);
+		redisFree(context);
 		return;
 	}
 	if(config.UserName.size())
@@ -49,6 +49,7 @@ void RedisClient::startup()
 			redisFree(context);
 			return;
 		}
+		freeReplyObject(result);
 	}
 	else
 	{
@@ -57,7 +58,6 @@ void RedisClient::startup()
 
 	m_Context = context;
 	m_Address = IPv4Address::New(MSStringView(config.IP), config.PortNum);
-
 	MS_INFO("accepted from %s:%d", m_Address->getAddress().c_str(), m_Address->getPort());
 }
 
@@ -178,8 +178,10 @@ bool RedisClient::execute(MSString const &cmd, MSString& output)
 	if(result->type == REDIS_REPLY_ERROR)
 	{
 		MS_ERROR("%s", result->str);
+		freeReplyObject(result);
 		return false;
 	}
 	output = RedisParseResult(result);
+	freeReplyObject(result);
 	return true;
 }
