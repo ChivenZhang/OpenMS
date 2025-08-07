@@ -53,9 +53,10 @@ void RedisService::onExit()
 
 void RedisService::configureEndpoint(RedisPool::config_t& config)
 {
-	config.IP = "127.0.0.1";
-	config.PortNum = 6379;
-	config.UserName = {};
-	config.Password = {};
-	config.Instance = 2;
+	config.IP = property(identity() + ".redis.ip", MSString("127.0.0.1"));
+	config.PortNum  = property(identity() + ".redis.port", 6379U);
+	config.UserName = property(identity() + ".redis.username", MSString());
+	config.Password = property(identity() + ".redis.password", MSString());
+	config.Instance = property(identity() + ".redis.instance", 1U);
+	config.Reconnect = property(identity() + ".redis.reconnect", 1U);
 }

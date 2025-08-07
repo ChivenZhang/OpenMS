@@ -32,7 +32,7 @@ void MySQLService::onInit()
 
 	MySQLPool::startup();
 
-#if 0 // TEST
+#if 1 // TEST
 	for (size_t n = 0; n < 10; ++n)
 	{
 		MySQLPool::execute("select * from userinfo", [](uint64_t rows, MSStringList const& result)
@@ -61,10 +61,11 @@ void MySQLService::onExit()
 
 void MySQLService::configureEndpoint(MySQLPool::config_t& config)
 {
-	config.IP = "127.0.0.1";
-	config.PortNum = 3306;
-	config.UserName = "admin";
-	config.Password = "123456";
-	config.Database = "game";
-	config.Instance = 2;
+	config.IP = property(identity() + ".mysql.ip", MSString("127.0.0.1"));
+	config.PortNum  = property(identity() + ".mysql.port", 3306U);
+	config.UserName = property(identity() + ".mysql.username", MSString());
+	config.Password = property(identity() + ".mysql.password", MSString());
+	config.Database = property(identity() + ".mysql.database", MSString());
+	config.Instance = property(identity() + ".mysql.instance", 1U);
+	config.Reconnect = property(identity() + ".mysql.reconnect", 1U);
 }
