@@ -21,7 +21,7 @@ void RedisService::onInit()
 
 	RedisPool::startup();
 
-#if 0 // TEST
+#if 1 // TEST
 	for (size_t i = 0; i < 10; ++i)
 	{
 		RedisPool::execute("exists mykey" + std::to_string(i), [](bool update, MSString const& result)

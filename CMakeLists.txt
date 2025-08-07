@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 3.31)
 project(OpenMS)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -14,7 +13,6 @@ add_subdirectory(${OPENMS_SOURCE_DIR}/External/iocpp)
 
 if(OPENMS_ENABLE_SAMPLE)
 add_subdirectory(${OPENMS_SOURCE_DIR}/Sample)
-file(CREATE_LINK "${OPENMS_SOURCE_DIR}/APPLICATION.json" "${CMAKE_BINARY_DIR}/APPLICATION.json")
 endif()
 
 if(OPENMS_ENABLE_DISCOVERY)
@@ -24,3 +22,5 @@ endif()
 if(OPENMS_ENABLE_MYSQL OR OPENMS_ENABLE_REDIS)
 add_subdirectory(${OPENMS_SOURCE_DIR}/Service/Database)
 endif()
+
+file(CREATE_LINK "${OPENMS_SOURCE_DIR}/APPLICATION.json" "${CMAKE_BINARY_DIR}/APPLICATION.json")
