@@ -8,8 +8,12 @@
 			"cacheVariables": {
 				"CMAKE_BUILD_TYPE": "Debug",
 				"CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT_CUSTOM}/scripts/buildsystems/vcpkg.cmake",
+				"MYSQL_CLIENT_CUSTOM": "$env{MYSQL_CLIENT_CUSTOM}",
 
-				"OPENMS_ENABLE_SAMPLE": "ON"
+				"OPENMS_ENABLE_DISCOVERY": "ON",
+				"OPENMS_ENABLE_MYSQL": "OFF",
+				"OPENMS_ENABLE_REDIS": "ON",
+				"OPENMS_ENABLE_SAMPLE": "OFF"
 			}
 		},
 		{
@@ -19,8 +23,12 @@
 			"cacheVariables": {
 				"CMAKE_BUILD_TYPE": "RelWithDebInfo",
 				"CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT_CUSTOM}/scripts/buildsystems/vcpkg.cmake",
+				"MYSQL_CLIENT_CUSTOM": "$env{MYSQL_CLIENT_CUSTOM}",
 
-				"OPENMS_ENABLE_SAMPLE": "ON"
+				"OPENMS_ENABLE_DISCOVERY": "ON",
+				"OPENMS_ENABLE_MYSQL": "OFF",
+				"OPENMS_ENABLE_REDIS": "ON",
+				"OPENMS_ENABLE_SAMPLE": "OFF"
 			}
 		}
 	]

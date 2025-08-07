@@ -12,8 +12,7 @@
 #include "MS.h"
 #include "IMailPromise.h"
 class IMailContext;
-template <class T>
-using IMailTask = IMailPromise<T>;
+using IMailTask = IMailPromise<void>;
 
 /// @brief Interface for mail
 struct IMail
@@ -38,15 +37,15 @@ public:
 
 	virtual bool exist(MSString address) const = 0;
 
-	template<class T, class... Args>
-	bool create(MSString address, Args... args)
+	template<class T, class... ARGS>
+	bool create(MSString address, ARGS... args)
 	{
 		static_assert(std::is_base_of_v<IMailBox, T>);
-		return create(address, [&](MSRaw<IMailContext> context){ return MSNew<T>(context, std::forward<Args>(args)...); });
+		return create(address, [&](MSRaw<IMailContext> context){ return MSNew<T>(context, std::forward<ARGS>(args)...); });
 	}
 
 protected:
 	virtual void error(MSError&& info) = 0;
 
-	virtual IMailTask<void> read(IMail&& mail) = 0;
+	virtual IMailTask read(IMail&& mail) = 0;
 };

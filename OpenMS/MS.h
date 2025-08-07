@@ -344,6 +344,7 @@ inline const uint32_t MSHash(MSStringView value) noexcept
 
 // ============================================
 
+#define JSON_USE_IMPLICIT_CONVERSIONS 0
 #include <nlohmann/json.hpp>
 #define OPENMS_TYPE NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT
 #define OPENMS_IS_SCALAR(T) std::enable_if_t<std::is_scalar_v<T>, int> = 0
@@ -382,15 +383,16 @@ bool TTypeC(T const& src, U& dst)
 template<class T, class U, OPENMS_NOT_SAME(T, U), OPENMS_IS_TEXT(T), OPENMS_NOT_SCALAR(T)>
 bool TTypeC(T const& src, U& dst)
 {
-	nlohmann::json json = nlohmann::json::parse(src, nullptr, false, true);
 	try
 	{
-		dst = json.get<U>();
-	} catch (...)
-	{
-		return false;
+		nlohmann::json json = nlohmann::json::parse(src, nullptr, false, true);
+		json.get_to(dst);
+		return true;
 	}
-	return true;
+	catch (...)
+	{
+	}
+	return false;
 }
 
 template<class T, class U, OPENMS_NOT_SAME(T, U), OPENMS_NOT_TEXT(T), OPENMS_IS_SCALAR(T)>

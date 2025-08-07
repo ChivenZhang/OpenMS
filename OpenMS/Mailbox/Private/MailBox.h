@@ -26,7 +26,7 @@ public:
 
 protected:
 	void error(MSError&& info) override;
-	IMailTask<void> read(IMail&& mail) override;
+	IMailTask read(IMail&& mail) override;
 
 private:
 	friend class MailContext;
@@ -35,6 +35,6 @@ private:
 	MSMutex m_MailLock;
 	MSAtomic<uint32_t> m_Session;
 	MSRaw<IMailContext> m_Context;
-	struct mail_t { IMail Mail; IMailTask<void> Handle; };
+	struct mail_t { IMail Mail; IMailTask Handle; };
 	MSQueue<mail_t> m_MailQueue;
 };

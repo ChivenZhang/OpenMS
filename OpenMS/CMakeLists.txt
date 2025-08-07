@@ -1,3 +1,26 @@
+
+if(OPENMS_ENABLE_MYSQL)
+set(MYSQL_SOURCES
+		Endpoint/MySQL/MySQLClient.cpp
+		Endpoint/MySQL/MySQLClient.h
+		Endpoint/MySQL/MySQLPool.cpp
+		Endpoint/MySQL/MySQLPool.h
+)
+else()
+set(MYSQL_SOURCES)
+endif()
+
+if(OPENMS_ENABLE_REDIS)
+set(REDIS_SOURCES
+		Endpoint/Redis/RedisClient.cpp
+		Endpoint/Redis/RedisClient.h
+		Endpoint/Redis/RedisPool.cpp
+		Endpoint/Redis/RedisPool.h
+)
+else()
+set(REDIS_SOURCES)
+endif()
+
 add_library(OpenMS STATIC
 		Endpoint/HTTP/HTTPClient.cpp
 		Endpoint/HTTP/HTTPClient.h
@@ -103,7 +126,21 @@ add_library(OpenMS STATIC
 		Service/Private/Service.h
 		Toolkit/Timer.cpp
 		Toolkit/Timer.h
+		${MYSQL_SOURCES}
+		${REDIS_SOURCES}
 )
+
+if(OPENMS_ENABLE_MYSQL)
+target_include_directories(OpenMS PUBLIC $ENV{MYSQL_CLIENT_CUSTOM}/include)
+target_link_directories(OpenMS PUBLIC $ENV{MYSQL_CLIENT_CUSTOM}/lib64/vs14)
+target_link_libraries(OpenMS PRIVATE mysqlcppconn mysqlcppconnx)
+endif()
+
+if(OPENMS_ENABLE_REDIS)
+# this is heuristically generated, and may not be correct
+find_package(hiredis CONFIG REQUIRED)
+target_link_libraries(OpenMS PRIVATE hiredis::hiredis)
+endif()
 
 find_package(unofficial-http-parser CONFIG REQUIRED)
 target_link_libraries(OpenMS PRIVATE unofficial::http_parser::http_parser)
