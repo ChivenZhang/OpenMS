@@ -39,6 +39,15 @@
 		"master": {
 			"ip": "127.0.0.1",
 			"port": 8080
+		},
+		"mysql": {
+			"ip": "127.0.0.1",
+			"port": 3306,
+			"username": "admin",
+			"password": "123456",
+			"database": "game",
+			"instance": 1,
+			"reconnect": 1
 		}
 	},
 	"redis":{
@@ -49,6 +58,14 @@
 		"master": {
 			"ip": "127.0.0.1",
 			"port": 8080
+		},
+		"redis": {
+			"ip": "127.0.0.1",
+			"port": 6379,
+			"username": "",
+			"password": "",
+			"instance": 1,
+			"reconnect": 1
 		}
 	}
 }
