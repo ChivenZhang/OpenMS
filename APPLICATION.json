@@ -67,5 +67,19 @@
 			"instance": 1,
 			"reconnect": 1
 		}
+	},
+	"fileserver":{
+		"server": {
+			"ip": "127.0.0.1",
+			"port": 80
+		},
+		"master": {
+			"ip": "127.0.0.1",
+			"port": 8080
+		},
+		"static": {
+			"ip": "127.0.0.1",
+			"port": 80
+		}
 	}
 }

@@ -23,4 +23,8 @@ if(OPENMS_ENABLE_MYSQL OR OPENMS_ENABLE_REDIS)
 add_subdirectory(${OPENMS_SOURCE_DIR}/Service/Database)
 endif()
 
+if(OPENMS_ENABLE_FILESERVER)
+add_subdirectory(${OPENMS_SOURCE_DIR}/Service/FileServer)
+endif()
+
 file(CREATE_LINK "${OPENMS_SOURCE_DIR}/APPLICATION.json" "${CMAKE_BINARY_DIR}/APPLICATION.json")
