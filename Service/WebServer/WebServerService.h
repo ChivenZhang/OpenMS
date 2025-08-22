@@ -11,13 +11,13 @@
 * =================================================*/
 #include <OpenMS/Service/Cluster/ClusterService.h>
 #include <OpenMS/Endpoint/HTTP/HTTPServer.h>
-#include "FileServerConfig.h"
+#include "WebServerConfig.h"
 
-class FileServerService 
+class WebServerService
 	:
 	public ClusterService,
 	public HTTPServer,
-	public FileServerConfig
+	public WebServerConfig
 {
 public:
 	MSString identity() const override;
@@ -26,6 +26,9 @@ protected:
 	void onInit() override;
 	void onExit() override;
 	void configureEndpoint(HTTPServer::config_t& config) override;
+
+protected:
+	MSStringList m_StaticPaths;
 };
 
-OPENMS_RUN(FileServerService)
+OPENMS_RUN(WebServerService)

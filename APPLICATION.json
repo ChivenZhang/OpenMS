@@ -71,15 +71,16 @@
 	"fileserver":{
 		"server": {
 			"ip": "127.0.0.1",
-			"port": 80
+			"port": 0
 		},
 		"master": {
 			"ip": "127.0.0.1",
 			"port": 8080
 		},
-		"static": {
+		"web": {
 			"ip": "127.0.0.1",
-			"port": 80
+			"port": 80,
+			"static-paths": ["Resource/"]
 		}
 	}
 }
