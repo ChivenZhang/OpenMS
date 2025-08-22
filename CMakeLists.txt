@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 3.5)
 project(OpenMS)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -21,6 +22,10 @@ endif()
 
 if(OPENMS_ENABLE_MYSQL OR OPENMS_ENABLE_REDIS)
 add_subdirectory(${OPENMS_SOURCE_DIR}/Service/Database)
+endif()
+
+if(OPENMS_ENABLE_WEBSERVER)
+add_subdirectory(${OPENMS_SOURCE_DIR}/Service/WebServer)
 endif()
 
 file(CREATE_LINK "${OPENMS_SOURCE_DIR}/APPLICATION.json" "${CMAKE_BINARY_DIR}/APPLICATION.json")

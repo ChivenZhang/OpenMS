@@ -67,5 +67,26 @@
 			"instance": 1,
 			"reconnect": 1
 		}
+	},
+	"webserver":{
+		"server": {
+			"ip": "127.0.0.1",
+			"port": 0
+		},
+		"master": {
+			"ip": "127.0.0.1",
+			"port": 8080
+		},
+		"web": {
+			"ip": "127.0.0.1",
+			"port": 80,
+			"roots": {
+				"/": ["./Static"]
+			},
+			"alias": {
+				"/": "/index.html",
+				"/index": "/index.html"
+			}
+		}
 	}
 }

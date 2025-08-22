@@ -418,6 +418,7 @@ bool TTypeC(bool const& src, MSString& dst)
 template <class T = MSString, class U = bool, OPENMS_NOT_SAME(T, U)>
 bool TTypeC(MSString const& src, bool& dst)
 {
+	if (src.empty()) return false;
 	dst = (src == "true");
 	return true;
 }
@@ -431,6 +432,7 @@ bool TTypeC(int16_t const& src, MSString& dst)
 template <class T = MSString, class U = int16_t, OPENMS_NOT_SAME(T, U)>
 bool TTypeC(MSString const& src, int16_t& dst)
 {
+	if (src.empty()) return false;
 	dst = (int16_t)std::strtol(src.c_str(), nullptr, 10);
 	return true;
 }
@@ -444,6 +446,7 @@ bool TTypeC(uint16_t const& src, MSString& dst)
 template <class T = MSString, class U = uint16_t, OPENMS_NOT_SAME(T, U)>
 bool TTypeC(MSString const& src, uint16_t& dst)
 {
+	if (src.empty()) return false;
 	dst = (uint16_t)std::strtol(src.c_str(), nullptr, 10);
 	return true;
 }
@@ -457,6 +460,7 @@ bool TTypeC(int32_t const& src, MSString& dst)
 template <class T = MSString, class U = int32_t, OPENMS_NOT_SAME(T, U)>
 bool TTypeC(MSString const& src, int32_t& dst)
 {
+	if (src.empty()) return false;
 	dst = std::strtol(src.c_str(), nullptr, 10);
 	return true;
 }
@@ -470,6 +474,7 @@ bool TTypeC(uint32_t const& src, MSString& dst)
 template <class T = MSString, class U = uint32_t, OPENMS_NOT_SAME(T, U)>
 bool TTypeC(MSString const& src, uint32_t& dst)
 {
+	if (src.empty()) return false;
 	dst = std::strtoul(src.c_str(), nullptr, 10);
 	return true;
 }
@@ -483,6 +488,7 @@ bool TTypeC(int64_t const& src, MSString& dst)
 template <class T = MSString, class U = int64_t, OPENMS_NOT_SAME(T, U)>
 bool TTypeC(MSString const& src, int64_t& dst)
 {
+	if (src.empty()) return false;
 	dst = std::strtoll(src.c_str(), nullptr, 10);
 	return true;
 }
@@ -496,6 +502,7 @@ bool TTypeC(uint64_t const& src, MSString& dst)
 template <class T = MSString, class U = uint64_t, OPENMS_NOT_SAME(T, U)>
 bool TTypeC(MSString const& src, uint64_t& dst)
 {
+	if (src.empty()) return false;
 	dst = std::strtoull(src.c_str(), nullptr, 10);
 	return true;
 }
@@ -509,6 +516,7 @@ bool TTypeC(float const& src, MSString& dst)
 template <class T = MSString, class U = float, OPENMS_NOT_SAME(T, U)>
 bool TTypeC(MSString const& src, float& dst)
 {
+	if (src.empty()) return false;
 	dst = std::strtof(src.c_str(), nullptr);
 	return true;
 }
@@ -522,6 +530,7 @@ bool TTypeC(double const& src, MSString& dst)
 template <class T = MSString, class U = double, OPENMS_NOT_SAME(T, U)>
 bool TTypeC(MSString const& src, double& dst)
 {
+	if (src.empty()) return false;
 	dst = std::strtod(src.c_str(), nullptr);
 	return true;
 }
