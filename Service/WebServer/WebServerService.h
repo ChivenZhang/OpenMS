@@ -28,7 +28,10 @@ protected:
 	void configureEndpoint(HTTPServer::config_t& config) override;
 
 protected:
-	MSStringList m_StaticPaths;
+	uint32_t m_MaxBodySize = 0;
+	uint32_t m_MaxBufferSize = 0;
+	MSStringMap<MSStringList> m_StaticRoots;
+	MSStringMap<MSString> m_StaticAlias;
 };
 
 OPENMS_RUN(WebServerService)

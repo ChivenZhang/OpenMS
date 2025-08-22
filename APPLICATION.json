@@ -68,7 +68,7 @@
 			"reconnect": 1
 		}
 	},
-	"fileserver":{
+	"webserver":{
 		"server": {
 			"ip": "127.0.0.1",
 			"port": 0
@@ -80,7 +80,13 @@
 		"web": {
 			"ip": "127.0.0.1",
 			"port": 80,
-			"static-paths": ["Resource/"]
+			"roots": {
+				"/": ["./Static"]
+			},
+			"alias": {
+				"/": "/index.html",
+				"/index": "/index.html"
+			}
 		}
 	}
 }
