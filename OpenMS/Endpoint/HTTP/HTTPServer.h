@@ -18,6 +18,10 @@
 class HTTPServer : public IEndpoint
 {
 public:
+	using request_t = HTTPRequest;
+	using response_t = HTTPResponse;
+	using method_t = MSLambda<void(request_t const& request, response_t& response)>;
+
 	struct config_t
 	{
 		MSString IP;
@@ -29,13 +33,9 @@ public:
 			MSLambda<void(MSRef<IChannel>)> OnOpen;
 			MSLambda<void(MSRef<IChannel>)> OnClose;
 			MSLambda<bool(MSString const& rule, MSString const& url)> OnRoute;
+			MSLambda<void(request_t const& request, response_t& response)> OnError;
 		} Callback;
 	};
-
-	using request_t = HTTPRequest;
-	using response_t = HTTPResponse;
-	using method_t = MSLambda<void(request_t const& request, response_t& response)>;
-
 public:
 	void startup() override;
 	void shutdown() override;
@@ -71,8 +71,9 @@ protected:
 protected:
 	friend class HTTPServerInboundHandler;
 	MSRef<TCPServerReactor> m_Reactor;
-	MSLambda<bool(MSString const& rule, MSString const& url)> m_OnRoute;
 	MSMutex m_LockGet, m_LockPost, m_LockPut, m_LockDelete;
+	MSLambda<bool(MSString const& rule, MSString const& url)> m_OnRoute;
+	MSLambda<void(request_t const& request, response_t& response)> m_OnError;
 	MSList<MSBinary<MSString, method_t>> m_GetRouter, m_PostRouter, m_PutRouter, m_DeleteRouter;
 };
 

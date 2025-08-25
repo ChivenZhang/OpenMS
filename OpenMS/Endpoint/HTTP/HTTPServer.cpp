@@ -33,13 +33,12 @@ void HTTPServer::startup()
 				std::regex regex(rule);
 				return std::regex_match(url, regex);
 			}
-			catch (...)
-			{
-			}
+			catch (...) {}
 			return false;
 		};
 	}
 	m_OnRoute = config.Callback.OnRoute;
+	m_OnError = config.Callback.OnError;
 	m_Reactor = MSNew<TCPServerReactor>(
 		IPv4Address::New(config.IP, config.PortNum),
 		config.Backlog,
@@ -130,15 +129,15 @@ bool HTTPServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw
 	m_Settings.on_message_begin = [](http_parser* parser)
 	{
 		auto handler = (HTTPServerInboundHandler*)parser->data;
-		handler->m_LastField = MSString();
-		handler->m_Request.Url = MSString();
+		handler->m_LastField = {};
+		handler->m_Request.Url = {};
 		handler->m_Request.Params.clear();
 		handler->m_Request.Header.clear();
-		handler->m_Request.Body = MSString();
+		handler->m_Request.Body = {};
 
 		handler->m_Response.Code = 0;
 		handler->m_Response.Header.clear();
-		handler->m_Response.Body = MSString();
+		handler->m_Response.Body = {};
 		return 0;
 	};
 	m_Settings.on_url = [](http_parser* parser, const char* at, size_t length)
@@ -210,8 +209,7 @@ bool HTTPServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw
 					if (handler->m_Server->m_OnRoute(route.first, handler->m_Request.Url) == false) continue;
 					method = route.second;
 				}
-			}
-			break;
+			} break;
 		case HTTP_GET:
 			{
 				MSMutexLock lock(handler->m_Server->m_LockGet);
@@ -220,8 +218,7 @@ bool HTTPServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw
 					if (handler->m_Server->m_OnRoute(route.first, handler->m_Request.Url) == false) continue;
 					method = route.second;
 				}
-			}
-			break;
+			} break;
 		case HTTP_POST:
 			{
 				MSMutexLock lock(handler->m_Server->m_LockPost);
@@ -230,8 +227,7 @@ bool HTTPServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw
 					if (handler->m_Server->m_OnRoute(route.first, handler->m_Request.Url) == false) continue;
 					method = route.second;
 				}
-			}
-			break;
+			} break;
 		case HTTP_PUT:
 			{
 				MSMutexLock lock(handler->m_Server->m_LockPut);
@@ -240,10 +236,8 @@ bool HTTPServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw
 					if (handler->m_Server->m_OnRoute(route.first, handler->m_Request.Url) == false) continue;
 					method = route.second;
 				}
-			}
-			break;
-		default:
-			break;
+			} break;
+		default: break;
 		}
 
 		if (method)
@@ -274,6 +268,7 @@ bool HTTPServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw
 			handler->m_Response.Code = HTTP_STATUS_NOT_FOUND;
 			handler->m_Response.Body = "404 Not Found";
 		}
+
 		return 0;
 	};
 
@@ -282,6 +277,26 @@ bool HTTPServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw
 	{
 		if (m_Response.Code)
 		{
+			// Handle error code
+
+			if(m_Response.Code != HTTP_STATUS_OK && m_Server->m_OnError)
+			{
+				try
+				{
+					m_Server->m_OnError(m_Request, m_Response);
+				}
+				catch (MSError const& ex)
+				{
+					cpptrace::logic_error error(ex.what());
+					MS_ERROR("%s", error.what());
+				}
+				catch (...)
+				{
+					cpptrace::logic_error error("unhandled exception");
+					MS_ERROR("%s", error.what());
+				}
+			}
+
 			// Generate response headers
 
 			MSString headers;

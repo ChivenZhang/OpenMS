@@ -24,14 +24,16 @@ void WebServerService::onInit()
 
 	HTTPServer::startup();
 
-	for (auto& pattern : m_StaticRoots)
+	// URL alias
+
+	for (auto& pattern : m_StaticAlias)
 	{
 		auto& staticName = pattern.first;
 		auto& staticPaths = pattern.second;
 		bind_get(staticName + ".*", [=, this](request_t const& request, response_t& response)
 		{
-			MS_INFO("request %s", request.Url.c_str());
-
+			MS_INFO("alias %s", request.Url.c_str());
+			
 			// Response static files
 
 			try
@@ -47,11 +49,17 @@ void WebServerService::onInit()
 						if (std::filesystem::exists(fullPath) && std::filesystem::is_regular_file(fullPath))
 						{
 							auto fileSize = std::filesystem::file_size(fullPath);
+							if(m_MaxBodySize < fileSize)
+							{
+								response.Code = HTTP_STATUS_PAYLOAD_TOO_LARGE;
+								response.Body = "413 Payload Too Large";
+								return;
+							}
 							std::ifstream file(fullPath, std::ios::in | std::ios::binary);
 							if (file.is_open())
 							{
 								response.Code = HTTP_STATUS_OK;
-								response.Body.resize(std::min<size_t>(m_MaxBodySize, fileSize));
+								response.Body.resize(fileSize);
 								response.Header["Content-Length"] = std::to_string(file.read(response.Body.data(), (int64_t)response.Body.size()).gcount());
 								file.close();
 
@@ -74,6 +82,49 @@ void WebServerService::onInit()
 			response.Body = "404 Not Found";
 		});
 	}
+
+	// URL roots
+
+	for (auto& pattern : m_StaticRoots)
+	{
+		auto& staticName = pattern.first;
+		auto& staticPath = pattern.second;
+		bind_get(staticName + ".*", [=, this](request_t const& request, response_t& response)
+		{
+			MS_INFO("root %s", request.Url.c_str());
+
+			// Response static files
+
+			auto filePath = request.Url;
+			auto fullPath = std::filesystem::path(staticPath + filePath);
+			if (std::filesystem::exists(fullPath) && std::filesystem::is_regular_file(fullPath))
+			{
+				auto fileSize = std::filesystem::file_size(fullPath);
+				if(m_MaxBodySize < fileSize)
+				{
+					response.Code = HTTP_STATUS_PAYLOAD_TOO_LARGE;
+					response.Body = "413 Payload Too Large";
+					return;
+				}
+				std::ifstream file(fullPath, std::ios::in | std::ios::binary);
+				if (file.is_open())
+				{
+					response.Code = HTTP_STATUS_OK;
+					response.Body.resize(fileSize);
+					response.Header["Content-Length"] = std::to_string(file.read(response.Body.data(), (int64_t)response.Body.size()).gcount());
+					file.close();
+
+					auto fileType = std::filesystem::path(request.Url).extension().generic_string();
+					auto result = OPENMS_MIME_TYPE.find(fileType);
+					if (result == OPENMS_MIME_TYPE.end()) response.Header["Content-Type"] = "text/plain";
+					else response.Header["Content-Type"] = result->second;
+					return;
+				}
+			}
+			response.Code = HTTP_STATUS_NOT_FOUND;
+			response.Body = "404 Not Found";
+		});
+	}
 }
 
 void WebServerService::onExit()
@@ -88,8 +139,15 @@ void WebServerService::configureEndpoint(HTTPServer::config_t& config)
 	config.IP = property(identity() + ".web.ip", MSString("127.0.0.1"));
 	config.PortNum = property(identity() + ".web.port", 80U);
 	m_MaxBodySize = property(identity() + ".web.body-size", 1024 * 1024U); // 1MB
-	m_MaxBufferSize = property(identity() + ".web.buffer-size", 1024 * 1024U); // 1MB
-	m_StaticRoots = property(identity() + ".web.roots", MSStringMap<MSStringList>());
-	m_StaticAlias = property(identity() + ".web.alias", MSStringMap<MSString>());
-	// TODO: url alias
+	m_StaticRoots = property(identity() + ".web.roots", MSStringMap<MSString>());
+	m_StaticAlias = property(identity() + ".web.alias", MSStringMap<MSStringList>());
+	m_ErrorPages = property(identity() + ".web.error", MSStringMap<MSString>());
+
+	config.Callback.OnError = [=](request_t const& request, response_t& response)
+	{
+		auto result = m_ErrorPages.find(std::to_string(response.Code));
+		if(result == m_ErrorPages.end()) return;
+		response.Code = HTTP_STATUS_PERMANENT_REDIRECT;
+		response.Header["Location"] = result->second;
+	};
 }

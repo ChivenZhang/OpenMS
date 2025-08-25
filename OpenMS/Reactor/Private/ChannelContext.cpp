@@ -48,3 +48,8 @@ MSFuture<bool> ChannelContext::writeAndFlush(MSRef<IChannelEvent> event, MSPromi
 {
 	return m_Channel->writeAndFlush(event, promise);
 }
+
+MSStringMap<MSAny> &ChannelContext::attrib()
+{
+	return m_AttribMap;
+}

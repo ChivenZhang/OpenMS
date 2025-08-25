@@ -29,4 +29,6 @@ public:
 	virtual void writeAndFlush(MSRef<IChannelEvent> event) = 0;
 
 	virtual MSFuture<bool> writeAndFlush(MSRef<IChannelEvent> event, MSPromise<bool>& promise) = 0;
+
+	virtual MSStringMap<MSAny>& attrib() = 0;
 };

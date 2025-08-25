@@ -29,9 +29,9 @@ protected:
 
 protected:
 	uint32_t m_MaxBodySize = 0;
-	uint32_t m_MaxBufferSize = 0;
-	MSStringMap<MSStringList> m_StaticRoots;
-	MSStringMap<MSString> m_StaticAlias;
+	MSStringMap<MSString> m_ErrorPages;
+	MSStringMap<MSString> m_StaticRoots;
+	MSStringMap<MSStringList> m_StaticAlias;
 };
 
 OPENMS_RUN(WebServerService)

@@ -80,12 +80,15 @@
 		"web": {
 			"ip": "127.0.0.1",
 			"port": 80,
-			"roots": {
+			"alias": {
 				"/": ["./Static"]
 			},
-			"alias": {
-				"/": "/index.html",
-				"/index": "/index.html"
+			"roots": {
+				"/": "./Static"
+			},
+			"error":{
+				"404": "/404.html",
+				"500": "/500.html"
 			}
 		}
 	}
