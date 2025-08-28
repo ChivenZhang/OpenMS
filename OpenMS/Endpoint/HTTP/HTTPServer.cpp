@@ -21,7 +21,8 @@ void HTTPServer::startup()
 	{
 		config.Callback.OnOpen = [=](MSRef<IChannel> channel)
 		{
-			channel->getPipeline()->addLast("default", MSNew<HTTPServerInboundHandler>(this));
+			channel->getPipeline()->addFirst("inbound", MSNew<HTTPServerInboundHandler>(this));
+			channel->getPipeline()->addLast("outbound", MSNew<HTTPServerOutboundHandler>(this));
 		};
 	}
 	if (config.Callback.OnRoute == nullptr)
@@ -38,7 +39,6 @@ void HTTPServer::startup()
 		};
 	}
 	m_OnRoute = config.Callback.OnRoute;
-	m_OnError = config.Callback.OnError;
 	m_Reactor = MSNew<TCPServerReactor>(
 		IPv4Address::New(config.IP, config.PortNum),
 		config.Backlog,
@@ -244,6 +244,8 @@ bool HTTPServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw
 		{
 			try
 			{
+				handler->m_Context->attrib()["request"] = &handler->m_Request;
+				handler->m_Context->attrib()["response"] = &handler->m_Response;
 				method(handler->m_Request, handler->m_Response);
 			}
 			catch (MSError const& ex)
@@ -272,48 +274,96 @@ bool HTTPServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw
 		return 0;
 	};
 
+	m_Context = context;
 	auto parsedNum = http_parser_execute(&m_Parser, &m_Settings, event->Message.data(), event->Message.size());
-	if (parsedNum == event->Message.size())
+	if (parsedNum == event->Message.size()) return true;
+	context->close();
+	return false;
+}
+
+HTTPServerOutboundHandler::HTTPServerOutboundHandler(MSRaw<HTTPServer> server)
+	:
+	m_Server(server)
+{
+}
+
+bool HTTPServerOutboundHandler::channelWrite(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)
+{
+	auto& requestData = context->attrib()["request"];
+	auto& responseData = context->attrib()["response"];
+	if(requestData.type() == typeid(HTTPServer::request_t*) && responseData.type() == typeid(HTTPServer::response_t*))
 	{
-		if (m_Response.Code)
+		auto& request = *std::any_cast<HTTPServer::request_t*>(requestData);
+		auto& response = *std::any_cast<HTTPServer::response_t*>(responseData);
+		
+		if (response.Code)
 		{
-			// Handle error code
-
-			if(m_Response.Code != HTTP_STATUS_OK && m_Server->m_OnError)
-			{
-				try
-				{
-					m_Server->m_OnError(m_Request, m_Response);
-				}
-				catch (MSError const& ex)
-				{
-					cpptrace::logic_error error(ex.what());
-					MS_ERROR("%s", error.what());
-				}
-				catch (...)
-				{
-					cpptrace::logic_error error("unhandled exception");
-					MS_ERROR("%s", error.what());
-				}
-			}
-
 			// Generate response headers
 
 			MSString headers;
-			m_Response.Header.emplace("Content-Type", "text/plain; charset=UTF-8");
-			m_Response.Header["Content-Length"] = std::to_string(m_Response.Body.size());
-			for (auto& header : m_Response.Header) headers += header.first + ":" + header.second + "\r\n";
-			auto response = "HTTP/1.1" " " + std::to_string(m_Response.Code) + "\r\n" + headers + "\r\n" + m_Response.Body;
+			response.Header.emplace("Content-Type", "text/plain; charset=UTF-8");
+			response.Header["Content-Length"] = std::to_string(response.Body.size());
+			for (auto& header : response.Header) headers += header.first + ":" + header.second + "\r\n";
+			auto responseHTML = "HTTP/1.1" " " + std::to_string(response.Code) + "\r\n" + headers + "\r\n" + response.Body;
 
 			// Send response to remote client
 
-			context->writeAndFlush(IChannelEvent::New(response));
-			return true;
+			context->writeAndFlush(IChannelEvent::New(responseHTML));
 		}
 	}
-	else
-	{
-		context->close();
-	}
 	return false;
+}
+
+bool HTTPServerRequestHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)
+{
+	auto& requestData = context->attrib()["request"];
+	auto& responseData = context->attrib()["response"];
+	if(requestData.type() == typeid(HTTPServer::request_t*) && responseData.type() == typeid(HTTPServer::response_t*))
+	{
+		auto& request = *std::any_cast<HTTPServer::request_t*>(requestData);
+		auto& response = *std::any_cast<HTTPServer::response_t*>(responseData);
+		
+		try
+		{
+			return handle(context, request, response);
+		}
+		catch (MSError const& ex)
+		{
+			cpptrace::logic_error error(ex.what());
+			MS_ERROR("%s", error.what());
+		}
+		catch (...)
+		{
+			cpptrace::logic_error error("unhandled exception");
+			MS_ERROR("%s", error.what());
+		}
+	}
+    return false;
+}
+
+bool HTTPServerResponseHandler::channelWrite(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)
+{
+	auto& requestData = context->attrib()["request"];
+	auto& responseData = context->attrib()["response"];
+	if(requestData.type() == typeid(HTTPServer::request_t*) && responseData.type() == typeid(HTTPServer::response_t*))
+	{
+		auto& request = *std::any_cast<HTTPServer::request_t*>(requestData);
+		auto& response = *std::any_cast<HTTPServer::response_t*>(responseData);
+		
+		try
+		{
+			return handle(context, request, response);
+		}
+		catch (MSError const& ex)
+		{
+			cpptrace::logic_error error(ex.what());
+			MS_ERROR("%s", error.what());
+		}
+		catch (...)
+		{
+			cpptrace::logic_error error("unhandled exception");
+			MS_ERROR("%s", error.what());
+		}
+	}
+    return false;
 }

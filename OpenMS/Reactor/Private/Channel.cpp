@@ -84,7 +84,7 @@ void Channel::readChannel(MSRef<IChannelEvent> event)
 		{
 			result = inbounds[i].Handler->channelRead(&m_Context, event.get());
 		}
-		catch (MSError ex)
+		catch (MSError& ex)
 		{
 			inbounds[i].Handler->channelError(&m_Context, std::move(ex));
 		}
@@ -102,7 +102,7 @@ void Channel::readChannel(MSRef<IChannelEvent> event)
 		{
 			result = outbounds[i].Handler->channelWrite(&m_Context, event.get());
 		}
-		catch (MSError ex)
+		catch (MSError& ex)
 		{
 			outbounds[i].Handler->channelError(&m_Context, std::move(ex));
 		}
@@ -126,7 +126,7 @@ void Channel::writeChannel(MSRef<IChannelEvent> event)
 		{
 			result = outbounds[i].Handler->channelWrite(&m_Context, event.get());
 		}
-		catch (MSError ex)
+		catch (MSError& ex)
 		{
 			outbounds[i].Handler->channelError(&m_Context, std::move(ex));
 		}
