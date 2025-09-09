@@ -21,7 +21,8 @@ void HTTPServer::startup()
 	{
 		config.Callback.OnOpen = [=](MSRef<IChannel> channel)
 		{
-			channel->getPipeline()->addLast("default", MSNew<HTTPServerInboundHandler>(this));
+			channel->getPipeline()->addFirst("inbound", MSNew<HTTPServerInboundHandler>(this));
+			channel->getPipeline()->addLast("outbound", MSNew<HTTPServerOutboundHandler>(this));
 		};
 	}
 	if (config.Callback.OnRoute == nullptr)
@@ -33,9 +34,7 @@ void HTTPServer::startup()
 				std::regex regex(rule);
 				return std::regex_match(url, regex);
 			}
-			catch (...)
-			{
-			}
+			catch (...) {}
 			return false;
 		};
 	}
@@ -130,15 +129,15 @@ bool HTTPServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw
 	m_Settings.on_message_begin = [](http_parser* parser)
 	{
 		auto handler = (HTTPServerInboundHandler*)parser->data;
-		handler->m_LastField = MSString();
-		handler->m_Request.Url = MSString();
+		handler->m_LastField = {};
+		handler->m_Request.Url = {};
 		handler->m_Request.Params.clear();
 		handler->m_Request.Header.clear();
-		handler->m_Request.Body = MSString();
+		handler->m_Request.Body = {};
 
 		handler->m_Response.Code = 0;
 		handler->m_Response.Header.clear();
-		handler->m_Response.Body = MSString();
+		handler->m_Response.Body = {};
 		return 0;
 	};
 	m_Settings.on_url = [](http_parser* parser, const char* at, size_t length)
@@ -210,8 +209,7 @@ bool HTTPServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw
 					if (handler->m_Server->m_OnRoute(route.first, handler->m_Request.Url) == false) continue;
 					method = route.second;
 				}
-			}
-			break;
+			} break;
 		case HTTP_GET:
 			{
 				MSMutexLock lock(handler->m_Server->m_LockGet);
@@ -220,8 +218,7 @@ bool HTTPServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw
 					if (handler->m_Server->m_OnRoute(route.first, handler->m_Request.Url) == false) continue;
 					method = route.second;
 				}
-			}
-			break;
+			} break;
 		case HTTP_POST:
 			{
 				MSMutexLock lock(handler->m_Server->m_LockPost);
@@ -230,8 +227,7 @@ bool HTTPServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw
 					if (handler->m_Server->m_OnRoute(route.first, handler->m_Request.Url) == false) continue;
 					method = route.second;
 				}
-			}
-			break;
+			} break;
 		case HTTP_PUT:
 			{
 				MSMutexLock lock(handler->m_Server->m_LockPut);
@@ -240,16 +236,16 @@ bool HTTPServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw
 					if (handler->m_Server->m_OnRoute(route.first, handler->m_Request.Url) == false) continue;
 					method = route.second;
 				}
-			}
-			break;
-		default:
-			break;
+			} break;
+		default: break;
 		}
 
 		if (method)
 		{
 			try
 			{
+				handler->m_Context->attrib()["request"] = &handler->m_Request;
+				handler->m_Context->attrib()["response"] = &handler->m_Response;
 				method(handler->m_Request, handler->m_Response);
 			}
 			catch (MSError const& ex)
@@ -274,31 +270,100 @@ bool HTTPServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw
 			handler->m_Response.Code = HTTP_STATUS_NOT_FOUND;
 			handler->m_Response.Body = "404 Not Found";
 		}
+
 		return 0;
 	};
 
+	m_Context = context;
 	auto parsedNum = http_parser_execute(&m_Parser, &m_Settings, event->Message.data(), event->Message.size());
-	if (parsedNum == event->Message.size())
+	if (parsedNum == event->Message.size()) return true;
+	context->close();
+	return false;
+}
+
+HTTPServerOutboundHandler::HTTPServerOutboundHandler(MSRaw<HTTPServer> server)
+	:
+	m_Server(server)
+{
+}
+
+bool HTTPServerOutboundHandler::channelWrite(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)
+{
+	auto& requestData = context->attrib()["request"];
+	auto& responseData = context->attrib()["response"];
+	if(requestData.type() == typeid(HTTPServer::request_t*) && responseData.type() == typeid(HTTPServer::response_t*))
 	{
-		if (m_Response.Code)
+		auto& request = *std::any_cast<HTTPServer::request_t*>(requestData);
+		auto& response = *std::any_cast<HTTPServer::response_t*>(responseData);
+		
+		if (response.Code)
 		{
 			// Generate response headers
 
 			MSString headers;
-			m_Response.Header.emplace("Content-Type", "text/plain; charset=UTF-8");
-			m_Response.Header["Content-Length"] = std::to_string(m_Response.Body.size());
-			for (auto& header : m_Response.Header) headers += header.first + ":" + header.second + "\r\n";
-			auto response = "HTTP/1.1" " " + std::to_string(m_Response.Code) + "\r\n" + headers + "\r\n" + m_Response.Body;
+			response.Header.emplace("Content-Type", "text/plain; charset=UTF-8");
+			response.Header["Content-Length"] = std::to_string(response.Body.size());
+			for (auto& header : response.Header) headers += header.first + ":" + header.second + "\r\n";
+			auto responseHTML = "HTTP/1.1" " " + std::to_string(response.Code) + "\r\n" + headers + "\r\n" + response.Body;
 
 			// Send response to remote client
 
-			context->writeAndFlush(IChannelEvent::New(response));
-			return true;
+			context->writeAndFlush(IChannelEvent::New(responseHTML));
 		}
 	}
-	else
-	{
-		context->close();
-	}
 	return false;
+}
+
+bool HTTPServerRequestHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)
+{
+	auto& requestData = context->attrib()["request"];
+	auto& responseData = context->attrib()["response"];
+	if(requestData.type() == typeid(HTTPServer::request_t*) && responseData.type() == typeid(HTTPServer::response_t*))
+	{
+		auto& request = *std::any_cast<HTTPServer::request_t*>(requestData);
+		auto& response = *std::any_cast<HTTPServer::response_t*>(responseData);
+		
+		try
+		{
+			return handle(context, request, response);
+		}
+		catch (MSError const& ex)
+		{
+			cpptrace::logic_error error(ex.what());
+			MS_ERROR("%s", error.what());
+		}
+		catch (...)
+		{
+			cpptrace::logic_error error("unhandled exception");
+			MS_ERROR("%s", error.what());
+		}
+	}
+    return false;
+}
+
+bool HTTPServerResponseHandler::channelWrite(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)
+{
+	auto& requestData = context->attrib()["request"];
+	auto& responseData = context->attrib()["response"];
+	if(requestData.type() == typeid(HTTPServer::request_t*) && responseData.type() == typeid(HTTPServer::response_t*))
+	{
+		auto& request = *std::any_cast<HTTPServer::request_t*>(requestData);
+		auto& response = *std::any_cast<HTTPServer::response_t*>(responseData);
+		
+		try
+		{
+			return handle(context, request, response);
+		}
+		catch (MSError const& ex)
+		{
+			cpptrace::logic_error error(ex.what());
+			MS_ERROR("%s", error.what());
+		}
+		catch (...)
+		{
+			cpptrace::logic_error error("unhandled exception");
+			MS_ERROR("%s", error.what());
+		}
+	}
+    return false;
 }

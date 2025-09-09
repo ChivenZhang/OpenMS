@@ -1,4 +1,4 @@
-if(OPENMS_ENABLE_FILESERVER)
+if(OPENMS_ENABLE_WEBSERVER)
 add_executable(WebServerService
         WebServerConfig.h
         WebServerService.cpp
