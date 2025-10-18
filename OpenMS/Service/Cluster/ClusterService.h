@@ -14,7 +14,7 @@
 #include "Endpoint/RPC/RPCClient.h"
 #include "Endpoint/RPC/RPCServer.h"
 
-/// @brief 
+/// @brief Base Cluster Service
 class ClusterService
 	:
 	public Service,

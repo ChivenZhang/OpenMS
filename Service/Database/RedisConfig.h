@@ -9,7 +9,7 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "OpenMS/Service/Private/Property.h"
+#include <OpenMS/Service/Private/Property.h>
 
 /// @brief
 class RedisConfig

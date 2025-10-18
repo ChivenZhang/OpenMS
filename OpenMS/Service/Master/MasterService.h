@@ -13,7 +13,7 @@
 #include "MasterConfig.h"
 #include "Endpoint/RPC/RPCServer.h"
 
-/// @brief 
+/// @brief Base Master Service
 class MasterService
 	:
 	public Service,
@@ -27,7 +27,7 @@ protected:
 	void onExit() override;
 
 protected:
-	MSRef<RPCServer> m_RPCServer;
+	MSRef<RPCServer> m_ClusterServer;
 	MSStringMap<MSSet<MSString>> m_MailRouteMap;
 	MSStringMap<MSSet<MSString>> m_MailRouteNewMap;
 	std::chrono::time_point<std::chrono::system_clock> m_MailUpdateTime;
