@@ -9,16 +9,15 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "../Private/Service.h"
+#include "Service/Private/Service.h"
 #include "ClusterConfig.h"
-#include "ClusterClient.h"
-#include "ClusterServer.h"
+#include "Endpoint/RPC/RPCClient.h"
+#include "Endpoint/RPC/RPCServer.h"
 
 /// @brief 
 class ClusterService
 	:
 	public Service,
-	public RPCClient,
 	public RESOURCE(ClusterConfig),
 	public AUTOWIRE(IMailContext)
 {
@@ -28,13 +27,13 @@ public:
 protected:
 	void onInit() override;
 	void onExit() override;
-	void configureEndpoint(config_t& config) final;
 
 protected:
 	uint32_t m_Heartbeat = 0;
 	MSMutex m_MailRouteLock;
 	MSMutex m_MailClientLock;
-	MSRef<ClusterServer> m_MailServer;
+	MSRef<RPCServer> m_MailServer;
+	MSRef<RPCClient> m_ClusterClient;
 	MSStringMap<MSStringList> m_MailRouteMap;
-	MSStringMap<MSRef<ClusterClient>> m_MailClientMap;
+	MSStringMap<MSRef<RPCClient>> m_MailClientMap;
 };

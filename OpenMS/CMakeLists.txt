@@ -107,11 +107,7 @@ add_library(OpenMS STATIC
 		Reactor/UDP/UDPClientReactor.h
 		Reactor/UDP/UDPServerReactor.cpp
 		Reactor/UDP/UDPServerReactor.h
-		Service/Cluster/ClusterClient.cpp
-		Service/Cluster/ClusterClient.h
 		Service/Cluster/ClusterConfig.h
-		Service/Cluster/ClusterServer.cpp
-		Service/Cluster/ClusterServer.h
 		Service/Cluster/ClusterService.cpp
 		Service/Cluster/ClusterService.h
 		Service/IBootstrap.h

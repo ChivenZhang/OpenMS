@@ -16,7 +16,7 @@
 class KCPServerReactor : public ChannelReactor
 {
 public:
-	struct callback_kcp_t : public callback_t
+	struct callback_kcp_t : callback_t
 	{
 		MSLambda<uint32_t(MSRef<IChannelAddress>)> Session;
 	};

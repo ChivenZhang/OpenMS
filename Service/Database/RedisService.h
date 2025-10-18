@@ -17,7 +17,6 @@
 class RedisService 
 	:
 	public ClusterService,
-	public RedisPool,
 	public RedisConfig
 {
 public:
@@ -26,7 +25,9 @@ public:
 protected:
 	void onInit() override;
 	void onExit() override;
-	void configureEndpoint(RedisPool::config_t& config) override;
+
+protected:
+	MSRef<RedisPool> m_RedisPool;
 };
 
 OPENMS_RUN(RedisService)

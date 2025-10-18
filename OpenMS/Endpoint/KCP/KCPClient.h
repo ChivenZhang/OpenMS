@@ -25,6 +25,7 @@ public:
 	};
 
 public:
+	explicit KCPClient(config_t const& config);
 	void startup() override;
 	void shutdown() override;
 	bool running() const override;
@@ -32,8 +33,6 @@ public:
 	MSHnd<IChannelAddress> address() const override;
 
 protected:
-	virtual void configureEndpoint(config_t& config) = 0;
-
-protected:
+	config_t m_Config;
 	MSRef<KCPClientReactor> m_Reactor;
 };

@@ -52,7 +52,7 @@ void ClusterDemo1::onInit()
 	mails->createMailbox<LoginMailbox>("login");
 
 	m_Running = true;
-	m_Thread = MSThread([=]()
+	m_Thread = MSThread([=, this]()
 	{
 		while (m_Running)
 		{

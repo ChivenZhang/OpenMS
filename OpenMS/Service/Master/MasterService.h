@@ -17,7 +17,6 @@
 class MasterService
 	:
 	public Service,
-	public RPCServer,
 	public RESOURCE(MasterConfig)
 {
 public:
@@ -26,9 +25,9 @@ public:
 protected:
 	void onInit() override;
 	void onExit() override;
-	void configureEndpoint(config_t& config) final;
 
 protected:
+	MSRef<RPCServer> m_RPCServer;
 	MSStringMap<MSSet<MSString>> m_MailRouteMap;
 	MSStringMap<MSSet<MSString>> m_MailRouteNewMap;
 	std::chrono::time_point<std::chrono::system_clock> m_MailUpdateTime;

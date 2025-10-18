@@ -10,11 +10,15 @@
 * =================================================*/
 #include "KCPServer.h"
 
+KCPServer::KCPServer(config_t const& config)
+	:
+	m_Config(config)
+{
+}
+
 void KCPServer::startup()
 {
-	config_t config;
-	configureEndpoint(config);
-
+	auto config = m_Config;
 	m_Reactor = MSNew<KCPServerReactor>(
 		IPv4Address::New(config.IP, config.PortNum),
 		config.Backlog,

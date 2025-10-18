@@ -10,11 +10,15 @@
 * =================================================*/
 #include "TCPServer.h"
 
+TCPServer::TCPServer(config_t const& config)
+	:
+	m_Config(config)
+{
+}
+
 void TCPServer::startup()
 {
-	config_t config;
-	configureEndpoint(config);
-
+	auto config = m_Config;
 	m_Reactor = MSNew<TCPServerReactor>(
 		IPv4Address::New(config.IP, config.PortNum),
 		config.Backlog,

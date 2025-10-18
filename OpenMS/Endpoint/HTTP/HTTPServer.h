@@ -21,7 +21,6 @@ public:
 	using request_t = HTTPRequest;
 	using response_t = HTTPResponse;
 	using method_t = MSLambda<void(request_t const& request, response_t& response)>;
-
 	struct config_t
 	{
 		MSString IP;
@@ -35,7 +34,9 @@ public:
 			MSLambda<bool(MSString const& rule, MSString const& url)> OnRoute;
 		} Callback;
 	};
+
 public:
+	explicit HTTPServer(config_t const& config);
 	void startup() override;
 	void shutdown() override;
 	bool running() const override;
@@ -65,11 +66,10 @@ public:
 protected:
 	bool bind_internal(MSStringView path, uint8_t type, method_t&& method);
 
-	virtual void configureEndpoint(config_t& config) = 0;
-
 protected:
 	friend class HTTPServerInboundHandler;
 	friend class HTTPServerOutboundHandler;
+	config_t m_Config;
 	MSRef<TCPServerReactor> m_Reactor;
 	MSMutex m_LockGet, m_LockPost, m_LockPut, m_LockDelete;
 	MSLambda<bool(MSString const& rule, MSString const& url)> m_OnRoute;

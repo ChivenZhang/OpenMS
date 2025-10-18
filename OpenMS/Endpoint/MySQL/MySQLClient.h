@@ -29,6 +29,7 @@ public:
 	};
 
 public:
+	explicit MySQLClient(config_t const& config);
 	void startup() override;
 	void shutdown() override;
 	bool running() const override;
@@ -39,9 +40,7 @@ public:
 	uint64_t prepare(MSString const& sql, MSStringList const& vars, MSStringList& result);
 
 protected:
-	virtual void configureEndpoint(config_t& config) = 0;
-
-protected:
+	config_t m_Config;
 	MSRef<ISocketAddress> m_Address;
 	MSRef<sql::Connection> m_Context;
 };

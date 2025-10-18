@@ -91,10 +91,15 @@ static MSString RedisParseResult(MSRaw<redisReply> reply)
 	}
 }
 
+RedisPool::RedisPool(config_t const& config)
+	:
+	m_Config(config)
+{
+}
+
 void RedisPool::startup()
 {
-	config_t config;
-	configureEndpoint(config);
+	auto config = m_Config;
 	config.Instance = std::max<uint8_t>(1, config.Instance);
 	config.Reconnect = std::max<uint8_t>(1, config.Reconnect);
 

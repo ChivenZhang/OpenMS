@@ -17,20 +17,26 @@ MSString MasterService::identity() const
 
 void MasterService::onInit()
 {
-	RPCServer::startup();
+	m_RPCServer = MSNew<RPCServer>(RPCServer::config_t{
+		.IP = property(identity() + ".server.ip", MSString("127.0.0.1")),
+		.PortNum = (uint16_t)property(identity() + ".server.port", 0U),
+		.Backlog = property(identity() + ".server.backlog", 0U),
+		.Workers = 1,
+	});
+	m_RPCServer->startup();
 
 	// Register or update mail address
 
 	m_MailUpdateTime = std::chrono::system_clock::now();
 
-	bind("push", [=](MSString address, MSList<MSString> mails)->bool
+	m_RPCServer->bind("push", [this](MSString address, MSList<MSString> mails)->bool
 	{
 		for (auto& mail : mails) m_MailRouteMap[mail].insert(address);
 		for (auto& mail : mails) m_MailRouteNewMap[mail].insert(address);
 		return true;
 	});
 
-	bind("pull", [=]()->MSStringMap<MSSet<MSString>>
+	m_RPCServer->bind("pull", [this]()->MSStringMap<MSSet<MSString>>
 	{
 		auto now = std::chrono::system_clock::now();
 		if (OPENMS_HEARTBEAT <= std::chrono::duration_cast<std::chrono::seconds>(now - m_MailUpdateTime).count())
@@ -48,14 +54,6 @@ void MasterService::onExit()
 	m_MailRouteMap.clear();
 	m_MailRouteNewMap.clear();
 
-	RPCServer::shutdown();
-}
-
-void MasterService::configureEndpoint(config_t& config)
-{
-	auto ip = property(identity() + ".server.ip", MSString("127.0.0.1"));
-	auto port = property(identity() + ".server.port", 0U);
-	config.IP = ip;
-	config.PortNum = port;
-	config.Workers = 1;
+	if (m_RPCServer) m_RPCServer->shutdown();
+	m_RPCServer = nullptr;
 }

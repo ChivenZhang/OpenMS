@@ -13,11 +13,16 @@
 #include <format>
 #include <mysql/jdbc.h>
 
+MySQLClient::MySQLClient(config_t const& config)
+	:
+	m_Config(config)
+{
+}
+
 void MySQLClient::startup()
 {
-	config_t config;
-	configureEndpoint(config);
-
+	auto config = m_Config;
+	
 	auto driver = sql::mysql::get_mysql_driver_instance();
 	MS_INFO("MySQL Driver： %d.%d.%d", driver->getMajorVersion(), driver->getMinorVersion(), driver->getPatchVersion());
 	auto hostName = std::format("tcp://{}:{}", config.IP, config.PortNum);

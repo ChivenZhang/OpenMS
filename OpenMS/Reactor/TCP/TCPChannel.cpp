@@ -11,9 +11,9 @@
 #include "TCPChannel.h"
 #include "../Private/ChannelReactor.h"
 
-TCPChannel::TCPChannel(MSRaw<ChannelReactor> reactor, MSRef<IChannelAddress> local, MSRef<IChannelAddress> remote, uint32_t workid, uv_tcp_t* handle)
+TCPChannel::TCPChannel(MSRaw<ChannelReactor> reactor, MSRef<IChannelAddress> local, MSRef<IChannelAddress> remote, uint32_t workID, uv_tcp_t* handle)
 	:
-	Channel(reactor, local, remote, workid),
+	Channel(reactor, local, remote, workID),
 	m_Handle(handle)
 {
 }

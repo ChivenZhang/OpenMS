@@ -29,6 +29,7 @@ public:
 	using response_t = HTTPResponse;
 
 public:
+	explicit HTTPClient(config_t const& config);
 	void startup() override;
 	void shutdown() override;
 	bool running() const override;
@@ -58,11 +59,10 @@ public:
 protected:
 	bool call_internal(request_t const& request, uint8_t type, uint32_t timeout, response_t& response);
 
-	virtual void configureEndpoint(config_t& config) = 0;
-
 protected:
 	friend class HTTPClientInboundHandler;
 	MSMutex m_Lock;
+	config_t m_Config;
 	MSRef<TCPClientReactor> m_Reactor;
 
 	struct invoke_t
