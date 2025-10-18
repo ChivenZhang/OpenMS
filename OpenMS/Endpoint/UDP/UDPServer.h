@@ -10,8 +10,8 @@
 *
 * =================================================*/
 #include "../Private/Endpoint.h"
-#include "OpenMS/Service/IProperty.h"
-#include "OpenMS/Reactor/UDP/UDPServerReactor.h"
+#include "Service/IProperty.h"
+#include "Reactor/UDP/UDPServerReactor.h"
 
 class UDPServer : public Endpoint
 {

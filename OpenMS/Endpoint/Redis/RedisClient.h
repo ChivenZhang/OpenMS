@@ -9,7 +9,7 @@
 * Created by chivenzhang@gmail.com.
 * 
 * =================================================*/
-#include "OpenMS/Endpoint/IEndpoint.h"
+#include "Endpoint/IEndpoint.h"
 struct redisContext;
 
 class RedisClient : public IEndpoint
