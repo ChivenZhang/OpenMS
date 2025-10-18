@@ -11,7 +11,7 @@
 * =================================================*/
 #include "../IService.h"
 #include "../IProperty.h"
-#include "OpenMS/Toolkit/Timer.h"
+#include "Toolkit/Timer.h"
 
 #ifndef OPENMS_HEARTBEAT
 #define OPENMS_HEARTBEAT 10 /*second*/
