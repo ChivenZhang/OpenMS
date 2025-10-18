@@ -10,10 +10,10 @@
 				"CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT_CUSTOM}/scripts/buildsystems/vcpkg.cmake",
 
 				"OPENMS_ENABLE_DISCOVERY": "ON",
-				"OPENMS_ENABLE_MYSQL": "OFF",
-				"OPENMS_ENABLE_REDIS": "ON",
+				"OPENMS_ENABLE_WEBSERVER": "ON",
 				"OPENMS_ENABLE_SAMPLE": "OFF",
-				"OPENMS_ENABLE_WEBSERVER": "ON"
+				"OPENMS_ENABLE_MYSQL": "OFF",
+				"OPENMS_ENABLE_REDIS": "OFF"
 			}
 		},
 		{
@@ -25,30 +25,10 @@
 				"CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT_CUSTOM}/scripts/buildsystems/vcpkg.cmake",
 
 				"OPENMS_ENABLE_DISCOVERY": "ON",
-				"OPENMS_ENABLE_MYSQL": "OFF",
-				"OPENMS_ENABLE_REDIS": "ON",
-				"OPENMS_ENABLE_SAMPLE": "OFF",
-				"OPENMS_ENABLE_WEBSERVER": "ON"
-			}
-		},
-		{
-			"name": "x64-Mingw-Release",
-			"generator": "Ninja",
-			"binaryDir": "${sourceDir}/Output/${presetName}",
-			"cacheVariables": {
-				"CMAKE_BUILD_TYPE": "RelWithDebInfo",
-				"CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT_CUSTOM}/scripts/buildsystems/vcpkg.cmake",
-
-				"OPENMS_ENABLE_DISCOVERY": "ON",
-				"OPENMS_ENABLE_MYSQL": "OFF",
-				"OPENMS_ENABLE_REDIS": "OFF",
-				"OPENMS_ENABLE_SAMPLE": "OFF",
 				"OPENMS_ENABLE_WEBSERVER": "ON",
-				"MYSQL_CLIENT_CUSTOM": "$env{MYSQL_CLIENT_CUSTOM}",
-				"VCPKG_TARGET_TRIPLET": "x64-mingw-static",
-				"CMAKE_MAKE_PROGRAM": "ninja.exe",
-				"CMAKE_C_COMPILER": "gcc.exe",
-				"CMAKE_CXX_COMPILER": "g++.exe"
+				"OPENMS_ENABLE_SAMPLE": "OFF",
+				"OPENMS_ENABLE_MYSQL": "OFF",
+				"OPENMS_ENABLE_REDIS": "OFF"
 			}
 		}
 	]

@@ -10,11 +10,15 @@
 * =================================================*/
 #include "UDPClient.h"
 
+UDPClient::UDPClient(config_t const& config)
+	:
+	m_Config(config)
+{
+}
+
 void UDPClient::startup()
 {
-	config_t config;
-	configureEndpoint(config);
-
+	auto config = m_Config;
 	m_Reactor = MSNew<UDPClientReactor>(
 		IPv4Address::New(config.IP, config.PortNum),
 		config.Broadcast,

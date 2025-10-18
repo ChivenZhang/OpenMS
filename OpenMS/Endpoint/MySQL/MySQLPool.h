@@ -26,6 +26,7 @@ public:
 	};
 
 public:
+	explicit MySQLPool(config_t const& config);
 	void startup() override;
 	void shutdown() override;
 	bool running() const override;
@@ -36,9 +37,7 @@ public:
 	bool prepare(MSString const& sql, MSStringList const& vars, MSLambda<void(uint64_t update, MSStringList const& data)> result);
 
 protected:
-	virtual void configureEndpoint(config_t& config) = 0;
-
-protected:
+	config_t m_Config;
 	MSRef<ISocketAddress> m_Address;
 	MSMutex m_MutexLock;
 	MSMutexUnlock m_MutexUnlock;

@@ -24,6 +24,7 @@ public:
 	};
 
 public:
+	explicit RedisClient(config_t const& config);
 	void startup() override;
 	void shutdown() override;
 	bool running() const override;
@@ -33,9 +34,7 @@ public:
 	bool execute(MSString const& cmd, MSString& result);
 
 protected:
-	virtual void configureEndpoint(config_t& config) = 0;
-
-protected:
+	config_t m_Config;
 	MSRef<ISocketAddress> m_Address;
 	MSRaw<redisContext> m_Context = nullptr;
 };

@@ -10,11 +10,15 @@
 * =================================================*/
 #include "TCPClient.h"
 
+TCPClient::TCPClient(config_t const& config)
+	:
+	m_Config(config)
+{
+}
+
 void TCPClient::startup()
 {
-	config_t config;
-	configureEndpoint(config);
-
+	auto config = m_Config;
 	m_Reactor = MSNew<TCPClientReactor>(
 		IPv4Address::New(config.IP, config.PortNum),
 		config.Workers,

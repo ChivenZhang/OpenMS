@@ -10,11 +10,15 @@
 * =================================================*/
 #include "KCPClient.h"
 
+KCPClient::KCPClient(config_t const& config)
+	:
+	m_Config(config)
+{
+}
+
 void KCPClient::startup()
 {
-	config_t config;
-	configureEndpoint(config);
-
+	auto config = m_Config;
 	m_Reactor = MSNew<KCPClientReactor>(
 		IPv4Address::New(config.IP, config.PortNum),
 		config.Workers,

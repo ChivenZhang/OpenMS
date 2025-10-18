@@ -10,11 +10,15 @@
 * =================================================*/
 #include "HTTPClient.h"
 
+HTTPClient::HTTPClient(config_t const& config)
+	:
+	m_Config(config)
+{
+}
+
 void HTTPClient::startup()
 {
-	config_t config;
-	configureEndpoint(config);
-
+	auto config = m_Config;
 	if (config.Callback.OnOpen == nullptr)
 	{
 		config.Callback.OnOpen = [=](MSRef<IChannel> channel)

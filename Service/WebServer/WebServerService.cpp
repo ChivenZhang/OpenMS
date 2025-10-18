@@ -67,7 +67,23 @@ void WebServerService::onInit()
 {
 	ClusterService::onInit();
 
-	HTTPServer::startup();
+	m_MaxBodySize = property(identity() + ".web.body-size", 1024 * 1024U); // 1MB
+	m_ErrorPages = property(identity() + ".web.error", MSStringMap<MSString>());
+	m_StaticRoots = property(identity() + ".web.roots", MSStringMap<MSString>());
+	m_StaticAlias = property(identity() + ".web.alias", MSStringMap<MSStringList>());
+	m_HttpServer = MSNew<HTTPServer>(HTTPServer::config_t{
+		.IP = property(identity() + ".web.ip", MSString("127.0.0.1")),
+		.PortNum = (uint16_t)property(identity() + ".web.port", 80U),
+		.Callback = {
+			.OnOpen = [this](MSRef<IChannel> channel)
+			{
+				channel->getPipeline()->addFirst("inbound", MSNew<HTTPServerInboundHandler>(m_HttpServer.get()));
+				channel->getPipeline()->addLast("outbound", MSNew<HTTPServerOutboundHandler>(m_HttpServer.get()));
+				channel->getPipeline()->addBefore("outbound", "error", MSNew<WebServerErrorHandler>(this));
+			},
+		},
+	});
+	m_HttpServer->startup();
 
 	// URL alias
 
@@ -75,7 +91,7 @@ void WebServerService::onInit()
 	{
 		auto& staticName = pattern.first;
 		auto& staticPaths = pattern.second;
-		bind_get(staticName + ".*", [=, this](request_t const& request, response_t& response)
+		m_HttpServer->bind_get(staticName + ".*", [=, this](HTTPServer::request_t const& request, HTTPServer::response_t& response)
 		{
 			MS_INFO("alias %s", request.Url.c_str());
 			try
@@ -132,7 +148,7 @@ void WebServerService::onInit()
 	{
 		auto& staticName = pattern.first;
 		auto& staticPath = pattern.second;
-		bind_get(staticName + ".*", [=, this](request_t const& request, response_t& response)
+		m_HttpServer->bind_get(staticName + ".*", [=, this](HTTPServer::request_t const& request, HTTPServer::response_t& response)
 		{
 			MS_INFO("root %s", request.Url.c_str());
 
@@ -172,24 +188,8 @@ void WebServerService::onExit()
 {
 	ClusterService::onExit();
 
-	HTTPServer::shutdown();
-}
-
-void WebServerService::configureEndpoint(HTTPServer::config_t& config)
-{
-	config.IP = property(identity() + ".web.ip", MSString("127.0.0.1"));
-	config.PortNum = property(identity() + ".web.port", 80U);
-	m_MaxBodySize = property(identity() + ".web.body-size", 1024 * 1024U); // 1MB
-	m_ErrorPages = property(identity() + ".web.error", MSStringMap<MSString>());
-	m_StaticRoots = property(identity() + ".web.roots", MSStringMap<MSString>());
-	m_StaticAlias = property(identity() + ".web.alias", MSStringMap<MSStringList>());
-
-	config.Callback.OnOpen = [this](MSRef<IChannel> channel)
-	{
-		channel->getPipeline()->addFirst("inbound", MSNew<HTTPServerInboundHandler>(this));
-		channel->getPipeline()->addLast("outbound", MSNew<HTTPServerOutboundHandler>(this));
-		channel->getPipeline()->addBefore("outbound", "error", MSNew<WebServerErrorHandler>(this));
-	};
+	if (m_HttpServer) m_HttpServer->shutdown();
+	m_HttpServer = nullptr;
 }
 
 void WebServerService::forward(MSString url, HTTPServer::response_t &response)

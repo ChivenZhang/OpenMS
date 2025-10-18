@@ -17,7 +17,6 @@
 class MySQLService
 	:
 	public ClusterService,
-	public MySQLPool,
 	public MySQLConfig
 {
 public:
@@ -26,7 +25,9 @@ public:
 protected:
 	void onInit() override;
 	void onExit() override;
-	void configureEndpoint(MySQLPool::config_t& config) override;
+
+protected:
+	MSRef<MySQLPool> m_MysqlPool;
 };
 
 OPENMS_RUN(MySQLService)

@@ -10,11 +10,15 @@
 * =================================================*/
 #include "UDPServer.h"
 
+UDPServer::UDPServer(config_t const& config)
+	:
+	m_Config(config)
+{
+}
+
 void UDPServer::startup()
 {
-	config_t config;
-	configureEndpoint(config);
-
+	auto config = m_Config;
 	m_Reactor = MSNew<UDPServerReactor>(
 		IPv4Address::New(config.IP, config.PortNum),
 		config.Backlog,

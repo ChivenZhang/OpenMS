@@ -19,24 +19,32 @@ void RedisService::onInit()
 {
 	ClusterService::onInit();
 
-	RedisPool::startup();
+	m_RedisPool = MSNew<RedisPool>(RedisPool::config_t{
+		.IP = property(identity() + ".redis.ip", MSString("127.0.0.1")),
+		.PortNum  = (uint16_t)property(identity() + ".redis.port", 6379U),
+		.UserName = property(identity() + ".redis.username", MSString()),
+		.Password = property(identity() + ".redis.password", MSString()),
+		.Instance = (uint8_t)property(identity() + ".redis.instance", 1U),
+		.Reconnect = (uint8_t)property(identity() + ".redis.reconnect", 1U),
+	});
+	m_RedisPool->startup();
 
 #if 1 // TEST
 	for (size_t i = 0; i < 10; ++i)
 	{
-		RedisPool::execute("exists mykey" + std::to_string(i), [](bool update, MSString const& result)
+		m_RedisPool->execute("exists mykey" + std::to_string(i), [](bool update, MSString const& result)
 		{
 			MS_INFO("del mykey:%s", result.c_str());
 		});
-		RedisPool::execute("del mykey" + std::to_string(i), [](bool update, MSString const& result)
+		m_RedisPool->execute("del mykey" + std::to_string(i), [](bool update, MSString const& result)
 		{
 			MS_INFO("del mykey:%s", result.c_str());
 		});
-		RedisPool::execute("hmset mykey" + std::to_string(i) + " a1 b1 a2 b2", [](bool update, MSString const& result)
+		m_RedisPool->execute("hmset mykey" + std::to_string(i) + " a1 b1 a2 b2", [](bool update, MSString const& result)
 		{
 			MS_INFO("set mykey:%s", result.c_str());
 		});
-		RedisPool::execute("hgetall mykey" + std::to_string(i), [](bool update, MSString const& result)
+		m_RedisPool->execute("hgetall mykey" + std::to_string(i), [](bool update, MSString const& result)
 		{
 			MS_INFO("get mykey:%s", result.c_str());
 		});
@@ -48,15 +56,6 @@ void RedisService::onExit()
 {
 	ClusterService::onExit();
 
-	RedisPool::shutdown();
-}
-
-void RedisService::configureEndpoint(RedisPool::config_t& config)
-{
-	config.IP = property(identity() + ".redis.ip", MSString("127.0.0.1"));
-	config.PortNum  = property(identity() + ".redis.port", 6379U);
-	config.UserName = property(identity() + ".redis.username", MSString());
-	config.Password = property(identity() + ".redis.password", MSString());
-	config.Instance = property(identity() + ".redis.instance", 1U);
-	config.Reconnect = property(identity() + ".redis.reconnect", 1U);
+	if (m_RedisPool) m_RedisPool->shutdown();
+	m_RedisPool = nullptr;
 }

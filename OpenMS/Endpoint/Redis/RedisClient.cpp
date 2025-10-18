@@ -12,11 +12,15 @@
 #include "Reactor/Private/ChannelAddress.h"
 #include <hiredis/hiredis.h>
 
+RedisClient::RedisClient(config_t const& config)
+	:
+	m_Config(config)
+{
+}
+
 void RedisClient::startup()
 {
-	config_t config;
-	configureEndpoint(config);
-
+	auto config = m_Config;
 	auto context = redisConnect(config.IP.c_str(), config.PortNum);
 	if(context == nullptr)
 	{

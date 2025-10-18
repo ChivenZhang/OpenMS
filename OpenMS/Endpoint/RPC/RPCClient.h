@@ -29,6 +29,7 @@ public:
 	};
 
 public:
+	explicit RPCClient(config_t const& config);
 	void startup() override;
 	void shutdown() override;
 	bool running() const override;
@@ -248,11 +249,9 @@ public:
 	}
 
 protected:
-	virtual void configureEndpoint(config_t& config) = 0;
-
-protected:
 	friend class RPCClientInboundHandler;
 	Timer m_Timer;
+	config_t m_Config;
 	MSMutex m_Lock;
 	uint32_t m_Session = 0;
 	uint32_t m_Buffers = UINT32_MAX;

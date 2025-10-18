@@ -29,6 +29,7 @@ public:
 	};
 
 public:
+	explicit RPCServer(config_t const& config);
 	void startup() override;
 	void shutdown() override;
 	bool running() const override;
@@ -88,12 +89,11 @@ public:
 	}
 
 protected:
-	virtual void configureEndpoint(config_t& config) = 0;
-
 	bool bind_internal(MSStringView name, MSLambda<bool(MSString const&, MSString&)> method);
 
 protected:
 	friend class RPCServerInboundHandler;
+	config_t m_Config;
 	MSMutex m_Lock;
 	uint32_t m_Buffers = UINT32_MAX;
 	MSRef<TCPServerReactor> m_Reactor;
