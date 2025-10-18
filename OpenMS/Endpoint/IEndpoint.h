@@ -9,7 +9,7 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "OpenMS/Reactor/IChannelAddress.h"
+#include "Reactor/IChannelAddress.h"
 
 class OPENMS_API IEndpoint
 {

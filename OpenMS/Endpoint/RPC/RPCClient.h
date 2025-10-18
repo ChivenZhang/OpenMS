@@ -9,12 +9,12 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "OpenMS/Endpoint/IEndpoint.h"
-#include "OpenMS/Service/Private/Property.h"
-#include "OpenMS/Endpoint/RPC/RPCProtocol.h"
-#include "OpenMS/Reactor/TCP/TCPClientReactor.h"
-#include "OpenMS/Reactor/Private/ChannelHandler.h"
-#include "OpenMS/Toolkit/Timer.h"
+#include "Endpoint/IEndpoint.h"
+#include "Service/Private/Property.h"
+#include "Endpoint/RPC/RPCProtocol.h"
+#include "Reactor/TCP/TCPClientReactor.h"
+#include "Reactor/Private/ChannelHandler.h"
+#include "Toolkit/Timer.h"
 
 class RPCClient : public IEndpoint
 {

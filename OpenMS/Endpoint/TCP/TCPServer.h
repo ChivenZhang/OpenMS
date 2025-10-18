@@ -10,8 +10,8 @@
 *
 * =================================================*/
 #include "../Private/Endpoint.h"
-#include "OpenMS/Service/IProperty.h"
-#include "OpenMS/Reactor/TCP/TCPServerReactor.h"
+#include "Service/IProperty.h"
+#include "Reactor/TCP/TCPServerReactor.h"
 
 class TCPServer : public Endpoint
 {

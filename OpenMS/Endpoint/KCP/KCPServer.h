@@ -10,8 +10,8 @@
 *
 * =================================================*/
 #include "../Private/Endpoint.h"
-#include "OpenMS/Service/IProperty.h"
-#include "OpenMS/Reactor/KCP/KCPServerReactor.h"
+#include "Service/IProperty.h"
+#include "Reactor/KCP/KCPServerReactor.h"
 
 class KCPServer : public Endpoint
 {

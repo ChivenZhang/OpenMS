@@ -9,11 +9,11 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "OpenMS/Endpoint/IEndpoint.h"
-#include "OpenMS/Service/Private/Property.h"
-#include "OpenMS/Endpoint/RPC/RPCProtocol.h"
-#include "OpenMS/Reactor/TCP/TCPServerReactor.h"
-#include "OpenMS/Reactor/Private/ChannelHandler.h"
+#include "Endpoint/IEndpoint.h"
+#include "Service/Private/Property.h"
+#include "Endpoint/RPC/RPCProtocol.h"
+#include "Reactor/TCP/TCPServerReactor.h"
+#include "Reactor/Private/ChannelHandler.h"
 
 class RPCServer : public IEndpoint
 {

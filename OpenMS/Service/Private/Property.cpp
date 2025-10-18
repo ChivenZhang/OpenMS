@@ -11,7 +11,7 @@
 *
 * =================================================*/
 #include "Property.h"
-#include "OpenMS/Service/IService.h"
+#include "Service/IService.h"
 #include <fstream>
 #include <filesystem>
 

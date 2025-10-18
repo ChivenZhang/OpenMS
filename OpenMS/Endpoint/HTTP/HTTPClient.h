@@ -9,9 +9,9 @@
 * Created by chivenzhang@gmail.com.
 * 
 * =================================================*/
-#include "OpenMS/Endpoint/IEndpoint.h"
+#include "Endpoint/IEndpoint.h"
 #include "Reactor/Private/ChannelHandler.h"
-#include "OpenMS/Reactor/TCP/TCPClientReactor.h"
+#include "Reactor/TCP/TCPClientReactor.h"
 #include "HTTPProtocol.h"
 #include <http_parser.h>
 
