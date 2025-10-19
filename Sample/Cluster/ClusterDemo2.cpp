@@ -13,9 +13,7 @@
 class AuthorMailbox : public MailBox
 {
 public:
-	explicit AuthorMailbox(IMailContextRaw context) : MailBox(context)
-	{
-	}
+	using MailBox::MailBox;
 
 	IMailTask read(IMail&& mail) override
 	{
@@ -44,7 +42,7 @@ MSString ClusterDemo2::identity() const
 
 void ClusterDemo2::onInit()
 {
-	ClusterService::onInit();
+	ClusterServer::onInit();
 
 	auto mails = AUTOWIRE(IMailContext)::bean();
 	mails->createMailbox<AuthorMailbox>("author");
@@ -52,5 +50,5 @@ void ClusterDemo2::onInit()
 
 void ClusterDemo2::onExit()
 {
-	ClusterService::onExit();
+	ClusterServer::onExit();
 }

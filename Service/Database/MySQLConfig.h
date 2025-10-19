@@ -12,8 +12,6 @@
 #include <OpenMS/Service/Private/Property.h>
 
 /// @brief
-class MySQLConfig
-	:
-	RESOURCE2(Property, IProperty)
+class MySQLConfig : RESOURCE2(Property, IProperty)
 {
 };

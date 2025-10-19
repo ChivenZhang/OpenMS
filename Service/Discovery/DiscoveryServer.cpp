@@ -8,21 +8,21 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "DiscoveryService.h"
+#include "DiscoveryServer.h"
 
 // ========================================================================================
 
-MSString DiscoveryService::identity() const
+MSString DiscoveryServer::identity() const
 {
 	return "discovery";
 }
 
-void DiscoveryService::onInit()
+void DiscoveryServer::onInit()
 {
-	MasterService::onInit();
+	MasterServer::onInit();
 }
 
-void DiscoveryService::onExit()
+void DiscoveryServer::onExit()
 {
-	MasterService::onExit();
+	MasterServer::onExit();
 }

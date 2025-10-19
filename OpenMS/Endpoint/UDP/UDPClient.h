@@ -35,6 +35,6 @@ public:
 	MSHnd<IChannelAddress> address() const override;
 
 protected:
-	config_t m_Config;
+	const config_t m_Config;
 	MSRef<UDPClientReactor> m_Reactor;
 };

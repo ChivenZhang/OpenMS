@@ -9,13 +9,10 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "../Private/Property.h"
+#include "Service/Private/Property.h"
 #include "Mailbox/Private/MailContext.h"
 
 /// @brief
-class ClusterConfig
-	:
-	RESOURCE2(Property, IProperty),
-	RESOURCE2(MailContext, IMailContext)
+class ClusterConfig : RESOURCE2(Property, IProperty), RESOURCE2(MailContext, IMailContext)
 {
 };

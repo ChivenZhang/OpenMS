@@ -1,21 +1,21 @@
 if(OPENMS_ENABLE_MYSQL)
-add_executable(MySQLService
-    MySQLConfig.h
-    MySQLService.cpp
-    MySQLService.h
+add_executable(MySQLServer
+        MySQLConfig.h
+        MySQLServer.cpp
+        MySQLServer.h
 )
-add_dependencies(MySQLService OpenMS)
-target_include_directories(MySQLService PUBLIC ${OPENMS_SOURCE_DIR})
-target_link_libraries(MySQLService PRIVATE OpenMS)
+add_dependencies(MySQLServer OpenMS)
+target_include_directories(MySQLServer PUBLIC ${OPENMS_SOURCE_DIR})
+target_link_libraries(MySQLServer PRIVATE OpenMS)
 endif()
 
 if(OPENMS_ENABLE_REDIS)
-add_executable(RedisService
-    RedisConfig.h
-    RedisService.cpp
-    RedisService.h
+add_executable(RedisServer
+        RedisConfig.h
+        RedisServer.cpp
+        RedisServer.h
 )
-add_dependencies(RedisService OpenMS)
-target_include_directories(RedisService PUBLIC ${OPENMS_SOURCE_DIR})
-target_link_libraries(RedisService PRIVATE OpenMS)
+add_dependencies(RedisServer OpenMS)
+target_include_directories(RedisServer PUBLIC ${OPENMS_SOURCE_DIR})
+target_link_libraries(RedisServer PRIVATE OpenMS)
 endif()

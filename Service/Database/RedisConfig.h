@@ -12,8 +12,6 @@
 #include <OpenMS/Service/Private/Property.h>
 
 /// @brief
-class RedisConfig
-	:
-	RESOURCE2(Property, IProperty)
+class RedisConfig : RESOURCE2(Property, IProperty)
 {
 };

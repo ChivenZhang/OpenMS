@@ -18,7 +18,7 @@ using IMailTask = IMailPromise<void>;
 struct IMail
 {
 	MSString From, To, Data;
-	uint32_t SID; // Session
+	uint32_t FromSID, ToSID; // For Session
 };
 
 /// @brief Interface for mailbox

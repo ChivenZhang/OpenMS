@@ -9,9 +9,15 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include <OpenMS/Service/Master/MasterService.h>
+#include <OpenMS/Service/Cluster/ClusterServer.h>
+#include <OpenMS/Endpoint/MySQL/MySQLClient.h>
+#include <OpenMS/Endpoint/MySQL/MySQLPool.h>
+#include "MySQLConfig.h"
 
-class DiscoveryService : public MasterService
+class MySQLServer
+	:
+	public ClusterServer,
+	public MySQLConfig
 {
 public:
 	MSString identity() const override;
@@ -19,6 +25,9 @@ public:
 protected:
 	void onInit() override;
 	void onExit() override;
+
+protected:
+	MSRef<MySQLPool> m_MysqlPool;
 };
 
-OPENMS_RUN(DiscoveryService)
+OPENMS_RUN(MySQLServer)

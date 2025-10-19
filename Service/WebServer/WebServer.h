@@ -9,14 +9,14 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include <OpenMS/Service/Cluster/ClusterService.h>
+#include <OpenMS/Service/Cluster/ClusterServer.h>
 #include <OpenMS/Endpoint/HTTP/HTTPServer.h>
-#include "WebServerConfig.h"
+#include "WebConfig.h"
 
-class WebServerService
+class WebServer
 	:
-	public ClusterService,
-	public WebServerConfig
+	public ClusterServer,
+	public WebConfig
 {
 public:
 	MSString identity() const override;
@@ -36,4 +36,4 @@ protected:
 	MSStringMap<MSStringList> m_StaticAlias;
 };
 
-OPENMS_RUN(WebServerService)
+OPENMS_RUN(WebServer)

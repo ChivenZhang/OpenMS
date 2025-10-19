@@ -8,20 +8,19 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "MasterService.h"
+#include "MasterServer.h"
 
-MSString MasterService::identity() const
+MSString MasterServer::identity() const
 {
 	return "master";
 }
 
-void MasterService::onInit()
+void MasterServer::onInit()
 {
 	m_ClusterServer = MSNew<RPCServer>(RPCServer::config_t{
 		.IP = property(identity() + ".server.ip", MSString("127.0.0.1")),
 		.PortNum = (uint16_t)property(identity() + ".server.port", 0U),
 		.Backlog = property(identity() + ".server.backlog", 0U),
-		.Workers = 1,
 	});
 	m_ClusterServer->startup();
 
@@ -49,7 +48,7 @@ void MasterService::onInit()
 	});
 }
 
-void MasterService::onExit()
+void MasterServer::onExit()
 {
 	m_MailRouteMap.clear();
 	m_MailRouteNewMap.clear();

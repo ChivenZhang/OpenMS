@@ -8,16 +8,16 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "RedisService.h"
+#include "RedisServer.h"
 
-MSString RedisService::identity() const
+MSString RedisServer::identity() const
 {
 	return "redis";
 }
 
-void RedisService::onInit()
+void RedisServer::onInit()
 {
-	ClusterService::onInit();
+	ClusterServer::onInit();
 
 	m_RedisPool = MSNew<RedisPool>(RedisPool::config_t{
 		.IP = property(identity() + ".redis.ip", MSString("127.0.0.1")),
@@ -52,9 +52,9 @@ void RedisService::onInit()
 #endif
 }
 
-void RedisService::onExit()
+void RedisServer::onExit()
 {
-	ClusterService::onExit();
+	ClusterServer::onExit();
 
 	if (m_RedisPool) m_RedisPool->shutdown();
 	m_RedisPool = nullptr;

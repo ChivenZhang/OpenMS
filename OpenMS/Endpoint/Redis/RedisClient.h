@@ -34,7 +34,7 @@ public:
 	bool execute(MSString const& cmd, MSString& result);
 
 protected:
-	config_t m_Config;
+	const config_t m_Config;
 	MSRef<ISocketAddress> m_Address;
 	MSRaw<redisContext> m_Context = nullptr;
 };

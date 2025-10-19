@@ -108,20 +108,23 @@ add_library(OpenMS STATIC
 		Reactor/UDP/UDPServerReactor.cpp
 		Reactor/UDP/UDPServerReactor.h
 		Service/Cluster/ClusterConfig.h
-		Service/Cluster/ClusterService.cpp
-		Service/Cluster/ClusterService.h
-		Service/IBootstrap.h
+		Service/Cluster/ClusterServer.cpp
+		Service/Cluster/ClusterServer.h
 		Service/IProperty.h
+		Service/IServer.h
 		Service/IService.h
+		Service/IStartup.h
 		Service/Master/MasterConfig.h
-		Service/Master/MasterService.cpp
-		Service/Master/MasterService.h
+		Service/Master/MasterServer.cpp
+		Service/Master/MasterServer.h
 		Service/Private/Property.cpp
 		Service/Private/Property.h
+		Service/Private/Server.cpp
+		Service/Private/Server.h
 		Service/Private/Service.cpp
 		Service/Private/Service.h
-		Toolkit/Timer.cpp
-		Toolkit/Timer.h
+		Utility/Timer.cpp
+		Utility/Timer.h
 		${MYSQL_SOURCES}
 		${REDIS_SOURCES}
 )

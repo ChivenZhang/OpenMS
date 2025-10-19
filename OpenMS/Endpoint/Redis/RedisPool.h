@@ -36,7 +36,7 @@ public:
 	bool execute(MSString const& command, MSLambda<void(bool update, MSString const& data)> result);
 
 protected:
-	config_t m_Config;
+	const config_t m_Config;
 	MSRef<ISocketAddress> m_Address;
 	MSMutex m_MutexLock;
 	MSMutexUnlock m_MutexUnlock;
