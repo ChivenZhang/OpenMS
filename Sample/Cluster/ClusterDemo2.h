@@ -9,9 +9,9 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include <OpenMS/Service/Cluster/ClusterService.h>
+#include <OpenMS/Service/Cluster/ClusterServer.h>
 
-class ClusterDemo2 : public ClusterService
+class ClusterDemo2 : public ClusterServer
 {
 public:
 	MSString identity() const override;

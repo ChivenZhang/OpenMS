@@ -24,7 +24,6 @@ public:
 		uint16_t PortNum = 0;
 		TCPClientReactor::callback_tcp_t Callback;
 	};
-
 	using request_t = HTTPRequest;
 	using response_t = HTTPResponse;
 
@@ -62,7 +61,7 @@ protected:
 protected:
 	friend class HTTPClientInboundHandler;
 	MSMutex m_Lock;
-	config_t m_Config;
+	const config_t m_Config;
 	MSRef<TCPClientReactor> m_Reactor;
 
 	struct invoke_t

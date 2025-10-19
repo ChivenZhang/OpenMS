@@ -13,9 +13,7 @@
 class LoginMailbox : public MailBox
 {
 public:
-	explicit LoginMailbox(IMailContextRaw context) : MailBox(context)
-	{
-	}
+	using MailBox::MailBox;
 
 	IMailTask read(IMail&& mail) override
 	{
@@ -46,7 +44,7 @@ MSString ClusterDemo1::identity() const
 
 void ClusterDemo1::onInit()
 {
-	ClusterService::onInit();
+	ClusterServer::onInit();
 
 	auto mails = AUTOWIRE(IMailContext)::bean();
 	mails->createMailbox<LoginMailbox>("login");
@@ -67,5 +65,5 @@ void ClusterDemo1::onExit()
 	m_Running = false;
 	if (m_Thread.joinable()) m_Thread.join();
 
-	ClusterService::onExit();
+	ClusterServer::onExit();
 }

@@ -11,7 +11,7 @@
 *
 * =================================================*/
 #include "Property.h"
-#include "Service/IService.h"
+#include "Service/IServer.h"
 #include <fstream>
 #include <filesystem>
 
@@ -27,8 +27,8 @@ void Value::setValue(MSString const& value)
 
 Property::Property()
 {
-	auto argc = IBootstrap::Argc;
-	auto argv = IBootstrap::Argv;
+	auto argc = IStartup::Argc;
+	auto argv = IStartup::Argv;
 
 	// Get config file path
 

@@ -9,9 +9,9 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include <OpenMS/Service/Master/MasterService.h>
+#include <OpenMS/Service/Master/MasterServer.h>
 
-class MasterDemo : public MasterService
+class MasterDemo : public MasterServer
 {
 protected:
 	void onInit() override;

@@ -12,9 +12,7 @@
 #include <OpenMS/Service/Private/Property.h>
 
 /// @brief
-class WebServerConfig
-	:
-	RESOURCE2(Property, IProperty)
+class WebConfig : RESOURCE2(Property, IProperty)
 {
 };
 

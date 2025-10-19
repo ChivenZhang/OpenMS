@@ -69,7 +69,7 @@ protected:
 protected:
 	friend class HTTPServerInboundHandler;
 	friend class HTTPServerOutboundHandler;
-	config_t m_Config;
+	const config_t m_Config;
 	MSRef<TCPServerReactor> m_Reactor;
 	MSMutex m_LockGet, m_LockPost, m_LockPut, m_LockDelete;
 	MSLambda<bool(MSString const& rule, MSString const& url)> m_OnRoute;

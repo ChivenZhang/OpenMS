@@ -26,7 +26,6 @@ void RPCServer::startup()
 			channel->getPipeline()->addLast("default", MSNew<RPCServerInboundHandler>(this));
 		};
 	}
-	m_Buffers = config.Buffers;
 	m_Reactor = MSNew<TCPServerReactor>(
 		IPv4Address::New(config.IP, config.PortNum),
 		config.Backlog,
@@ -106,7 +105,7 @@ bool RPCServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<
 
 			// Handle remote request message
 
-			if (message.size() < m_Server->m_Buffers)
+			if (message.size() < m_Server->m_Config.Buffers)
 			{
 				MSString output;
 				RPCRequest request;

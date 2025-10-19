@@ -15,7 +15,6 @@ MailContext::MailContext(uint32_t overload)
 	m_Delivers(std::max(1U, overload))
 {
 	m_Running = true;
-
 	for (auto& deliver : m_Delivers)
 	{
 		deliver = MSNew<MailDeliver>(this);
@@ -62,7 +61,7 @@ bool MailContext::existMailbox(MSString address)
 
 bool MailContext::sendToMailbox(IMail&& mail)
 {
-	MSRef<MailBox> mailbox;
+	MSRef<MailBox> toMailbox, fromMailbox;
 	{
 		MSMutexLock lock(m_MailboxLock);
 		auto result = m_MailboxMap.find(mail.To);
@@ -71,14 +70,21 @@ bool MailContext::sendToMailbox(IMail&& mail)
 			if (m_RemoteCall == nullptr) return false;
 			return m_RemoteCall(std::forward<IMail>(mail));
 		}
-		mailbox = result->second;
+		toMailbox = result->second;
+
+		result = m_MailboxMap.find(mail.From);
+		if (result != m_MailboxMap.end())
+		{
+			fromMailbox = result->second;
+		}
 	}
 	{
-		MSMutexLock lock(mailbox->m_MailLock);
-		if (mail.SID == 0) mail.SID = ++mailbox->m_Session;
-		auto idle = mailbox->m_MailQueue.empty();
-		mailbox->m_MailQueue.push({ std::forward<IMail>(mail) });
-		if (idle) enqueueMailbox(mailbox);
+		MSMutexLock lock(toMailbox->m_MailLock);
+		if (mail.ToSID == 0 && toMailbox) mail.ToSID = ++toMailbox->m_Session;
+		if (mail.FromSID == 0 && fromMailbox) mail.FromSID = ++fromMailbox->m_Session;
+		auto idle = toMailbox->m_MailQueue.empty();
+		toMailbox->m_MailQueue.push({ std::forward<IMail>(mail) });
+		if (idle) enqueueMailbox(toMailbox);
 		return true;
 	}
 }

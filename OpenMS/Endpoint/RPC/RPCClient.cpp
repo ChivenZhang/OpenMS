@@ -26,7 +26,6 @@ void RPCClient::startup()
 			channel->getPipeline()->addLast("default", MSNew<RPCClientInboundHandler>(this));
 		};
 	}
-	m_Buffers = config.Buffers;
 	m_Reactor = MSNew<TCPClientReactor>(
 		IPv4Address::New(config.IP, config.PortNum),
 		config.Workers,
@@ -81,7 +80,7 @@ bool RPCClientInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<
 
 			// Handle remote response message
 
-			if (message.size() < m_Client->m_Buffers)
+			if (message.size() < m_Client->m_Config.Buffers)
 			{
 				RPCResponse response;
 				if (TTypeC(message, response))

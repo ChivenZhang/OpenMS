@@ -12,24 +12,24 @@
 #include <csignal>
 
 /// @brief Interface for bootstrap
-class OPENMS_API IBootstrap
+class OPENMS_API IStartup
 {
 public:
-	template <class T, OPENMS_BASE_OF(IService, T)>
+	template <class T, OPENMS_BASE_OF(IServer, T)>
 	static int Run(int argc, char* argv[])
 	{
 		printf(OPENMS_LOGO);
-		IBootstrap::Argc = argc;
-		IBootstrap::Argv = argv;
-		RESOURCE2_DATA(T, IService);
-		auto service = AUTOWIRE_DATA(IService);
-		signal(SIGINT, [](int) { AUTOWIRE_DATA(IService)->shutdown(); });
-		signal(SIGTERM, [](int) { AUTOWIRE_DATA(IService)->shutdown(); });
+		IStartup::Argc = argc;
+		IStartup::Argv = argv;
+		RESOURCE2_DATA(T, IServer);
+		auto service = AUTOWIRE_DATA(IServer);
+		signal(SIGINT, [](int) { AUTOWIRE_DATA(IServer)->shutdown(); });
+		signal(SIGTERM, [](int) { AUTOWIRE_DATA(IServer)->shutdown(); });
 		auto result = service->startup();
 		signal(SIGINT, nullptr);
 		signal(SIGTERM, nullptr);
-		IBootstrap::Argc = 0;
-		IBootstrap::Argv = nullptr;
+		IStartup::Argc = 0;
+		IStartup::Argv = nullptr;
 		return result;
 	}
 
@@ -38,4 +38,4 @@ public:
 	static char** Argv;
 };
 
-#define OPENMS_RUN(T) int main(int argc, char* argv[]) { return IBootstrap::Run<T>(argc, argv); }
+#define OPENMS_RUN(T) int main(int argc, char* argv[]) { return IStartup::Run<T>(argc, argv); }

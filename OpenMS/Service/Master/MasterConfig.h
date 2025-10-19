@@ -9,11 +9,9 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "../Private/Property.h"
+#include "Service/Private/Property.h"
 
 /// @brief 
-class MasterConfig
-	:
-	RESOURCE2(Property, IProperty)
+class MasterConfig : RESOURCE2(Property, IProperty)
 {
 };

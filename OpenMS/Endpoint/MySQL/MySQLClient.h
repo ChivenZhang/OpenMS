@@ -40,7 +40,7 @@ public:
 	uint64_t prepare(MSString const& sql, MSStringList const& vars, MSStringList& result);
 
 protected:
-	config_t m_Config;
+	const config_t m_Config;
 	MSRef<ISocketAddress> m_Address;
 	MSRef<sql::Connection> m_Context;
 };

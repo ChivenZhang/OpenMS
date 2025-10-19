@@ -14,7 +14,7 @@
 #include "Endpoint/RPC/RPCProtocol.h"
 #include "Reactor/TCP/TCPClientReactor.h"
 #include "Reactor/Private/ChannelHandler.h"
-#include "Toolkit/Timer.h"
+#include "Utility/Timer.h"
 
 class RPCClient : public IEndpoint
 {
@@ -250,11 +250,10 @@ public:
 
 protected:
 	friend class RPCClientInboundHandler;
+	const config_t m_Config;
 	Timer m_Timer;
-	config_t m_Config;
 	MSMutex m_Lock;
 	uint32_t m_Session = 0;
-	uint32_t m_Buffers = UINT32_MAX;
 	MSRef<TCPClientReactor> m_Reactor;
 
 	struct invoke_t

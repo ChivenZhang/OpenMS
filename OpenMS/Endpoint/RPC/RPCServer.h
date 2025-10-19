@@ -93,9 +93,8 @@ protected:
 
 protected:
 	friend class RPCServerInboundHandler;
-	config_t m_Config;
+	const config_t m_Config;
 	MSMutex m_Lock;
-	uint32_t m_Buffers = UINT32_MAX;
 	MSRef<TCPServerReactor> m_Reactor;
 	MSStringMap<MSLambda<bool(MSString const& input, MSString& output)>> m_Methods;
 };

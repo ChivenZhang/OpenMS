@@ -8,7 +8,7 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "WebServerService.h"
+#include "WebServer.h"
 #include <regex>
 #include <fstream>
 #include <filesystem>
@@ -17,7 +17,7 @@
 class WebServerErrorHandler : public HTTPServerResponseHandler
 {
 public:
-	explicit WebServerErrorHandler(MSRaw<WebServerService> server)
+	explicit WebServerErrorHandler(MSRaw<WebServer> server)
 		:
 		m_Server(server)
 	{
@@ -55,17 +55,17 @@ protected:
 	}
 
 protected:
-	MSRaw<WebServerService> m_Server;
+	MSRaw<WebServer> m_Server;
 };
 
-MSString WebServerService::identity() const
+MSString WebServer::identity() const
 {
 	return "webserver";
 }
 
-void WebServerService::onInit()
+void WebServer::onInit()
 {
-	ClusterService::onInit();
+	ClusterServer::onInit();
 
 	m_MaxBodySize = property(identity() + ".web.body-size", 1024 * 1024U); // 1MB
 	m_ErrorPages = property(identity() + ".web.error", MSStringMap<MSString>());
@@ -184,15 +184,15 @@ void WebServerService::onInit()
 	}
 }
 
-void WebServerService::onExit()
+void WebServer::onExit()
 {
-	ClusterService::onExit();
+	ClusterServer::onExit();
 
 	if (m_HttpServer) m_HttpServer->shutdown();
 	m_HttpServer = nullptr;
 }
 
-void WebServerService::forward(MSString url, HTTPServer::response_t &response)
+void WebServer::forward(MSString url, HTTPServer::response_t &response)
 {
 	// URL alias
 
@@ -292,7 +292,7 @@ void WebServerService::forward(MSString url, HTTPServer::response_t &response)
 	response.Body = "404 Not Found";
 }
 
-void WebServerService::redirect(MSString url, HTTPServer::response_t &response)
+void WebServer::redirect(MSString url, HTTPServer::response_t &response)
 {
 	response.Code = HTTP_STATUS_PERMANENT_REDIRECT;
 	response.Header["Location"] = url;

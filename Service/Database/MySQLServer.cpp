@@ -8,11 +8,11 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "MySQLService.h"
+#include "MySQLServer.h"
 
 // ========================================================================================
 
-MSString MySQLService::identity() const
+MSString MySQLServer::identity() const
 {
 	return "mysql";
 }
@@ -26,9 +26,9 @@ struct User
 	OPENMS_TYPE(User, id, age, name, money);
 };
 
-void MySQLService::onInit()
+void MySQLServer::onInit()
 {
-	ClusterService::onInit();
+	ClusterServer::onInit();
 
 	m_MysqlPool = MSNew<MySQLPool>(MySQLPool::config_t{
 		.IP = property(identity() + ".mysql.ip", MSString("127.0.0.1")),
@@ -61,9 +61,9 @@ void MySQLService::onInit()
 #endif
 }
 
-void MySQLService::onExit()
+void MySQLServer::onExit()
 {
-	ClusterService::onExit();
+	ClusterServer::onExit();
 
 	if (m_MysqlPool) m_MysqlPool->shutdown();
 	m_MysqlPool = nullptr;

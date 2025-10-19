@@ -37,7 +37,7 @@ public:
 	bool prepare(MSString const& sql, MSStringList const& vars, MSLambda<void(uint64_t update, MSStringList const& data)> result);
 
 protected:
-	config_t m_Config;
+	const config_t m_Config;
 	MSRef<ISocketAddress> m_Address;
 	MSMutex m_MutexLock;
 	MSMutexUnlock m_MutexUnlock;

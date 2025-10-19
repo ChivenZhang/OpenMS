@@ -9,17 +9,12 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "Service/Private/Service.h"
-#include "ClusterConfig.h"
-#include "Endpoint/RPC/RPCClient.h"
+#include "Service/Private/Server.h"
+#include "MasterConfig.h"
 #include "Endpoint/RPC/RPCServer.h"
 
-/// @brief Base Cluster Service
-class ClusterService
-	:
-	public Service,
-	public RESOURCE(ClusterConfig),
-	public AUTOWIRE(IMailContext)
+/// @brief Base Master Service
+class MasterServer : public Server, public RESOURCE(MasterConfig)
 {
 public:
 	MSString identity() const override;
@@ -29,11 +24,8 @@ protected:
 	void onExit() override;
 
 protected:
-	uint32_t m_Heartbeat = 0;
-	MSMutex m_MailRouteLock;
-	MSMutex m_MailClientLock;
-	MSRef<RPCServer> m_MailServer;
-	MSRef<RPCClient> m_ClusterClient;
-	MSStringMap<MSStringList> m_MailRouteMap;
-	MSStringMap<MSRef<RPCClient>> m_MailClientMap;
+	MSRef<RPCServer> m_ClusterServer;
+	MSStringMap<MSSet<MSString>> m_MailRouteMap;
+	MSStringMap<MSSet<MSString>> m_MailRouteNewMap;
+	std::chrono::time_point<std::chrono::system_clock> m_MailUpdateTime;
 };

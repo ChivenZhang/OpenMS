@@ -9,15 +9,15 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include <OpenMS/Service/Cluster/ClusterService.h>
-#include <OpenMS/Endpoint/MySQL/MySQLClient.h>
-#include <OpenMS/Endpoint/MySQL/MySQLPool.h>
-#include "MySQLConfig.h"
+#include <OpenMS/Service/Cluster/ClusterServer.h>
+#include <OpenMS/Endpoint/Redis/RedisClient.h>
+#include <OpenMS/Endpoint/Redis/RedisPool.h>
+#include "RedisConfig.h"
 
-class MySQLService
+class RedisServer
 	:
-	public ClusterService,
-	public MySQLConfig
+	public ClusterServer,
+	public RedisConfig
 {
 public:
 	MSString identity() const override;
@@ -27,7 +27,7 @@ protected:
 	void onExit() override;
 
 protected:
-	MSRef<MySQLPool> m_MysqlPool;
+	MSRef<RedisPool> m_RedisPool;
 };
 
-OPENMS_RUN(MySQLService)
+OPENMS_RUN(RedisServer)

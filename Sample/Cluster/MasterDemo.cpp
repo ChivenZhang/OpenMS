@@ -12,10 +12,10 @@
 
 void MasterDemo::onInit()
 {
-	MasterService::onInit();
+	MasterServer::onInit();
 }
 
 void MasterDemo::onExit()
 {
-	MasterService::onExit();
+	MasterServer::onExit();
 }
