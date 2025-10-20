@@ -76,7 +76,7 @@ void ClusterServer::onInit()
 			mailClient->startup();
 		}
 		if (mailClient->connect() == false) return false;
-		return mailClient->call<void>("mailbox", 0, mail.From, mail.To, mail.Data, mail.FromSID, mail.ToSID);
+		return mailClient->call<void>("mailbox", 0, mail.From, address + ":" + mail.To, mail.Data, mail.FromSID, mail.ToSID);
 	});
 
 	// Connect to master server
@@ -125,10 +125,10 @@ void ClusterServer::onExit()
 	if (m_ServiceServer) m_ServiceServer->shutdown();
 	m_ServiceServer = nullptr;
 
-	for (auto& client : m_MailClientMap) client.second->shutdown();
-	m_MailClientMap.clear();
-	m_MailRouteMap.clear();
-
 	if (m_ClusterClient) m_ClusterClient->shutdown();
 	m_ClusterClient = nullptr;
+
+	for (auto& client : m_MailClientMap) client.second->shutdown();
+	m_MailRouteMap.clear();
+	m_MailClientMap.clear();
 }
