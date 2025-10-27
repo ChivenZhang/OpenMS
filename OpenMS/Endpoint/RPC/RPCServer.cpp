@@ -10,6 +10,17 @@
 * =================================================*/
 #include "RPCServer.h"
 
+class RPCServerInboundHandler : public ChannelInboundHandler
+{
+public:
+	explicit RPCServerInboundHandler(MSRaw<RPCServer> server);
+	bool channelRead(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event) override;
+
+protected:
+	MSString m_Buffer;
+	MSRaw<RPCServer> m_Server;
+};
+
 RPCServer::RPCServer(config_t const& config)
 	:
 	m_Config(config)
@@ -21,7 +32,7 @@ void RPCServer::startup()
 	auto config = m_Config;
 	if (config.Callback.OnOpen == nullptr)
 	{
-		config.Callback.OnOpen = [=](MSRef<IChannel> channel)
+		config.Callback.OnOpen = [this](MSRef<IChannel> channel)
 		{
 			channel->getPipeline()->addLast("default", MSNew<RPCServerInboundHandler>(this));
 		};
@@ -59,13 +70,13 @@ MSHnd<IChannelAddress> RPCServer::address() const
 
 bool RPCServer::bind_internal(MSStringView name, MSLambda<bool(MSString const&, MSString&)> method)
 {
-	MSMutexLock lock(m_Lock);
+	MSMutexLock lock(m_Locker);
 	return m_Methods.emplace(name, method).second;
 }
 
 bool RPCServer::unbind(MSStringView name)
 {
-	MSMutexLock lock(m_Lock);
+	MSMutexLock lock(m_Locker);
 	return m_Methods.erase(MSString(name));
 }
 
@@ -73,7 +84,7 @@ bool RPCServer::invoke(MSStringView name, MSString const& input, MSString& outpu
 {
 	decltype(m_Methods)::value_type::second_type method;
 	{
-		MSMutexLock lock(m_Lock);
+		MSMutexLock lock(m_Locker);
 		auto result = m_Methods.find(MSString(name));
 		if (result == m_Methods.end()) return false;
 		method = result->second;
@@ -92,49 +103,42 @@ bool RPCServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<
 {
 	m_Buffer += event->Message;
 
-	// Use '\0' to split the message
-	auto index = event->Message.find(char());
-	if (index != MSString::npos)
+	struct stream_t
 	{
-		for (size_t i = 0; i < m_Buffer.size(); ++i)
+		uint32_t Length;
+		char Buffer[0];
+	};
+	auto& stream = *(stream_t*)m_Buffer.data();
+
+	if (sizeof(uint32_t) <= m_Buffer.size() && sizeof(uint32_t) + stream.Length <= m_Buffer.size())
+	{
+		auto message = MSStringView(stream.Buffer, stream.Length);
+
+		if (message.size() <= m_Server->m_Config.Buffers)
 		{
-			// Use '\0' to split the message
-			auto start = m_Buffer.find(char(), i);
-			if (start == MSString::npos) break;
-			auto message = MSStringView(m_Buffer.data() + i, start - i);
-
-			// Handle remote request message
-
-			if (message.size() < m_Server->m_Config.Buffers)
+			RPCRequest request;
+			if (TTypeC(message, request))
 			{
 				MSString output;
-				RPCRequest request;
-				if (TTypeC(message, request))
+				if (m_Server->invoke(request.Name, request.Args, output))
 				{
-					if (m_Server->invoke(request.Name, request.Args, output))
+					RPCResponse response;
+					response.ID = request.ID;
+					response.Args = output;
+					if (TTypeC(response, output))
 					{
-						// Send the response message
-
-						RPCResponse response;
-						response.ID = request.ID;
-						response.Args = output;
-						auto _event = MSNew<IChannelEvent>();
-						TTypeC(response, _event->Message);
-						// Use '\0' to split the message
-						_event->Message += char();
-						context->writeAndFlush(_event);
-					}
-					else
-					{
-						context->close();
+						auto length = (uint32_t)output.size();
+						context->writeAndFlush(IChannelEvent::New(MSString((char*)&length, sizeof(length)) + output));
 					}
 				}
+				else
+				{
+					context->close();
+				}
 			}
-
-			i = start;
 		}
 
-		m_Buffer = event->Message.substr(index + 1);
+		m_Buffer = m_Buffer.substr(sizeof(uint32_t) + stream.Length);
 	}
 
 	return false;

@@ -15,6 +15,9 @@
 #include "Reactor/TCP/TCPServerReactor.h"
 #include "Reactor/Private/ChannelHandler.h"
 
+class RPCServerInboundHandler;
+
+/// @brief RPC Server Endpoint
 class RPCServer : public IEndpoint
 {
 public:
@@ -43,7 +46,7 @@ public:
 	{
 		auto callback = [method](MSString const& input, MSString& output)-> bool
 		{
-			// Convert input to tuple
+			// Convert request to tuple
 
 			typename std::function_traits<F>::argument_tuple args;
 			if (std::is_same_v<decltype(args), MSTuple<>> == false)
@@ -51,11 +54,11 @@ public:
 				if (TTypeC(input, args) == false) return false;
 			}
 
-			// Call method with tuple
+			// Call method with tuple args
 
 			auto result = std::apply(method, args);
 
-			// Convert result to output
+			// Convert request to string
 
 			if (TTypeC(result, output) == false) return false;
 			return true;
@@ -69,7 +72,7 @@ public:
 	{
 		auto callback = [method](MSString const& input, MSString& output) -> bool
 		{
-			// Convert input to tuple
+			// Convert request to tuple
 
 			typename std::function_traits<F>::argument_tuple args;
 			if (std::is_same_v<decltype(args), MSTuple<>> == false)
@@ -77,7 +80,7 @@ public:
 				if (TTypeC(input, args) == false) return false;
 			}
 
-			// Call method with tuple
+			// Call method with tuple args
 
 			std::apply(method, args);
 
@@ -94,18 +97,7 @@ protected:
 protected:
 	friend class RPCServerInboundHandler;
 	const config_t m_Config;
-	MSMutex m_Lock;
+	MSMutex m_Locker;
 	MSRef<TCPServerReactor> m_Reactor;
 	MSStringMap<MSLambda<bool(MSString const& input, MSString& output)>> m_Methods;
-};
-
-class RPCServerInboundHandler : public ChannelInboundHandler
-{
-public:
-	explicit RPCServerInboundHandler(MSRaw<RPCServer> server);
-	bool channelRead(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event) override;
-
-protected:
-	MSString m_Buffer;
-	MSRaw<RPCServer> m_Server;
 };

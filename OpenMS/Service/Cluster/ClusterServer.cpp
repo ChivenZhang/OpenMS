@@ -76,7 +76,7 @@ void ClusterServer::onInit()
 			mailClient->startup();
 		}
 		if (mailClient->connect() == false) return false;
-		return mailClient->call<void>("mailbox", 0, mail.From, address + ":" + mail.To, mail.Data, mail.FromSID, mail.ToSID);
+		return mailClient->call<void>("mailbox", 0, mail.From, mail.To, mail.Data, mail.FromSID, mail.ToSID);
 	});
 
 	// Connect to master server

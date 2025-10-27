@@ -21,7 +21,7 @@ void RPCClient::startup()
 	auto config = m_Config;
 	if (config.Callback.OnOpen == nullptr)
 	{
-		config.Callback.OnOpen = [=](MSRef<IChannel> channel)
+		config.Callback.OnOpen = [this](MSRef<IChannel> channel)
 		{
 			channel->getPipeline()->addLast("default", MSNew<RPCClientInboundHandler>(this));
 		};
@@ -67,38 +67,37 @@ bool RPCClientInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<
 {
 	m_Buffer += event->Message;
 
-	// Use '\0' to split the message
-	auto index = event->Message.find(char());
-	if (index != MSString::npos)
+	struct stream_t
 	{
-		for (size_t i = 0; i < m_Buffer.size(); ++i)
+		uint32_t Length;
+		char Buffer[0];
+	};
+	auto& stream = *(stream_t*)m_Buffer.data();
+
+	if (sizeof(uint32_t) <= m_Buffer.size() && sizeof(uint32_t) + stream.Length <= m_Buffer.size())
+	{
+		auto message = MSStringView(stream.Buffer, stream.Length);
+
+		if (message.size() <= m_Client->m_Config.Buffers)
 		{
-			// Use '\0' to split the message
-			auto start = m_Buffer.find(char(), i);
-			if (start == MSString::npos) break;
-			auto message = MSStringView(m_Buffer.data() + i, start - i);
-
-			// Handle remote response message
-
-			if (message.size() < m_Client->m_Config.Buffers)
+			RPCResponse response;
+			if (TTypeC(message, response))
 			{
-				RPCResponse response;
-				if (TTypeC(message, response))
+				decltype(m_Client->m_Sessions)::value_type::second_type callback;
 				{
-					MSMutexLock lock(m_Client->m_Lock);
+					MSMutexLock lock(m_Client->m_Locker);
 					auto result = m_Client->m_Sessions.find(response.ID);
 					if (result != m_Client->m_Sessions.end())
 					{
-						result->second.OnResult(std::move(response.Args));
+						callback = result->second;
 						m_Client->m_Sessions.erase(result);
 					}
 				}
+				if (callback) callback(std::move(response.Args));
 			}
-
-			i = start;
 		}
 
-		m_Buffer = event->Message.substr(index + 1);
+		m_Buffer = m_Buffer.substr(sizeof(uint32_t) + stream.Length);
 	}
 
 	return false;

@@ -16,6 +16,7 @@
 #include "Reactor/Private/ChannelHandler.h"
 #include "Utility/Timer.h"
 
+/// @brief RPC Client Endpoint
 class RPCClient : public IEndpoint
 {
 public:
@@ -36,17 +37,24 @@ public:
 	bool connect() const override;
 	MSHnd<IChannelAddress> address() const override;
 
+	/// @brief synchronous call
+	/// @tparam T return type
+	/// @tparam ARGS args types
+	/// @param name call name
+	/// @param timeout unit: ms
+	/// @param args call args
+	/// @return result
 	template <class T, class... ARGS, OPENMS_NOT_SAME(T, void)>
-	T call(MSStringView name, uint32_t timeout, ARGS... args)
+	T call(MSStringView name, uint32_t timeout, ARGS &&... args)
 	{
 		if (m_Reactor == nullptr || m_Reactor->connect() == false) return T();
 
-		// Convert arguments to string
+		// Convert request to string
 
 		MSString input;
 		if (std::is_same_v<MSTuple<ARGS...>, MSTuple<>> == false)
 		{
-			if (TTypeC(std::make_tuple(args...), input) == false) return T();
+			if (TTypeC(std::make_tuple(std::forward<ARGS>(args)...), input) == false) return T();
 		}
 		RPCRequest request;
 		request.ID = ++m_Session;
@@ -54,60 +62,61 @@ public:
 		request.Args = input;
 		if (TTypeC(request, input) == false) return T();
 
-		// Setup promise and callback
-
 		if (timeout)
 		{
-			MSString output;
-			auto promise = MSNew<MSPromise<void>>();
-			auto future = promise->get_future();
+			// Set promise to handle response
+
+			MSPromise<MSString> promise;
+			auto future = promise.get_future();
 			{
-				MSMutexLock lock(m_Lock);
+				MSMutexLock lock(m_Locker);
 				auto& session = m_Sessions[request.ID];
-				session.OnResult = [promise, &output](MSString&& response)
-				{
-					output = response;
-					promise->set_value();
-				};
+				session = [&](MSString&& response) { promise.set_value(response); };
 			}
 
-			// Send input to remote server
+			// Send request to remote server
 
-			m_Reactor->writeAndFlush(IChannelEvent::New(input + char()), nullptr);
-
-			// Wait for result and return
-
+			auto length = (uint32_t)input.size();
+			m_Reactor->writeAndFlush(IChannelEvent::New(MSString((char*)&length, sizeof(length)) + input), nullptr);
 			auto status = future.wait_for(std::chrono::milliseconds(timeout));
 			{
-				MSMutexLock lock(m_Lock);
+				MSMutexLock lock(m_Locker);
 				m_Sessions.erase(request.ID);
 			}
 			if (status == std::future_status::ready)
 			{
 				T result;
-				if (TTypeC(output, result) == true) return result;
+				if (TTypeC(future.get(), result) == true) return result;
 			}
 		}
 		else
 		{
-			// Send input to remote server
+			// Send request to remote server
 
-			m_Reactor->writeAndFlush(IChannelEvent::New(input + char()), nullptr);
+			auto length = (uint32_t)input.size();
+			m_Reactor->writeAndFlush(IChannelEvent::New(MSString((char*)&length, sizeof(length)) + input), nullptr);
 		}
 		return T();
 	}
 
+	/// @brief synchronous call and return void
+	/// @tparam T void
+	/// @tparam ARGS args types
+	/// @param name call name
+	/// @param timeout unit: ms
+	/// @param args call args
+	/// @return void
 	template <class T, class... ARGS, OPENMS_IS_SAME(T, void)>
-	bool call(MSStringView name, uint32_t timeout, ARGS... args)
+	bool call(MSStringView name, uint32_t timeout, ARGS &&... args)
 	{
 		if (m_Reactor == nullptr || m_Reactor->connect() == false) return false;
 
-		// Convert arguments to string
+		// Convert request to string
 
 		MSString input;
 		if (std::is_same_v<MSTuple<ARGS...>, MSTuple<>> == false)
 		{
-			if (TTypeC(std::make_tuple(args...), input) == false) return false;
+			if (TTypeC(std::make_tuple(std::forward<ARGS>(args)...), input) == false) return false;
 		}
 		RPCRequest request;
 		request.ID = ++m_Session;
@@ -115,45 +124,52 @@ public:
 		request.Args = input;
 		if (TTypeC(request, input) == false) return false;
 
-		// Set up promise and callback
-
 		if (timeout)
 		{
-			auto promise = MSNew<MSPromise<void>>();
-			auto future = promise->get_future();
+			// Set promise to handle response
+
+			MSPromise<void> promise;
+			auto future = promise.get_future();
 			{
-				MSMutexLock lock(m_Lock);
+				MSMutexLock lock(m_Locker);
 				auto& session = m_Sessions[request.ID];
-				session.OnResult = [promise](MSString&& response) { promise->set_value(); };
+				session = [&](MSString&& response) { promise.set_value(); };
 			}
 
-			// Send input to remote server
+			// Send request to remote server
 
-			m_Reactor->writeAndFlush(IChannelEvent::New(input + char()), nullptr);
-
-			// Wait for result and return
-
+			auto length = (uint32_t)input.size();
+			m_Reactor->writeAndFlush(IChannelEvent::New(MSString((char*)&length, sizeof(length)) + input), nullptr);
 			future.wait_for(std::chrono::milliseconds(timeout));
 			{
-				MSMutexLock lock(m_Lock);
+				MSMutexLock lock(m_Locker);
 				m_Sessions.erase(request.ID);
 			}
 		}
 		else
 		{
-			// Send input to remote server
+			// Send request to remote server
 
-			m_Reactor->writeAndFlush(IChannelEvent::New(input + char()), nullptr);
+			auto length = (uint32_t)input.size();
+			m_Reactor->writeAndFlush(IChannelEvent::New(MSString((char*)&length, sizeof(length)) + input), nullptr);
 		}
 		return true;
 	}
 
+	/// @brief asynchronous call
+	/// @tparam T return type
+	/// @tparam ARGS args types
+	/// @param name call name
+	/// @param timeout unit: ms
+	/// @param args call args
+	/// @param callback call back
+	/// @return return true if send successfully
 	template <class T, class... ARGS, OPENMS_NOT_SAME(T, void)>
-	bool async(MSStringView name, uint32_t timeout, MSTuple<ARGS...> args, MSLambda<void(T&&)> callback)
+	bool async(MSStringView name, uint32_t timeout, MSTuple<ARGS...> const& args, MSLambda<void(T&&)> callback)
 	{
 		if (m_Reactor == nullptr || m_Reactor->connect() == false) return false;
 
-		// Convert arguments to string
+		// Convert request to string
 
 		MSString input;
 		if (std::is_same_v<MSTuple<ARGS...>, MSTuple<>> == false)
@@ -166,45 +182,55 @@ public:
 		request.Args = input;
 		if (TTypeC(request, input) == false) return false;
 
-		// Setup promise and callback
+		// Set timer to handle response
 
-		if (timeout)
 		{
+			MSMutexLock lock(m_Locker);
+			auto& session = m_Sessions[request.ID];
+			session = [callback](MSString&& response)
 			{
-				MSMutexLock lock(m_Lock);
-				auto& session = m_Sessions[request.ID];
-				session.OnResult = [callback](MSString&& response)
-				{
-					T result;
-					TTypeC(response, result);
-					if (callback) callback(std::move(result));
-				};
-			}
+				T result;
+				TTypeC(response, result);
+				if (callback) callback(std::move(result));
+			};
+		}
 
-			m_Timer.start(timeout, 0, [=, sessionID = request.ID](uint32_t handle)
+		m_Timer.start(timeout, 0, [sessionID = request.ID, this](uint32_t handle)
+		{
+			decltype(m_Sessions)::value_type::second_type callback;
 			{
-				MSMutexLock lock(m_Lock);
+				MSMutexLock lock(m_Locker);
 				auto result = m_Sessions.find(sessionID);
 				if (result != m_Sessions.end())
 				{
-					result->second.OnResult(MSString());
+					callback = result->second;
 					m_Sessions.erase(result);
 				}
-			});
-		}
+			}
+			if (callback) callback({});
+		});
 
-		// Send input to remote server
+		// Send request to remote server
 
-		m_Reactor->writeAndFlush(IChannelEvent::New(input + char()), nullptr);
+		uint32_t length = (uint32_t)input.size();
+		m_Reactor->writeAndFlush(IChannelEvent::New(MSString((char*)&length, sizeof(length)) + input), nullptr);
 		return true;
 	}
 
+	/// @brief asynchronous call and return void
+	/// @tparam T void
+	/// @tparam ARGS args types
+	/// @param name call name
+	/// @param timeout unit: ms
+	/// @param args call args
+	/// @param callback call back
+	/// @return return true if send successfully
 	template <class T, class... ARGS, OPENMS_IS_SAME(T, void)>
-	bool async(MSStringView name, uint32_t timeout, MSTuple<ARGS...> args, MSLambda<void()> callback)
+	bool async(MSStringView name, uint32_t timeout, MSTuple<ARGS...> const& args, MSLambda<void()> callback)
 	{
 		if (m_Reactor == nullptr || m_Reactor->connect() == false) return false;
 
-		// Convert arguments to string
+		// Convert request to string
 
 		MSString input;
 		if (std::is_same_v<MSTuple<ARGS...>, MSTuple<>> == false)
@@ -217,34 +243,33 @@ public:
 		request.Args = input;
 		if (TTypeC(request, input) == false) return false;
 
-		// Setup promise and callback
+		// Set timer to handle response
 
-		if (timeout)
 		{
-			{
-				MSMutexLock lock(m_Lock);
-				auto& session = m_Sessions[request.ID];
-				session.OnResult = [callback](MSString&& response)
-				{
-					if (callback) callback();
-				};
-			}
+			MSMutexLock lock(m_Locker);
+			auto& session = m_Sessions[request.ID];
+			session = [callback](MSString&& response) { if (callback) callback(); };
+		}
 
-			m_Timer.start(timeout, 0, [=, sessionID = request.ID](uint32_t handle)
+		m_Timer.start(timeout, 0, [sessionID = request.ID, this](uint32_t handle)
+		{
+			decltype(m_Sessions)::value_type::second_type callback;
 			{
-				MSMutexLock lock(m_Lock);
+				MSMutexLock lock(m_Locker);
 				auto result = m_Sessions.find(sessionID);
 				if (result != m_Sessions.end())
 				{
-					result->second.OnResult(MSString());
+					callback = result->second;
 					m_Sessions.erase(result);
 				}
-			});
-		}
+			}
+			if (callback) callback({});
+		});
 
-		// Send input to remote server
+		// Send request to remote server
 
-		m_Reactor->writeAndFlush(IChannelEvent::New(input + char()), nullptr);
+		auto length = (uint32_t)input.size();
+		m_Reactor->writeAndFlush(IChannelEvent::New(MSString((char*)&length, sizeof(length)) + input), nullptr);
 		return true;
 	}
 
@@ -252,16 +277,10 @@ protected:
 	friend class RPCClientInboundHandler;
 	const config_t m_Config;
 	Timer m_Timer;
-	MSMutex m_Lock;
-	uint32_t m_Session = 0;
+	MSMutex m_Locker;
+	MSAtomic<uint32_t> m_Session;
 	MSRef<TCPClientReactor> m_Reactor;
-
-	struct invoke_t
-	{
-		MSLambda<void(MSString&&)> OnResult;
-	};
-
-	MSMap<uint32_t, invoke_t> m_Sessions;
+	MSMap<uint32_t, MSLambda<void(MSString&&)>> m_Sessions;
 };
 
 class RPCClientInboundHandler : public ChannelInboundHandler
