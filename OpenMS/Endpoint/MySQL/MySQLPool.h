@@ -11,6 +11,7 @@
 * =================================================*/
 #include "Endpoint/IEndpoint.h"
 
+/// @brief MySQL Pool Endpoint
 class MySQLPool : public IEndpoint
 {
 public:

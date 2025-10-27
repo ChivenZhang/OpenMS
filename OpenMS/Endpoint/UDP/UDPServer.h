@@ -9,11 +9,12 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "../Private/Endpoint.h"
+#include "Endpoint/IEndpoint.h"
 #include "Service/IProperty.h"
 #include "Reactor/UDP/UDPServerReactor.h"
 
-class UDPServer : public Endpoint
+/// @brief UDP Server Endpoint
+class UDPServer : public IEndpoint
 {
 public:
 	struct config_t

@@ -32,8 +32,6 @@ add_library(OpenMS STATIC
 		Endpoint/KCP/KCPClient.h
 		Endpoint/KCP/KCPServer.cpp
 		Endpoint/KCP/KCPServer.h
-		Endpoint/Private/Endpoint.cpp
-		Endpoint/Private/Endpoint.h
 		Endpoint/RPC/RPCClient.cpp
 		Endpoint/RPC/RPCClient.h
 		Endpoint/RPC/RPCProtocol.h

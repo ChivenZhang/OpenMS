@@ -43,60 +43,50 @@ public:
 	/// @param name call name
 	/// @param timeout unit: ms
 	/// @param args call args
-	/// @return result
+	/// @return result and status
 	template <class T, class... ARGS, OPENMS_NOT_SAME(T, void)>
-	T call(MSStringView name, uint32_t timeout, ARGS &&... args)
+	MSBinary<T, bool> call(MSStringView name, uint32_t timeout, ARGS &&... args)
 	{
-		if (m_Reactor == nullptr || m_Reactor->connect() == false) return T();
+		if (m_Reactor == nullptr || m_Reactor->connect() == false) return {T(), false};
 
 		// Convert request to string
 
 		MSString input;
 		if (std::is_same_v<MSTuple<ARGS...>, MSTuple<>> == false)
 		{
-			if (TTypeC(std::make_tuple(std::forward<ARGS>(args)...), input) == false) return T();
+			if (TTypeC(std::make_tuple(std::forward<ARGS>(args)...), input) == false) return {T(), false};
 		}
 		RPCRequest request;
 		request.ID = ++m_Session;
 		request.Name = name;
 		request.Args = input;
-		if (TTypeC(request, input) == false) return T();
+		if (TTypeC(request, input) == false) return {T(), false};
 
-		if (timeout)
+		// Set promise to handle response
+
+		MSPromise<MSString> promise;
+		auto future = promise.get_future();
 		{
-			// Set promise to handle response
-
-			MSPromise<MSString> promise;
-			auto future = promise.get_future();
-			{
-				MSMutexLock lock(m_Locker);
-				auto& session = m_Sessions[request.ID];
-				session = [&](MSString&& response) { promise.set_value(response); };
-			}
-
-			// Send request to remote server
-
-			auto length = (uint32_t)input.size();
-			m_Reactor->writeAndFlush(IChannelEvent::New(MSString((char*)&length, sizeof(length)) + input), nullptr);
-			auto status = future.wait_for(std::chrono::milliseconds(timeout));
-			{
-				MSMutexLock lock(m_Locker);
-				m_Sessions.erase(request.ID);
-			}
-			if (status == std::future_status::ready)
-			{
-				T result;
-				if (TTypeC(future.get(), result) == true) return result;
-			}
+			MSMutexLock lock(m_Locker);
+			auto& session = m_Sessions[request.ID];
+			session = [&](MSString&& response) { promise.set_value(response); };
 		}
-		else
+
+		// Send request to remote server
+
+		auto length = (uint32_t)input.size();
+		m_Reactor->writeAndFlush(IChannelEvent::New(MSString((char*)&length, sizeof(length)) + input), nullptr);
+		auto status = future.wait_for(std::chrono::milliseconds(timeout));
 		{
-			// Send request to remote server
-
-			auto length = (uint32_t)input.size();
-			m_Reactor->writeAndFlush(IChannelEvent::New(MSString((char*)&length, sizeof(length)) + input), nullptr);
+			MSMutexLock lock(m_Locker);
+			m_Sessions.erase(request.ID);
 		}
-		return T();
+		if (status == std::future_status::ready)
+		{
+			T result;
+			if (TTypeC(future.get(), result) == true) return {result, true};
+		}
+		return {T(), false};
 	}
 
 	/// @brief synchronous call and return void
@@ -105,7 +95,7 @@ public:
 	/// @param name call name
 	/// @param timeout unit: ms
 	/// @param args call args
-	/// @return void
+	/// @return return true if send successfully
 	template <class T, class... ARGS, OPENMS_IS_SAME(T, void)>
 	bool call(MSStringView name, uint32_t timeout, ARGS &&... args)
 	{
@@ -124,34 +114,24 @@ public:
 		request.Args = input;
 		if (TTypeC(request, input) == false) return false;
 
-		if (timeout)
+		// Set promise to handle response
+
+		MSPromise<void> promise;
+		auto future = promise.get_future();
 		{
-			// Set promise to handle response
-
-			MSPromise<void> promise;
-			auto future = promise.get_future();
-			{
-				MSMutexLock lock(m_Locker);
-				auto& session = m_Sessions[request.ID];
-				session = [&](MSString&& response) { promise.set_value(); };
-			}
-
-			// Send request to remote server
-
-			auto length = (uint32_t)input.size();
-			m_Reactor->writeAndFlush(IChannelEvent::New(MSString((char*)&length, sizeof(length)) + input), nullptr);
-			future.wait_for(std::chrono::milliseconds(timeout));
-			{
-				MSMutexLock lock(m_Locker);
-				m_Sessions.erase(request.ID);
-			}
+			MSMutexLock lock(m_Locker);
+			auto& session = m_Sessions[request.ID];
+			session = [&](MSString&& response) { promise.set_value(); };
 		}
-		else
-		{
-			// Send request to remote server
 
-			auto length = (uint32_t)input.size();
-			m_Reactor->writeAndFlush(IChannelEvent::New(MSString((char*)&length, sizeof(length)) + input), nullptr);
+		// Send request to remote server
+
+		auto length = (uint32_t)input.size();
+		m_Reactor->writeAndFlush(IChannelEvent::New(MSString((char*)&length, sizeof(length)) + input), nullptr);
+		future.wait_for(std::chrono::milliseconds(timeout));
+		{
+			MSMutexLock lock(m_Locker);
+			m_Sessions.erase(request.ID);
 		}
 		return true;
 	}

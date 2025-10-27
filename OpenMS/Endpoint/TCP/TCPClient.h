@@ -9,11 +9,12 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "../Private/Endpoint.h"
+#include "Endpoint/IEndpoint.h"
 #include "Service/IProperty.h"
 #include "Reactor/TCP/TCPClientReactor.h"
 
-class TCPClient : public Endpoint
+/// @brief TCP Client Endpoint
+class TCPClient : public IEndpoint
 {
 public:
 	struct config_t

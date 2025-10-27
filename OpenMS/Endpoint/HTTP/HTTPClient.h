@@ -15,6 +15,7 @@
 #include "HTTPProtocol.h"
 #include <http_parser.h>
 
+/// @brief HTTP Client Endpoint
 class HTTPClient : public IEndpoint
 {
 public:

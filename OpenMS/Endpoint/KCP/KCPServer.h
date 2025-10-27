@@ -9,11 +9,12 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "../Private/Endpoint.h"
+#include "Endpoint/IEndpoint.h"
 #include "Service/IProperty.h"
 #include "Reactor/KCP/KCPServerReactor.h"
 
-class KCPServer : public Endpoint
+/// @brief KCP Server Endpoint
+class KCPServer : public IEndpoint
 {
 public:
 	struct config_t
