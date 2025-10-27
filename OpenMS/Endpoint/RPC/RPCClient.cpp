@@ -9,6 +9,18 @@
 *
 * =================================================*/
 #include "RPCClient.h"
+#include "Reactor/Private/ChannelHandler.h"
+
+class RPCClientInboundHandler : public ChannelInboundHandler
+{
+public:
+	explicit RPCClientInboundHandler(MSRaw<RPCClient> client);
+	bool channelRead(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event) override;
+
+protected:
+	MSString m_Buffer;
+	MSRaw<RPCClient> m_Client;
+};
 
 RPCClient::RPCClient(config_t const& config)
 	:
@@ -19,17 +31,16 @@ RPCClient::RPCClient(config_t const& config)
 void RPCClient::startup()
 {
 	auto config = m_Config;
-	if (config.Callback.OnOpen == nullptr)
-	{
-		config.Callback.OnOpen = [this](MSRef<IChannel> channel)
-		{
-			channel->getPipeline()->addLast("default", MSNew<RPCClientInboundHandler>(this));
-		};
-	}
 	m_Reactor = MSNew<TCPClientReactor>(
 		IPv4Address::New(config.IP, config.PortNum),
 		config.Workers,
-		config.Callback
+		TCPClientReactor::callback_tcp_t
+		{
+			.OnOpen = [this](MSRef<IChannel> channel)
+			{
+				channel->getPipeline()->addLast("default", MSNew<RPCClientInboundHandler>(this));
+			},
+		}
 	);
 	m_Reactor->startup();
 	if (m_Reactor->running() == false) MS_FATAL("failed to start reactor");
@@ -81,7 +92,7 @@ bool RPCClientInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<
 		if (message.size() <= m_Client->m_Config.Buffers)
 		{
 			RPCResponse response;
-			if (TTypeC(message, response))
+			if (MSTypeC(message, response))
 			{
 				decltype(m_Client->m_Sessions)::value_type::second_type callback;
 				{

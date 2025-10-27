@@ -49,7 +49,7 @@ public:
 	T property(MSString const& name, T const& value = T()) const
 	{
 		T result;
-		if (TTypeC(property(name), result)) return result;
+		if (MSTypeC(property(name), result)) return result;
 		return value;
 	}
 };

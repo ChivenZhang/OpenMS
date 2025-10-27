@@ -254,42 +254,42 @@ using MSString32HashMap = MSHashMap<MSString32, T>;
 
 // ============================================
 
-template<typename T, typename ... Args>
+template<class T, class ... Args>
 inline MSRef<T> MSNew(Args&& ... args)
 {
 	return std::make_shared<T>(std::forward<Args>(args)...);
 }
-template<typename U, typename T>
+template<class U, class T>
 inline MSRef<U> MSCast(MSRef<T>&& target)
 {
 	if (target == nullptr) return nullptr;
 	return std::dynamic_pointer_cast<U>(target);
 }
-template<typename U, typename T>
+template<class U, class T>
 inline MSRef<U> MSCast(MSRef<T> const& target)
 {
 	if (target == nullptr) return nullptr;
 	return std::dynamic_pointer_cast<U>(target);
 }
-template<typename U, typename T>
+template<class U, class T>
 inline MSHnd<U> MSCast(MSHnd<T>&& target)
 {
 	if (target == nullptr) return MSHnd<U>();
 	return std::dynamic_pointer_cast<U>(target.lock());
 }
-template<typename U, typename T>
+template<class U, class T>
 inline MSHnd<U> MSCast(MSHnd<T> const& target)
 {
 	if (target == nullptr) return MSHnd<U>();
 	return std::dynamic_pointer_cast<U>(target.lock());
 }
-template<typename U, typename T>
+template<class U, class T>
 inline MSRaw<U> MSCast(MSRaw<T>&& target)
 {
 	if (target == nullptr) return nullptr;
 	return dynamic_cast<U*>((T*)target);
 }
-template<typename U, typename T>
+template<class U, class T>
 inline MSRaw<U> MSCast(MSRaw<T> const& target)
 {
 	if (target == nullptr) return nullptr;
@@ -344,6 +344,54 @@ inline const uint32_t MSHash(MSStringView value) noexcept
 
 // ============================================
 
+template<class T>
+struct MSTraits;
+
+template<class T, class... Args>
+struct MSTraits<T(*)(Args...)>
+{
+	using return_type = T;
+	using argument_types = std::tuple<Args...>;
+	static constexpr std::size_t argument_count = sizeof...(Args);
+	template<std::size_t N>
+	using argument_type = std::tuple_element<N, std::tuple<Args...>>::type;
+};
+
+template<class F>
+struct MSTraits : MSTraits<decltype(&F::operator())> {};
+
+template<class C, class T, class... Args>
+struct MSTraits<T(C::*)(Args...) const>
+{
+	using return_type = T;
+	using argument_types = std::tuple<Args...>;
+	static constexpr std::size_t argument_count = sizeof...(Args);
+	template<std::size_t N>
+	using argument_type = std::tuple_element<N, std::tuple<Args...>>::type;
+};
+
+template<class C, class T, class... Args>
+struct MSTraits<T(C::*)(Args...)>
+{
+	using return_type = T;
+	using argument_types = std::tuple<Args...>;
+	static constexpr std::size_t argument_count = sizeof...(Args);
+	template<std::size_t N>
+	using argument_type = std::tuple_element<N, std::tuple<Args...>>::type;
+};
+
+template<class T, class... Args>
+struct MSTraits<std::function<T(Args...)>>
+{
+	using return_type = T;
+	using argument_types = std::tuple<Args...>;
+	static constexpr std::size_t argument_count = sizeof...(Args);
+	template<std::size_t N>
+	using argument_type = std::tuple_element<N, std::tuple<Args...>>::type;
+};
+
+// ============================================
+
 #define JSON_USE_IMPLICIT_CONVERSIONS 0
 #include <nlohmann/json.hpp>
 #define OPENMS_TYPE NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT
@@ -361,28 +409,15 @@ inline const uint32_t MSHash(MSStringView value) noexcept
 #define OPENMS_NOT_TEXT(T) std::enable_if_t<!std::is_same_v<T, std::string>, int> = 0
 #endif
 
-namespace std
-{
-	template <typename T>
-	struct function_traits : public function_traits<decltype(&T::operator())> {};
-
-	template <typename F, typename T, typename... Args>
-	struct function_traits<T(F::*)(Args...) const>
-	{
-		using result_type = T;
-		using argument_tuple = std::tuple<Args...>;
-	};
-}
-
 template<class T, class U, OPENMS_IS_SAME(T, U)>
-bool TTypeC(T const& src, U& dst)
+bool MSTypeC(T const& src, U& dst)
 {
 	dst = src;
 	return true;
 }
 
 template<class T, class U, OPENMS_NOT_SAME(T, U), OPENMS_IS_TEXT(T), OPENMS_NOT_SCALAR(T)>
-bool TTypeC(T const& src, U& dst)
+bool MSTypeC(T const& src, U& dst)
 {
 	try
 	{
@@ -397,27 +432,27 @@ bool TTypeC(T const& src, U& dst)
 }
 
 template<class T, class U, OPENMS_NOT_SAME(T, U), OPENMS_NOT_TEXT(T), OPENMS_IS_SCALAR(T)>
-bool TTypeC(T const& src, U& dst)
+bool MSTypeC(T const& src, U& dst)
 {
 	MSString str;
-	return TTypeC(src, str) && TTypeC(str, dst);
+	return MSTypeC(src, str) && MSTypeC(str, dst);
 }
 
 template<class T, class U, OPENMS_NOT_SAME(T, U), OPENMS_NOT_TEXT(T), OPENMS_NOT_SCALAR(T)>
-bool TTypeC(T const& src, U& dst)
+bool MSTypeC(T const& src, U& dst)
 {
 	nlohmann::json json = src;
-	return TTypeC(json.dump(), dst);
+	return MSTypeC(json.dump(), dst);
 }
 
 template <class T = bool, class U = MSString, OPENMS_NOT_SAME(T, U)>
-bool TTypeC(bool const& src, MSString& dst)
+bool MSTypeC(bool const& src, MSString& dst)
 {
 	dst = src ? "true" : "false";
 	return true;
 }
 template <class T = MSString, class U = bool, OPENMS_NOT_SAME(T, U)>
-bool TTypeC(MSString const& src, bool& dst)
+bool MSTypeC(MSString const& src, bool& dst)
 {
 	if (src.empty()) return false;
 	dst = (src == "true");
@@ -425,13 +460,13 @@ bool TTypeC(MSString const& src, bool& dst)
 }
 
 template <class T = int16_t, class U = MSString, OPENMS_NOT_SAME(T, U)>
-bool TTypeC(int16_t const& src, MSString& dst)
+bool MSTypeC(int16_t const& src, MSString& dst)
 {
 	dst = std::to_string(src);
 	return true;
 }
 template <class T = MSString, class U = int16_t, OPENMS_NOT_SAME(T, U)>
-bool TTypeC(MSString const& src, int16_t& dst)
+bool MSTypeC(MSString const& src, int16_t& dst)
 {
 	if (src.empty()) return false;
 	dst = (int16_t)std::strtol(src.c_str(), nullptr, 10);
@@ -439,13 +474,13 @@ bool TTypeC(MSString const& src, int16_t& dst)
 }
 
 template <class T = MSString, class U = uint16_t, OPENMS_NOT_SAME(T, U)>
-bool TTypeC(uint16_t const& src, MSString& dst)
+bool MSTypeC(uint16_t const& src, MSString& dst)
 {
 	dst = std::to_string(src);
 	return true;
 }
 template <class T = MSString, class U = uint16_t, OPENMS_NOT_SAME(T, U)>
-bool TTypeC(MSString const& src, uint16_t& dst)
+bool MSTypeC(MSString const& src, uint16_t& dst)
 {
 	if (src.empty()) return false;
 	dst = (uint16_t)std::strtol(src.c_str(), nullptr, 10);
@@ -453,13 +488,13 @@ bool TTypeC(MSString const& src, uint16_t& dst)
 }
 
 template <class T = int32_t, class U = MSString, OPENMS_NOT_SAME(T, U)>
-bool TTypeC(int32_t const& src, MSString& dst)
+bool MSTypeC(int32_t const& src, MSString& dst)
 {
 	dst = std::to_string(src);
 	return true;
 }
 template <class T = MSString, class U = int32_t, OPENMS_NOT_SAME(T, U)>
-bool TTypeC(MSString const& src, int32_t& dst)
+bool MSTypeC(MSString const& src, int32_t& dst)
 {
 	if (src.empty()) return false;
 	dst = std::strtol(src.c_str(), nullptr, 10);
@@ -467,13 +502,13 @@ bool TTypeC(MSString const& src, int32_t& dst)
 }
 
 template<class T = uint32_t, class U = MSString, OPENMS_NOT_SAME(T, U)>
-bool TTypeC(uint32_t const& src, MSString& dst)
+bool MSTypeC(uint32_t const& src, MSString& dst)
 {
 	dst = std::to_string(src);
 	return true;
 }
 template <class T = MSString, class U = uint32_t, OPENMS_NOT_SAME(T, U)>
-bool TTypeC(MSString const& src, uint32_t& dst)
+bool MSTypeC(MSString const& src, uint32_t& dst)
 {
 	if (src.empty()) return false;
 	dst = std::strtoul(src.c_str(), nullptr, 10);
@@ -481,13 +516,13 @@ bool TTypeC(MSString const& src, uint32_t& dst)
 }
 
 template <class T = int64_t, class U = MSString, OPENMS_NOT_SAME(T, U)>
-bool TTypeC(int64_t const& src, MSString& dst)
+bool MSTypeC(int64_t const& src, MSString& dst)
 {
 	dst = std::to_string(src);
 	return true;
 }
 template <class T = MSString, class U = int64_t, OPENMS_NOT_SAME(T, U)>
-bool TTypeC(MSString const& src, int64_t& dst)
+bool MSTypeC(MSString const& src, int64_t& dst)
 {
 	if (src.empty()) return false;
 	dst = std::strtoll(src.c_str(), nullptr, 10);
@@ -495,13 +530,13 @@ bool TTypeC(MSString const& src, int64_t& dst)
 }
 
 template<class T = uint64_t, class U = MSString, OPENMS_NOT_SAME(T, U)>
-bool TTypeC(uint64_t const& src, MSString& dst)
+bool MSTypeC(uint64_t const& src, MSString& dst)
 {
 	dst = std::to_string(src);
 	return true;
 }
 template <class T = MSString, class U = uint64_t, OPENMS_NOT_SAME(T, U)>
-bool TTypeC(MSString const& src, uint64_t& dst)
+bool MSTypeC(MSString const& src, uint64_t& dst)
 {
 	if (src.empty()) return false;
 	dst = std::strtoull(src.c_str(), nullptr, 10);
@@ -509,13 +544,13 @@ bool TTypeC(MSString const& src, uint64_t& dst)
 }
 
 template <class T = float, class U = MSString, OPENMS_NOT_SAME(T, U)>
-bool TTypeC(float const& src, MSString& dst)
+bool MSTypeC(float const& src, MSString& dst)
 {
 	dst = std::to_string(src);
 	return true;
 }
 template <class T = MSString, class U = float, OPENMS_NOT_SAME(T, U)>
-bool TTypeC(MSString const& src, float& dst)
+bool MSTypeC(MSString const& src, float& dst)
 {
 	if (src.empty()) return false;
 	dst = std::strtof(src.c_str(), nullptr);
@@ -523,13 +558,13 @@ bool TTypeC(MSString const& src, float& dst)
 }
 
 template <class T = double, class U = MSString, OPENMS_NOT_SAME(T, U)>
-bool TTypeC(double const& src, MSString& dst)
+bool MSTypeC(double const& src, MSString& dst)
 {
 	dst = std::to_string(src);
 	return true;
 }
 template <class T = MSString, class U = double, OPENMS_NOT_SAME(T, U)>
-bool TTypeC(MSString const& src, double& dst)
+bool MSTypeC(MSString const& src, double& dst)
 {
 	if (src.empty()) return false;
 	dst = std::strtod(src.c_str(), nullptr);
@@ -537,13 +572,13 @@ bool TTypeC(MSString const& src, double& dst)
 }
 
 template <class T = const char*, class U = MSString, OPENMS_NOT_SAME(T, U)>
-bool TTypeC(const char* const& src, MSString& dst)
+bool MSTypeC(const char* const& src, MSString& dst)
 {
 	dst = (src) ? MSString(src) : MSString();
 	return true;
 }
 template <class T = MSString, class U = const char*, OPENMS_NOT_SAME(T, U)>
-bool TTypeC(MSString const& src, const char*& dst)
+bool MSTypeC(MSString const& src, const char*& dst)
 {
 	dst = src.c_str();
 	return true;
@@ -551,13 +586,13 @@ bool TTypeC(MSString const& src, const char*& dst)
 
 #if 17 <= OPENMS_CPP_VERSION
 template <class T = MSStringView, class U = MSString, OPENMS_NOT_SAME(T, U)>
-bool TTypeC(MSStringView const& src, MSString& dst)
+bool MSTypeC(MSStringView const& src, MSString& dst)
 {
 	dst = MSString(src);
 	return true;
 }
 template <class T = MSString, class U = MSStringView, OPENMS_NOT_SAME(T, U)>
-bool TTypeC(MSString const& src, MSStringView& dst)
+bool MSTypeC(MSString const& src, MSStringView& dst)
 {
 	dst = src;
 	return true;
@@ -570,7 +605,7 @@ struct TTextC
 	static MSString to_string(T const& value, MSString const& string = MSString())
 	{
 		MSString result;
-		if (TTypeC(value, result)) return result;
+		if (MSTypeC(value, result)) return result;
 		return string;
 	}
 
@@ -578,7 +613,7 @@ struct TTextC
 	static T from_string(MSString const& string, T const& value = T())
 	{
 		T result;
-		if (TTypeC(string, result)) return result;
+		if (MSTypeC(string, result)) return result;
 		return value;
 	}
 };

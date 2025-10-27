@@ -1,0 +1,34 @@
+/*=================================================
+* Copyright © 2020-2025 ChivenZhang.
+* All Rights Reserved.
+* =====================Note=========================
+*
+*
+* ====================History=======================
+* Created by ChivenZhang@gmail.com.
+*
+* =================================================*/
+#include <OpenMS/Endpoint/RPC/RPCServer.h>
+#include <OpenMS/Endpoint/RPC/RPCClient.h>
+
+int main()
+{
+	auto server = MSNew<RPCServer>(RPCServer::config_t{
+		.IP = "127.0.0.1",
+		.PortNum = 8080,
+	});
+	auto client = MSNew<RPCClient>(RPCClient::config_t{
+		.IP = "127.0.0.1",
+		.PortNum = 8080,
+	});
+	server->bind("echo", [](MSString text) { MS_INFO("echo: %s", text.c_str()); });
+	server->startup();
+	client->startup();
+	client->call<void>("echo", 1000, MSString("Hello,OpenMS!"));
+
+	system("pause");
+
+	server->shutdown();
+	client->shutdown();
+	return 0;
+}
