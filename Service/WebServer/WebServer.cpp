@@ -287,9 +287,8 @@ void WebServer::forward(MSString url, HTTPServer::response_t &response)
 			}
 		}
 	}
-	
-	response.Code = HTTP_STATUS_NOT_FOUND;
-	response.Body = "404 Not Found";
+
+	handle(url, response);
 }
 
 void WebServer::redirect(MSString url, HTTPServer::response_t &response)
@@ -297,4 +296,10 @@ void WebServer::redirect(MSString url, HTTPServer::response_t &response)
 	response.Code = HTTP_STATUS_PERMANENT_REDIRECT;
 	response.Header["Location"] = url;
 	response.Body = "308 Permanent Redirect";
+}
+
+void WebServer::handle(MSString url, HTTPServer::response_t& response)
+{
+	response.Code = HTTP_STATUS_NOT_FOUND;
+	response.Body = "404 Not Found";
 }

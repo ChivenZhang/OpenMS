@@ -350,6 +350,7 @@ inline const uint32_t MSHash(MSStringView value) noexcept
 #define OPENMS_IS_SCALAR(T) std::enable_if_t<std::is_scalar_v<T>, int> = 0
 #define OPENMS_NOT_SCALAR(T) std::enable_if_t<!std::is_scalar_v<T>, int> = 0
 #define OPENMS_BASE_OF(T, U) std::enable_if_t<std::is_base_of_v<T, U>, int> = 0
+#define OPENMS_NOT_BASE(T, U) std::enable_if_t<!std::is_base_of_v<T, U>, int> = 0
 #define OPENMS_IS_SAME(T, U) std::enable_if_t<std::is_same_v<T, U>, int> = 0
 #define OPENMS_NOT_SAME(T, U) std::enable_if_t<!std::is_same_v<T, U>, int> = 0
 #if 17 <= OPENMS_CPP_VERSION

@@ -13,10 +13,7 @@
 #include <OpenMS/Endpoint/HTTP/HTTPServer.h>
 #include "WebConfig.h"
 
-class WebServer
-	:
-	public ClusterServer,
-	public WebConfig
+class WebServer : public ClusterServer, public WebConfig
 {
 public:
 	MSString identity() const override;
@@ -26,6 +23,7 @@ protected:
 	void onExit() override;
 	void forward(MSString url, HTTPServer::response_t& response);
 	void redirect(MSString url, HTTPServer::response_t& response);
+	virtual void handle(MSString url, HTTPServer::response_t& response);
 
 protected:
 	friend class WebServerErrorHandler;

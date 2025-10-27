@@ -14,10 +14,7 @@
 #include <OpenMS/Endpoint/Redis/RedisPool.h>
 #include "RedisConfig.h"
 
-class RedisServer
-	:
-	public ClusterServer,
-	public RedisConfig
+class RedisServer : public ClusterServer, public RedisConfig
 {
 public:
 	MSString identity() const override;

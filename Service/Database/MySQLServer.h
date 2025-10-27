@@ -14,10 +14,7 @@
 #include <OpenMS/Endpoint/MySQL/MySQLPool.h>
 #include "MySQLConfig.h"
 
-class MySQLServer
-	:
-	public ClusterServer,
-	public MySQLConfig
+class MySQLServer : public ClusterServer, public MySQLConfig
 {
 public:
 	MSString identity() const override;
