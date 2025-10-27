@@ -24,10 +24,9 @@ void MasterServer::onInit()
 	});
 	m_ClusterServer->startup();
 
-	// Register or update mail address
+	// Maintain mail route table
 
 	m_MailUpdateTime = std::chrono::system_clock::now();
-
 	m_ClusterServer->bind("push", [this](MSString address, MSList<MSString> mails)->bool
 	{
 		for (auto& mail : mails) m_MailRouteMap[mail].insert(address);
@@ -41,7 +40,7 @@ void MasterServer::onInit()
 		if (OPENMS_HEARTBEAT <= std::chrono::duration_cast<std::chrono::seconds>(now - m_MailUpdateTime).count())
 		{
 			m_MailUpdateTime = now;
-			m_MailRouteMap = m_MailRouteNewMap;
+			m_MailRouteMap = std::move(m_MailRouteNewMap);
 			m_MailRouteNewMap.clear();
 		}
 		return m_MailRouteMap;

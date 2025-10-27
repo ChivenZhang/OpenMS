@@ -12,6 +12,7 @@
 #include "Endpoint/IEndpoint.h"
 struct redisContext;
 
+/// @brief Redis Client Endpoint
 class RedisClient : public IEndpoint
 {
 public:

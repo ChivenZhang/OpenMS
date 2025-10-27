@@ -51,7 +51,7 @@ void ClusterServer::onInit()
 		}
 		if (address.empty()) return false;
 
-		// Select an RPC client to send
+		// Select a RPC client to send
 
 		MSRef<RPCClient> mailClient;
 		{
@@ -106,10 +106,10 @@ void ClusterServer::onInit()
 			MSStringList mailList;
 			AUTOWIRE(IMailContext)::bean()->listMailbox(mailList);
 			MSString address = m_ServiceServer->address().lock()->getString();
-			if (m_ClusterClient->call<bool>("push", 1000, address, mailList))
+			if (m_ClusterClient->call<bool>("push", 1000, address, mailList).first)
 			{
 				MSMutexLock lock(m_MailRouteLock);
-				m_MailRouteMap = m_ClusterClient->call<MSMap<MSString, MSStringList>>("pull", 1000);
+				m_MailRouteMap = m_ClusterClient->call<MSMap<MSString, MSStringList>>("pull", 1000).first;
 			}
 		}
 	});

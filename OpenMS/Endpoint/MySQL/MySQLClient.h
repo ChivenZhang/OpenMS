@@ -16,6 +16,7 @@ namespace sql
 	class Connection;
 }
 
+/// @brief MySQL Client Endpoint
 class MySQLClient : public IEndpoint
 {
 public:
