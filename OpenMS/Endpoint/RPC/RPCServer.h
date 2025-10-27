@@ -28,7 +28,6 @@ public:
 		uint32_t Backlog = 0;
 		uint32_t Workers = 0;
 		uint32_t Buffers = UINT16_MAX;
-		TCPServerReactor::callback_tcp_t Callback;
 	};
 
 public:
@@ -41,17 +40,17 @@ public:
 	bool unbind(MSStringView name);
 	bool invoke(MSStringView name, MSString const& input, MSString& output);
 
-	template <class F, OPENMS_NOT_SAME(typename std::function_traits<F>::result_type, void)>
+	template <class F, OPENMS_NOT_SAME(typename MSTraits<F>::return_type, void)>
 	bool bind(MSStringView name, F method)
 	{
 		auto callback = [method](MSString const& input, MSString& output)-> bool
 		{
 			// Convert request to tuple
 
-			typename std::function_traits<F>::argument_tuple args;
+			typename MSTraits<F>::argument_types args;
 			if (std::is_same_v<decltype(args), MSTuple<>> == false)
 			{
-				if (TTypeC(input, args) == false) return false;
+				if (MSTypeC(input, args) == false) return false;
 			}
 
 			// Call method with tuple args
@@ -60,24 +59,24 @@ public:
 
 			// Convert request to string
 
-			if (TTypeC(result, output) == false) return false;
+			if (MSTypeC(result, output) == false) return false;
 			return true;
 		};
 
 		return bind_internal(name, callback);
 	}
 
-	template <class F, OPENMS_IS_SAME(typename std::function_traits<F>::result_type, void)>
+	template <class F, OPENMS_IS_SAME(typename MSTraits<F>::return_type, void)>
 	bool bind(MSStringView name, F method)
 	{
 		auto callback = [method](MSString const& input, MSString& output) -> bool
 		{
 			// Convert request to tuple
 
-			typename std::function_traits<F>::argument_tuple args;
+			typename MSTraits<F>::argument_types args;
 			if (std::is_same_v<decltype(args), MSTuple<>> == false)
 			{
-				if (TTypeC(input, args) == false) return false;
+				if (MSTypeC(input, args) == false) return false;
 			}
 
 			// Call method with tuple args

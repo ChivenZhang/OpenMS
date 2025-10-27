@@ -30,18 +30,17 @@ RPCServer::RPCServer(config_t const& config)
 void RPCServer::startup()
 {
 	auto config = m_Config;
-	if (config.Callback.OnOpen == nullptr)
-	{
-		config.Callback.OnOpen = [this](MSRef<IChannel> channel)
-		{
-			channel->getPipeline()->addLast("default", MSNew<RPCServerInboundHandler>(this));
-		};
-	}
 	m_Reactor = MSNew<TCPServerReactor>(
 		IPv4Address::New(config.IP, config.PortNum),
 		config.Backlog,
 		config.Workers,
-		config.Callback
+		TCPServerReactor::callback_tcp_t
+		{
+			.OnOpen = [this](MSRef<IChannel> channel)
+			{
+				channel->getPipeline()->addLast("default", MSNew<RPCServerInboundHandler>(this));
+			},
+		}
 	);
 	m_Reactor->startup();
 	if (m_Reactor->running() == false) MS_FATAL("failed to start reactor");
@@ -117,7 +116,7 @@ bool RPCServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<
 		if (message.size() <= m_Server->m_Config.Buffers)
 		{
 			RPCRequest request;
-			if (TTypeC(message, request))
+			if (MSTypeC(message, request))
 			{
 				MSString output;
 				if (m_Server->invoke(request.Name, request.Args, output))
@@ -125,7 +124,7 @@ bool RPCServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<
 					RPCResponse response;
 					response.ID = request.ID;
 					response.Args = output;
-					if (TTypeC(response, output))
+					if (MSTypeC(response, output))
 					{
 						auto length = (uint32_t)output.size();
 						context->writeAndFlush(IChannelEvent::New(MSString((char*)&length, sizeof(length)) + output));

@@ -13,8 +13,9 @@
 #include "Service/Private/Property.h"
 #include "Endpoint/RPC/RPCProtocol.h"
 #include "Reactor/TCP/TCPClientReactor.h"
-#include "Reactor/Private/ChannelHandler.h"
 #include "Utility/Timer.h"
+
+class RPCClientInboundHandler;
 
 /// @brief RPC Client Endpoint
 class RPCClient : public IEndpoint
@@ -26,7 +27,6 @@ public:
 		uint16_t PortNum = 0;
 		uint32_t Workers = 0;
 		uint32_t Buffers = UINT16_MAX;
-		TCPClientReactor::callback_tcp_t Callback;
 	};
 
 public:
@@ -43,7 +43,7 @@ public:
 	/// @param name call name
 	/// @param timeout unit: ms
 	/// @param args call args
-	/// @return result and status
+	/// @return result and true if sent
 	template <class T, class... ARGS, OPENMS_NOT_SAME(T, void)>
 	MSBinary<T, bool> call(MSStringView name, uint32_t timeout, ARGS &&... args)
 	{
@@ -54,13 +54,13 @@ public:
 		MSString input;
 		if (std::is_same_v<MSTuple<ARGS...>, MSTuple<>> == false)
 		{
-			if (TTypeC(std::make_tuple(std::forward<ARGS>(args)...), input) == false) return {T(), false};
+			if (MSTypeC(std::make_tuple(std::forward<ARGS>(args)...), input) == false) return {T(), false};
 		}
 		RPCRequest request;
 		request.ID = ++m_Session;
 		request.Name = name;
 		request.Args = input;
-		if (TTypeC(request, input) == false) return {T(), false};
+		if (MSTypeC(request, input) == false) return {T(), false};
 
 		// Set promise to handle response
 
@@ -84,7 +84,7 @@ public:
 		if (status == std::future_status::ready)
 		{
 			T result;
-			if (TTypeC(future.get(), result) == true) return {result, true};
+			if (MSTypeC(future.get(), result) == true) return {result, true};
 		}
 		return {T(), false};
 	}
@@ -95,7 +95,7 @@ public:
 	/// @param name call name
 	/// @param timeout unit: ms
 	/// @param args call args
-	/// @return return true if send successfully
+	/// @return return true if sent
 	template <class T, class... ARGS, OPENMS_IS_SAME(T, void)>
 	bool call(MSStringView name, uint32_t timeout, ARGS &&... args)
 	{
@@ -106,13 +106,13 @@ public:
 		MSString input;
 		if (std::is_same_v<MSTuple<ARGS...>, MSTuple<>> == false)
 		{
-			if (TTypeC(std::make_tuple(std::forward<ARGS>(args)...), input) == false) return false;
+			if (MSTypeC(std::make_tuple(std::forward<ARGS>(args)...), input) == false) return false;
 		}
 		RPCRequest request;
 		request.ID = ++m_Session;
 		request.Name = name;
 		request.Args = input;
-		if (TTypeC(request, input) == false) return false;
+		if (MSTypeC(request, input) == false) return false;
 
 		// Set promise to handle response
 
@@ -143,7 +143,7 @@ public:
 	/// @param timeout unit: ms
 	/// @param args call args
 	/// @param callback call back
-	/// @return return true if send successfully
+	/// @return return true if sent
 	template <class T, class... ARGS, OPENMS_NOT_SAME(T, void)>
 	bool async(MSStringView name, uint32_t timeout, MSTuple<ARGS...> const& args, MSLambda<void(T&&)> callback)
 	{
@@ -154,13 +154,13 @@ public:
 		MSString input;
 		if (std::is_same_v<MSTuple<ARGS...>, MSTuple<>> == false)
 		{
-			if (TTypeC(args, input) == false) return false;
+			if (MSTypeC(args, input) == false) return false;
 		}
 		RPCRequest request;
 		request.ID = ++m_Session;
 		request.Name = name;
 		request.Args = input;
-		if (TTypeC(request, input) == false) return false;
+		if (MSTypeC(request, input) == false) return false;
 
 		// Set timer to handle response
 
@@ -170,7 +170,7 @@ public:
 			session = [callback](MSString&& response)
 			{
 				T result;
-				TTypeC(response, result);
+				MSTypeC(response, result);
 				if (callback) callback(std::move(result));
 			};
 		}
@@ -204,7 +204,7 @@ public:
 	/// @param timeout unit: ms
 	/// @param args call args
 	/// @param callback call back
-	/// @return return true if send successfully
+	/// @return return true if sent
 	template <class T, class... ARGS, OPENMS_IS_SAME(T, void)>
 	bool async(MSStringView name, uint32_t timeout, MSTuple<ARGS...> const& args, MSLambda<void()> callback)
 	{
@@ -215,13 +215,13 @@ public:
 		MSString input;
 		if (std::is_same_v<MSTuple<ARGS...>, MSTuple<>> == false)
 		{
-			if (TTypeC(args, input) == false) return false;
+			if (MSTypeC(args, input) == false) return false;
 		}
 		RPCRequest request;
 		request.ID = ++m_Session;
 		request.Name = name;
 		request.Args = input;
-		if (TTypeC(request, input) == false) return false;
+		if (MSTypeC(request, input) == false) return false;
 
 		// Set timer to handle response
 
@@ -261,15 +261,4 @@ protected:
 	MSAtomic<uint32_t> m_Session;
 	MSRef<TCPClientReactor> m_Reactor;
 	MSMap<uint32_t, MSLambda<void(MSString&&)>> m_Sessions;
-};
-
-class RPCClientInboundHandler : public ChannelInboundHandler
-{
-public:
-	explicit RPCClientInboundHandler(MSRaw<RPCClient> client);
-	bool channelRead(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event) override;
-
-protected:
-	MSString m_Buffer;
-	MSRaw<RPCClient> m_Client;
 };
