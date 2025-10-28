@@ -15,20 +15,19 @@
 The Distributed Network Framework based on Microservice Theory.
 
 ## Features
-- [x] Support [reactor](https://en.wikipedia.org/wiki/Reactor_pattern) network pattern
+- [x] Support [C++20 coroutine](https://en.cppreference.com/w/cpp/language/coroutines) coding
+- [x] Support [Reactor](https://en.wikipedia.org/wiki/Reactor_pattern) network model
+- [x] Support [Actor](https://en.wikipedia.org/wiki/Erlang_(programming_language)) messaging model
 - [x] Support tcp, udp, [kcp](https://github.com/skywind3000/kcp), rpc, http, mysql, redis
-- [x] Support [c++20 coroutine](https://en.cppreference.com/w/cpp/language/coroutines) coding
-- [x] Support [Actor](https://en.wikipedia.org/wiki/Erlang_(programming_language)) message model
-- [x] Support [IOC](https://en.wikipedia.org/wiki/Inversion_of_control) collection mechanism
-- [x] Support [microservice](https://microservices.io/patterns/index.html) cluster
+- [x] Support [Microservice](https://microservices.io/patterns/index.html) cluster
 - [x] Support Windows, macOS, Linux
 - [ ] Support Hot module replacement
 
 ## How to install
-* Set the environment variable "VCPKG_ROOT_CUSTOM".
-* Use [vcpkg](https://learn.microsoft.com/zh-cn/vcpkg/get_started/overview) to install dependency on manifest mode.
-* Use [CLion](https://www.jetbrains.com.cn/en-us/clion/) or [Visual Studio](https://visualstudio.microsoft.com/) to open folder where contains CMakeLists.txt .
-* See directory [./Sample](https://github.com/ChivenZhang/OpenMS/tree/master/Sample) for more details.
+* Download and install the [VCPKG](https://learn.microsoft.com/zh-cn/vcpkg/get_started/overview) package manager.
+* Set yours "VCPKG_HOME" in [CMakePresets.json](https://github.com/ChivenZhang/OpenMS/tree/master/CMakePresets.json).
+* Use [CLion](https://www.jetbrains.com.cn/en-us/clion/) or [Visual Studio](https://visualstudio.microsoft.com/) to open the project.
+* See [Sample](https://github.com/ChivenZhang/OpenMS/tree/master/Sample) for more details about how to use.
 
 ```c++
 // Master service instance
