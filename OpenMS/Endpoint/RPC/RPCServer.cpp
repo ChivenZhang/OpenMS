@@ -13,21 +13,21 @@
 class RPCServerInboundHandler : public ChannelInboundHandler
 {
 public:
-	explicit RPCServerInboundHandler(MSRaw<RPCServer> server);
+	explicit RPCServerInboundHandler(MSRaw<IRPCServer> server);
 	bool channelRead(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event) override;
 
 protected:
 	MSString m_Buffer;
-	MSRaw<RPCServer> m_Server;
+	MSRaw<IRPCServer> m_Server;
 };
 
-RPCServer::RPCServer(config_t const& config)
+IRPCServer::IRPCServer(config_t const& config)
 	:
 	m_Config(config)
 {
 }
 
-void RPCServer::startup()
+void IRPCServer::startup()
 {
 	auto config = m_Config;
 	m_Reactor = MSNew<TCPServerReactor>(
@@ -46,40 +46,40 @@ void RPCServer::startup()
 	if (m_Reactor->running() == false) MS_FATAL("failed to start reactor");
 }
 
-void RPCServer::shutdown()
+void IRPCServer::shutdown()
 {
 	if (m_Reactor) m_Reactor->shutdown();
 	m_Reactor = nullptr;
 }
 
-bool RPCServer::running() const
+bool IRPCServer::running() const
 {
 	return m_Reactor ? m_Reactor->running() : false;
 }
 
-bool RPCServer::connect() const
+bool IRPCServer::connect() const
 {
 	return m_Reactor ? m_Reactor->connect() : false;
 }
 
-MSHnd<IChannelAddress> RPCServer::address() const
+MSHnd<IChannelAddress> IRPCServer::address() const
 {
 	return m_Reactor ? m_Reactor->address() : MSHnd<IChannelAddress>();
 }
 
-bool RPCServer::bind_internal(MSStringView name, method_t&& method)
+bool IRPCServer::bind_internal(MSStringView name, method_t&& method)
 {
 	MSMutexLock lock(m_Locker);
 	return m_Methods.emplace(MSHash(name), method).second;
 }
 
-bool RPCServer::unbind(MSStringView name)
+bool IRPCServer::unbind(MSStringView name)
 {
 	MSMutexLock lock(m_Locker);
 	return m_Methods.erase(MSHash(name));
 }
 
-bool RPCServer::invoke(uint32_t hash, MSStringView const& input, MSString& output)
+bool IRPCServer::invoke(uint32_t hash, MSStringView const& input, MSString& output)
 {
 	decltype(m_Methods)::value_type::second_type method;
 	{
@@ -92,7 +92,7 @@ bool RPCServer::invoke(uint32_t hash, MSStringView const& input, MSString& outpu
 	return false;
 }
 
-RPCServerInboundHandler::RPCServerInboundHandler(MSRaw<RPCServer> server)
+RPCServerInboundHandler::RPCServerInboundHandler(MSRaw<IRPCServer> server)
 	:
 	m_Server(server)
 {

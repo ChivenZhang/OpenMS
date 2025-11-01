@@ -127,6 +127,9 @@ add_library(OpenMS STATIC
 		Utility/Timer.h
 		${MYSQL_SOURCES}
 		${REDIS_SOURCES}
+		Message/IMessage.h
+		Message/IMessageBox.h
+		Message/IMessageSession.h
 )
 
 if(OPENMS_ENABLE_MYSQL)

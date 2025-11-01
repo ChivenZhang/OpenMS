@@ -9,9 +9,12 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "IMessageBox.h"
+#include "Utility/Async.h"
+#include "IMessage.h"
+#include "IMessageSession.h"
 
-class IMessageHub
+class IMessageBox
 {
-
+public:
+	virtual MSAsync<MSString> handle(MSRef<IMessageSession> session, IMessage const& message) = 0;
 };

@@ -14,21 +14,21 @@
 class RPCClientInboundHandler : public ChannelInboundHandler
 {
 public:
-	explicit RPCClientInboundHandler(MSRaw<RPCClient> client);
+	explicit RPCClientInboundHandler(MSRaw<IRPCClient> client);
 	bool channelRead(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event) override;
 
 protected:
 	MSString m_Buffer;
-	MSRaw<RPCClient> m_Client;
+	MSRaw<IRPCClient> m_Client;
 };
 
-RPCClient::RPCClient(config_t const& config)
+IRPCClient::IRPCClient(config_t const& config)
 	:
 	m_Config(config)
 {
 }
 
-void RPCClient::startup()
+void IRPCClient::startup()
 {
 	auto config = m_Config;
 	m_Reactor = MSNew<TCPClientReactor>(
@@ -46,29 +46,36 @@ void RPCClient::startup()
 	if (m_Reactor->running() == false) MS_FATAL("failed to start reactor");
 }
 
-void RPCClient::shutdown()
+void IRPCClient::shutdown()
 {
 	if (m_Reactor) m_Reactor->shutdown();
 	m_Reactor = nullptr;
+
+	MSMutexLock lock(m_Locker);
+	for (auto& session : m_Sessions)
+	{
+		auto callback = session.second;
+		if (callback) callback({});
+	}
 	m_Sessions.clear();
 }
 
-bool RPCClient::running() const
+bool IRPCClient::running() const
 {
 	return m_Reactor ? m_Reactor->running() : false;
 }
 
-bool RPCClient::connect() const
+bool IRPCClient::connect() const
 {
 	return m_Reactor ? m_Reactor->connect() : false;
 }
 
-MSHnd<IChannelAddress> RPCClient::address() const
+MSHnd<IChannelAddress> IRPCClient::address() const
 {
 	return m_Reactor ? m_Reactor->address() : MSHnd<IChannelAddress>();
 }
 
-RPCClientInboundHandler::RPCClientInboundHandler(MSRaw<RPCClient> client)
+RPCClientInboundHandler::RPCClientInboundHandler(MSRaw<IRPCClient> client)
 	:
 	m_Client(client)
 {
