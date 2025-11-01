@@ -1,4 +1,6 @@
 #pragma once
+#include "MS.h"
+#include "Reactor/IChannel.h"
 /*=================================================
 * Copyright © 2020-2025 ChivenZhang.
 * All Rights Reserved.
@@ -9,9 +11,9 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "IMessageBox.h"
 
-class IMessageHub
+class IMessageSession
 {
-
+public:
+	MSHnd<IChannel> Channel;
 };

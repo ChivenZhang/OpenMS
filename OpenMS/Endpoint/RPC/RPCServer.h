@@ -13,12 +13,10 @@
 #include "Service/Private/Property.h"
 #include "Endpoint/RPC/RPCProtocol.h"
 #include "Reactor/TCP/TCPServerReactor.h"
-#include "Reactor/Private/ChannelHandler.h"
-
 class RPCServerInboundHandler;
 
 /// @brief RPC Server Endpoint
-class RPCServer : public IEndpoint
+class IRPCServer : public IEndpoint
 {
 public:
 	struct config_t
@@ -34,7 +32,7 @@ protected:
 	using method_t = MSLambda<bool(MSStringView const& input, MSString& output)>;
 
 public:
-	explicit RPCServer(config_t const& config);
+	explicit IRPCServer(config_t const& config);
 	void startup() override;
 	void shutdown() override;
 	bool running() const override;
@@ -42,59 +40,7 @@ public:
 	MSHnd<IChannelAddress> address() const override;
 	bool unbind(MSStringView name);
 	bool invoke(uint32_t hash, MSStringView const& input, MSString& output);
-
-	template <class F, OPENMS_NOT_SAME(typename MSTraits<F>::return_type, void)>
-	bool bind(MSStringView name, F method)
-	{
-		auto callback = [method](MSStringView const& input, MSString& output)-> bool
-		{
-			// Convert request to tuple
-
-			typename MSTraits<F>::argument_datas args;
-			if (std::is_same_v<decltype(args), MSTuple<>> == false)
-			{
-				if (MSTypeC(input, args) == false) return false;
-			}
-
-			// Call method with tuple args
-
-			auto result = std::apply(method, args);
-
-			// Convert request to string
-
-			if (MSTypeC(result, output) == false) return false;
-			return true;
-		};
-
-		return bind_internal(name, callback);
-	}
-
-	template <class F, OPENMS_IS_SAME(typename MSTraits<F>::return_type, void)>
-	bool bind(MSStringView name, F method)
-	{
-		auto callback = [method](MSStringView const& input, MSString& output) -> bool
-		{
-			// Convert request to tuple
-
-			typename MSTraits<F>::argument_datas args;
-			if (std::is_same_v<decltype(args), MSTuple<>> == false)
-			{
-				if (MSTypeC(input, args) == false) return false;
-			}
-
-			// Call method with tuple args
-
-			std::apply(method, args);
-
-			// Return void output
-			return true;
-		};
-
-		return bind_internal(name, callback);
-	}
-
-protected:
-	bool bind_internal(MSStringView name, method_t&& method);
+	bool bind(MSStringView name, MSLambda<bool(MSStringView const& input, MSString& output)>&& method);
 
 protected:
 	friend class RPCServerInboundHandler;
@@ -103,3 +49,59 @@ protected:
 	MSRef<TCPServerReactor> m_Reactor;
 	MSMap<uint32_t, method_t> m_Methods;
 };
+
+template<class Parser = RPCProtocolParser>
+class TRPCServer : public IRPCServer
+{
+public:
+	using parser_t = Parser;
+	using IRPCServer::IRPCServer;
+
+	template <class F, OPENMS_NOT_SAME(typename MSTraits<F>::return_type, void)>
+	bool bind(MSStringView name, F method)
+	{
+		return IRPCServer::bind(name, [method](MSStringView const& input, MSString& output)-> bool
+		{
+			// Convert request to tuple
+
+			typename MSTraits<F>::argument_datas args;
+			if (std::is_same_v<decltype(args), MSTuple<>> == false)
+			{
+				if (parser_t::fromString(MSString(input), args) == false) return false;
+			}
+
+			// Call method with tuple args
+
+			auto result = std::apply(method, args);
+
+			// Convert request to string
+
+			if (parser_t::toString(result, output) == false) return false;
+			return true;
+		});
+	}
+
+	template <class F, OPENMS_IS_SAME(typename MSTraits<F>::return_type, void)>
+	bool bind(MSStringView name, F method)
+	{
+		return IRPCServer::bind(name, [method](MSStringView const& input, MSString& output) -> bool
+		{
+			// Convert request to tuple
+
+			typename MSTraits<F>::argument_datas args;
+			if (std::is_same_v<decltype(args), MSTuple<>> == false)
+			{
+				if (parser_t::fromString(MSString(input), args) == false) return false;
+			}
+
+			// Call method with tuple args
+
+			std::apply(method, args);
+
+			// Return void output
+			return true;
+		});
+	}
+};
+
+using RPCServer = TRPCServer<>;

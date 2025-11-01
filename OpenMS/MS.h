@@ -344,11 +344,8 @@ inline const uint32_t MSHash(MSStringView value) noexcept
 
 // ============================================
 
-template<class T>
-struct MSTraits;
-
 template<class T, class... Args>
-struct MSTraits<T(*)(Args...)>
+struct MSTraitsBase
 {
 	using return_type = T;
 	using argument_types = std::tuple<Args...>;
@@ -357,42 +354,42 @@ struct MSTraits<T(*)(Args...)>
 	template<std::size_t N>
 	using argument_type = std::tuple_element<N, std::tuple<Args...>>::type;
 };
+
+template<class T>
+struct MSTraits;
 
 template<class F>
 struct MSTraits : MSTraits<decltype(&F::operator())> {};
 
-template<class C, class T, class... Args>
-struct MSTraits<T(C::*)(Args...) const>
-{
-	using return_type = T;
-	using argument_types = std::tuple<Args...>;
-	using argument_datas = std::tuple<std::remove_cvref_t<Args>...>;
-	static constexpr std::size_t argument_count = sizeof...(Args);
-	template<std::size_t N>
-	using argument_type = std::tuple_element<N, std::tuple<Args...>>::type;
-};
-
-template<class C, class T, class... Args>
-struct MSTraits<T(C::*)(Args...)>
-{
-	using return_type = T;
-	using argument_types = std::tuple<Args...>;
-	using argument_datas = std::tuple<std::remove_cvref_t<Args>...>;
-	static constexpr std::size_t argument_count = sizeof...(Args);
-	template<std::size_t N>
-	using argument_type = std::tuple_element<N, std::tuple<Args...>>::type;
-};
+template<class T, class... Args>
+struct MSTraits<T(Args...)> : MSTraitsBase<T, Args...> {};
 
 template<class T, class... Args>
-struct MSTraits<std::function<T(Args...)>>
-{
-	using return_type = T;
-	using argument_types = std::tuple<Args...>;
-	using argument_datas = std::tuple<std::remove_cvref_t<Args>...>;
-	static constexpr std::size_t argument_count = sizeof...(Args);
-	template<std::size_t N>
-	using argument_type = std::tuple_element<N, std::tuple<Args...>>::type;
-};
+struct MSTraits<T(*)(Args...)> : MSTraitsBase<T, Args...> {};
+
+template<class C, class T, class... Args>
+struct MSTraits<T(C::*)(Args...)> : MSTraitsBase<T, Args...> {};
+
+template<class C, class T, class... Args>
+struct MSTraits<T(C::*)(Args...) const> : MSTraitsBase<T, Args...> {};
+
+template<class C, class T, class... Args>
+struct MSTraits<T(C::*)(Args...) const&> : MSTraitsBase<T, Args...> {};
+
+template<class C, class T, class... Args>
+struct MSTraits<T(C::*)(Args...) const&&> : MSTraitsBase<T, Args...> {};
+
+template<class C, class T, class... Args>
+struct MSTraits<T(C::*)(Args...) const noexcept> : MSTraitsBase<T, Args...> {};
+
+template<class C, class T, class... Args>
+struct MSTraits<T(C::*)(Args...) const& noexcept> : MSTraitsBase<T, Args...> {};
+
+template<class C, class T, class... Args>
+struct MSTraits<T(C::*)(Args...) const&& noexcept> : MSTraitsBase<T, Args...> {};
+
+template<class T, class... Args>
+struct MSTraits<std::function<T(Args...)>> : MSTraitsBase<T, Args...> {};
 
 // ============================================
 

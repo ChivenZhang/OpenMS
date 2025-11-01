@@ -9,9 +9,7 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "IMessageBox.h"
 
-class IMessageHub
+class IMessage
 {
-
 };
