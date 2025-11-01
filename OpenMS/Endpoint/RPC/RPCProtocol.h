@@ -11,18 +11,31 @@
 * =================================================*/
 #include "MS.h"
 
-struct RPCRequest
+// struct RPCRequest
+// {
+// 	uint32_t ID;
+// 	uint32_t Name;
+// 	MSString Args;
+// };
+//
+// struct RPCResponse
+// {
+// 	uint32_t ID;
+// 	MSString Args;
+// };
+
+struct RPCRequestView
 {
 	uint32_t ID;
-	MSString Name;
-	MSString Args;
-	OPENMS_TYPE(RPCRequest, ID, Name, Args)
+	uint32_t Name;
+	uint32_t Length;
+	char Buffer[0];
 };
 
-struct RPCResponse
+struct RPCResponseView
 {
 	uint32_t ID;
-	MSString Args;
-	OPENMS_TYPE(RPCResponse, ID, Args)
+	uint32_t Length;
+	char Buffer[0];
 };
 

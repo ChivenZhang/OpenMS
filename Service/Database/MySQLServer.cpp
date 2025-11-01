@@ -17,15 +17,6 @@ MSString MySQLServer::identity() const
 	return "mysql";
 }
 
-struct User
-{
-	int id;
-	int age;
-	MSString name;
-	float money;
-	OPENMS_TYPE(User, id, age, name, money);
-};
-
 void MySQLServer::onInit()
 {
 	ClusterServer::onInit();
@@ -41,7 +32,7 @@ void MySQLServer::onInit()
 	});
 	m_MysqlPool->startup();
 
-#if 1 // TEST
+#if 0 // TEST
 	for (size_t n = 0; n < 10; ++n)
 	{
 		m_MysqlPool->execute("select * from userinfo", [](uint64_t rows, MSStringList const& result)

@@ -31,7 +31,7 @@ void ClusterServer::onInit()
 	});
 	m_ServiceServer->bind("mailbox", [=](MSString from, MSString to, MSString data, uint32_t fromSID, uint32_t toSID)
 	{
-		mails->sendToMailbox({from, to, data, fromSID, toSID});
+		mails->sendToMailbox({fromSID, toSID, from, to, data});
 	});
 	m_ServiceServer->startup();
 
@@ -51,7 +51,7 @@ void ClusterServer::onInit()
 		}
 		if (address.empty()) return false;
 
-		// Select a RPC client to send
+		// Select an RPC client to send
 
 		MSRef<RPCClient> mailClient;
 		{

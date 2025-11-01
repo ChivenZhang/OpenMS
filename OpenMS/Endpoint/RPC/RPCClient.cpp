@@ -85,31 +85,29 @@ bool RPCClientInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<
 	};
 	auto& stream = *(stream_t*)m_Buffer.data();
 
-	if (sizeof(uint32_t) <= m_Buffer.size() && sizeof(uint32_t) + stream.Length <= m_Buffer.size())
+	if (sizeof(stream_t) <= m_Buffer.size() && sizeof(stream_t) + stream.Length <= m_Buffer.size())
 	{
 		auto message = MSStringView(stream.Buffer, stream.Length);
-
 		if (message.size() <= m_Client->m_Config.Buffers)
 		{
-			RPCResponse response;
-			if (MSTypeC(message, response))
+			auto& responseView = *(RPCResponseView*)message.data();
+			if (sizeof(RPCResponseView) <= message.size() && sizeof(RPCResponseView) + responseView.Length == message.size())
 			{
 				decltype(m_Client->m_Sessions)::value_type::second_type callback;
 				{
 					MSMutexLock lock(m_Client->m_Locker);
-					auto result = m_Client->m_Sessions.find(response.ID);
+					auto result = m_Client->m_Sessions.find(responseView.ID);
 					if (result != m_Client->m_Sessions.end())
 					{
 						callback = result->second;
 						m_Client->m_Sessions.erase(result);
 					}
 				}
-				if (callback) callback(std::move(response.Args));
+				if (callback) callback(MSStringView(responseView.Buffer, responseView.Length));
 			}
 		}
 
 		m_Buffer = m_Buffer.substr(sizeof(uint32_t) + stream.Length);
 	}
-
 	return false;
 }

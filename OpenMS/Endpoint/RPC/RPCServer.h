@@ -30,6 +30,9 @@ public:
 		uint32_t Buffers = UINT16_MAX;
 	};
 
+protected:
+	using method_t = MSLambda<bool(MSStringView const& input, MSString& output)>;
+
 public:
 	explicit RPCServer(config_t const& config);
 	void startup() override;
@@ -38,16 +41,16 @@ public:
 	bool connect() const override;
 	MSHnd<IChannelAddress> address() const override;
 	bool unbind(MSStringView name);
-	bool invoke(MSStringView name, MSString const& input, MSString& output);
+	bool invoke(uint32_t hash, MSStringView const& input, MSString& output);
 
 	template <class F, OPENMS_NOT_SAME(typename MSTraits<F>::return_type, void)>
 	bool bind(MSStringView name, F method)
 	{
-		auto callback = [method](MSString const& input, MSString& output)-> bool
+		auto callback = [method](MSStringView const& input, MSString& output)-> bool
 		{
 			// Convert request to tuple
 
-			typename MSTraits<F>::argument_types args;
+			typename MSTraits<F>::argument_datas args;
 			if (std::is_same_v<decltype(args), MSTuple<>> == false)
 			{
 				if (MSTypeC(input, args) == false) return false;
@@ -69,11 +72,11 @@ public:
 	template <class F, OPENMS_IS_SAME(typename MSTraits<F>::return_type, void)>
 	bool bind(MSStringView name, F method)
 	{
-		auto callback = [method](MSString const& input, MSString& output) -> bool
+		auto callback = [method](MSStringView const& input, MSString& output) -> bool
 		{
 			// Convert request to tuple
 
-			typename MSTraits<F>::argument_types args;
+			typename MSTraits<F>::argument_datas args;
 			if (std::is_same_v<decltype(args), MSTuple<>> == false)
 			{
 				if (MSTypeC(input, args) == false) return false;
@@ -91,12 +94,12 @@ public:
 	}
 
 protected:
-	bool bind_internal(MSStringView name, MSLambda<bool(MSString const&, MSString&)> method);
+	bool bind_internal(MSStringView name, method_t&& method);
 
 protected:
 	friend class RPCServerInboundHandler;
 	const config_t m_Config;
 	MSMutex m_Locker;
 	MSRef<TCPServerReactor> m_Reactor;
-	MSStringMap<MSLambda<bool(MSString const& input, MSString& output)>> m_Methods;
+	MSMap<uint32_t, method_t> m_Methods;
 };
