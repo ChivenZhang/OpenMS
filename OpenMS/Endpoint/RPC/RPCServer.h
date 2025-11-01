@@ -13,8 +13,6 @@
 #include "Service/Private/Property.h"
 #include "Endpoint/RPC/RPCProtocol.h"
 #include "Reactor/TCP/TCPServerReactor.h"
-#include "Reactor/Private/ChannelHandler.h"
-
 class RPCServerInboundHandler;
 
 /// @brief RPC Server Endpoint
@@ -42,19 +40,7 @@ public:
 	MSHnd<IChannelAddress> address() const override;
 	bool unbind(MSStringView name);
 	bool invoke(uint32_t hash, MSStringView const& input, MSString& output);
-
-	bool bind(MSStringView name, MSLambda<bool(MSStringView const& input, MSString& output)> method)
-	{
-		auto callback = [method](MSStringView const& input, MSString& output)-> bool
-		{
-			return method(input, output);
-		};
-
-		return bind_internal(name, callback);
-	}
-
-protected:
-	bool bind_internal(MSStringView name, method_t&& method);
+	bool bind(MSStringView name, MSLambda<bool(MSStringView const& input, MSString& output)>&& method);
 
 protected:
 	friend class RPCServerInboundHandler;
@@ -74,7 +60,7 @@ public:
 	template <class F, OPENMS_NOT_SAME(typename MSTraits<F>::return_type, void)>
 	bool bind(MSStringView name, F method)
 	{
-		auto callback = [method](MSStringView const& input, MSString& output)-> bool
+		return IRPCServer::bind(name, [method](MSStringView const& input, MSString& output)-> bool
 		{
 			// Convert request to tuple
 
@@ -92,15 +78,13 @@ public:
 
 			if (parser_t::toString(result, output) == false) return false;
 			return true;
-		};
-
-		return bind_internal(name, callback);
+		});
 	}
 
 	template <class F, OPENMS_IS_SAME(typename MSTraits<F>::return_type, void)>
 	bool bind(MSStringView name, F method)
 	{
-		auto callback = [method](MSStringView const& input, MSString& output) -> bool
+		return IRPCServer::bind(name, [method](MSStringView const& input, MSString& output) -> bool
 		{
 			// Convert request to tuple
 
@@ -116,9 +100,7 @@ public:
 
 			// Return void output
 			return true;
-		};
-
-		return bind_internal(name, callback);
+		});
 	}
 };
 

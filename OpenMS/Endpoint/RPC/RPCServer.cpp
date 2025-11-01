@@ -9,6 +9,7 @@
 *
 * =================================================*/
 #include "RPCServer.h"
+#include "Reactor/Private/ChannelHandler.h"
 
 class RPCServerInboundHandler : public ChannelInboundHandler
 {
@@ -67,12 +68,6 @@ MSHnd<IChannelAddress> IRPCServer::address() const
 	return m_Reactor ? m_Reactor->address() : MSHnd<IChannelAddress>();
 }
 
-bool IRPCServer::bind_internal(MSStringView name, method_t&& method)
-{
-	MSMutexLock lock(m_Locker);
-	return m_Methods.emplace(MSHash(name), method).second;
-}
-
 bool IRPCServer::unbind(MSStringView name)
 {
 	MSMutexLock lock(m_Locker);
@@ -90,6 +85,13 @@ bool IRPCServer::invoke(uint32_t hash, MSStringView const& input, MSString& outp
 	}
 	if (method && method(input, output)) return true;
 	return false;
+}
+
+bool IRPCServer::bind(MSStringView name, MSLambda<bool(MSStringView const& input, MSString& output)>&& method)
+{
+	if (method == nullptr) return false;
+	MSMutexLock lock(m_Locker);
+	return m_Methods.emplace(MSHash(name), method).second;
 }
 
 RPCServerInboundHandler::RPCServerInboundHandler(MSRaw<IRPCServer> server)

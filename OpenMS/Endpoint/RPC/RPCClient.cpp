@@ -75,6 +75,91 @@ MSHnd<IChannelAddress> IRPCClient::address() const
 	return m_Reactor ? m_Reactor->address() : MSHnd<IChannelAddress>();
 }
 
+MSBinary<MSString, bool> IRPCClient::call(MSStringView const& name, uint32_t timeout, MSString const& input)
+{
+	if (m_Reactor == nullptr || m_Reactor->connect() == false) return {{}, false};
+
+	// Convert request to string
+
+	MSString output(sizeof(RPCRequestView) + input.size(), 0);
+	auto& requestView = *(RPCRequestView*)output.data();
+	requestView.ID = ++m_Session;
+	requestView.Name = MSHash(name);
+	requestView.Length = (uint32_t)input.size();
+	if (requestView.Length) ::memcpy(requestView.Buffer, input.data(), input.size());
+
+	// Set promise to handle response
+
+	MSPromise<MSString> promise;
+	auto future = promise.get_future();
+	{
+		MSMutexLock lock(m_Locker);
+		auto& session = m_Sessions[requestView.ID];
+		session = [&](MSStringView const& response) { promise.set_value(MSString(response)); };
+	}
+
+	// Send request to remote server
+
+	auto length = (uint32_t)output.size();
+	m_Reactor->writeAndFlush(IChannelEvent::New(MSString((char*)&length, sizeof(length)) + output), nullptr);
+	auto status = future.wait_for(std::chrono::milliseconds(timeout));
+	{
+		MSMutexLock lock(m_Locker);
+		m_Sessions.erase(requestView.ID);
+	}
+	if (status == std::future_status::ready)
+	{
+		return {future.get(), true};
+	}
+	return {{}, false};
+}
+
+bool IRPCClient::async(MSStringView const& name, uint32_t timeout, MSString const& input, MSLambda<void(MSString&&)>&& callback)
+{
+	if (m_Reactor == nullptr || m_Reactor->connect() == false) return false;
+
+	// Convert request to string
+
+	MSString output(sizeof(RPCRequestView) + input.size(), 0);
+	auto& requestView = *(RPCRequestView*)output.data();
+	requestView.ID = ++m_Session;
+	requestView.Name = MSHash(name);
+	requestView.Length = (uint32_t)input.size();
+	if (requestView.Length) ::memcpy(requestView.Buffer, input.data(), input.size());
+
+	// Set timer to handle response
+
+	{
+		MSMutexLock lock(m_Locker);
+		auto& session = m_Sessions[requestView.ID];
+		session = [callback](MSStringView const& response)
+		{
+			if (callback) callback(MSString(response));
+		};
+	}
+
+	m_Timer.start(timeout, 0, [sessionID = requestView.ID, this](uint32_t handle)
+	{
+		decltype(m_Sessions)::value_type::second_type callback;
+		{
+			MSMutexLock lock(m_Locker);
+			auto result = m_Sessions.find(sessionID);
+			if (result != m_Sessions.end())
+			{
+				callback = result->second;
+				m_Sessions.erase(result);
+			}
+		}
+		if (callback) callback({});
+	});
+
+	// Send request to remote server
+
+	auto length = (uint32_t)output.size();
+	m_Reactor->writeAndFlush(IChannelEvent::New(MSString((char*)&length, sizeof(length)) + output), nullptr);
+	return true;
+}
+
 RPCClientInboundHandler::RPCClientInboundHandler(MSRaw<IRPCClient> client)
 	:
 	m_Client(client)
