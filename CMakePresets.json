@@ -16,7 +16,7 @@
 				"OPENMS_ENABLE_REDIS": "OFF"
 			},
 			"environment": {
-				"VCPKG_HOME": "F:/Library/Windows/vcpkg-static"
+				"VCPKG_HOME": "???"
 			}
 		},
 		{
@@ -29,7 +29,25 @@
 
 				"OPENMS_ENABLE_DISCOVERY": "ON",
 				"OPENMS_ENABLE_WEBSERVER": "ON",
-				"OPENMS_ENABLE_SAMPLE": "ON",
+				"OPENMS_ENABLE_SAMPLE": "OFF",
+				"OPENMS_ENABLE_MYSQL": "OFF",
+				"OPENMS_ENABLE_REDIS": "OFF"
+			},
+			"environment": {
+				"VCPKG_HOME": "???"
+			}
+		},
+		{
+			"name": "x64-Develop",
+			"generator": "Ninja",
+			"binaryDir": "${sourceDir}/Output/${presetName}",
+			"cacheVariables": {
+				"CMAKE_BUILD_TYPE": "RelWithDebInfo",
+				"CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_HOME}/scripts/buildsystems/vcpkg.cmake",
+
+				"OPENMS_ENABLE_DISCOVERY": "ON",
+				"OPENMS_ENABLE_WEBSERVER": "ON",
+				"OPENMS_ENABLE_SAMPLE": "OFF",
 				"OPENMS_ENABLE_MYSQL": "OFF",
 				"OPENMS_ENABLE_REDIS": "OFF"
 			},

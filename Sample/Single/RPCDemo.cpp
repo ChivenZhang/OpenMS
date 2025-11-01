@@ -21,7 +21,7 @@ int main()
 		.IP = "127.0.0.1",
 		.PortNum = 8080,
 	});
-	server->bind("echo", [](MSString text) { MS_INFO("echo: %s", text.c_str()); });
+	server->bind("echo", [](MSString const& text) { MS_INFO("echo: %s", text.c_str()); });
 	server->startup();
 	client->startup();
 	client->call<void>("echo", 1000, MSString("Hello,OpenMS!"));
