@@ -67,24 +67,24 @@ MSHnd<IChannelAddress> RPCServer::address() const
 	return m_Reactor ? m_Reactor->address() : MSHnd<IChannelAddress>();
 }
 
-bool RPCServer::bind_internal(MSStringView name, MSLambda<bool(MSString const&, MSString&)> method)
+bool RPCServer::bind_internal(MSStringView name, method_t&& method)
 {
 	MSMutexLock lock(m_Locker);
-	return m_Methods.emplace(name, method).second;
+	return m_Methods.emplace(MSHash(name), method).second;
 }
 
 bool RPCServer::unbind(MSStringView name)
 {
 	MSMutexLock lock(m_Locker);
-	return m_Methods.erase(MSString(name));
+	return m_Methods.erase(MSHash(name));
 }
 
-bool RPCServer::invoke(MSStringView name, MSString const& input, MSString& output)
+bool RPCServer::invoke(uint32_t hash, MSStringView const& input, MSString& output)
 {
 	decltype(m_Methods)::value_type::second_type method;
 	{
 		MSMutexLock lock(m_Locker);
-		auto result = m_Methods.find(MSString(name));
+		auto result = m_Methods.find(hash);
 		if (result == m_Methods.end()) return false;
 		method = result->second;
 	}
@@ -109,26 +109,25 @@ bool RPCServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<
 	};
 	auto& stream = *(stream_t*)m_Buffer.data();
 
-	if (sizeof(uint32_t) <= m_Buffer.size() && sizeof(uint32_t) + stream.Length <= m_Buffer.size())
+	if (sizeof(stream_t) <= m_Buffer.size() && sizeof(stream_t) + stream.Length <= m_Buffer.size())
 	{
 		auto message = MSStringView(stream.Buffer, stream.Length);
-
 		if (message.size() <= m_Server->m_Config.Buffers)
 		{
-			RPCRequest request;
-			if (MSTypeC(message, request))
+			auto& requestView = *(RPCRequestView*)message.data();
+			if (sizeof(RPCRequestView) <= message.size() && sizeof(RPCRequestView) + requestView.Length == message.size())
 			{
-				MSString output;
-				if (m_Server->invoke(request.Name, request.Args, output))
+				MSString response;
+				if (m_Server->invoke(requestView.Name, MSStringView(requestView.Buffer, requestView.Length), response))
 				{
-					RPCResponse response;
-					response.ID = request.ID;
-					response.Args = output;
-					if (MSTypeC(response, output))
-					{
-						auto length = (uint32_t)output.size();
-						context->writeAndFlush(IChannelEvent::New(MSString((char*)&length, sizeof(length)) + output));
-					}
+					MSString output(sizeof(RPCResponseView) + response.size(), 0);
+					RPCResponseView& responseView = *(RPCResponseView*)output.data();
+					responseView.ID = requestView.ID;
+					responseView.Length = (uint32_t)response.size();
+					if (responseView.Length) ::memcpy(responseView.Buffer, response.data(), response.size());
+
+					auto length = (uint32_t)output.size();
+					context->writeAndFlush(IChannelEvent::New(MSString((char*)&length, sizeof(length)) + output));
 				}
 				else
 				{

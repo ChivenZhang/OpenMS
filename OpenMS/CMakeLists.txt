@@ -121,6 +121,8 @@ add_library(OpenMS STATIC
 		Service/Private/Server.h
 		Service/Private/Service.cpp
 		Service/Private/Service.h
+		Utility/Async.cpp
+		Utility/Async.h
 		Utility/Timer.cpp
 		Utility/Timer.h
 		${MYSQL_SOURCES}

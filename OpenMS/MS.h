@@ -352,6 +352,7 @@ struct MSTraits<T(*)(Args...)>
 {
 	using return_type = T;
 	using argument_types = std::tuple<Args...>;
+	using argument_datas = std::tuple<std::remove_cvref_t<Args>...>;
 	static constexpr std::size_t argument_count = sizeof...(Args);
 	template<std::size_t N>
 	using argument_type = std::tuple_element<N, std::tuple<Args...>>::type;
@@ -365,6 +366,7 @@ struct MSTraits<T(C::*)(Args...) const>
 {
 	using return_type = T;
 	using argument_types = std::tuple<Args...>;
+	using argument_datas = std::tuple<std::remove_cvref_t<Args>...>;
 	static constexpr std::size_t argument_count = sizeof...(Args);
 	template<std::size_t N>
 	using argument_type = std::tuple_element<N, std::tuple<Args...>>::type;
@@ -375,6 +377,7 @@ struct MSTraits<T(C::*)(Args...)>
 {
 	using return_type = T;
 	using argument_types = std::tuple<Args...>;
+	using argument_datas = std::tuple<std::remove_cvref_t<Args>...>;
 	static constexpr std::size_t argument_count = sizeof...(Args);
 	template<std::size_t N>
 	using argument_type = std::tuple_element<N, std::tuple<Args...>>::type;
@@ -385,6 +388,7 @@ struct MSTraits<std::function<T(Args...)>>
 {
 	using return_type = T;
 	using argument_types = std::tuple<Args...>;
+	using argument_datas = std::tuple<std::remove_cvref_t<Args>...>;
 	static constexpr std::size_t argument_count = sizeof...(Args);
 	template<std::size_t N>
 	using argument_type = std::tuple_element<N, std::tuple<Args...>>::type;

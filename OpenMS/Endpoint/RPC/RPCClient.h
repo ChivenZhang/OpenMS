@@ -56,11 +56,13 @@ public:
 		{
 			if (MSTypeC(std::make_tuple(std::forward<ARGS>(args)...), input) == false) return {T(), false};
 		}
-		RPCRequest request;
-		request.ID = ++m_Session;
-		request.Name = name;
-		request.Args = input;
-		if (MSTypeC(request, input) == false) return {T(), false};
+
+		MSString output(sizeof(RPCRequestView) + input.size(), 0);
+		auto& requestView = *(RPCRequestView*)output.data();
+		requestView.ID = ++m_Session;
+		requestView.Name = MSHash(name);
+		requestView.Length = (uint32_t)input.size();
+		if (requestView.Length) ::memcpy(requestView.Buffer, input.data(), input.size());
 
 		// Set promise to handle response
 
@@ -68,18 +70,18 @@ public:
 		auto future = promise.get_future();
 		{
 			MSMutexLock lock(m_Locker);
-			auto& session = m_Sessions[request.ID];
-			session = [&](MSString&& response) { promise.set_value(response); };
+			auto& session = m_Sessions[requestView.ID];
+			session = [&](MSStringView const& response) { promise.set_value(MSString(response)); };
 		}
 
 		// Send request to remote server
 
-		auto length = (uint32_t)input.size();
-		m_Reactor->writeAndFlush(IChannelEvent::New(MSString((char*)&length, sizeof(length)) + input), nullptr);
+		auto length = (uint32_t)output.size();
+		m_Reactor->writeAndFlush(IChannelEvent::New(MSString((char*)&length, sizeof(length)) + output), nullptr);
 		auto status = future.wait_for(std::chrono::milliseconds(timeout));
 		{
 			MSMutexLock lock(m_Locker);
-			m_Sessions.erase(request.ID);
+			m_Sessions.erase(requestView.ID);
 		}
 		if (status == std::future_status::ready)
 		{
@@ -108,11 +110,13 @@ public:
 		{
 			if (MSTypeC(std::make_tuple(std::forward<ARGS>(args)...), input) == false) return false;
 		}
-		RPCRequest request;
-		request.ID = ++m_Session;
-		request.Name = name;
-		request.Args = input;
-		if (MSTypeC(request, input) == false) return false;
+
+		MSString output(sizeof(RPCRequestView) + input.size(), 0);
+		auto& requestView = *(RPCRequestView*)output.data();
+		requestView.ID = ++m_Session;
+		requestView.Name = MSHash(name);
+		requestView.Length = (uint32_t)input.size();
+		if (requestView.Length) ::memcpy(requestView.Buffer, input.data(), input.size());
 
 		// Set promise to handle response
 
@@ -120,18 +124,18 @@ public:
 		auto future = promise.get_future();
 		{
 			MSMutexLock lock(m_Locker);
-			auto& session = m_Sessions[request.ID];
-			session = [&](MSString&& response) { promise.set_value(); };
+			auto& session = m_Sessions[requestView.ID];
+			session = [&](MSStringView const& response) { promise.set_value(); };
 		}
 
 		// Send request to remote server
 
-		auto length = (uint32_t)input.size();
-		m_Reactor->writeAndFlush(IChannelEvent::New(MSString((char*)&length, sizeof(length)) + input), nullptr);
+		auto length = (uint32_t)output.size();
+		m_Reactor->writeAndFlush(IChannelEvent::New(MSString((char*)&length, sizeof(length)) + output), nullptr);
 		future.wait_for(std::chrono::milliseconds(timeout));
 		{
 			MSMutexLock lock(m_Locker);
-			m_Sessions.erase(request.ID);
+			m_Sessions.erase(requestView.ID);
 		}
 		return true;
 	}
@@ -156,18 +160,20 @@ public:
 		{
 			if (MSTypeC(args, input) == false) return false;
 		}
-		RPCRequest request;
-		request.ID = ++m_Session;
-		request.Name = name;
-		request.Args = input;
-		if (MSTypeC(request, input) == false) return false;
+
+		MSString output(sizeof(RPCRequestView) + input.size(), 0);
+		auto& requestView = *(RPCRequestView*)output.data();
+		requestView.ID = ++m_Session;
+		requestView.Name = MSHash(name);
+		requestView.Length = (uint32_t)input.size();
+		if (requestView.Length) ::memcpy(requestView.Buffer, input.data(), input.size());
 
 		// Set timer to handle response
 
 		{
 			MSMutexLock lock(m_Locker);
-			auto& session = m_Sessions[request.ID];
-			session = [callback](MSString&& response)
+			auto& session = m_Sessions[requestView.ID];
+			session = [callback](MSStringView const& response)
 			{
 				T result;
 				MSTypeC(response, result);
@@ -175,7 +181,7 @@ public:
 			};
 		}
 
-		m_Timer.start(timeout, 0, [sessionID = request.ID, this](uint32_t handle)
+		m_Timer.start(timeout, 0, [sessionID = requestView.ID, this](uint32_t handle)
 		{
 			decltype(m_Sessions)::value_type::second_type callback;
 			{
@@ -192,8 +198,8 @@ public:
 
 		// Send request to remote server
 
-		uint32_t length = (uint32_t)input.size();
-		m_Reactor->writeAndFlush(IChannelEvent::New(MSString((char*)&length, sizeof(length)) + input), nullptr);
+		uint32_t length = (uint32_t)output.size();
+		m_Reactor->writeAndFlush(IChannelEvent::New(MSString((char*)&length, sizeof(length)) + output), nullptr);
 		return true;
 	}
 
@@ -217,21 +223,23 @@ public:
 		{
 			if (MSTypeC(args, input) == false) return false;
 		}
-		RPCRequest request;
-		request.ID = ++m_Session;
-		request.Name = name;
-		request.Args = input;
-		if (MSTypeC(request, input) == false) return false;
+
+		MSString output(sizeof(RPCRequestView) + input.size(), 0);
+		auto& requestView = *(RPCRequestView*)output.data();
+		requestView.ID = ++m_Session;
+		requestView.Name = MSHash(name);
+		requestView.Length = (uint32_t)input.size();
+		if (requestView.Length) ::memcpy(requestView.Buffer, input.data(), input.size());
 
 		// Set timer to handle response
 
 		{
 			MSMutexLock lock(m_Locker);
-			auto& session = m_Sessions[request.ID];
-			session = [callback](MSString&& response) { if (callback) callback(); };
+			auto& session = m_Sessions[requestView.ID];
+			session = [callback](MSStringView const& response) { if (callback) callback(); };
 		}
 
-		m_Timer.start(timeout, 0, [sessionID = request.ID, this](uint32_t handle)
+		m_Timer.start(timeout, 0, [sessionID = requestView.ID, this](uint32_t handle)
 		{
 			decltype(m_Sessions)::value_type::second_type callback;
 			{
@@ -248,8 +256,8 @@ public:
 
 		// Send request to remote server
 
-		auto length = (uint32_t)input.size();
-		m_Reactor->writeAndFlush(IChannelEvent::New(MSString((char*)&length, sizeof(length)) + input), nullptr);
+		auto length = (uint32_t)output.size();
+		m_Reactor->writeAndFlush(IChannelEvent::New(MSString((char*)&length, sizeof(length)) + output), nullptr);
 		return true;
 	}
 
@@ -260,5 +268,5 @@ protected:
 	MSMutex m_Locker;
 	MSAtomic<uint32_t> m_Session;
 	MSRef<TCPClientReactor> m_Reactor;
-	MSMap<uint32_t, MSLambda<void(MSString&&)>> m_Sessions;
+	MSMap<uint32_t, MSLambda<void(MSStringView const&)>> m_Sessions;
 };
