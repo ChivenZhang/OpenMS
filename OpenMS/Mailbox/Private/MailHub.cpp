@@ -8,95 +8,97 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "MailContext.h"
+#include "MailHub.h"
 
-MailContext::MailContext(uint32_t overload)
+MailHub::MailHub(uint32_t overload)
 	:
 	m_Delivers(std::max(1U, overload))
 {
+	m_Session = 1;
 	m_Running = true;
 	for (auto& deliver : m_Delivers)
 	{
-		deliver = MSNew<MailDeliver>(this);
+		deliver = MSNew<MailMan>(this);
 	}
 }
 
-MailContext::~MailContext()
+MailHub::~MailHub()
 {
 	m_Running = false;
 	m_MailUnlock.notify_all();
 	m_Delivers.clear();
 }
 
-bool MailContext::createMailbox(MSString address, MSLambda<MSRef<IMailBox>(MSRaw<IMailContext>)> factory)
+bool MailHub::createMailbox(MSString address, MSLambda<MSRef<IMailBox>()> factory)
 {
 	MSMutexLock lock(m_MailboxLock);
-	auto result = m_MailboxMap.emplace(address, nullptr);
+	auto result = m_MailboxMap.emplace(MSHash(address), nullptr);
 	if (result.second == false) return false;
-	auto mailbox = MSCast<MailBox>(factory(this));
+	auto mailbox = MSCast<MailBox>(factory());
 	if (mailbox == nullptr) return false;
 	mailbox->m_Address = address;
+	mailbox->m_HashName = MSHash(address);
 	m_Mailboxes.push_back(mailbox);
 	result.first->second = m_Mailboxes.back();
 	return true;
 }
 
-bool MailContext::cancelMailbox(MSString address)
+bool MailHub::cancelMailbox(MSString address)
 {
 	MSMutexLock lock(m_MailboxLock);
-	auto result = m_MailboxMap.find(address);
+	auto result = m_MailboxMap.find(MSHash(address));
 	if (result == m_MailboxMap.end()) return false;
 	std::erase(m_Mailboxes, result->second);
 	m_MailboxMap.erase(result);
 	return true;
 }
 
-bool MailContext::existMailbox(MSString address)
+bool MailHub::existMailbox(MSString address)
 {
 	MSMutexLock lock(m_MailboxLock);
-	auto result = m_MailboxMap.find(address);
+	auto result = m_MailboxMap.find(MSHash(address));
 	if (result == m_MailboxMap.end()) return false;
 	return true;
 }
 
-bool MailContext::sendToMailbox(IMail&& mail)
+uint32_t MailHub::sendToMailbox(IMail mail)
 {
-	MSRef<MailBox> toMailbox, fromMailbox;
+	MSRef<MailBox> toMailbox;
+	mail.Date = m_Session++;
 	{
 		MSMutexLock lock(m_MailboxLock);
 		auto result = m_MailboxMap.find(mail.To);
 		if (result == m_MailboxMap.end() || result->second == nullptr)
 		{
-			if (m_RemoteCall == nullptr) return false;
-			return m_RemoteCall(std::forward<IMail>(mail));
+			if (m_RemoteCall == nullptr) return 0;
+			if (m_RemoteCall(mail)) return mail.Date;
+			return 0;
 		}
 		toMailbox = result->second;
-
-		result = m_MailboxMap.find(mail.From);
-		if (result != m_MailboxMap.end())
-		{
-			fromMailbox = result->second;
-		}
 	}
 	{
 		MSMutexLock lock(toMailbox->m_MailLock);
-		if (mail.ToSID == 0 && toMailbox) mail.ToSID = ++toMailbox->m_Session;
-		if (mail.FromSID == 0 && fromMailbox) mail.FromSID = ++fromMailbox->m_Session;
 		auto idle = toMailbox->m_MailQueue.empty();
-		toMailbox->m_MailQueue.push({ std::forward<IMail>(mail) });
+		MSString mailData(sizeof(IMailView) + mail.Body.size(), 0);
+		auto& mailView = *(IMailView*)mailData.data();
+		mailView.From = mail.From;
+		mailView.To = mail.To;
+		mailView.Date = mail.Date;
+		if (mail.Body.empty() == false) ::memcpy(mailView.Body, mail.Body.data(), mail.Body.size());
+		toMailbox->m_MailQueue.push({ .Mail = std::move(mailData) });
 		if (idle) enqueueMailbox(toMailbox);
-		return true;
+		return mail.Date;
 	}
 }
 
-bool MailContext::sendToMailbox(MSLambda<bool(IMail&& mail)> func)
+bool MailHub::sendToMailbox(MSLambda<bool(IMail mail)> func)
 {
 	if (m_RemoteCall) return false;
 	m_RemoteCall = func;
 	return true;
 }
 
-void MailContext::listMailbox(MSStringList& result)
+void MailHub::listMailbox(MSStringList& result)
 {
 	MSMutexLock lock(m_MailboxLock);
 	for (auto& mailbox : m_Mailboxes)
@@ -105,7 +107,7 @@ void MailContext::listMailbox(MSStringList& result)
 	}
 }
 
-bool MailContext::enqueueMailbox(MSHnd<IMailBox> mailbox)
+bool MailHub::enqueueMailbox(MSHnd<IMailBox> mailbox)
 {
 	{
 		MSMutexLock lock(m_MailLock);
@@ -115,7 +117,7 @@ bool MailContext::enqueueMailbox(MSHnd<IMailBox> mailbox)
 	return true;
 }
 
-bool MailContext::dequeueMailbox(MSHnd<IMailBox>& mailbox)
+bool MailHub::dequeueMailbox(MSHnd<IMailBox>& mailbox)
 {
 	MSMutexLock lock(m_MailLock);
 	if (m_MailboxQueue.empty()) return false;

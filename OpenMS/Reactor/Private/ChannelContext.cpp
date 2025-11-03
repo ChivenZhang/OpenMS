@@ -39,16 +39,6 @@ MSFuture<bool> ChannelContext::write(MSRef<IChannelEvent> event, MSPromise<bool>
 	return m_Channel->write(event, promise);
 }
 
-void ChannelContext::writeAndFlush(MSRef<IChannelEvent> event)
-{
-	m_Channel->writeAndFlush(event);
-}
-
-MSFuture<bool> ChannelContext::writeAndFlush(MSRef<IChannelEvent> event, MSPromise<bool>& promise)
-{
-	return m_Channel->writeAndFlush(event, promise);
-}
-
 MSStringMap<MSAny> &ChannelContext::attrib()
 {
 	return m_AttribMap;

@@ -10,14 +10,14 @@
 *
 * =================================================*/
 #include "Endpoint/IEndpoint.h"
-#include "Service/Private/Property.h"
+#include "OpenMS/Server/Private/Property.h"
 #include "Endpoint/RPC/RPCProtocol.h"
 #include "Reactor/TCP/TCPClientReactor.h"
 #include "Utility/Timer.h"
 class RPCClientInboundHandler;
 
-/// @brief RPC Client Endpoint
-class IRPCClient : public IEndpoint
+/// @brief RPC Client Base
+class RPCClientBase : public IEndpoint
 {
 public:
 	struct config_t
@@ -27,149 +27,195 @@ public:
 		uint32_t Workers = 0;
 		uint32_t Buffers = UINT16_MAX;
 	};
+	using method_t = MSLambda<bool(MSStringView const& input, MSString& output)>;
 
 public:
-	explicit IRPCClient(config_t const& config);
+	explicit RPCClientBase(config_t const& config);
 	void startup() override;
 	void shutdown() override;
 	bool running() const override;
 	bool connect() const override;
 	MSHnd<IChannelAddress> address() const override;
-	MSBinary<MSString, bool> call(MSStringView const& name, uint32_t timeout, MSString const& input);
-	bool async(MSStringView const& name, uint32_t timeout, MSString const& input, MSLambda<void(MSString&&)>&& callback);
+
+	bool unbind(MSStringView name);
+	bool invoke(uint32_t hash, MSStringView const& input, MSString& output);
+	bool bind(MSStringView name, MSLambda<bool(MSStringView const& input, MSString& output)>&& method);
+
+	MSBinary<MSString, bool> call(MSStringView const& name, uint32_t timeout, MSStringView const& input);
+	bool async(MSStringView const& name, uint32_t timeout, MSStringView const& input, MSLambda<void(MSString&&)>&& callback);
 
 protected:
 	friend class RPCClientInboundHandler;
 	const config_t m_Config;
 	Timer m_Timer;
-	MSMutex m_Locker;
+	MSMutex m_LockMethod;
+	MSMutex m_LockSession;
 	MSAtomic<uint32_t> m_Session;
 	MSRef<TCPClientReactor> m_Reactor;
+	MSMap<uint32_t, method_t> m_Methods;
 	MSMap<uint32_t, MSLambda<void(MSStringView const&)>> m_Sessions;
 };
 
-template<class Parser = RPCProtocolParser>
-class TRPCClient : public IRPCClient
+/// @brief RPC Client Endpoint
+class RPCClient : public RPCClientBase
 {
 public:
-	using parser_t = Parser;
-	using IRPCClient::IRPCClient;
+	using RPCClientBase::bind;
+	using RPCClientBase::call;
+	using RPCClientBase::async;
+	using RPCClientBase::RPCClientBase;
+
+	template <class F, OPENMS_NOT_SAME(typename MSTraits<F>::return_type, void)>
+	bool bind(MSStringView name, F method)
+	{
+		return RPCClientBase::bind(name, [method](MSStringView const& input, MSString& output)-> bool
+		{
+			// Convert request to tuple
+
+			typename MSTraits<F>::argument_datas args;
+			if (std::is_same_v<decltype(args), MSTuple<>> == false)
+			{
+				if (MSTypeC(input, args) == false) return false;
+			}
+
+			// Call method with tuple args
+
+			auto result = std::apply(method, args);
+
+			// Convert request to string
+
+			if (MSTypeC(result, output) == false) return false;
+			return true;
+		});
+	}
+
+	template <class F, OPENMS_IS_SAME(typename MSTraits<F>::return_type, void)>
+	bool bind(MSStringView name, F method)
+	{
+		return RPCClientBase::bind(name, [method](MSStringView const& input, MSString& output) -> bool
+		{
+			// Convert request to tuple
+
+			typename MSTraits<F>::argument_datas args;
+			if (std::is_same_v<decltype(args), MSTuple<>> == false)
+			{
+				if (MSTypeC(input, args) == false) return false;
+			}
+
+			// Call method with tuple args
+
+			std::apply(method, args);
+
+			// Return void output
+			return true;
+		});
+	}
 
 	/// @brief synchronous call
 	/// @tparam T return type
-	/// @tparam ARGS args types
+	/// @tparam Args args types
 	/// @param name call name
 	/// @param timeout unit: ms
 	/// @param args call args
 	/// @return result and true if sent
-	template <class T, class... ARGS, OPENMS_NOT_SAME(T, void)>
-	MSBinary<T, bool> call(MSStringView const& name, uint32_t timeout, ARGS &&... args)
+	template <class T, class... Args, OPENMS_NOT_SAME(T, void)>
+	MSBinary<T, bool> call(MSStringView const& name, uint32_t timeout, Args &&... args)
 	{
-		if (m_Reactor == nullptr || m_Reactor->connect() == false) return {T(), false};
-
 		// Convert request to string
 
 		MSString input;
-		if (std::is_same_v<MSTuple<ARGS...>, MSTuple<>> == false)
+		if (std::is_same_v<MSTuple<Args...>, MSTuple<>> == false)
 		{
-			if (parser_t::toString(std::make_tuple(std::forward<ARGS>(args)...), input) == false) return {T(), false};
+			if (MSTypeC(std::make_tuple(std::forward<Args>(args)...), input) == false) return {T(), false};
 		}
 
-		auto response = IRPCClient::call(name, timeout, input);
+		auto output = RPCClientBase::call(name, timeout, input);
 
 		// Convert string to response
 
-		if (response.second)
+		if (output.second)
 		{
-			T result;
-			if (parser_t::fromString(response.first, result) == true) return {result, true};
+			T response;
+			if (MSTypeC(output.first, response) == true) return {response, true};
 		}
-		return {T(), false};
+		return {{}, false};
 	}
 
 	/// @brief synchronous call and return void
 	/// @tparam T void
-	/// @tparam ARGS args types
+	/// @tparam Args args types
 	/// @param name call name
 	/// @param timeout unit: ms
 	/// @param args call args
 	/// @return return true if sent
-	template <class T, class... ARGS, OPENMS_IS_SAME(T, void)>
-	bool call(MSStringView const& name, uint32_t timeout, ARGS &&... args)
+	template <class T, class... Args, OPENMS_IS_SAME(T, void)>
+	bool call(MSStringView const& name, uint32_t timeout, Args &&... args)
 	{
-		if (m_Reactor == nullptr || m_Reactor->connect() == false) return false;
-
 		// Convert request to string
 
 		MSString input;
-		if (std::is_same_v<MSTuple<ARGS...>, MSTuple<>> == false)
+		if (std::is_same_v<MSTuple<Args...>, MSTuple<>> == false)
 		{
-			if (parser_t::toString(std::make_tuple(std::forward<ARGS>(args)...), input) == false) return false;
+			if (MSTypeC(std::make_tuple(std::forward<Args>(args)...), input) == false) return false;
 		}
 
-		auto response = IRPCClient::call(name, timeout, std::move(input));
-		return response.second;
+		auto output = RPCClientBase::call(name, timeout, input);
+		return output.second;
 	}
 
 	/// @brief asynchronous call
 	/// @tparam T return type
-	/// @tparam ARGS args types
+	/// @tparam Args args types
 	/// @param name call name
 	/// @param timeout unit: ms
 	/// @param args call args
 	/// @param callback call back
 	/// @return return true if sent
-	template <class T, class... ARGS, OPENMS_NOT_SAME(T, void)>
-	bool async(MSStringView const& name, uint32_t timeout, MSTuple<ARGS...> const& args, MSLambda<void(T&&)> callback)
+	template <class T, class... Args, OPENMS_NOT_SAME(T, void)>
+	bool async(MSStringView const& name, uint32_t timeout, MSTuple<Args...> const& args, MSLambda<void(T&&)> callback)
 	{
-		if (m_Reactor == nullptr || m_Reactor->connect() == false) return false;
-
 		// Convert request to string
 
 		MSString input;
-		if (std::is_same_v<MSTuple<ARGS...>, MSTuple<>> == false)
+		if (std::is_same_v<MSTuple<Args...>, MSTuple<>> == false)
 		{
-			if (parser_t::toString(args, input) == false) return false;
+			if (MSTypeC(args, input) == false) return false;
 		}
 
 		// Convert string to response
 
-		return IRPCClient::async(name, timeout, input, [callback](MSString&& response)
+		return RPCClientBase::async(name, timeout, input, [callback](MSString&& output)
 		{
-			T result;
-			parser_t::fromString(response, result);
-			if (callback) callback(std::move(result));
+			T response;
+			MSTypeC(output, response);
+			if (callback) callback(std::move(response));
 		});
 	}
 
 	/// @brief asynchronous call and return void
 	/// @tparam T void
-	/// @tparam ARGS args types
+	/// @tparam Args args types
 	/// @param name call name
 	/// @param timeout unit: ms
 	/// @param args call args
 	/// @param callback call back
 	/// @return return true if sent
-	template <class T, class... ARGS, OPENMS_IS_SAME(T, void)>
-	bool async(MSStringView const& name, uint32_t timeout, MSTuple<ARGS...> const& args, MSLambda<void()> callback)
+	template <class T, class... Args, OPENMS_IS_SAME(T, void)>
+	bool async(MSStringView const& name, uint32_t timeout, MSTuple<Args...> const& args, MSLambda<void()> callback)
 	{
-		if (m_Reactor == nullptr || m_Reactor->connect() == false) return false;
-
 		// Convert request to string
 
 		MSString input;
-		if (std::is_same_v<MSTuple<ARGS...>, MSTuple<>> == false)
+		if (std::is_same_v<MSTuple<Args...>, MSTuple<>> == false)
 		{
-			if (parser_t::toString(args, input) == false) return false;
+			if (MSTypeC(args, input) == false) return false;
 		}
 
 		// Convert string to response
 
-		return IRPCClient::async(name, timeout, input, [callback](MSString&& response)
+		return RPCClientBase::async(name, timeout, input, [callback](MSString&& output)
 		{
 			if (callback) callback();
 		});
 	}
 };
-
-using RPCClient = TRPCClient<>;

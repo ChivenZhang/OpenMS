@@ -14,21 +14,21 @@
 class RPCServerInboundHandler : public ChannelInboundHandler
 {
 public:
-	explicit RPCServerInboundHandler(MSRaw<IRPCServer> server);
+	explicit RPCServerInboundHandler(MSRaw<RPCServerBase> server);
 	bool channelRead(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event) override;
 
 protected:
 	MSString m_Buffer;
-	MSRaw<IRPCServer> m_Server;
+	MSRaw<RPCServerBase> m_Server;
 };
 
-IRPCServer::IRPCServer(config_t const& config)
+RPCServerBase::RPCServerBase(config_t const& config)
 	:
 	m_Config(config)
 {
 }
 
-void IRPCServer::startup()
+void RPCServerBase::startup()
 {
 	auto config = m_Config;
 	m_Reactor = MSNew<TCPServerReactor>(
@@ -47,38 +47,47 @@ void IRPCServer::startup()
 	if (m_Reactor->running() == false) MS_FATAL("failed to start reactor");
 }
 
-void IRPCServer::shutdown()
+void RPCServerBase::shutdown()
 {
 	if (m_Reactor) m_Reactor->shutdown();
 	m_Reactor = nullptr;
+
+	MSMutexLock lock(m_LockSession);
+	for (auto& session : m_Sessions)
+	{
+		auto callback = session.second;
+		if (callback) callback({});
+	}
+	m_Sessions.clear();
+	m_Session = 0;
 }
 
-bool IRPCServer::running() const
+bool RPCServerBase::running() const
 {
 	return m_Reactor ? m_Reactor->running() : false;
 }
 
-bool IRPCServer::connect() const
+bool RPCServerBase::connect() const
 {
 	return m_Reactor ? m_Reactor->connect() : false;
 }
 
-MSHnd<IChannelAddress> IRPCServer::address() const
+MSHnd<IChannelAddress> RPCServerBase::address() const
 {
 	return m_Reactor ? m_Reactor->address() : MSHnd<IChannelAddress>();
 }
 
-bool IRPCServer::unbind(MSStringView name)
+bool RPCServerBase::unbind(MSStringView name)
 {
-	MSMutexLock lock(m_Locker);
+	MSMutexLock lock(m_LockMethod);
 	return m_Methods.erase(MSHash(name));
 }
 
-bool IRPCServer::invoke(uint32_t hash, MSStringView const& input, MSString& output)
+bool RPCServerBase::invoke(uint32_t hash, MSStringView const& input, MSString& output)
 {
 	decltype(m_Methods)::value_type::second_type method;
 	{
-		MSMutexLock lock(m_Locker);
+		MSMutexLock lock(m_LockMethod);
 		auto result = m_Methods.find(hash);
 		if (result == m_Methods.end()) return false;
 		method = result->second;
@@ -87,14 +96,98 @@ bool IRPCServer::invoke(uint32_t hash, MSStringView const& input, MSString& outp
 	return false;
 }
 
-bool IRPCServer::bind(MSStringView name, MSLambda<bool(MSStringView const& input, MSString& output)>&& method)
+bool RPCServerBase::bind(MSStringView name, MSLambda<bool(MSStringView const& input, MSString& output)>&& method)
 {
 	if (method == nullptr) return false;
-	MSMutexLock lock(m_Locker);
+	MSMutexLock lock(m_LockMethod);
 	return m_Methods.emplace(MSHash(name), method).second;
 }
 
-RPCServerInboundHandler::RPCServerInboundHandler(MSRaw<IRPCServer> server)
+MSBinary<MSString, bool> RPCServerBase::call(MSStringView const& name, uint32_t timeout, MSStringView const& input)
+{
+	if (m_Reactor == nullptr || m_Reactor->connect() == false) return {{}, false};
+
+	// Convert request to string
+
+	MSString output(sizeof(RPCRequestView) + input.size(), 0);
+	auto& request = *(RPCRequestView*)output.data();
+	request.Length = (uint32_t)output.size();
+	request.Session = (++m_Session) | 0x80000000;
+	request.Method = MSHash(name);
+	if (input.empty() == false) ::memcpy(request.Buffer, input.data(), input.size());
+
+	// Set promise to handle response
+
+	MSPromise<MSString> promise;
+	auto future = promise.get_future();
+	{
+		MSMutexLock lock(m_LockMethod);
+		auto& session = m_Sessions[request.Session];
+		session = [&](MSStringView const& response) { promise.set_value(MSString(response)); };
+	}
+
+	// Send request to remote server
+
+	m_Reactor->write(IChannelEvent::New(output), nullptr);
+
+	auto status = future.wait_for(std::chrono::milliseconds(timeout));
+	{
+		MSMutexLock lock(m_LockMethod);
+		m_Sessions.erase(request.Session);
+	}
+	if (status == std::future_status::ready)
+	{
+		return {future.get(), true};
+	}
+	return {{}, false};
+}
+
+bool RPCServerBase::async(MSStringView const& name, uint32_t timeout, MSStringView const& input, MSLambda<void(MSString&&)>&& callback)
+{
+	if (m_Reactor == nullptr || m_Reactor->connect() == false) return false;
+
+	// Convert request to string
+
+	MSString output(sizeof(RPCRequestView) + input.size(), 0);
+	auto& requestView = *(RPCRequestView*)output.data();
+	requestView.Length = (uint32_t)output.size();
+	requestView.Session = ++m_Session;
+	requestView.Method = MSHash(name);
+	if (output.empty() == false) ::memcpy(requestView.Buffer, input.data(), input.size());
+
+	// Set timer to handle response
+
+	{
+		MSMutexLock lock(m_LockMethod);
+		auto& session = m_Sessions[requestView.Session];
+		session = [callback](MSStringView const& response)
+		{
+			if (callback) callback(MSString(response));
+		};
+	}
+
+	m_Timer.start(timeout, 0, [sessionID = requestView.Session, this](uint32_t handle)
+	{
+		decltype(m_Sessions)::value_type::second_type callback;
+		{
+			MSMutexLock lock(m_LockMethod);
+			auto result = m_Sessions.find(sessionID);
+			if (result != m_Sessions.end())
+			{
+				callback = result->second;
+				m_Sessions.erase(result);
+			}
+		}
+		if (callback) callback({});
+	});
+
+	// Send request to remote server
+
+	m_Reactor->write(IChannelEvent::New(output), nullptr);
+	return true;
+}
+
+RPCServerInboundHandler::RPCServerInboundHandler(MSRaw<RPCServerBase> server)
 	:
 	m_Server(server)
 {
@@ -103,33 +196,26 @@ RPCServerInboundHandler::RPCServerInboundHandler(MSRaw<IRPCServer> server)
 bool RPCServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)
 {
 	m_Buffer += event->Message;
-
-	struct stream_t
+	auto& package = *(RPCRequestBase*)m_Buffer.data();
+	if (sizeof(RPCRequestBase) <= m_Buffer.size() && package.Length <= m_Buffer.size())
 	{
-		uint32_t Length;
-		char Buffer[0];
-	};
-	auto& stream = *(stream_t*)m_Buffer.data();
-
-	if (sizeof(stream_t) <= m_Buffer.size() && sizeof(stream_t) + stream.Length <= m_Buffer.size())
-	{
-		auto message = MSStringView(stream.Buffer, stream.Length);
-		if (message.size() <= m_Server->m_Config.Buffers)
+		// Call from client
+		if ((package.Session & 0X80000000) == 0)
 		{
-			auto& requestView = *(RPCRequestView*)message.data();
-			if (sizeof(RPCRequestView) <= message.size() && sizeof(RPCRequestView) + requestView.Length == message.size())
+			auto& request = *(RPCRequestView*)m_Buffer.data();
+			auto message = MSStringView(request.Buffer, request.Length - sizeof(RPCRequestView));
+			if (message.size() <= m_Server->m_Config.Buffers)
 			{
-				MSString response;
-				if (m_Server->invoke(requestView.Name, MSStringView(requestView.Buffer, requestView.Length), response))
+				MSString output;
+				if (m_Server->invoke(request.Method, message, output))
 				{
-					MSString output(sizeof(RPCResponseView) + response.size(), 0);
-					RPCResponseView& responseView = *(RPCResponseView*)output.data();
-					responseView.ID = requestView.ID;
-					responseView.Length = (uint32_t)response.size();
-					if (responseView.Length) ::memcpy(responseView.Buffer, response.data(), response.size());
+					MSString buffer(sizeof(RPCResponseView) + output.size(), 0);
+					RPCResponseView& response = *(RPCResponseView*)buffer.data();
+					response.Length = (uint32_t)buffer.size();
+					response.Session = request.Session;
+					if (output.empty() == false) ::memcpy(response.Buffer, output.data(), output.size());
 
-					auto length = (uint32_t)output.size();
-					context->writeAndFlush(IChannelEvent::New(MSString((char*)&length, sizeof(length)) + output));
+					context->write(IChannelEvent::New(buffer));
 				}
 				else
 				{
@@ -137,9 +223,26 @@ bool RPCServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<
 				}
 			}
 		}
-
-		m_Buffer = m_Buffer.substr(sizeof(uint32_t) + stream.Length);
+		else
+		{
+			auto& response = *(RPCResponseView*)m_Buffer.data();
+			auto message = MSStringView(response.Buffer, response.Length - sizeof(RPCResponseView));
+			if (message.size() <= m_Server->m_Config.Buffers)
+			{
+				decltype(m_Server->m_Sessions)::value_type::second_type callback;
+				{
+					MSMutexLock lock(m_Server->m_LockSession);
+					auto result = m_Server->m_Sessions.find(response.Session);
+					if (result != m_Server->m_Sessions.end())
+					{
+						callback = result->second;
+						m_Server->m_Sessions.erase(result);
+					}
+				}
+				if (callback) callback(message);
+			}
+		}
+		m_Buffer = m_Buffer.substr(package.Length);
 	}
-
 	return false;
 }

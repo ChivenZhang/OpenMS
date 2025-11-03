@@ -9,25 +9,25 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "../IMailContext.h"
+#include "../IMailHub.h"
 #include "MailBox.h"
-#include "MailDeliver.h"
+#include "MailMan.h"
 
-class MailContext : public IMailContext
+class MailHub : public IMailHub
 {
 public:
-	explicit MailContext(uint32_t overload = MSThread::hardware_concurrency());
-	~MailContext() override;
-	using IMailContext::createMailbox;
-	bool createMailbox(MSString address, MSLambda<MSRef<IMailBox>(MSRaw<IMailContext>)> factory) override;
+	explicit MailHub(uint32_t overload = MSThread::hardware_concurrency());
+	~MailHub() override;
+	using IMailHub::createMailbox;
+	bool createMailbox(MSString address, MSLambda<MSRef<IMailBox>()> factory) override;
 	bool cancelMailbox(MSString address) override;
 	bool existMailbox(MSString address) override;
-	bool sendToMailbox(IMail&& mail) override;
-	bool sendToMailbox(MSLambda<bool(IMail&& mail)> func) override;
+	uint32_t sendToMailbox(IMail mail) override;
+	bool sendToMailbox(MSLambda<bool(IMail mail)> func) override;
 	void listMailbox(MSStringList& result) override;
 
 private:
-	friend class MailDeliver;
+	friend class MailMan;
 	bool enqueueMailbox(MSHnd<IMailBox> mailbox);
 	bool dequeueMailbox(MSHnd<IMailBox>& mailbox);
 
@@ -37,9 +37,10 @@ protected:
 	MSMutex m_MailboxLock;
 	MSMutexUnlock m_MailboxUnlock;
 	MSAtomic<bool> m_Running;
-	MSLambda<bool(IMail&& mail)> m_RemoteCall;
+	MSLambda<bool(IMail mail)> m_RemoteCall;
+	MSAtomic<uint32_t> m_Session;
 	MSList<MSRef<MailBox>> m_Mailboxes;
-	MSList<MSRef<MailDeliver>> m_Delivers;
-	MSMap<MSString, MSRef<MailBox>> m_MailboxMap;
+	MSList<MSRef<MailMan>> m_Delivers;
+	MSMap<uint32_t, MSRef<MailBox>> m_MailboxMap;
 	MSQueue<MSRef<IMailBox>> m_MailboxQueue;
 };

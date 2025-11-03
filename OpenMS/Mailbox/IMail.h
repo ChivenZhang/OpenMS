@@ -9,9 +9,18 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "IMessageBox.h"
+#include "MS.h"
 
-class IMessageHub
+/// @brief Interface for mail
+struct IMail
 {
+	uint32_t From, To, Date;
+	MSStringView Body;
+};
 
+/// @brief Interface for mail
+struct IMailView
+{
+	uint32_t From, To, Date;
+	char Body[0];
 };

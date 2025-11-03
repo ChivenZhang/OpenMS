@@ -29,13 +29,13 @@ void MasterServer::onInit()
 	m_MailUpdateTime = std::chrono::system_clock::now();
 	m_ClusterServer->bind("push", [this](MSString const& address, MSList<MSString> const& mails)->bool
 	{
-		for (auto& mail : mails) m_MailRouteMap[mail].insert(address);
-		for (auto& mail : mails) m_MailRouteNewMap[mail].insert(address);
+		for (auto& mail : mails) m_MailRouteMap[MSHash(mail)].insert(address);
+		for (auto& mail : mails) m_MailRouteNewMap[MSHash(mail)].insert(address);
 		MS_INFO("validate %s", address.c_str());
 		return true;
 	});
 
-	m_ClusterServer->bind("pull", [this]()->MSStringMap<MSSet<MSString>>
+	m_ClusterServer->bind("pull", [this]()->MSMap<uint32_t, MSSet<MSString>>
 	{
 		auto now = std::chrono::system_clock::now();
 		if (OPENMS_HEARTBEAT <= std::chrono::duration_cast<std::chrono::seconds>(now - m_MailUpdateTime).count())

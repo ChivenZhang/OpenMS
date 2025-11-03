@@ -312,7 +312,7 @@ bool HTTPServerOutboundHandler::channelWrite(MSRaw<IChannelContext> context, MSR
 
 			// Send response to remote client
 
-			context->writeAndFlush(IChannelEvent::New(responseHTML));
+			context->write(IChannelEvent::New(responseHTML));
 		}
 	}
 	return false;

@@ -9,7 +9,7 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "Service/Private/Server.h"
+#include "OpenMS/Server/Private/Server.h"
 #include "MasterConfig.h"
 #include "Endpoint/RPC/RPCServer.h"
 
@@ -25,7 +25,7 @@ protected:
 
 protected:
 	MSRef<RPCServer> m_ClusterServer;
-	MSStringMap<MSSet<MSString>> m_MailRouteMap;
-	MSStringMap<MSSet<MSString>> m_MailRouteNewMap;
+	MSMap<uint32_t, MSSet<MSString>> m_MailRouteMap;
+	MSMap<uint32_t, MSSet<MSString>> m_MailRouteNewMap;
 	std::chrono::time_point<std::chrono::system_clock> m_MailUpdateTime;
 };

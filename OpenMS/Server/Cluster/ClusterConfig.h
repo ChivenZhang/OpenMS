@@ -9,9 +9,10 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "Service/Private/Property.h"
+#include "OpenMS/Server/Private/Property.h"
+#include "Mailbox/Private/MailHub.h"
 
-/// @brief 
-class MasterConfig : RESOURCE2(Property, IProperty)
+/// @brief
+class ClusterConfig : RESOURCE2(Property, IProperty), RESOURCE2(MailHub, IMailHub)
 {
 };

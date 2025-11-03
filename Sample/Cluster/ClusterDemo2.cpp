@@ -15,19 +15,13 @@ class AuthorMailbox : public MailBox
 public:
 	using MailBox::MailBox;
 
-	IMailTask read(IMail&& mail) override
+	IMailTask read(IMail mail) override
 	{
-		static int count = 0;
-		count++;
-		static int t0 = ::clock();
-		int t1 = ::clock();
-		if (t0 + CLOCKS_PER_SEC <= t1)
-		{
-			MS_INFO("read %.0f mails per second", count * 1.0f * CLOCKS_PER_SEC / (t1 - t0));
-			count = 0;
-			t0 = t1;
-		}
-
+		auto newMail = mail;
+		newMail.Body = "success";
+		newMail.To = mail.From;
+		send(newMail);
+		MS_INFO("success");
 		co_return;
 	}
 };
@@ -44,8 +38,8 @@ void ClusterDemo2::onInit()
 {
 	ClusterServer::onInit();
 
-	auto mails = AUTOWIRE(IMailContext)::bean();
-	mails->createMailbox<AuthorMailbox>("author");
+	auto hub = AUTOWIRE(IMailHub)::bean();
+	hub->createMailbox<AuthorMailbox>("author");
 }
 
 void ClusterDemo2::onExit()

@@ -24,7 +24,6 @@ public:
 	void shutdown() override;
 	MSHnd<IChannelAddress> address() const override;
 	void write(MSRef<IChannelEvent> event, MSRef<IChannelAddress> address) override;
-	void writeAndFlush(MSRef<IChannelEvent> event, MSRef<IChannelAddress> address) override;
 
 protected:
 	void onConnect(MSRef<Channel> channel) override;

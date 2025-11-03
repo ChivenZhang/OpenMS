@@ -10,6 +10,7 @@
 *
 * =================================================*/
 #include "MS.h"
+#include "Utility/Async.h"
 
 class OPENMS_API IServiceAddress
 {
@@ -35,5 +36,8 @@ public:
 /// @brief Interface for service
 class OPENMS_API IService
 {
-	// TODO:
+public:
+	virtual ~IService() = default;
+
+	virtual MSAsync<MSString> handle(MSString const& input) = 0;
 };

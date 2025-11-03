@@ -9,7 +9,7 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-
+#include "Service/IService.h"
 
 class Service
 {
