@@ -29,7 +29,7 @@ MailHub::~MailHub()
 	m_Delivers.clear();
 }
 
-bool MailHub::createMailbox(MSString address, MSLambda<MSRef<IMailBox>()> factory)
+bool MailHub::create(MSString address, MSLambda<MSRef<IMailBox>()> factory)
 {
 	MSMutexLock lock(m_MailboxLock);
 	auto result = m_MailboxMap.emplace(MSHash(address), nullptr);
@@ -43,7 +43,7 @@ bool MailHub::createMailbox(MSString address, MSLambda<MSRef<IMailBox>()> factor
 	return true;
 }
 
-bool MailHub::cancelMailbox(MSString address)
+bool MailHub::cancel(MSString address)
 {
 	MSMutexLock lock(m_MailboxLock);
 	auto result = m_MailboxMap.find(MSHash(address));
@@ -53,7 +53,7 @@ bool MailHub::cancelMailbox(MSString address)
 	return true;
 }
 
-bool MailHub::existMailbox(MSString address)
+bool MailHub::exist(MSString address)
 {
 	MSMutexLock lock(m_MailboxLock);
 	auto result = m_MailboxMap.find(MSHash(address));
@@ -61,7 +61,7 @@ bool MailHub::existMailbox(MSString address)
 	return true;
 }
 
-uint32_t MailHub::sendToMailbox(IMail mail)
+uint32_t MailHub::send(IMail mail)
 {
 	MSRef<MailBox> toMailbox;
 	mail.Date = m_Session++;
@@ -91,14 +91,14 @@ uint32_t MailHub::sendToMailbox(IMail mail)
 	}
 }
 
-bool MailHub::sendToMailbox(MSLambda<bool(IMail mail)> func)
+bool MailHub::send(MSLambda<bool(IMail mail)> func)
 {
 	if (m_RemoteCall) return false;
 	m_RemoteCall = func;
 	return true;
 }
 
-void MailHub::listMailbox(MSStringList& result)
+void MailHub::list(MSStringList& result)
 {
 	MSMutexLock lock(m_MailboxLock);
 	for (auto& mailbox : m_Mailboxes)

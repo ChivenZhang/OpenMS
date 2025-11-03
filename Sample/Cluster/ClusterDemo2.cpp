@@ -39,7 +39,7 @@ void ClusterDemo2::onInit()
 	ClusterServer::onInit();
 
 	auto hub = AUTOWIRE(IMailHub)::bean();
-	hub->createMailbox<AuthorMailbox>("author");
+	hub->create<AuthorMailbox>("author");
 }
 
 void ClusterDemo2::onExit()

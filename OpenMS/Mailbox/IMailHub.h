@@ -17,23 +17,23 @@ class OPENMS_API IMailHub
 public:
 	virtual ~IMailHub() = default;
 
-	virtual bool createMailbox(MSString address, MSLambda<MSRef<IMailBox>()> factory) = 0;
+	virtual bool create(MSString address, MSLambda<MSRef<IMailBox>()> factory) = 0;
 
-	virtual bool cancelMailbox(MSString address) = 0;
+	virtual bool cancel(MSString address) = 0;
 
-	virtual bool existMailbox(MSString address) = 0;
+	virtual bool exist(MSString address) = 0;
 
-	virtual uint32_t sendToMailbox(IMail mail) = 0;
+	virtual uint32_t send(IMail mail) = 0;
 
-	virtual bool sendToMailbox(MSLambda<bool(IMail mail)> func) = 0;
+	virtual bool send(MSLambda<bool(IMail mail)> func) = 0;
 
-	virtual void listMailbox(MSStringList& result) = 0;
+	virtual void list(MSStringList& result) = 0;
 
 	template<class T, class... Args>
-	bool createMailbox(MSString address, Args &&... args)
+	bool create(MSString address, Args &&... args)
 	{
 		static_assert(std::is_base_of_v<IMailBox, T>);
-		return createMailbox(address, [&](){ return MSNew<T>(this, std::forward<Args>(args)...); });
+		return create(address, [&](){ return MSNew<T>(this, std::forward<Args>(args)...); });
 	}
 };
 using IMailHubRaw = MSRaw<IMailHub>;

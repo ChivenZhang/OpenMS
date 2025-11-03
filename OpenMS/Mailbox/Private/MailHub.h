@@ -18,13 +18,13 @@ class MailHub : public IMailHub
 public:
 	explicit MailHub(uint32_t overload = MSThread::hardware_concurrency());
 	~MailHub() override;
-	using IMailHub::createMailbox;
-	bool createMailbox(MSString address, MSLambda<MSRef<IMailBox>()> factory) override;
-	bool cancelMailbox(MSString address) override;
-	bool existMailbox(MSString address) override;
-	uint32_t sendToMailbox(IMail mail) override;
-	bool sendToMailbox(MSLambda<bool(IMail mail)> func) override;
-	void listMailbox(MSStringList& result) override;
+	using IMailHub::create;
+	bool create(MSString address, MSLambda<MSRef<IMailBox>()> factory) override;
+	bool cancel(MSString address) override;
+	bool exist(MSString address) override;
+	uint32_t send(IMail mail) override;
+	bool send(MSLambda<bool(IMail mail)> func) override;
+	void list(MSStringList& result) override;
 
 private:
 	friend class MailMan;

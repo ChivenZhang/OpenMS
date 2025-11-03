@@ -27,25 +27,25 @@ uint32_t MailBox::send(IMail mail)
 {
 	if (m_Context == nullptr) return 0;
 	mail.From = m_HashName;
-	return m_Context->sendToMailbox(mail);
+	return m_Context->send(mail);
 }
 
 bool MailBox::create(MSString address, MSLambda<MSRef<IMailBox>()> factory)
 {
 	if (m_Context == nullptr) return false;
-	return m_Context->createMailbox(address, factory);
+	return m_Context->create(address, factory);
 }
 
 bool MailBox::cancel(MSString address)
 {
 	if (m_Context == nullptr) return false;
-	return m_Context->cancelMailbox(address);
+	return m_Context->cancel(address);
 }
 
 bool MailBox::exist(MSString address) const
 {
 	if (m_Context == nullptr) return false;
-	return m_Context->existMailbox(address);
+	return m_Context->exist(address);
 }
 
 void MailBox::error(MSError&& info)

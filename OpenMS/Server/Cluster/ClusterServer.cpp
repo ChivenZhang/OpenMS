@@ -31,13 +31,13 @@ void ClusterServer::onInit()
 	});
 	m_ServiceServer->bind("mailbox", [=](uint32_t from, uint32_t to, uint32_t date, MSString const& body)
 	{
-		mails->sendToMailbox({from, to, date, body});
+		mails->send({from, to, date, body});
 	});
 	m_ServiceServer->startup();
 
 	// Handle local mail to remote
 
-	mails->sendToMailbox([this](IMail mail)->bool
+	mails->send([this](IMail mail)->bool
 	{
 		// Select remote address to send
 
@@ -104,7 +104,7 @@ void ClusterServer::onInit()
 		if (m_ClusterClient->connect() == true && m_ServiceServer->connect() == true)
 		{
 			MSStringList mailList;
-			AUTOWIRE(IMailHub)::bean()->listMailbox(mailList);
+			AUTOWIRE(IMailHub)::bean()->list(mailList);
 			MSString address = m_ServiceServer->address().lock()->getString();
 			if (m_ClusterClient->call<bool>("push", 1000, address, mailList).first)
 			{

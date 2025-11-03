@@ -44,14 +44,14 @@ void ClusterDemo1::onInit()
 	ClusterServer::onInit();
 
 	auto hub = AUTOWIRE(IMailHub)::bean();
-	hub->createMailbox<LoginMailbox>("login");
+	hub->create<LoginMailbox>("login");
 
 	m_Running = true;
 	m_Thread = MSThread([=, this]()
 	{
 		while (m_Running)
 		{
-			hub->sendToMailbox({.To = MSHash("login"), .Body = R"({"user":"admin", "pass":"******"})"});
+			hub->send({.To = MSHash("login"), .Body = R"({"user":"admin", "pass":"******"})"});
 			std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		}
 	});
