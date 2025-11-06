@@ -1,6 +1,5 @@
-#pragma once
 /*=================================================
-* Copyright @ 2020-2025 ChivenZhang.
+* Copyright © 2020-2025 ChivenZhang.
 * All Rights Reserved.
 * =====================Note=========================
 *
@@ -9,9 +8,4 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "Service/Private/Property.h"
-
-/// @brief 
-class MasterConfig : RESOURCE2(Property, IProperty)
-{
-};
+#include "Service.h"

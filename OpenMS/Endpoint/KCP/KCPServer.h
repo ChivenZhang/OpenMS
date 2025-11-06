@@ -10,7 +10,7 @@
 *
 * =================================================*/
 #include "Endpoint/IEndpoint.h"
-#include "Service/IProperty.h"
+#include "OpenMS/Server/IProperty.h"
 #include "Reactor/KCP/KCPServerReactor.h"
 
 /// @brief KCP Server Endpoint

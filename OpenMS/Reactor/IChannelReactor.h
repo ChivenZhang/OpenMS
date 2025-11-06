@@ -9,7 +9,6 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "MS.h"
 #include "IChannel.h"
 
 /// @brief Interface for channel
@@ -31,8 +30,4 @@ public:
 	virtual void write(MSRef<IChannelEvent> event, MSRef<IChannelAddress> address) = 0;
 
 	virtual MSFuture<bool> write(MSRef<IChannelEvent> event, MSRef<IChannelAddress> address, MSPromise<bool>&& promise) = 0;
-
-	virtual void writeAndFlush(MSRef<IChannelEvent> event, MSRef<IChannelAddress> address) = 0;
-
-	virtual MSFuture<bool> writeAndFlush(MSRef<IChannelEvent> event, MSRef<IChannelAddress> address, MSPromise<bool>&& promise) = 0;
 };

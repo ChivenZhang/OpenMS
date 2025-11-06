@@ -11,31 +11,19 @@
 * =================================================*/
 #include "MS.h"
 
-struct RPCRequestView
+struct RPCRequestBase
 {
-	uint32_t ID;
-	uint32_t Name;
 	uint32_t Length;
+	uint32_t Session;
+};
+
+struct RPCRequestView : RPCRequestBase
+{
+	uint32_t Method;
 	char Buffer[0];
 };
 
-struct RPCResponseView
+struct RPCResponseView : RPCRequestBase
 {
-	uint32_t ID;
-	uint32_t Length;
 	char Buffer[0];
-};
-
-struct RPCProtocolParser
-{
-	template<class T>
-	static bool toString(T const& input, MSString& output)
-	{
-		return MSTypeC(input, output);
-	}
-	template<class T>
-	static bool fromString(MSString const& input, T& output)
-	{
-		return MSTypeC(input, output);
-	}
 };
