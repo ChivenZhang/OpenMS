@@ -27,7 +27,7 @@ public:
 
 	virtual bool send(MSLambda<bool(IMail mail)> func) = 0;
 
-	virtual void list(MSStringList& result) = 0;
+	virtual void list(MSList<IMailBox::name_t>& result) = 0;
 
 	template<class T, class... Args>
 	bool create(MSString address, Args &&... args)

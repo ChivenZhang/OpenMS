@@ -30,6 +30,6 @@ protected:
 	MSMutex m_MailClientLock;
 	MSRef<RPCServer> m_ServiceServer;
 	MSRef<RPCClient> m_ClusterClient;
-	MSMap<uint32_t, MSStringList> m_MailRouteMap;	// service : [ip+port]
-	MSMap<uint32_t, MSRef<RPCClient>> m_MailClientMap;	// [ip+port] : client
+	MSMap<uint32_t, MSStringList> m_MailRouteMap;		// service : [ip+port]
+	MSMap<uint32_t, MSRef<RPCClient>> m_MailClientMap;	// [ip+port] : clients
 };

@@ -10,6 +10,7 @@
 * =================================================*/
 #include "MailMan.h"
 #include "MailHub.h"
+#include "Mail.h"
 #include <coroutine>
 #include <cpptrace/cpptrace.hpp>
 
@@ -23,7 +24,7 @@ MailMan::MailMan(MSRaw<MailHub> context)
 		{
 			MSUniqueLock lock(m_MailLock);
 			MSHnd<IMailBox> element;
-			m_Context->m_MailUnlock.wait(lock, [&]() { return m_Context->m_Running == false || m_Context->dequeueMailbox(element); });
+			m_Context->m_MailUnlock.wait(lock, [&]() { return m_Context->m_Running == false || m_Context->dequeue(element); });
 			if (m_Context->m_Running == false) break;
 
 			if (auto mailbox = MSCast<MailBox>(element.lock()))
@@ -39,6 +40,7 @@ MailMan::MailMan(MSRaw<MailHub> context)
 						mailData.From = mailView.From;
 						mailData.To = mailView.To;
 						mailData.Date = mailView.Date;
+						mailData.Addr = mailView.Addr;
 						mailData.Body = MSStringView(mailView.Body, mail.Mail.size() - sizeof(IMailView));
 						mail.Handle = std::move(mailbox->read(mailData));
 					}
@@ -61,7 +63,7 @@ MailMan::MailMan(MSRaw<MailHub> context)
 				}
 				if (mailbox->m_MailQueue.empty() == false)
 				{
-					m_Context->enqueueMailbox(mailbox);
+					m_Context->enqueue(mailbox);
 				}
 			}
 		}

@@ -29,9 +29,9 @@ void ClusterServer::onInit()
 		.Backlog = property(identity() + ".server.backlog", 0U),
 		.Workers = property(identity() + ".server.workers", 0U),
 	});
-	m_ServiceServer->bind("mailbox", [=](uint32_t from, uint32_t to, uint32_t date, MSString const& body)
+	m_ServiceServer->bind("mailbox", [=](uint32_t from, uint32_t to, uint32_t date, uint32_t addr, MSString const& body)
 	{
-		mails->send({from, to, date, body});
+		mails->send({from, to, date, addr, body});
 	});
 	m_ServiceServer->startup();
 
@@ -76,7 +76,7 @@ void ClusterServer::onInit()
 			client->startup();
 		}
 		if (client->connect() == false) return false;
-		return client->call<void>("mailbox", 0, mail.From, mail.To, mail.Date, MSString(mail.Body));
+		return client->call<void>("mailbox", 0, mail.From, mail.To, mail.Date, mail.Addr, MSString(mail.Body));
 	});
 
 	// Connect to master server
@@ -103,7 +103,7 @@ void ClusterServer::onInit()
 		}
 		if (m_ClusterClient->connect() == true && m_ServiceServer->connect() == true)
 		{
-			MSStringList mailList;
+			MSList<IMailBox::name_t> mailList;
 			AUTOWIRE(IMailHub)::bean()->list(mailList);
 			MSString address = m_ServiceServer->address().lock()->getString();
 			if (m_ClusterClient->call<bool>("push", 1000, address, mailList).first)

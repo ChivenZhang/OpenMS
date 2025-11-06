@@ -9,6 +9,7 @@
 *
 * =================================================*/
 #include "MailHub.h"
+#include "Mail.h"
 
 MailHub::MailHub(uint32_t overload)
 	:
@@ -36,29 +37,22 @@ bool MailHub::create(MSString address, MSLambda<MSRef<IMailBox>()> factory)
 	if (result.second == false) return false;
 	auto mailbox = MSCast<MailBox>(factory());
 	if (mailbox == nullptr) return false;
-	mailbox->m_Address = address;
+	result.first->second = mailbox;
 	mailbox->m_HashName = MSHash(address);
-	m_Mailboxes.push_back(mailbox);
-	result.first->second = m_Mailboxes.back();
 	return true;
 }
 
 bool MailHub::cancel(MSString address)
 {
 	MSMutexLock lock(m_MailboxLock);
-	auto result = m_MailboxMap.find(MSHash(address));
-	if (result == m_MailboxMap.end()) return false;
-	std::erase(m_Mailboxes, result->second);
-	m_MailboxMap.erase(result);
-	return true;
+	return m_MailboxMap.erase(MSHash(address));
 }
 
 bool MailHub::exist(MSString address)
 {
 	MSMutexLock lock(m_MailboxLock);
 	auto result = m_MailboxMap.find(MSHash(address));
-	if (result == m_MailboxMap.end()) return false;
-	return true;
+	return result != m_MailboxMap.end();
 }
 
 uint32_t MailHub::send(IMail mail)
@@ -84,9 +78,10 @@ uint32_t MailHub::send(IMail mail)
 		mailView.From = mail.From;
 		mailView.To = mail.To;
 		mailView.Date = mail.Date;
+		mailView.Addr = mail.Addr;
 		if (mail.Body.empty() == false) ::memcpy(mailView.Body, mail.Body.data(), mail.Body.size());
 		toMailbox->m_MailQueue.push({ .Mail = std::move(mailData) });
-		if (idle) enqueueMailbox(toMailbox);
+		if (idle) enqueue(toMailbox);
 		return mail.Date;
 	}
 }
@@ -98,16 +93,16 @@ bool MailHub::send(MSLambda<bool(IMail mail)> func)
 	return true;
 }
 
-void MailHub::list(MSStringList& result)
+void MailHub::list(MSList<uint32_t>& result)
 {
 	MSMutexLock lock(m_MailboxLock);
-	for (auto& mailbox : m_Mailboxes)
+	for (auto& mailbox : m_MailboxMap)
 	{
-		result.push_back(mailbox->m_Address);
+		result.push_back(mailbox.second->name());
 	}
 }
 
-bool MailHub::enqueueMailbox(MSHnd<IMailBox> mailbox)
+bool MailHub::enqueue(MSHnd<IMailBox> mailbox)
 {
 	{
 		MSMutexLock lock(m_MailLock);
@@ -117,7 +112,7 @@ bool MailHub::enqueueMailbox(MSHnd<IMailBox> mailbox)
 	return true;
 }
 
-bool MailHub::dequeueMailbox(MSHnd<IMailBox>& mailbox)
+bool MailHub::dequeue(MSHnd<IMailBox>& mailbox)
 {
 	MSMutexLock lock(m_MailLock);
 	if (m_MailboxQueue.empty()) return false;

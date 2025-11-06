@@ -10,6 +10,8 @@
 * =================================================*/
 #include "MasterServer.h"
 
+#include "Mailbox/IMailBox.h"
+
 MSString MasterServer::identity() const
 {
 	return "master";
@@ -27,10 +29,10 @@ void MasterServer::onInit()
 	// Maintain mail route table
 
 	m_MailUpdateTime = std::chrono::system_clock::now();
-	m_ClusterServer->bind("push", [this](MSString const& address, MSList<MSString> const& mails)->bool
+	m_ClusterServer->bind("push", [this](MSString const& address, MSList<IMailBox::name_t> const& mails)->bool
 	{
-		for (auto& mail : mails) m_MailRouteMap[MSHash(mail)].insert(address);
-		for (auto& mail : mails) m_MailRouteNewMap[MSHash(mail)].insert(address);
+		for (auto& mail : mails) m_MailRouteMap[mail].insert(address);
+		for (auto& mail : mails) m_MailRouteNewMap[mail].insert(address);
 		MS_INFO("validate %s", address.c_str());
 		return true;
 	});

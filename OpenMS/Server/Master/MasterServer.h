@@ -25,7 +25,7 @@ protected:
 
 protected:
 	MSRef<RPCServer> m_ClusterServer;
-	MSMap<uint32_t, MSSet<MSString>> m_MailRouteMap;
+	MSMap<uint32_t, MSSet<MSString>> m_MailRouteMap;	// Service : [IP:Port]
 	MSMap<uint32_t, MSSet<MSString>> m_MailRouteNewMap;
 	std::chrono::time_point<std::chrono::system_clock> m_MailUpdateTime;
 };

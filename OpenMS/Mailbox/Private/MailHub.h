@@ -24,12 +24,12 @@ public:
 	bool exist(MSString address) override;
 	uint32_t send(IMail mail) override;
 	bool send(MSLambda<bool(IMail mail)> func) override;
-	void list(MSStringList& result) override;
+	void list(MSList<uint32_t>& result) override;
 
 private:
 	friend class MailMan;
-	bool enqueueMailbox(MSHnd<IMailBox> mailbox);
-	bool dequeueMailbox(MSHnd<IMailBox>& mailbox);
+	bool enqueue(MSHnd<IMailBox> mailbox);
+	bool dequeue(MSHnd<IMailBox>& mailbox);
 
 protected:
 	MSMutex m_MailLock;
@@ -39,7 +39,6 @@ protected:
 	MSAtomic<bool> m_Running;
 	MSLambda<bool(IMail mail)> m_RemoteCall;
 	MSAtomic<uint32_t> m_Session;
-	MSList<MSRef<MailBox>> m_Mailboxes;
 	MSList<MSRef<MailMan>> m_Delivers;
 	MSMap<uint32_t, MSRef<MailBox>> m_MailboxMap;
 	MSQueue<MSRef<IMailBox>> m_MailboxQueue;

@@ -109,7 +109,6 @@ add_library(OpenMS STATIC
 		Server/Cluster/ClusterServer.h
 		Server/IProperty.h
 		Server/IServer.h
-		Service/IService.h
 		Server/IStartup.h
 		Server/Master/MasterConfig.h
 		Server/Master/MasterServer.cpp
@@ -118,8 +117,8 @@ add_library(OpenMS STATIC
 		Server/Private/Property.h
 		Server/Private/Server.cpp
 		Server/Private/Server.h
-		Service/Private/Service.cpp
-		Service/Private/Service.h
+        Server/Private/Service.cpp
+        Server/Private/Service.h
 		Utility/Async.cpp
 		Utility/Async.h
 		Utility/Timer.cpp
@@ -127,6 +126,7 @@ add_library(OpenMS STATIC
 		${MYSQL_SOURCES}
 		${REDIS_SOURCES}
 		Mailbox/IMail.h
+		Mailbox/Private/Mail.h
 )
 
 if(OPENMS_ENABLE_MYSQL)

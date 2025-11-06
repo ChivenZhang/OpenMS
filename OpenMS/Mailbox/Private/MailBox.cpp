@@ -18,9 +18,9 @@ MailBox::MailBox(MSRaw<IMailHub> context)
 {
 }
 
-MSString MailBox::name() const
+IMailBox::name_t MailBox::name() const
 {
-	return m_Address;
+	return m_HashName;
 }
 
 uint32_t MailBox::send(IMail mail)
@@ -51,10 +51,4 @@ bool MailBox::exist(MSString address) const
 void MailBox::error(MSError&& info)
 {
 	MS_INFO("%s", info.what());
-}
-
-IMailTask MailBox::read(IMail mail)
-{
-	MS_INFO("TODO:implement read method");
-	co_return;
 }

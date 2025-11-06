@@ -18,9 +18,12 @@ using IMailTask = MSAsync<void>;
 class OPENMS_API IMailBox
 {
 public:
+	using name_t = uint32_t;
+
+public:
 	virtual ~IMailBox() = default;
 
-	virtual MSString name() const = 0;
+	virtual name_t name() const = 0;
 
 	virtual uint32_t send(IMail mail) = 0;
 

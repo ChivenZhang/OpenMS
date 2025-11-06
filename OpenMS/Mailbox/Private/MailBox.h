@@ -19,7 +19,7 @@ class MailBox : public IMailBox
 {
 public:
 	explicit MailBox(MSRaw<IMailHub> context);
-	MSString name() const final;
+	name_t name() const final;
 	uint32_t send(IMail mail) final;
 	using IMailBox::create;
 	bool create(MSString address, MSLambda<MSRef<IMailBox>()> factory) final;
@@ -28,12 +28,10 @@ public:
 
 protected:
 	void error(MSError&& info) override;
-	IMailTask read(IMail mail) override;
 
 private:
 	friend class MailHub;
 	friend class MailMan;
-	MSString m_Address;
 	uint32_t m_HashName;
 	MSMutex m_MailLock;
 	MSAtomic<uint32_t> m_Session;
