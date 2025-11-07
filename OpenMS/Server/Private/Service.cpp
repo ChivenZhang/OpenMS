@@ -1,4 +1,3 @@
-#pragma once
 /*=================================================
 * Copyright © 2020-2025 ChivenZhang.
 * All Rights Reserved.
@@ -9,13 +8,4 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include <OpenMS/Server/Master/MasterServer.h>
-
-class MasterDemo : public MasterServer
-{
-protected:
-	void onInit() override;
-	void onExit() override;
-};
-
-OPENMS_RUN(MasterDemo)
+#include "Service.h"

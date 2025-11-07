@@ -1,6 +1,5 @@
-#pragma once
 /*=================================================
-* Copyright @ 2020-2025 ChivenZhang.
+* Copyright © 2020-2025 ChivenZhang.
 * All Rights Reserved.
 * =====================Note=========================
 *
@@ -9,10 +8,4 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "Service/Private/Property.h"
-#include "Mailbox/Private/MailContext.h"
-
-/// @brief
-class ClusterConfig : RESOURCE2(Property, IProperty), RESOURCE2(MailContext, IMailContext)
-{
-};
+#include "Async.h"

@@ -9,7 +9,7 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include <OpenMS/Service/Master/MasterServer.h>
+#include <OpenMS/Server/Master/MasterServer.h>
 
 class DiscoveryServer : public MasterServer
 {

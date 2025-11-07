@@ -9,13 +9,12 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include <OpenMS/Server/Master/MasterServer.h>
+#include "MS.h"
 
-class MasterDemo : public MasterServer
+/// @brief Interface for mail
+struct IMailView
 {
-protected:
-	void onInit() override;
-	void onExit() override;
+	uint32_t From, To;	// 源服务，目标服务
+	uint32_t Date, Addr;// 时间戳，目标地址
+	char Body[0];
 };
-
-OPENMS_RUN(MasterDemo)

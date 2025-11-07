@@ -19,7 +19,7 @@ void ClusterServer::onInit()
 {
 	if (AUTOWIRE(IProperty)::bean()->property(identity() + ".master").empty()) return;
 
-	auto mails = AUTOWIRE(IMailContext)::bean();
+	auto mails = AUTOWIRE(IMailHub)::bean();
 
 	// Handle remote mail to local
 
@@ -29,15 +29,15 @@ void ClusterServer::onInit()
 		.Backlog = property(identity() + ".server.backlog", 0U),
 		.Workers = property(identity() + ".server.workers", 0U),
 	});
-	m_ServiceServer->bind("mailbox", [=](MSString from, MSString to, MSString data, uint32_t fromSID, uint32_t toSID)
+	m_ServiceServer->bind("mailbox", [=](uint32_t from, uint32_t to, uint32_t date, uint32_t addr, MSString const& body)
 	{
-		mails->sendToMailbox({from, to, data, fromSID, toSID});
+		mails->send({from, to, date, addr, body});
 	});
 	m_ServiceServer->startup();
 
 	// Handle local mail to remote
 
-	mails->sendToMailbox([this](IMail&& mail)-> bool
+	mails->send([this](IMail mail)->bool
 	{
 		// Select remote address to send
 
@@ -51,12 +51,12 @@ void ClusterServer::onInit()
 		}
 		if (address.empty()) return false;
 
-		// Select a RPC client to send
+		// Select an RPC client to send
 
-		MSRef<RPCClient> mailClient;
+		MSRef<RPCClient> client;
 		{
 			MSMutexLock lock(m_MailClientLock);
-			auto result = m_MailClientMap.emplace(address, nullptr);
+			auto result = m_MailClientMap.emplace(MSHash(address), nullptr);
 			if (result.second || result.first->second == nullptr)
 			{
 				auto index = address.find(':');
@@ -67,16 +67,16 @@ void ClusterServer::onInit()
 				});
 				result.first->second->startup();
 			}
-			mailClient = result.first->second;
+			client = result.first->second;
 		}
-		if (mailClient == nullptr) return false;
-		if (mailClient->connect() == false)
+		if (client == nullptr) return false;
+		if (client->connect() == false)
 		{
-			mailClient->shutdown();
-			mailClient->startup();
+			client->shutdown();
+			client->startup();
 		}
-		if (mailClient->connect() == false) return false;
-		return mailClient->call<void>("mailbox", 0, mail.From, mail.To, mail.Data, mail.FromSID, mail.ToSID);
+		if (client->connect() == false) return false;
+		return client->call<void>("mailbox", 0, mail.From, mail.To, mail.Date, mail.Addr, MSString(mail.Body));
 	});
 
 	// Connect to master server
@@ -103,13 +103,13 @@ void ClusterServer::onInit()
 		}
 		if (m_ClusterClient->connect() == true && m_ServiceServer->connect() == true)
 		{
-			MSStringList mailList;
-			AUTOWIRE(IMailContext)::bean()->listMailbox(mailList);
+			MSList<IMailBox::name_t> mailList;
+			AUTOWIRE(IMailHub)::bean()->list(mailList);
 			MSString address = m_ServiceServer->address().lock()->getString();
 			if (m_ClusterClient->call<bool>("push", 1000, address, mailList).first)
 			{
 				MSMutexLock lock(m_MailRouteLock);
-				m_MailRouteMap = m_ClusterClient->call<MSMap<MSString, MSStringList>>("pull", 1000).first;
+				m_MailRouteMap = m_ClusterClient->call<MSMap<uint32_t, MSStringList>>("pull", 1000).first;
 			}
 		}
 	});

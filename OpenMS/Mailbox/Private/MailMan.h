@@ -1,6 +1,6 @@
 #pragma once
 /*=================================================
-* Copyright © 2020-2025 ChivenZhang.
+* Copyright @ 2020-2025 ChivenZhang.
 * All Rights Reserved.
 * =====================Note=========================
 *
@@ -9,8 +9,18 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
+#include "MailBox.h"
+class MailHub;
 
-
-class Service
+/// @brief Implement for mail man
+class MailMan
 {
+public:
+	explicit MailMan(MSRaw<MailHub> context);
+	~MailMan();
+
+protected:
+	MSMutex m_MailLock;
+	MSThread m_MailThread;
+	MSRaw<MailHub> m_Context;
 };

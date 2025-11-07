@@ -20,8 +20,6 @@ public:
 	MSFuture<bool> close(MSPromise<bool>& promise) override;
 	void write(MSRef<IChannelEvent> event) override;
 	MSFuture<bool> write(MSRef<IChannelEvent> event, MSPromise<bool>& promise) override;
-	void writeAndFlush(MSRef<IChannelEvent> event) override;
-	MSFuture<bool> writeAndFlush(MSRef<IChannelEvent> event, MSPromise<bool>& promise) override;
 	MSStringMap<MSAny>& attrib() override;
 
 protected:

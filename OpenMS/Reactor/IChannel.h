@@ -9,7 +9,6 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "MS.h"
 #include "IChannelAddress.h"
 #include "IChannelContext.h"
 #include "IChannelPipeline.h"
@@ -43,8 +42,4 @@ public:
 	virtual void write(MSRef<IChannelEvent> event) = 0;
 
 	virtual MSFuture<bool> write(MSRef<IChannelEvent> event, MSPromise<bool>& promise) = 0;
-
-	virtual void writeAndFlush(MSRef<IChannelEvent> event) = 0;
-
-	virtual MSFuture<bool> writeAndFlush(MSRef<IChannelEvent> event, MSPromise<bool>& promise) = 0;
 };

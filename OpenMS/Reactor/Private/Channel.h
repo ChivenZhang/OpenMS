@@ -18,7 +18,7 @@ class Channel : public IChannel, public std::enable_shared_from_this<Channel>
 {
 public:
 	Channel(MSRaw<ChannelReactor> reactor, MSRef<IChannelAddress> local, MSRef<IChannelAddress> remote, uint32_t workID);
-	~Channel();
+	~Channel() override;
 	bool running() const override;
 	uint32_t getWorkID() const override;
 	MSHnd<IChannelAddress> getLocal() const override;
@@ -31,8 +31,6 @@ public:
 	MSFuture<bool> close(MSPromise<bool>& promise) override;
 	void write(MSRef<IChannelEvent> event) override;
 	MSFuture<bool> write(MSRef<IChannelEvent> event, MSPromise<bool>& promise) override;
-	void writeAndFlush(MSRef<IChannelEvent> event) override;
-	MSFuture<bool> writeAndFlush(MSRef<IChannelEvent> event, MSPromise<bool>& promise) override;
 
 protected:
 	const uint32_t m_WorkID;

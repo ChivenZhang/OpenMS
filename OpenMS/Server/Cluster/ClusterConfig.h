@@ -1,5 +1,6 @@
+#pragma once
 /*=================================================
-* Copyright © 2020-2025 ChivenZhang.
+* Copyright @ 2020-2025 ChivenZhang.
 * All Rights Reserved.
 * =====================Note=========================
 *
@@ -8,4 +9,10 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "Service.h"
+#include "OpenMS/Server/Private/Property.h"
+#include "Mailbox/Private/MailHub.h"
+
+/// @brief
+class ClusterConfig : RESOURCE2(Property, IProperty), RESOURCE2(MailHub, IMailHub)
+{
+};

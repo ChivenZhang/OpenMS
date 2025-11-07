@@ -9,7 +9,6 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "MS.h"
 #include "IChannelHandler.h"
 
 /// @brief Interface for channel pipeline

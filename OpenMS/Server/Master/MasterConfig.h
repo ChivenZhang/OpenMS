@@ -9,18 +9,9 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "MailBox.h"
-class MailContext;
+#include "OpenMS/Server/Private/Property.h"
 
-/// @brief Implement for mail deliver
-class MailDeliver
+/// @brief 
+class MasterConfig : RESOURCE2(Property, IProperty)
 {
-public:
-	explicit MailDeliver(MSRaw<MailContext> context);
-	~MailDeliver();
-
-protected:
-	MSMutex m_MailLock;
-	MSThread m_MailThread;
-	MSRaw<MailContext> m_Context;
 };

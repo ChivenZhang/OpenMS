@@ -53,14 +53,13 @@ add_library(OpenMS STATIC
 		Handler/AES/AESHandler.h
 		MS.h
 		Mailbox/IMailBox.h
-		Mailbox/IMailContext.h
-		Mailbox/IMailPromise.h
+		Mailbox/IMailHub.h
 		Mailbox/Private/MailBox.cpp
 		Mailbox/Private/MailBox.h
-		Mailbox/Private/MailContext.cpp
-		Mailbox/Private/MailContext.h
-		Mailbox/Private/MailDeliver.cpp
-		Mailbox/Private/MailDeliver.h
+		Mailbox/Private/MailHub.cpp
+		Mailbox/Private/MailHub.h
+		Mailbox/Private/MailMan.cpp
+		Mailbox/Private/MailMan.h
 		Reactor/IChannel.h
 		Reactor/IChannelAddress.h
 		Reactor/IChannelBuffer.h
@@ -105,26 +104,29 @@ add_library(OpenMS STATIC
 		Reactor/UDP/UDPClientReactor.h
 		Reactor/UDP/UDPServerReactor.cpp
 		Reactor/UDP/UDPServerReactor.h
-		Service/Cluster/ClusterConfig.h
-		Service/Cluster/ClusterServer.cpp
-		Service/Cluster/ClusterServer.h
-		Service/IProperty.h
-		Service/IServer.h
-		Service/IService.h
-		Service/IStartup.h
-		Service/Master/MasterConfig.h
-		Service/Master/MasterServer.cpp
-		Service/Master/MasterServer.h
-		Service/Private/Property.cpp
-		Service/Private/Property.h
-		Service/Private/Server.cpp
-		Service/Private/Server.h
-		Service/Private/Service.cpp
-		Service/Private/Service.h
+		Server/Cluster/ClusterConfig.h
+		Server/Cluster/ClusterServer.cpp
+		Server/Cluster/ClusterServer.h
+		Server/IProperty.h
+		Server/IServer.h
+		Server/IStartup.h
+		Server/Master/MasterConfig.h
+		Server/Master/MasterServer.cpp
+		Server/Master/MasterServer.h
+		Server/Private/Property.cpp
+		Server/Private/Property.h
+		Server/Private/Server.cpp
+		Server/Private/Server.h
+        Server/Private/Service.cpp
+        Server/Private/Service.h
+		Utility/Async.cpp
+		Utility/Async.h
 		Utility/Timer.cpp
 		Utility/Timer.h
 		${MYSQL_SOURCES}
 		${REDIS_SOURCES}
+		Mailbox/IMail.h
+		Mailbox/Private/Mail.h
 )
 
 if(OPENMS_ENABLE_MYSQL)

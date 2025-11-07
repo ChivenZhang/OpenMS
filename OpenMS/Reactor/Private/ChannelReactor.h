@@ -32,8 +32,6 @@ public:
 	MSHnd<IChannelAddress> address() const override;
 	void write(MSRef<IChannelEvent> event, MSRef<IChannelAddress> address) override;
 	MSFuture<bool> write(MSRef<IChannelEvent> event, MSRef<IChannelAddress> address, MSPromise<bool>&& promise) override;
-	void writeAndFlush(MSRef<IChannelEvent> event, MSRef<IChannelAddress> address) override;
-	MSFuture<bool> writeAndFlush(MSRef<IChannelEvent> event, MSRef<IChannelAddress> address, MSPromise<bool>&& promise) override;
 
 protected:
 	virtual void onConnect(MSRef<Channel> channel);

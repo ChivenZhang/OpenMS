@@ -9,13 +9,19 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include <OpenMS/Server/Master/MasterServer.h>
+#include "Mailbox/Private/MailBox.h"
 
-class MasterDemo : public MasterServer
+class Service : public MailBox
 {
-protected:
-	void onInit() override;
-	void onExit() override;
-};
+public:
+	using MailBox::MailBox;
 
-OPENMS_RUN(MasterDemo)
+
+
+protected:
+	IMailTask read(IMail mail) override;
+
+protected:
+	using async_t = MSLambda<MSAsync<MSString>(MSString const&)>;
+	MSMap<uint32_t, async_t> m_AsyncMap;
+};

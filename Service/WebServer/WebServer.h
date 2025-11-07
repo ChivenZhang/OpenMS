@@ -9,7 +9,7 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include <OpenMS/Service/Cluster/ClusterServer.h>
+#include <OpenMS/Server/Cluster/ClusterServer.h>
 #include <OpenMS/Endpoint/HTTP/HTTPServer.h>
 #include "WebConfig.h"
 
