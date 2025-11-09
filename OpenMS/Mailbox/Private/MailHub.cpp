@@ -30,14 +30,15 @@ MailHub::~MailHub()
 	m_Delivers.clear();
 }
 
-bool MailHub::create(MSString address, MSLambda<MSRef<IMailBox>()> factory)
+bool MailHub::create(MSString address, MSRef<IMailBox> value)
 {
 	MSMutexLock lock(m_MailboxLock);
 	auto result = m_MailboxMap.emplace(MSHash(address), nullptr);
 	if (result.second == false) return false;
-	auto mailbox = MSCast<MailBox>(factory());
+	auto mailbox = MSCast<MailBox>(value);
 	if (mailbox == nullptr) return false;
 	result.first->second = mailbox;
+	mailbox->m_Context = this;
 	mailbox->m_HashName = MSHash(address);
 	return true;
 }
@@ -58,14 +59,14 @@ bool MailHub::exist(MSString address)
 uint32_t MailHub::send(IMail mail)
 {
 	MSRef<MailBox> toMailbox;
-	mail.Date = m_Session++;
+	if (mail.Date == 0) mail.Date = m_Session++;
 	{
 		MSMutexLock lock(m_MailboxLock);
 		auto result = m_MailboxMap.find(mail.To);
 		if (result == m_MailboxMap.end() || result->second == nullptr)
 		{
-			if (m_RemoteCall == nullptr) return 0;
-			if (m_RemoteCall(mail)) return mail.Date;
+			MS_INFO("Mail send #%d %u->%u %s", mail.Date, mail.From, mail.To, mail.Body.data());
+			if (m_RemoteCall && m_RemoteCall(mail)) return mail.Date;
 			return 0;
 		}
 		toMailbox = result->second;
@@ -73,14 +74,20 @@ uint32_t MailHub::send(IMail mail)
 	{
 		MSMutexLock lock(toMailbox->m_MailLock);
 		auto idle = toMailbox->m_MailQueue.empty();
-		MSString mailData(sizeof(IMailView) + mail.Body.size(), 0);
-		auto& mailView = *(IMailView*)mailData.data();
+		MSString mailData(sizeof(MailView) + mail.Body.size(), 0);
+		auto& mailView = *(MailView*)mailData.data();
 		mailView.From = mail.From;
 		mailView.To = mail.To;
 		mailView.Date = mail.Date;
-		mailView.Addr = mail.Addr;
+		mailView.Type = mail.Type;
 		if (mail.Body.empty() == false) ::memcpy(mailView.Body, mail.Body.data(), mail.Body.size());
-		toMailbox->m_MailQueue.push({ .Mail = std::move(mailData) });
+		IMail newMail = {};
+		newMail.From = mailView.From;
+		newMail.To = mailView.To;
+		newMail.Date = mailView.Date;
+		newMail.Type = mailView.Type;
+		newMail.Body = MSStringView(mailView.Body, mailData.size() - sizeof(MailView));
+		toMailbox->m_MailQueue.push({ .Mail = std::move(mailData), .Task = toMailbox->read(newMail),});
 		if (idle) enqueue(toMailbox);
 		return mail.Date;
 	}

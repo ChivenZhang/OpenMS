@@ -18,11 +18,12 @@ class MailMan;
 class MailBox : public IMailBox
 {
 public:
-	explicit MailBox(MSRaw<IMailHub> context);
+	MailBox() = default;
+	~MailBox() override;
 	name_t name() const final;
 	uint32_t send(IMail mail) final;
 	using IMailBox::create;
-	bool create(MSString address, MSLambda<MSRef<IMailBox>()> factory) final;
+	bool create(MSString address, MSRef<IMailBox> value) final;
 	bool cancel(MSString address) final;
 	bool exist(MSString address) const final;
 
@@ -32,10 +33,10 @@ protected:
 private:
 	friend class MailHub;
 	friend class MailMan;
-	uint32_t m_HashName;
+	uint32_t m_HashName = 0;
+	MSRaw<IMailHub> m_Context = nullptr;
 	MSMutex m_MailLock;
 	MSAtomic<uint32_t> m_Session;
-	MSRaw<IMailHub> m_Context;
-	struct mail_t { MSString Mail; IMailTask Handle; };
+	struct mail_t { MSString Mail; IMailTask Task; };
 	MSQueue<mail_t> m_MailQueue;
 };

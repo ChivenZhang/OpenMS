@@ -29,9 +29,16 @@ void ClusterServer::onInit()
 		.Backlog = property(identity() + ".server.backlog", 0U),
 		.Workers = property(identity() + ".server.workers", 0U),
 	});
-	m_ServiceServer->bind("mailbox", [=](uint32_t from, uint32_t to, uint32_t date, uint32_t addr, MSString const& body)
+	m_ServiceServer->bind("mailbox", [=](uint32_t from, uint32_t to, uint32_t date, uint32_t type, MSList<char> const& body)
 	{
-		mails->send({from, to, date, addr, body});
+		IMail mail = {};
+		mail.From = from;
+		mail.To = to;
+		mail.Date = date;
+		mail.Type = type;
+		mail.Body = MSStringView(body.data(), body.size());
+		MS_INFO("Mail recv #%d %u->%u %s", mail.Date, mail.From, mail.To, mail.Body.data());
+		mails->send(mail);
 	});
 	m_ServiceServer->startup();
 
@@ -76,7 +83,8 @@ void ClusterServer::onInit()
 			client->startup();
 		}
 		if (client->connect() == false) return false;
-		return client->call<void>("mailbox", 0, mail.From, mail.To, mail.Date, mail.Addr, MSString(mail.Body));
+
+		return client->call<void>("mailbox", 0, mail.From, mail.To, mail.Date, mail.Type, MSList<char>{mail.Body.begin(), mail.Body.end()});
 	});
 
 	// Connect to master server

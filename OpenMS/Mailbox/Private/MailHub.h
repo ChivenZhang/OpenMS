@@ -19,7 +19,7 @@ public:
 	explicit MailHub(uint32_t overload = MSThread::hardware_concurrency());
 	~MailHub() override;
 	using IMailHub::create;
-	bool create(MSString address, MSLambda<MSRef<IMailBox>()> factory) override;
+	bool create(MSString address, MSRef<IMailBox> value) override;
 	bool cancel(MSString address) override;
 	bool exist(MSString address) override;
 	uint32_t send(IMail mail) override;

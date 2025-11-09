@@ -8,7 +8,8 @@
 	"cluster1": {
 		"server": {
 			"ip": "127.0.0.1",
-			"port": 0
+			"port": 8081,
+			"workers": 4
 		},
 		"master": {
 			"ip": "127.0.0.1",
@@ -18,7 +19,8 @@
 	"cluster2": {
 		"server": {
 			"ip": "127.0.0.1",
-			"port": 0
+			"port": 8082,
+			"workers": 4
 		},
 		"master": {
 			"ip": "127.0.0.1",

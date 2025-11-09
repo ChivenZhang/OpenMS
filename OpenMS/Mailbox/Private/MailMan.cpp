@@ -33,33 +33,14 @@ MailMan::MailMan(MSRaw<MailHub> context)
 				if (mailbox->m_MailQueue.empty() == false)
 				{
 					auto& mail = mailbox->m_MailQueue.front();
-					if (bool(mail.Handle) == false)
+					if (bool(mail.Task) == true && mail.Task.done() == false)
 					{
-						auto& mailView = *(IMailView*)mail.Mail.data();
-						IMail mailData;
-						mailData.From = mailView.From;
-						mailData.To = mailView.To;
-						mailData.Date = mailView.Date;
-						mailData.Addr = mailView.Addr;
-						mailData.Body = MSStringView(mailView.Body, mail.Mail.size() - sizeof(IMailView));
-						mail.Handle = std::move(mailbox->read(mailData));
+						mail.Task.resume();
 					}
-					if (bool(mail.Handle) == true && mail.Handle.done() == false)
+					if (bool(mail.Task) == true && mail.Task.done() == true)
 					{
-						try
-						{
-							mail.Handle.resume();
-						}
-						catch (MSError& ex)
-						{
-							mailbox->error(std::forward<MSError>(ex));
-						}
-						catch (...)
-						{
-							mailbox->error(cpptrace::logic_error("unknown exception"));
-						}
+						mailbox->m_MailQueue.pop();
 					}
-					if (bool(mail.Handle) == true && mail.Handle.done()) mailbox->m_MailQueue.pop();
 				}
 				if (mailbox->m_MailQueue.empty() == false)
 				{

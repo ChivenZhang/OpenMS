@@ -9,20 +9,18 @@
 *
 * =================================================*/
 #include "ClusterDemo2.h"
+#include "Server/Private/Service.h"
 
-class AuthorMailbox : public MailBox
+class AuthorService : public Service
 {
 public:
-	using MailBox::MailBox;
-
-	IMailTask read(IMail mail) override
+	AuthorService()
 	{
-		auto newMail = mail;
-		newMail.Body = "success";
-		newMail.To = mail.From;
-		send(newMail);
-		MS_INFO("success");
-		co_return;
+		this->bind("verify", [](MSStringView input)->MSAsync<MSString>
+		{
+			MS_INFO("success");
+			co_return "success";
+		});
 	}
 };
 
@@ -39,7 +37,7 @@ void ClusterDemo2::onInit()
 	ClusterServer::onInit();
 
 	auto hub = AUTOWIRE(IMailHub)::bean();
-	hub->create<AuthorMailbox>("author");
+	hub->create("author", MSNew<AuthorService>());
 }
 
 void ClusterDemo2::onExit()
