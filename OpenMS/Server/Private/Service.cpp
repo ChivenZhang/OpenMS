@@ -115,15 +115,8 @@ IMailTask Service::read(IMail mail)
 			if (method)
 			{
 				auto input = MSStringView(request.Buffer, mail.Body.size() - sizeof(request_t));
-				auto response = method(input);
-				while (bool(response) == true && response.done() == false)
-				{
-					response.resume();
-				}
-				if (bool(response) == true && response.done() == true)
-				{
-					mail.Body = response.getValue();
-				}
+
+				mail.Body = co_await MSAwait<MSString, MSStringView>(method, input);
 			}
 			mail.Type = 1;
 			std::swap(mail.From, mail.To);

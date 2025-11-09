@@ -35,7 +35,7 @@ MailMan::MailMan(MSRaw<MailHub> context)
 					auto& mail = mailbox->m_MailQueue.front();
 					if (bool(mail.Task) == true && mail.Task.done() == false)
 					{
-						mail.Task.resume();
+						if (mail.Task.awaitable() == false) mail.Task.resume();
 					}
 					if (bool(mail.Task) == true && mail.Task.done() == true)
 					{
