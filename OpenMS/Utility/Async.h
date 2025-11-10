@@ -229,12 +229,13 @@ public:
     {
         handle_t(std::coroutine_handle<> handle, T& value) : m_Handle(handle), m_Value(value) {}
         handle_t(handle_t const& other) : m_Handle(other.m_Handle), m_Value(other.m_Value) {}
+        handle_t& operator=(handle_t const& other) { m_Handle = other.m_Handle; m_Value = other.m_Value; return *this; }
         void setValue(T&& value)
         {
             MS_INFO("#3 %p", m_Handle.address());
             if (bool(m_Handle) && m_Handle.done() == false)
             {
-                // m_Value = value;
+                m_Value = value;
                 m_Handle.resume();
             }
         }
@@ -245,9 +246,10 @@ public:
     };
 
 public:
-    MSAwait(MSLambda<void(handle_t)> callback)
+    MSAwait(MSLambda<void(handle_t&)> callback)
         :
-        m_Method(callback)
+        m_Method(callback),
+        m_Context(m_Handle, m_Value)
     {
     }
 
@@ -258,21 +260,21 @@ public:
 
     void await_suspend(std::coroutine_handle<> handle)
     {
-        MS_INFO("#1 %p", handle.address());
         m_Handle = handle;
-        m_Method({m_Handle, m_Value});
+        m_Context = handle_t(m_Handle, m_Value);
+        m_Method(m_Context);
     }
 
     T await_resume()
     {
-        MS_INFO("#2 %p", m_Handle.address());
         return m_Value;
     }
 
 private:
     T m_Value = {};
+    handle_t m_Context;
     std::coroutine_handle<> m_Handle;
-    MSLambda<void(handle_t)> m_Method;
+    MSLambda<void(handle_t&)> m_Method;
 };
 
 // Await<void>
@@ -283,13 +285,9 @@ class MSAwait<void>
 public:
     struct handle_t
     {
-        handle_t(std::coroutine_handle<> handle)
-            :
-            m_Handle(handle)
-        {
-        }
-        handle_t(handle_t&&) = default;
-        handle_t(handle_t const&) = default;
+        handle_t(std::coroutine_handle<> handle) : m_Handle(handle) {}
+        handle_t(handle_t const& other) : m_Handle(other.m_Handle) {}
+        handle_t& operator=(handle_t const& other) { m_Handle = other.m_Handle; return *this; }
         void setValue()
         {
             if (m_Handle && m_Handle.done() == false) m_Handle.resume();
@@ -302,7 +300,8 @@ public:
 public:
     MSAwait(MSLambda<void(handle_t)> callback)
         :
-        m_Method(callback)
+        m_Method(callback),
+        m_Context(m_Handle)
     {
     }
 
@@ -314,12 +313,14 @@ public:
     void await_suspend(std::coroutine_handle<> handle)
     {
         m_Handle = handle;
-        m_Method({m_Handle});
+        m_Context = handle_t{m_Handle};
+        m_Method(m_Context);
     }
 
     void await_resume() { }
 
 private:
+    handle_t m_Context;
     std::coroutine_handle<> m_Handle;
     MSLambda<void(handle_t)> m_Method;
 };

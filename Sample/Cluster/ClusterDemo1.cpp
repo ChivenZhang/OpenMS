@@ -25,7 +25,7 @@ public:
 
 		this->bind("login2", [this](MSStringView input)->MSAsync<MSString>
 		{
-			auto response = co_await MSAwait<MSString>([input, this](MSAwait<MSString>::handle_t handle)
+			auto response = co_await MSAwait<MSString>([input, this](MSAwait<MSString>::handle_t& handle)
 			{
 				this->async("author", "verify", 100, input, [&](MSStringView output) mutable
 				{
