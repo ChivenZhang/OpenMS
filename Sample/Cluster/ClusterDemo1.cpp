@@ -25,13 +25,14 @@ public:
 
 		this->bind("login2", [this](MSStringView input)->MSAsync<MSString>
 		{
-			auto response = co_await MSAwait<MSString>([input, this](MSAwait<MSString>::handle_t& handle)
+			// this->async("author", "verify", 100, input, [&](MSStringView output) mutable
+			// {
+			// 	handle.setValue("Test");
+			// });
+			auto response = co_await []()->MSString
 			{
-				this->async("author", "verify", 100, input, [&](MSStringView output) mutable
-				{
-					handle.setValue("Test");
-				});
-			});
+				return "Test";
+			};
 			MS_INFO("login %s", response.c_str());
 			co_return response;
 		});
