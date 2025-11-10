@@ -23,15 +23,16 @@ public:
 			co_return response;
 		});
 
-		this->bind("login2", [this](MSStringView input)-> MSAsync<MSString>
+		this->bind("login2", [this](MSStringView input)->MSAsync<MSString>
 		{
-			MS_INFO("#1");
-			auto response = co_await MSAwait<MSString>([&]()->MSAsync<MSString>
+			auto response = co_await MSAwait<MSString>([input, this](MSAwait<MSString>::handle_t handle)
 			{
-				MS_INFO("#2");
-					co_return "success";
+				this->async("author", "verify", 100, input, [&](MSStringView output) mutable
+				{
+					handle.setValue("Test");
+				});
 			});
-			MS_INFO("#3");
+			MS_INFO("login %s", response.c_str());
 			co_return response;
 		});
 	}
@@ -60,6 +61,7 @@ void ClusterDemo1::onInit()
 		{
 			MSString response;
 			loginService->call("login", "login2", 1000, R"({"user":"admin", "pass":"******"})", response);
+			break;
 		}
 	});
 }

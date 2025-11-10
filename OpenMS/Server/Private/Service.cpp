@@ -112,13 +112,15 @@ IMailTask Service::read(IMail mail)
 				auto result = m_MethodMap.find(request.Method);
 				if (result != m_MethodMap.end()) method = result->second;
 			}
+
+			MSString response;
 			if (method)
 			{
 				auto input = MSStringView(request.Buffer, mail.Body.size() - sizeof(request_t));
-
-				mail.Body = co_await MSAwait<MSString, MSStringView>(method, input);
+				response = co_await method(input);
 			}
 			mail.Type = 1;
+			mail.Body = response;
 			std::swap(mail.From, mail.To);
 			send(mail);
 		}
