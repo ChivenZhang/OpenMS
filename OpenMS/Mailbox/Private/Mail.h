@@ -11,10 +11,10 @@
 * =================================================*/
 #include "MS.h"
 
-/// @brief Interface for mail
-struct IMailView
+/// @brief view for mail
+struct MailView
 {
 	uint32_t From, To;	// 源服务，目标服务
-	uint32_t Date, Addr;// 时间戳，目标地址
+	uint32_t Date, Type;// 时间戳，消息类型
 	char Body[0];
 };

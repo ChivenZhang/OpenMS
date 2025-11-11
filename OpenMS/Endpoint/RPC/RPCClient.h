@@ -73,7 +73,7 @@ public:
 			// Convert request to tuple
 
 			typename MSTraits<F>::argument_datas args;
-			if (std::is_same_v<decltype(args), MSTuple<>> == false)
+			if constexpr (MSTraits<F>::argument_count != 0)
 			{
 				if (MSTypeC(input, args) == false) return false;
 			}
@@ -97,7 +97,7 @@ public:
 			// Convert request to tuple
 
 			typename MSTraits<F>::argument_datas args;
-			if (std::is_same_v<decltype(args), MSTuple<>> == false)
+			if constexpr (MSTraits<F>::argument_count != 0)
 			{
 				if (MSTypeC(input, args) == false) return false;
 			}
@@ -124,7 +124,7 @@ public:
 		// Convert request to string
 
 		MSString input;
-		if (std::is_same_v<MSTuple<Args...>, MSTuple<>> == false)
+		if constexpr (sizeof...(Args) != 0)
 		{
 			if (MSTypeC(std::make_tuple(std::forward<Args>(args)...), input) == false) return {T(), false};
 		}
@@ -154,7 +154,7 @@ public:
 		// Convert request to string
 
 		MSString input;
-		if (std::is_same_v<MSTuple<Args...>, MSTuple<>> == false)
+		if constexpr (sizeof...(Args) != 0)
 		{
 			if (MSTypeC(std::make_tuple(std::forward<Args>(args)...), input) == false) return false;
 		}
@@ -177,7 +177,7 @@ public:
 		// Convert request to string
 
 		MSString input;
-		if (std::is_same_v<MSTuple<Args...>, MSTuple<>> == false)
+		if constexpr (sizeof...(Args) != 0)
 		{
 			if (MSTypeC(args, input) == false) return false;
 		}
@@ -206,7 +206,7 @@ public:
 		// Convert request to string
 
 		MSString input;
-		if (std::is_same_v<MSTuple<Args...>, MSTuple<>> == false)
+		if constexpr (sizeof...(Args) != 0)
 		{
 			if (MSTypeC(args, input) == false) return false;
 		}

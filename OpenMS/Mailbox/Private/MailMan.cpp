@@ -33,33 +33,25 @@ MailMan::MailMan(MSRaw<MailHub> context)
 				if (mailbox->m_MailQueue.empty() == false)
 				{
 					auto& mail = mailbox->m_MailQueue.front();
-					if (bool(mail.Handle) == false)
+					if (bool(mail.Task) == false)
 					{
-						auto& mailView = *(IMailView*)mail.Mail.data();
-						IMail mailData;
-						mailData.From = mailView.From;
-						mailData.To = mailView.To;
-						mailData.Date = mailView.Date;
-						mailData.Addr = mailView.Addr;
-						mailData.Body = MSStringView(mailView.Body, mail.Mail.size() - sizeof(IMailView));
-						mail.Handle = std::move(mailbox->read(mailData));
+						auto& mailView = *(MailView*)mail.Mail.data();
+						IMail newMail = {};
+						newMail.From = mailView.From;
+						newMail.To = mailView.To;
+						newMail.Date = mailView.Date;
+						newMail.Type = mailView.Type;
+						newMail.Body = MSStringView(mailView.Body, mail.Mail.size() - sizeof(MailView));
+						mail.Task = mailbox->read(newMail);
 					}
-					if (bool(mail.Handle) == true && mail.Handle.done() == false)
+					if (bool(mail.Task) == true && mail.Task.done() == false)
 					{
-						try
-						{
-							mail.Handle.resume();
-						}
-						catch (MSError& ex)
-						{
-							mailbox->error(std::forward<MSError>(ex));
-						}
-						catch (...)
-						{
-							mailbox->error(cpptrace::logic_error("unknown exception"));
-						}
+						if (mail.Task.state() != MSAsyncState::AWAIT) mail.Task.resume();
 					}
-					if (bool(mail.Handle) == true && mail.Handle.done()) mailbox->m_MailQueue.pop();
+					if (bool(mail.Task) == false || bool(mail.Task) == true && mail.Task.done() == true)
+					{
+						mailbox->m_MailQueue.pop();
+					}
 				}
 				if (mailbox->m_MailQueue.empty() == false)
 				{

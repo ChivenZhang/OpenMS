@@ -122,7 +122,10 @@ MSBinary<MSString, bool> RPCClientBase::call(MSStringView const& name, uint32_t 
 	{
 		MSMutexLock lock(m_LockSession);
 		auto& session = m_Sessions[request.Session];
-		session = [&](MSStringView const& response) { promise.set_value(MSString(response)); };
+		session = [&, sessionID = request.Session](MSStringView const& response)
+		{
+			promise.set_value(MSString(response));
+		};
 	}
 
 	// Send request to remote server
@@ -215,10 +218,6 @@ bool RPCClientInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<
 					if (output.empty() == false) ::memcpy(response.Buffer, output.data(), output.size());
 
 					context->write(IChannelEvent::New(buffer));
-				}
-				else
-				{
-					context->close();
 				}
 			}
 		}

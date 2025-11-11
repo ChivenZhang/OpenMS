@@ -1,6 +1,6 @@
 #pragma once
 /*=================================================
-* Copyright © 2020-2025 ChivenZhang.
+* Copyright @ 2020-2025 ChivenZhang.
 * All Rights Reserved.
 * =====================Note=========================
 *
@@ -9,12 +9,16 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "MS.h"
+#include <OpenMS/Server/Cluster/ClusterServer.h>
 
-/// @brief Interface for mail
-struct IMail
+class GatewayServer : public ClusterServer
 {
-	uint32_t From, To;	// 源服务，目标服务
-	uint32_t Date, Type;// 时间戳，消息类型
-	MSStringView Body;	// 消息体
+public:
+	MSString identity() const override;
+
+protected:
+	void onInit() override;
+	void onExit() override;
 };
+
+OPENMS_RUN(GatewayServer)

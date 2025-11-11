@@ -9,26 +9,26 @@
 *
 * =================================================*/
 #include "ClusterDemo1.h"
+#include "Server/Private/Service.h"
 
-class LoginMailbox : public MailBox
+class LoginService : public Service
 {
 public:
-	using MailBox::MailBox;
-
-	IMailTask read(IMail mail) override
+	LoginService()
 	{
-		if (mail.From == MSHash("author"))
+		this->bind("login", [this](MSString user, MSString pass)->MSAsync<MSString>
 		{
-			MS_INFO("get %s", MSString(mail.Body).c_str());
-		}
-		else
-		{
-			send({.To = MSHash("author"), .Body = mail.Body });
-		}
-		co_return;
+			auto output = co_await [=](MSAwait<MSString> promise)->MSString
+			{
+				this->async<MSString>("author", "verify", 1000, MSTuple{user, pass}, [=](MSString response)
+				{
+					promise(MSString(response));
+				});
+				return {};
+			};
+			co_return output;
+		});
 	}
-
-	MSSet<uint32_t> m_Session;
 };
 
 // ========================================================================================
@@ -44,15 +44,16 @@ void ClusterDemo1::onInit()
 	ClusterServer::onInit();
 
 	auto hub = AUTOWIRE(IMailHub)::bean();
-	hub->create<LoginMailbox>("login");
+	auto loginService = MSNew<LoginService>();
+	hub->create("login", loginService);
 
 	m_Running = true;
 	m_Thread = MSThread([=, this]()
 	{
 		while (m_Running)
 		{
-			hub->send({.To = MSHash("login"), .Body = R"({"user":"admin", "pass":"******"})"});
-			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+			auto response = loginService->call<MSString>("login", "login", 1000, MSTuple{"admin", "123456"});
+			MS_INFO("Get %s", response.first.c_str());
 		}
 	});
 }

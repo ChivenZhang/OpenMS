@@ -27,7 +27,7 @@ public:
 
 	virtual uint32_t send(IMail mail) = 0;
 
-	virtual bool create(MSString address, MSLambda<MSRef<IMailBox>()> factory) = 0;
+	virtual bool create(MSString address, MSRef<IMailBox> value) = 0;
 
 	virtual bool cancel(MSString address) = 0;
 

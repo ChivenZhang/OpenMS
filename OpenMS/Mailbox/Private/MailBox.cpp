@@ -11,11 +11,14 @@
 #include "MailBox.h"
 #include "MailHub.h"
 
-MailBox::MailBox(MSRaw<IMailHub> context)
-	:
-	m_Context(context),
-	m_HashName(0)
+MailBox::~MailBox()
 {
+	while (m_MailQueue.size())
+	{
+		auto& handle = m_MailQueue.front().Task;
+		if (handle && handle.done() == false) handle.destroy();
+		m_MailQueue.pop();
+	}
 }
 
 IMailBox::name_t MailBox::name() const
@@ -30,10 +33,10 @@ uint32_t MailBox::send(IMail mail)
 	return m_Context->send(mail);
 }
 
-bool MailBox::create(MSString address, MSLambda<MSRef<IMailBox>()> factory)
+bool MailBox::create(MSString address, MSRef<IMailBox> value)
 {
 	if (m_Context == nullptr) return false;
-	return m_Context->create(address, factory);
+	return m_Context->create(address, value);
 }
 
 bool MailBox::cancel(MSString address)
@@ -50,5 +53,5 @@ bool MailBox::exist(MSString address) const
 
 void MailBox::error(MSError&& info)
 {
-	MS_INFO("%s", info.what());
+	MS_ERROR("%s", info.what());
 }
