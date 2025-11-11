@@ -14,6 +14,11 @@
 #include <variant>
 #include <coroutine>
 
+// Await<T>
+
+template<class T>
+using MSAwait = std::function<void(T)>;
+
 // Async<T>
 
 enum class MSAsyncState
@@ -37,8 +42,10 @@ public:
         std::exception_ptr m_Error{};
         std::coroutine_handle<> m_Handle{};
     };
+    template<class U>
+    using await_type = std::function<void(U)>;
 
-    MSAsync() = default;
+    MSAsync(){}
 
     explicit MSAsync(handle_type handle) : m_Data(handle)
     {
@@ -115,37 +122,43 @@ public:
     template<class F>
     auto await_transform(F func)
     {
+        using return_type = MSTraits<F>::return_data;
+        
         struct transform_awaitable
         {
             decltype(func) method;
-            std::coroutine_handle<MSAsync> handle;
-            std::future<typename MSTraits<F>::return_type> future;
-            std::promise<typename MSTraits<F>::return_type> promise;
+            handle_type handle;
+            std::future<return_type> future;
+            std::promise<return_type> promise;
 
-            ~transform_awaitable() { MS_INFO("delete"); }
             bool await_ready() const noexcept { return false; }
-            void await_suspend(std::coroutine_handle<MSAsync> h)
+            void await_suspend(handle_type h)
             {
                 handle = h;
                 handle.promise().data().m_State = MSAsyncState::AWAIT;
                 future = promise.get_future();
-                std::thread([&]() mutable
+
+                if constexpr (std::is_void_v<return_type>)
                 {
-                    if constexpr(std::is_void_v<typename MSTraits<F>::return_type>)
+                    MSAwait<return_type> promise_func = [&](return_type && value)
                     {
-                        method();
-                        promise.set_value();
-                    }
-                    else
+                        promise.set_value(value);
+                        handle.resume();
+                    };
+                    method(promise_func);
+                }
+                else
+                {
+                    MSAwait<return_type> promise_func = [&](return_type && value)
                     {
-                        auto result = method();
-                        promise.set_value(result);
-                    }
-                    handle.resume();
-                }).detach();
+                        promise.set_value(value);
+                        handle.resume();
+                    };
+                    method(promise_func);
+                }
             }
 
-            typename MSTraits<F>::return_type await_resume()
+            return_type await_resume()
             {
                 if (handle.promise().data().m_Error) std::rethrow_exception(handle.promise().data().m_Error);
                 handle.promise().data().m_State = MSAsyncState::PEND;
@@ -190,17 +203,16 @@ class MSAsync<void> : public std::coroutine_handle<MSAsync<void>>
 public:
     using promise_type = MSAsync;
 	using handle_type = std::coroutine_handle<promise_type>;
-
     struct data_t
     {
         MSAsyncState m_State = MSAsyncState::NONE;
         std::exception_ptr m_Error{};
         std::coroutine_handle<> m_Handle{};
     };
+    template<class U>
+    using await_type = std::function<void(U)>;
 
-    MSAsync()
-    {
-    }
+    MSAsync(){}
 
     explicit MSAsync(handle_type handle) : m_Data(handle)
     {
@@ -278,35 +290,43 @@ public:
     template<class F>
     auto await_transform(F func)
     {
+        using return_type = MSTraits<F>::return_data;
+
         struct transform_awaitable
         {
             decltype(func) method;
-            std::coroutine_handle<MSAsync> handle;
-            std::future<typename MSTraits<F>::return_type> future;
-            std::promise<typename MSTraits<F>::return_type> promise;
+            handle_type handle;
+            std::future<return_type> future;
+            std::promise<return_type> promise;
 
             bool await_ready() const noexcept { return false; }
-            void await_suspend(std::coroutine_handle<MSAsync> h)
+            void await_suspend(handle_type h)
             {
                 handle = h;
                 handle.promise().data().m_State = MSAsyncState::AWAIT;
                 future = promise.get_future();
-                std::thread([&]() mutable
+
+                if constexpr (std::is_void_v<return_type>)
                 {
-                    if constexpr(std::is_void_v<typename MSTraits<F>::return_type>)
+                    MSAwait<return_type> promise_func = [&](return_type && value)
                     {
-                        method();
-                        promise.set_value();
-                    }
-                    else
+                        promise.set_value(value);
+                        handle.resume();
+                    };
+                    method(promise_func);
+                }
+                else
+                {
+                    MSAwait<return_type> promise_func = [&](return_type && value)
                     {
-                        promise.set_value(method());
-                    }
-                    handle.resume();
-                }).detach();
+                        promise.set_value(value);
+                        handle.resume();
+                    };
+                    method(promise_func);
+                }
             }
 
-            typename MSTraits<F>::return_type await_resume()
+            return_type await_resume()
             {
                 if (handle.promise().data().m_Error) std::rethrow_exception(handle.promise().data().m_Error);
                 handle.promise().data().m_State = MSAsyncState::PEND;

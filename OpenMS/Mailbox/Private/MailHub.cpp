@@ -65,7 +65,7 @@ uint32_t MailHub::send(IMail mail)
 		auto result = m_MailboxMap.find(mail.To);
 		if (result == m_MailboxMap.end() || result->second == nullptr)
 		{
-			MS_INFO("Mail send #%d %u->%u %s", mail.Date, mail.From, mail.To, mail.Body.data());
+			MS_DEBUG("Mail send #%d %u->%u %s", mail.Date, mail.From, mail.To, mail.Body.data());
 			if (m_RemoteCall && m_RemoteCall(mail)) return mail.Date;
 			return 0;
 		}

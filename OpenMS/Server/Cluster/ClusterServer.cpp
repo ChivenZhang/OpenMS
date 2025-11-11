@@ -37,7 +37,7 @@ void ClusterServer::onInit()
 		mail.Date = date;
 		mail.Type = type;
 		mail.Body = MSStringView(body.data(), body.size());
-		MS_INFO("Mail recv #%d %u->%u %s", mail.Date, mail.From, mail.To, mail.Body.data());
+		MS_DEBUG("Mail recv #%d %u->%u %s", mail.Date, mail.From, mail.To, mail.Body.data());
 		mails->send(mail);
 	});
 	m_ServiceServer->startup();
