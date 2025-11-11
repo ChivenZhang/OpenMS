@@ -53,5 +53,5 @@ bool MailBox::exist(MSString address) const
 
 void MailBox::error(MSError&& info)
 {
-	MS_INFO("%s", info.what());
+	MS_ERROR("%s", info.what());
 }

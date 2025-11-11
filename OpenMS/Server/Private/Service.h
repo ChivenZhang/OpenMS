@@ -18,18 +18,18 @@ public:
 	using method_t = MSLambda<MSAsync<MSString>(MSStringView)>;
 	using session_t = MSLambda<void(MSStringView)>;
 	using MailBox::MailBox;
-	bool bind(MSStringView method, method_t callback);
+	bool bind(MSStringView method, method_t&& callback);
 	bool call(MSStringView service, MSStringView method, uint32_t timeout, MSStringView request, MSString& response);
 	bool async(MSStringView service, MSStringView method, uint32_t timeout, MSStringView request, MSLambda<void(MSStringView)> callback);
 
-	template<class F, OPENMS_NOT_SAME(typename MSTraits<F>::return_data, MSTraits<method_t>::return_data), OPENMS_NOT_SAME(typename MSTraits<F>::argument_datas, MSTraits<method_t>::argument_datas)>
+	template<class F, std::enable_if_t<!std::is_same_v<typename MSTraits<F>::return_data, MSTraits<method_t>::return_data> || !std::is_same_v<typename MSTraits<F>::argument_datas, MSTraits<method_t>::argument_datas>, int> = 0>
 	bool bind(MSStringView method, F callback)
 	{
 		using return_type = MSTraits<F>::return_data;
 		using argument_type = MSTraits<F>::argument_datas;
 		if constexpr (std::is_same_v<return_type, void>)
 		{
-			method_t function = [callback](MSStringView input)->MSAsync<MSString>
+			return this->bind(method, [callback](MSStringView input)->MSAsync<MSString>
 			{
 				argument_type request;
 				if constexpr (std::is_same_v<argument_type, MSTuple<void>> == false)
@@ -38,12 +38,11 @@ public:
 				}
 				co_await std::apply(callback, request);
 				co_return {};
-			};
-			return this->bind(method, function);
+			});
 		}
 		else
 		{
-			method_t function = [callback](MSStringView input)->MSAsync<MSString>
+			return this->bind(method, [callback](MSStringView input)->MSAsync<MSString>
 			{
 				argument_type request;
 				if constexpr (std::is_same_v<argument_type, MSTuple<void>> == false)
@@ -54,8 +53,7 @@ public:
 				MSString output;
 				MSTypeC(response, output);
 				co_return output;
-			};
-			return this->bind(method, function);
+			});
 		}
 	}
 

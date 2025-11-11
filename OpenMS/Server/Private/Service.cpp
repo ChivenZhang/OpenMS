@@ -16,7 +16,7 @@ struct request_t
 	char Buffer[0];
 };
 
-bool Service::bind(MSStringView method, method_t callback)
+bool Service::bind(MSStringView method, method_t && callback)
 {
 	MSMutexLock lock(m_MutexMethod);
 	auto result = m_MethodMap.emplace(MSHash(method), callback);

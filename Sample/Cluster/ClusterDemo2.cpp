@@ -16,9 +16,9 @@ class AuthorService : public Service
 public:
 	AuthorService()
 	{
-		this->bind("verify", [](MSStringView input)->MSAsync<MSString>
+		this->bind("verify", [](MSString user, MSString pass)->MSAsync<MSString>
 		{
-			// MS_INFO("success %s", input.data());
+			MS_INFO("success %s %s", user.c_str(), pass.c_str());
 			co_return "success";
 		});
 	}
