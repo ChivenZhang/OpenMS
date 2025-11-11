@@ -10,6 +10,7 @@
 * =================================================*/
 #include "ClusterDemo1.h"
 #include "Server/Private/Service.h"
+#include "Utility/QuickQPS.h"
 
 class LoginService : public Service
 {
@@ -50,10 +51,21 @@ void ClusterDemo1::onInit()
 	m_Running = true;
 	m_Thread = MSThread([=, this]()
 	{
+		QuickQPS qps;
+
+		auto T = ::clock();
 		while (m_Running)
 		{
-			auto response = loginService->call<MSString>("login", "login", 1000, MSTuple{"admin", "123456"});
-			MS_INFO("Get %s", response.first.c_str());
+			auto response = loginService->call<MSString>("author", "verify", 1000, MSTuple{"admin", "123456"});
+			MS_DEBUG("Get %s", response.first.c_str());
+			qps.hit();
+
+			auto t = ::clock();
+			if (T + 5000 <= t)
+			{
+				MS_INFO("QPS %f", qps.get());
+				T = t;
+			}
 		}
 	});
 }
