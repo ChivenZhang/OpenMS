@@ -33,6 +33,7 @@ MailMan::MailMan(MSRaw<MailHub> context)
 				if (mailbox->m_MailQueue.empty() == false)
 				{
 					auto& mail = mailbox->m_MailQueue.front();
+
 					if (bool(mail.Task) == false)
 					{
 						auto& mailView = *(MailView*)mail.Mail.data();

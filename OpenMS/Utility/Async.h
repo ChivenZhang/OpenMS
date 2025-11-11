@@ -51,6 +51,15 @@ public:
     {
     }
 
+    ~MSAsync()
+    {
+        if (std::holds_alternative<handle_type>(m_Data))
+        {
+            handle_type& handle = std::get<handle_type>(m_Data);
+            if (bool(handle) && handle.promise().state() != MSAsyncState::DONE) handle.destroy();
+        }
+    }
+
     MSAsync get_return_object()
     {
         return MSAsync{handle_type::from_promise(*this)};
@@ -68,7 +77,7 @@ public:
         {
             bool await_ready() const noexcept { return false; }
             void await_resume() noexcept {}
-            void await_suspend(std::coroutine_handle<MSAsync> handle) noexcept
+            void await_suspend(handle_type handle) noexcept
             {
                 if (handle.promise().data().m_Handle) handle.promise().data().m_Handle.resume();
             }
@@ -218,6 +227,15 @@ public:
     {
     }
 
+    ~MSAsync()
+    {
+        if (std::holds_alternative<handle_type>(m_Data))
+        {
+            auto& handle = std::get<handle_type>(m_Data);
+            if (bool(handle)) handle.destroy();
+        }
+    }
+
     MSAsync get_return_object()
     {
         return MSAsync{from_promise(*this)};
@@ -240,7 +258,7 @@ public:
             void await_resume() noexcept
             {
             }
-            void await_suspend(std::coroutine_handle<MSAsync> handle) noexcept
+            void await_suspend(handle_type handle) noexcept
             {
                 if (handle.promise().data().m_Handle) handle.promise().data().m_Handle.resume();
             }
@@ -345,16 +363,16 @@ private:
     data_t& data()
     {
         if (std::holds_alternative<data_t>(m_Data)) return std::get<data_t>(m_Data);
-        return std::get<std::coroutine_handle<MSAsync>>(m_Data).promise().data();
+        return std::get<handle_type>(m_Data).promise().data();
     }
     data_t const& data() const
     {
         if (std::holds_alternative<data_t>(m_Data)) return std::get<data_t>(m_Data);
-        return std::get<std::coroutine_handle<MSAsync>>(m_Data).promise().data();
+        return std::get<handle_type>(m_Data).promise().data();
     }
 
 private:
-    std::variant<data_t, std::coroutine_handle<MSAsync>> m_Data;
+    std::variant<data_t, handle_type> m_Data;
 };
 
 #endif

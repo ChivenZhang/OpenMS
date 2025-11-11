@@ -31,10 +31,12 @@ void TCPClientReactor::startup()
 	{
 		uv_loop_t loop;
 		uv_tcp_t client;
+		uv_async_t async;
 		uv_connect_t connect_req;
 
 		uv_loop_init(&loop);
 		uv_tcp_init(&loop, &client);
+		uv_async_init(&loop, &async, on_send);
 
 		do
 		{
@@ -101,13 +103,20 @@ void TCPClientReactor::startup()
 
 			{
 				loop.data = this;
+				async.data = this;
 				uv_timer_t timer;
 				uv_timer_init(&loop, &timer);
-				uv_timer_start(&timer, on_send, 0, 1);
+				uv_timer_start(&timer, [](uv_timer_t* handle)
+				{
+					auto reactor = (TCPClientReactor*)handle->loop->data;
+					if (reactor->m_Running == false) uv_stop(handle->loop);
+				} , 500, 1);
 
+				m_EventAsync = &async;
 				uv_run(&loop, UV_RUN_ONCE);
 				promise.set_value();
 				uv_run(&loop, UV_RUN_DEFAULT);
+				m_EventAsync = nullptr;
 				m_Connect = false;
 			}
 
@@ -172,6 +181,12 @@ void TCPClientReactor::onDisconnect(MSRef<Channel> channel)
 	m_Connect = false;
 	m_Channel = nullptr;
 	ChannelReactor::onDisconnect(channel);
+}
+
+void TCPClientReactor::onOutbound(MSRef<IChannelEvent> event, bool flush)
+{
+	ChannelReactor::onOutbound(event, flush);
+	uv_async_send(m_EventAsync);
 }
 
 void TCPClientReactor::on_connect(uv_connect_t* req, int status)
@@ -291,10 +306,9 @@ void TCPClientReactor::on_read(uv_stream_t* stream, ssize_t nread, const uv_buf_
 	free(buf->base);
 }
 
-void TCPClientReactor::on_send(uv_timer_t* handle)
+void TCPClientReactor::on_send(uv_async_t* handle)
 {
 	auto reactor = (TCPClientReactor*)handle->loop->data;
-	if (reactor->m_Running == false) uv_stop(handle->loop);
 	if (reactor->m_Running == false || reactor->m_Sending == false) return;
 
 	MSMutexLock lock(reactor->m_EventLock);

@@ -28,16 +28,18 @@ public:
 protected:
 	void onConnect(MSRef<Channel> channel) override;
 	void onDisconnect(MSRef<Channel> channel) override;
+	void onOutbound(MSRef<IChannelEvent> event, bool flush) override;
 
 protected:
 	static void on_connect(uv_connect_t* req, int status);
 	static void on_alloc(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf);
 	static void on_read(uv_stream_t* stream, ssize_t nread, const uv_buf_t* buf);
-	static void on_send(uv_timer_t* handle);
+	static void on_send(uv_async_t* handle);
 
 protected:
 	MSRef<Channel> m_Channel;
 	MSRef<ISocketAddress> m_Address;
 	MSRef<ISocketAddress> m_LocalAddress;
 	MSMap<MSRaw<IChannelEvent>, MSRef<IChannelEvent>> m_EventCache;
+	uv_async_t* m_EventAsync = nullptr;
 };

@@ -92,9 +92,11 @@ void KCPClientReactor::startup()
 	{
 		uv_loop_t loop;
 		uv_udp_t client;
+		uv_async_t async;
 
 		uv_loop_init(&loop);
 		uv_udp_init(&loop, &client);
+		uv_async_init(&loop, &async, on_send);
 
 		do
 		{
@@ -180,13 +182,20 @@ void KCPClientReactor::startup()
 
 			{
 				loop.data = this;
+				async.data = this;
 				uv_timer_t timer;
 				uv_timer_init(&loop, &timer);
-				uv_timer_start(&timer, on_send, 0, 1);
+				uv_timer_start(&timer, [](uv_timer_t* handle)
+				{
+					auto reactor = (KCPClientReactor*)handle->loop->data;
+					if (reactor->m_Running == false) uv_stop(handle->loop);
+				} , 500, 1);
 
 				m_Connect = true;
+				m_EventAsync = &async;
 				promise.set_value();
 				uv_run(&loop, UV_RUN_DEFAULT);
+				m_EventAsync = nullptr;
 				m_Connect = false;
 			}
 
@@ -251,6 +260,12 @@ void KCPClientReactor::onDisconnect(MSRef<Channel> channel)
 	m_Connect = false;
 	m_Channel = nullptr;
 	ChannelReactor::onDisconnect(channel);
+}
+
+void KCPClientReactor::onOutbound(MSRef<IChannelEvent> event, bool flush)
+{
+	ChannelReactor::onOutbound(event, flush);
+	uv_async_send(m_EventAsync);
 }
 
 void KCPClientReactor::on_alloc(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf)
@@ -399,7 +414,7 @@ int KCPClientReactor::on_output(const char* buf, int len, IKCPCB* kcp, void* use
 	return (int)count;
 }
 
-void KCPClientReactor::on_send(uv_timer_t* handle)
+void KCPClientReactor::on_send(uv_async_t* handle)
 {
 	auto reactor = (KCPClientReactor*)handle->loop->data;
 	reactor->m_ChannelRemoved = nullptr;

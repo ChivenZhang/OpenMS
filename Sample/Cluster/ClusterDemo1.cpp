@@ -52,14 +52,14 @@ void ClusterDemo1::onInit()
 	m_Thread = MSThread([=, this]()
 	{
 		QuickQPS qps;
-
 		auto T = ::clock();
+
 		while (m_Running)
 		{
 			auto response = loginService->call<MSString>("author", "verify", 1000, MSTuple{"admin", "123456"});
 			MS_DEBUG("Get %s", response.first.c_str());
-			qps.hit();
 
+			qps.hit();
 			auto t = ::clock();
 			if (T + 5000 <= t)
 			{
