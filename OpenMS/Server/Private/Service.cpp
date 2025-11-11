@@ -1,4 +1,4 @@
-/*=================================================
+﻿/*=================================================
 * Copyright © 2020-2025 ChivenZhang.
 * All Rights Reserved.
 * =====================Note=========================
@@ -118,6 +118,7 @@ IMailTask Service::read(IMail mail)
 			{
 				auto input = MSStringView(request.Buffer, mail.Body.size() - sizeof(request_t));
 				response = co_await method(input);
+				MS_INFO("RPC %s", response.data());
 			}
 			mail.Type = 1;
 			mail.Body = response;
