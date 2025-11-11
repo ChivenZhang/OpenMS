@@ -9,28 +9,26 @@
 *
 * =================================================*/
 #include "ClusterDemo1.h"
+#include "Server/Private/Service.h"
 
-class LoginMailbox : public MailBox
+class LoginService : public Service
 {
 public:
-	using MailBox::MailBox;
-
-	IMailTask read(IMail&& mail) override
+	LoginService()
 	{
-		static int count = 0;
-		count++;
-
-		static int t0 = ::clock();
-		int t1 = ::clock();
-		if (t0 + CLOCKS_PER_SEC <= t1)
+		this->bind("login", [this](MSStringView input)->MSAsync<MSString>
 		{
-			MS_INFO("send %.0f mails per second", count * 1.0f * CLOCKS_PER_SEC / (t1 - t0));
-			count = 0;
-			t0 = t1;
-		}
-
-		send({.To = "author", .Data = mail.Data});
-		co_return;
+			auto output = co_await [=](MSAwait<MSString> promise)->MSString
+			{
+				this->async("author", "verify", 100, input, [=](MSStringView response)
+				{
+					promise(MSString(response));
+				});
+				return {};
+			};
+			MS_INFO("RPC %s", output.c_str());
+			co_return output;
+		});
 	}
 };
 
@@ -38,7 +36,7 @@ public:
 
 MSString ClusterDemo1::identity() const
 {
-	// Use config in Application.json
+	// Use config in APPLICATION.json
 	return "cluster1";
 }
 
@@ -46,16 +44,18 @@ void ClusterDemo1::onInit()
 {
 	ClusterServer::onInit();
 
-	auto mails = AUTOWIRE(IMailContext)::bean();
-	mails->createMailbox<LoginMailbox>("login");
+	auto hub = AUTOWIRE(IMailHub)::bean();
+	auto loginService = MSNew<LoginService>();
+	hub->create("login", loginService);
 
 	m_Running = true;
 	m_Thread = MSThread([=, this]()
 	{
 		while (m_Running)
 		{
-			mails->sendToMailbox({.To = "login", .Data = R"({"user":"admin", "pass":"******"})"});
-			std::this_thread::sleep_for(std::chrono::milliseconds(10));
+			MSString response;
+			loginService->call("login", "login", 1000, R"({"user":"admin", "pass":"******"})", response);
+			//break;
 		}
 	});
 }

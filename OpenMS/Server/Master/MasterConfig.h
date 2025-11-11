@@ -1,3 +1,4 @@
+#pragma once
 /*=================================================
 * Copyright @ 2020-2025 ChivenZhang.
 * All Rights Reserved.
@@ -8,21 +9,9 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "DiscoveryServer.h"
+#include "OpenMS/Server/Private/Property.h"
 
-// ========================================================================================
-
-MSString DiscoveryServer::identity() const
+/// @brief 
+class MasterConfig : RESOURCE2(Property, IProperty)
 {
-	return "discovery";
-}
-
-void DiscoveryServer::onInit()
-{
-	MasterServer::onInit();
-}
-
-void DiscoveryServer::onExit()
-{
-	MasterServer::onExit();
-}
+};

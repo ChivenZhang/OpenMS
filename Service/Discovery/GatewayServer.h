@@ -9,12 +9,9 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "Service/Private/Server.h"
-#include "MasterConfig.h"
-#include "Endpoint/RPC/RPCServer.h"
+#include <OpenMS/Server/Master/MasterServer.h>
 
-/// @brief Base Master Service
-class MasterServer : public Server, public RESOURCE(MasterConfig)
+class GatewayServer : public MasterServer
 {
 public:
 	MSString identity() const override;
@@ -22,10 +19,6 @@ public:
 protected:
 	void onInit() override;
 	void onExit() override;
-
-protected:
-	MSRef<RPCServer> m_ClusterServer;
-	MSStringMap<MSSet<MSString>> m_MailRouteMap;
-	MSStringMap<MSSet<MSString>> m_MailRouteNewMap;
-	std::chrono::time_point<std::chrono::system_clock> m_MailUpdateTime;
 };
+
+OPENMS_RUN(GatewayServer)

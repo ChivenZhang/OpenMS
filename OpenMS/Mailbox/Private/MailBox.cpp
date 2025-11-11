@@ -9,46 +9,49 @@
 *
 * =================================================*/
 #include "MailBox.h"
-#include "MailContext.h"
+#include "MailHub.h"
 
-MailBox::MailBox(MSRaw<IMailContext> context)
-	:
-	m_Context(context)
+MailBox::~MailBox()
 {
+	while (m_MailQueue.size())
+	{
+		auto& handle = m_MailQueue.front().Task;
+		if (handle && handle.done() == false) handle.destroy();
+		m_MailQueue.pop();
+	}
 }
 
-bool MailBox::send(IMail&& mail)
+IMailBox::name_t MailBox::name() const
 {
-	if (m_Context == nullptr) return false;
-	mail.From = m_Address;
-	return m_Context->sendToMailbox(std::forward<IMail>(mail));
+	return m_HashName;
 }
 
-bool MailBox::create(MSString address, MSLambda<MSRef<IMailBox>(MSRaw<IMailContext>)> factory)
+uint32_t MailBox::send(IMail mail)
+{
+	if (m_Context == nullptr) return 0;
+	mail.From = m_HashName;
+	return m_Context->send(mail);
+}
+
+bool MailBox::create(MSString address, MSRef<IMailBox> value)
 {
 	if (m_Context == nullptr) return false;
-	return m_Context->createMailbox(address, factory);
+	return m_Context->create(address, value);
 }
 
 bool MailBox::cancel(MSString address)
 {
 	if (m_Context == nullptr) return false;
-	return m_Context->cancelMailbox(address);
+	return m_Context->cancel(address);
 }
 
 bool MailBox::exist(MSString address) const
 {
 	if (m_Context == nullptr) return false;
-	return m_Context->existMailbox(address);
+	return m_Context->exist(address);
 }
 
 void MailBox::error(MSError&& info)
 {
 	MS_INFO("%s", info.what());
-}
-
-IMailTask MailBox::read(IMail&& mail)
-{
-	MS_INFO("TODO:implement read method");
-	co_return;
 }

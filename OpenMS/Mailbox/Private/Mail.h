@@ -1,6 +1,6 @@
 #pragma once
 /*=================================================
-* Copyright @ 2020-2025 ChivenZhang.
+* Copyright © 2020-2025 ChivenZhang.
 * All Rights Reserved.
 * =====================Note=========================
 *
@@ -9,16 +9,12 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include <OpenMS/Service/Master/MasterServer.h>
+#include "MS.h"
 
-class DiscoveryServer : public MasterServer
+/// @brief view for mail
+struct MailView
 {
-public:
-	MSString identity() const override;
-
-protected:
-	void onInit() override;
-	void onExit() override;
+	uint32_t From, To;	// 源服务，目标服务
+	uint32_t Date, Type;// 时间戳，消息类型
+	char Body[0];
 };
-
-OPENMS_RUN(DiscoveryServer)

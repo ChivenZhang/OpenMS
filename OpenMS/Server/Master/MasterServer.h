@@ -9,9 +9,12 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include <OpenMS/Server/Cluster/ClusterServer.h>
+#include "OpenMS/Server/Private/Server.h"
+#include "MasterConfig.h"
+#include "Endpoint/RPC/RPCServer.h"
 
-class ClusterDemo1 : public ClusterServer
+/// @brief Base Master Service
+class MasterServer : public Server, public RESOURCE(MasterConfig)
 {
 public:
 	MSString identity() const override;
@@ -21,8 +24,8 @@ protected:
 	void onExit() override;
 
 protected:
-	MSThread m_Thread;
-	MSAtomic<bool> m_Running;
+	MSRef<RPCServer> m_ClusterServer;
+	MSMap<uint32_t, MSSet<MSString>> m_MailRouteMap;	// Service : [IP:Port]
+	MSMap<uint32_t, MSSet<MSString>> m_MailRouteNewMap;
+	std::chrono::time_point<std::chrono::system_clock> m_MailUpdateTime;
 };
-
-OPENMS_RUN(ClusterDemo1)

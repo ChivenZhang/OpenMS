@@ -156,14 +156,6 @@ void TCPClientReactor::write(MSRef<IChannelEvent> event, MSRef<IChannelAddress> 
 	if (channel && channel->running()) channel->write(event);
 }
 
-void TCPClientReactor::writeAndFlush(MSRef<IChannelEvent> event, MSRef<IChannelAddress> address)
-{
-	if (m_Running == false) return;
-	auto channel = m_Channel;
-	event->Channel = channel;
-	if (channel && channel->running()) channel->writeAndFlush(event);
-}
-
 void TCPClientReactor::onConnect(MSRef<Channel> channel)
 {
 	MS_DEBUG("accepted from %s", channel->getRemote().lock()->getString().c_str());

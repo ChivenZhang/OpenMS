@@ -87,19 +87,6 @@ MSFuture<bool> ChannelReactor::write(MSRef<IChannelEvent> event, MSRef<IChannelA
 	return result;
 }
 
-void ChannelReactor::writeAndFlush(MSRef<IChannelEvent> event, MSRef<IChannelAddress> address)
-{
-}
-
-MSFuture<bool> ChannelReactor::writeAndFlush(MSRef<IChannelEvent> event, MSRef<IChannelAddress> address, MSPromise<bool>&& promise)
-{
-	if (m_Running == false) return MSFuture<bool>();
-	auto result = promise.get_future();
-	event->Promise = &promise;
-	writeAndFlush(event, address);
-	return result;
-}
-
 void ChannelReactor::onConnect(MSRef<Channel> channel)
 {
 	if (channel == nullptr) return;

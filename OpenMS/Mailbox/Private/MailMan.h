@@ -10,17 +10,17 @@
 *
 * =================================================*/
 #include "MailBox.h"
-class MailContext;
+class MailHub;
 
-/// @brief Implement for mail deliver
-class MailDeliver
+/// @brief Implement for mail man
+class MailMan
 {
 public:
-	explicit MailDeliver(MSRaw<MailContext> context);
-	~MailDeliver();
+	explicit MailMan(MSRaw<MailHub> context);
+	~MailMan();
 
 protected:
 	MSMutex m_MailLock;
 	MSThread m_MailThread;
-	MSRaw<MailContext> m_Context;
+	MSRaw<MailHub> m_Context;
 };

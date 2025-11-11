@@ -10,31 +10,33 @@
 *
 * =================================================*/
 #include "../IMailBox.h"
-class MailContext;
-class MailDeliver;
+class IChannel;
+class MailHub;
+class MailMan;
 
 /// @brief 
 class MailBox : public IMailBox
 {
 public:
-	explicit MailBox(MSRaw<IMailContext> context);
-	bool send(IMail&& mail) final;
+	MailBox() = default;
+	~MailBox() override;
+	name_t name() const final;
+	uint32_t send(IMail mail) final;
 	using IMailBox::create;
-	bool create(MSString address, MSLambda<MSRef<IMailBox>(MSRaw<IMailContext>)> factory) final;
+	bool create(MSString address, MSRef<IMailBox> value) final;
 	bool cancel(MSString address) final;
 	bool exist(MSString address) const final;
 
 protected:
 	void error(MSError&& info) override;
-	IMailTask read(IMail&& mail) override;
 
 private:
-	friend class MailContext;
-	friend class MailDeliver;
-	MSString m_Address;
+	friend class MailHub;
+	friend class MailMan;
+	uint32_t m_HashName = 0;
+	MSRaw<IMailHub> m_Context = nullptr;
 	MSMutex m_MailLock;
 	MSAtomic<uint32_t> m_Session;
-	MSRaw<IMailContext> m_Context;
-	struct mail_t { IMail Mail; IMailTask Handle; };
+	struct mail_t { MSString Mail; IMailTask Task; };
 	MSQueue<mail_t> m_MailQueue;
 };

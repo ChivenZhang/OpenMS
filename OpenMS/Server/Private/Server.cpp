@@ -21,6 +21,7 @@ int Server::startup()
 	auto frameTime = ::clock();
 	auto frameNext = frameTime;
 	constexpr auto timePerFrame = 1000 / 15;
+	MS_INFO("starting %s...", this->identity().c_str());
 
 	try
 	{
@@ -36,6 +37,8 @@ int Server::startup()
 		onError(cpptrace::logic_error("unknown exception"));
 		m_Running = false;
 	}
+
+	MS_INFO("started %s", this->identity().c_str());
 
 	while (m_Running)
 	{
@@ -85,6 +88,8 @@ int Server::startup()
 		onError(cpptrace::logic_error("unknown exception"));
 		m_Running = false;
 	}
+
+	MS_INFO("terminated %s", this->identity().c_str());
 
 	return 0;
 }

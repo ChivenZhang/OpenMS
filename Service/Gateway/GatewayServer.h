@@ -1,6 +1,6 @@
 #pragma once
 /*=================================================
-* Copyright © 2020-2025 ChivenZhang.
+* Copyright @ 2020-2025 ChivenZhang.
 * All Rights Reserved.
 * =====================Note=========================
 *
@@ -9,7 +9,16 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
+#include <OpenMS/Server/Cluster/ClusterServer.h>
 
-class IMessage
+class GatewayServer : public ClusterServer
 {
+public:
+	MSString identity() const override;
+
+protected:
+	void onInit() override;
+	void onExit() override;
 };
+
+OPENMS_RUN(GatewayServer)

@@ -1,4 +1,3 @@
-#pragma once
 /*=================================================
 * Copyright @ 2020-2025 ChivenZhang.
 * All Rights Reserved.
@@ -9,9 +8,21 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "Service/Private/Property.h"
+#include "GatewayServer.h"
 
-/// @brief 
-class MasterConfig : RESOURCE2(Property, IProperty)
+// ========================================================================================
+
+MSString GatewayServer::identity() const
 {
-};
+	return "gateway";
+}
+
+void GatewayServer::onInit()
+{
+	ClusterServer::onInit();
+}
+
+void GatewayServer::onExit()
+{
+	ClusterServer::onExit();
+}

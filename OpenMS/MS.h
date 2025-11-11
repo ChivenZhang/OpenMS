@@ -348,6 +348,7 @@ template<class T, class... Args>
 struct MSTraitsBase
 {
 	using return_type = T;
+	using return_data = std::remove_cvref_t<T>;
 	using argument_types = std::tuple<Args...>;
 	using argument_datas = std::tuple<std::remove_cvref_t<Args>...>;
 	static constexpr std::size_t argument_count = sizeof...(Args);

@@ -1,4 +1,3 @@
-#pragma once
 /*=================================================
 * Copyright @ 2020-2025 ChivenZhang.
 * All Rights Reserved.
@@ -9,10 +8,21 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "Service/Private/Property.h"
-#include "Mailbox/Private/MailContext.h"
+#include "GatewayServer.h"
 
-/// @brief
-class ClusterConfig : RESOURCE2(Property, IProperty), RESOURCE2(MailContext, IMailContext)
+// ========================================================================================
+
+MSString GatewayServer::identity() const
 {
-};
+	return "discovery";
+}
+
+void GatewayServer::onInit()
+{
+	MasterServer::onInit();
+}
+
+void GatewayServer::onExit()
+{
+	MasterServer::onExit();
+}
