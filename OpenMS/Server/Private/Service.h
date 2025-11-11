@@ -22,7 +22,7 @@ public:
 	bool call(MSStringView service, MSStringView method, uint32_t timeout, MSStringView request, MSString& response);
 	bool async(MSStringView service, MSStringView method, uint32_t timeout, MSStringView request, MSLambda<void(MSStringView)> callback);
 
-	template<class F, OPENMS_NOT_SAME(F, method_t)>
+	template<class F, OPENMS_NOT_SAME(typename MSTraits<F>::return_data, MSTraits<method_t>::return_data), OPENMS_NOT_SAME(typename MSTraits<F>::argument_datas, MSTraits<method_t>::argument_datas)>
 	bool bind(MSStringView method, F callback)
 	{
 		using return_type = MSTraits<F>::return_data;

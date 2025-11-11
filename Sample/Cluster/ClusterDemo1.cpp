@@ -16,16 +16,17 @@ class LoginService : public Service
 public:
 	LoginService()
 	{
-		this->bind("login", [this](MSString user, MSString pass)->MSAsync<MSString>
+		this->bind("login", [this](MSStringView input)->MSAsync<MSString>
 		{
 			auto output = co_await [=](MSAwait<MSString> promise)->MSString
 			{
-				this->async<MSString>("author", "verify", 1000, MSTuple{user, pass}, [=](MSString response)
+				this->async("author", "verify", 100, input, [=](MSStringView output)
 				{
-					promise(MSString(response));
+					promise(MSString(output));
 				});
 				return {};
 			};
+			// MS_INFO("RPC %s", output.c_str());
 			co_return output;
 		});
 	}
@@ -52,9 +53,8 @@ void ClusterDemo1::onInit()
 	{
 		while (m_Running)
 		{
-			auto response =
-				loginService->call<MSString>("login", "login", 1000, MSTuple{"admin", "user"});
-			MS_INFO("RPC %s", response.first.c_str());
+			MSString response;
+			loginService->call("login", "login", 1000, "{}", response);
 		}
 	});
 }
