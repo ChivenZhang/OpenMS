@@ -22,6 +22,103 @@ public:
 	bool call(MSStringView service, MSStringView method, uint32_t timeout, MSStringView request, MSString& response);
 	bool async(MSStringView service, MSStringView method, uint32_t timeout, MSStringView request, MSLambda<void(MSStringView)> callback);
 
+	template<class F, OPENMS_NOT_SAME(F, method_t)>
+	bool bind(MSStringView method, F callback)
+	{
+		using return_type = MSTraits<F>::return_data;
+		using argument_type = MSTraits<F>::argument_datas;
+		if constexpr (std::is_same_v<return_type, void>)
+		{
+			method_t function = [callback](MSStringView input)->MSAsync<MSString>
+			{
+				argument_type request;
+				if constexpr (std::is_same_v<argument_type, MSTuple<void>> == false)
+				{
+					if (MSTypeC(MSString(input), request) == false) co_return {};
+				}
+				co_await std::apply(callback, request);
+				co_return {};
+			};
+			return this->bind(method, function);
+		}
+		else
+		{
+			method_t function = [callback](MSStringView input)->MSAsync<MSString>
+			{
+				argument_type request;
+				if constexpr (std::is_same_v<argument_type, MSTuple<void>> == false)
+				{
+					if (MSTypeC(MSString(input), request) == false) co_return {};
+				}
+				auto response = co_await std::apply(callback, request);
+				MSString output;
+				MSTypeC(response, output);
+				co_return output;
+			};
+			return this->bind(method, function);
+		}
+	}
+
+	template<class T, class...Args>
+	auto call(MSStringView service, MSStringView method, uint32_t timeout, MSTuple<Args...>&& args)
+	{
+		MSString request;
+		if constexpr (std::is_void_v<T>)
+		{
+			if constexpr (sizeof...(Args) != 0)
+			{
+				if (MSTypeC(args, request) == false) return false;
+			}
+			MSString response;
+			return this->call(service, method, timeout, request, response);
+		}
+		else
+		{
+			if constexpr (sizeof...(Args) != 0)
+			{
+				if (MSTypeC(args, request) == false) return MSBinary{T(), false};
+			}
+			MSString response;
+			if (this->call(service, method, timeout, request, response) == false)
+			{
+				return MSBinary{T(), false};
+			}
+			T result;
+			if (MSTypeC(response, result) == false) return MSBinary{T(), false};
+			return MSBinary{result, true};
+		}
+	}
+
+	template<class T, class...Args>
+	bool async(MSStringView service, MSStringView method, uint32_t timeout, MSTuple<Args...>&& args, MSLambda<void(T)> callback)
+	{
+		MSString request;
+		if constexpr (std::is_void_v<T>)
+		{
+			if constexpr (sizeof...(Args) != 0)
+			{
+				if (MSTypeC(args, request) == false) return false;
+			}
+			return this->async(service, method, timeout, request, [callback](MSStringView)
+			{
+				if (callback) callback();
+			});
+		}
+		else
+		{
+			if constexpr (sizeof...(Args) != 0)
+			{
+				if (MSTypeC(args, request) == false) return false;
+			}
+			return this->async(service, method, timeout, request, [callback](MSStringView response)
+			{
+				T result;
+				MSTypeC(response, result);
+				if (callback) callback(result);
+			});
+		}
+	}
+
 protected:
 	IMailTask read(IMail mail) final;
 
