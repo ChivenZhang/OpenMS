@@ -33,10 +33,12 @@ void TCPServerReactor::startup()
 	{
 		uv_loop_t loop;
 		uv_tcp_t server;
+		uv_async_t async;
 
 		uv_loop_init(&loop);
 		uv_tcp_init(&loop, &server);
 		uv_tcp_nodelay(&server, 1);
+		uv_async_init(&loop, &async, on_send);
 
 		do
 		{
@@ -107,13 +109,20 @@ void TCPServerReactor::startup()
 
 			{
 				loop.data = this;
+				async.data = this;
 				uv_timer_t timer;
 				uv_timer_init(&loop, &timer);
-				uv_timer_start(&timer, on_send, 0, 1);
+				uv_timer_start(&timer, [](uv_timer_t* handle)
+				{
+					auto reactor = (TCPServerReactor*)handle->loop->data;
+					if (reactor->m_Running == false) uv_stop(handle->loop);
+				} , 1000, 1);
 
 				m_Connect = true;
+				m_EventAsync = &async;
 				promise.set_value();
 				uv_run(&loop, UV_RUN_DEFAULT);
+				m_EventAsync = nullptr;
 				m_Connect = false;
 			}
 
@@ -176,6 +185,12 @@ void TCPServerReactor::onDisconnect(MSRef<Channel> channel)
 	auto hashName = remote->getHashName();
 	m_ChannelMap.erase(hashName);
 	ChannelReactor::onDisconnect(channel);
+}
+
+void TCPServerReactor::onOutbound(MSRef<IChannelEvent> event, bool flush)
+{
+	ChannelReactor::onOutbound(event, flush);
+	uv_async_send(m_EventAsync);
 }
 
 void TCPServerReactor::on_connect(uv_stream_t* server, int status)
@@ -310,10 +325,9 @@ void TCPServerReactor::on_read(uv_stream_t* stream, ssize_t nread, const uv_buf_
 	free(buf->base);
 }
 
-void TCPServerReactor::on_send(uv_timer_t* handle)
+void TCPServerReactor::on_send(uv_async_t* handle)
 {
 	auto reactor = (TCPServerReactor*)handle->loop->data;
-	if (reactor->m_Running == false) uv_stop(handle->loop);
 	if (reactor->m_Running == false || reactor->m_Sending == false) return;
 
 	MSMutexLock lock(reactor->m_EventLock);

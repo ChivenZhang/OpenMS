@@ -30,12 +30,13 @@ public:
 protected:
 	void onConnect(MSRef<Channel> channel) override;
 	void onDisconnect(MSRef<Channel> channel) override;
+	void onOutbound(MSRef<IChannelEvent> event, bool flush) override;
 
 protected:
 	static void on_alloc(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf);
 	static void on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf, const struct sockaddr* addr, unsigned flags);
 	static int on_output(const char* buf, int len, struct IKCPCB* kcp, void* user);
-	static void on_send(uv_timer_t* handle);
+	static void on_send(uv_async_t* handle);
 
 protected:
 	uint32_t m_Backlog, m_Session;
@@ -45,4 +46,5 @@ protected:
 	MSList<MSRef<Channel>> m_ChannelsRemoved;
 	MSMap<uint32_t, MSRef<Channel>> m_ChannelMap;
 	MSLambda<uint32_t(MSRef<IChannelAddress>)> m_OnSession;
+	uv_async_t* m_EventAsync = nullptr;
 };

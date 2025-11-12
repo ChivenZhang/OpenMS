@@ -127,6 +127,7 @@ add_library(OpenMS STATIC
 		${REDIS_SOURCES}
 		Mailbox/IMail.h
 		Mailbox/Private/Mail.h
+		Utility/QuickQPS.h
 )
 
 if(OPENMS_ENABLE_MYSQL)

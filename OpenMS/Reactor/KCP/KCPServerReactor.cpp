@@ -96,9 +96,11 @@ void KCPServerReactor::startup()
 	{
 		uv_loop_t loop;
 		uv_udp_t server;
+		uv_async_t async;
 
 		uv_loop_init(&loop);
 		uv_udp_init(&loop, &server);
+		uv_async_init(&loop, &async, on_send);
 
 		do
 		{
@@ -173,13 +175,20 @@ void KCPServerReactor::startup()
 
 			{
 				loop.data = this;
+				async.data = this;
 				uv_timer_t timer;
 				uv_timer_init(&loop, &timer);
-				uv_timer_start(&timer, on_send, 0, 1);
+				uv_timer_start(&timer, [](uv_timer_t* handle)
+				{
+					auto reactor = (KCPServerReactor*)handle->loop->data;
+					if (reactor->m_Running == false) uv_stop(handle->loop);
+				} , 1000, 1);
 
 				m_Connect = true;
+				m_EventAsync = &async;
 				promise.set_value();
 				uv_run(&loop, UV_RUN_DEFAULT);
+				m_EventAsync = nullptr;
 				m_Connect = false;
 			}
 
@@ -247,6 +256,12 @@ void KCPServerReactor::onDisconnect(MSRef<Channel> channel)
 	m_ChannelMap.erase(hashName);
 	m_Channels.erase(std::remove(m_Channels.begin(), m_Channels.end(), channel), m_Channels.end());
 	ChannelReactor::onDisconnect(channel);
+}
+
+void KCPServerReactor::onOutbound(MSRef<IChannelEvent> event, bool flush)
+{
+	ChannelReactor::onOutbound(event, flush);
+	uv_async_send(m_EventAsync);
 }
 
 void KCPServerReactor::on_alloc(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf)
@@ -435,7 +450,7 @@ int KCPServerReactor::on_output(const char* buf, int len, IKCPCB* kcp, void* use
 	return (int)count;
 }
 
-void KCPServerReactor::on_send(uv_timer_t* handle)
+void KCPServerReactor::on_send(uv_async_t* handle)
 {
 	auto reactor = (KCPServerReactor*)handle->loop->data;
 	if (reactor->m_ChannelsRemoved.size()) reactor->m_ChannelsRemoved.clear();

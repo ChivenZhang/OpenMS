@@ -18,7 +18,7 @@ public:
 	{
 		this->bind("verify", [](MSString user, MSString pass)->MSAsync<MSString>
 		{
-			MS_INFO("success %s %s", user.c_str(), pass.c_str());
+			MS_DEBUG("success %s %s", user.c_str(), pass.c_str());
 			co_return "success";
 		});
 	}

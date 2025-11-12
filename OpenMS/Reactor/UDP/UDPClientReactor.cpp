@@ -33,9 +33,11 @@ void UDPClientReactor::startup()
 	{
 		uv_loop_t loop;
 		uv_udp_t client;
+		uv_async_t async;
 
 		uv_loop_init(&loop);
 		uv_udp_init(&loop, &client);
+		uv_async_init(&loop, &async, on_send);
 
 		do
 		{
@@ -150,13 +152,20 @@ void UDPClientReactor::startup()
 
 			{
 				loop.data = this;
+				async.data = this;
 				uv_timer_t timer;
 				uv_timer_init(&loop, &timer);
-				uv_timer_start(&timer, on_send, 0, 1);
+				uv_timer_start(&timer, [](uv_timer_t* handle)
+				{
+					auto reactor = (UDPClientReactor*)handle->loop->data;
+					if (reactor->m_Running == false) uv_stop(handle->loop);
+				} , 1000, 1);
 
 				m_Connect = true;
+				m_EventAsync = &async;
 				promise.set_value();
 				uv_run(&loop, UV_RUN_DEFAULT);
+				m_EventAsync = nullptr;
 				m_Connect = false;
 			}
 
@@ -224,6 +233,12 @@ void UDPClientReactor::onDisconnect(MSRef<Channel> channel)
 	ChannelReactor::onDisconnect(channel);
 }
 
+void UDPClientReactor::onOutbound(MSRef<IChannelEvent> event, bool flush)
+{
+	ChannelReactor::onOutbound(event, flush);
+	uv_async_send(m_EventAsync);
+}
+
 void UDPClientReactor::on_alloc(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf)
 {
 	buf->base = (char*)malloc(suggested_size);
@@ -257,10 +272,9 @@ void UDPClientReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf
 	free(buf->base);
 }
 
-void UDPClientReactor::on_send(uv_timer_t* handle)
+void UDPClientReactor::on_send(uv_async_t* handle)
 {
 	auto reactor = (UDPClientReactor*)handle->loop->data;
-	if (reactor->m_Running == false) uv_stop(handle->loop);
 	if (reactor->m_Running == false || reactor->m_Sending == false) return;
 
 	MSMutexLock lock(reactor->m_EventLock);
