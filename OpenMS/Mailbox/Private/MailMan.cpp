@@ -43,7 +43,14 @@ MailMan::MailMan(MSRaw<MailHub> context)
 						newMail.Date = mailView.Date;
 						newMail.Type = mailView.Type;
 						newMail.Body = MSStringView(mailView.Body, mail.Mail.size() - sizeof(MailView));
-						mail.Task = mailbox->read(newMail);
+						try
+						{
+							mail.Task = mailbox->read(newMail);
+						}
+						catch (MSError& error)
+						{
+							MSPrintError(error);
+						}
 					}
 					if (bool(mail.Task) == true && mail.Task.done() == false)
 					{

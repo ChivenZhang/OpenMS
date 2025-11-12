@@ -51,9 +51,32 @@
 #endif
 
 #ifdef _WIN32
-#	ifdef _DEBUG
-#		define OPENMS_DEBUG_MODE
+#	define OPENMS_PLATFORM_WINDOWS
+#elif defined(__APPLE__)
+#	define OPENMS_PLATFORM_APPLE
+#	if defined(TARGET_OS_OSX)
+#		define OPENMS_PLATFORM_MACOS
+#	elif defined(TARGET_OS_IPHONE)
+#		define OPENMS_PLATFORM_IPHONE
 #	endif
+#elif defined(__ANDROID__)
+#	define OPENMS_PLATFORM_ANDROID
+#elif defined(__FreeBSD__)
+#	define OPENMS_PLATFORM_FREEBSD
+#elif defined(__NetBSD__)
+#	define OPENMS_PLATFORM_NETBSD
+#elif defined(__sun)
+#	define OPENMS_PLATFORM_SOLARIS
+#elif defined(__linux__) || defined(__linux)
+#	define OPENMS_PLATFORM_LINUX
+#elif defined(__unix__) || defined(__unix)
+#	define OPENMS_PLATFORM_UNIX
+#endif
+
+#if defined(_WIN64) || defined(__x86_64__)
+#	define OPENMS_PLATFORM_64
+#elif defined(_WIN32) || defined(__i386__)
+#	define OPENMS_PLATFORM_32
 #endif
 
 // ============================================
@@ -207,6 +230,24 @@ template <class ...TS>
 using MSTuple = std::tuple<TS...>;
 using MSAny = std::any;
 using MSError = std::exception;
+template <class E>
+void MSThrowError(E&& error)
+{
+	std::throw_with_nested(error);
+}
+inline void MSPrintError(const MSError& error, uint32_t level =  0)
+{
+	MS_ERROR("%s exception: %s", MSString(level, ' ').c_str(), error.what());
+	try
+	{
+		std::rethrow_if_nested(error);
+	}
+	catch (const std::exception& nestedException)
+	{
+		MSPrintError(nestedException, level + 1);
+	}
+	catch (...) {}
+}
 template <class T>
 using MSLambda = std::function<T>;
 using MSThread = std::thread;

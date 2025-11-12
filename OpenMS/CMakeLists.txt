@@ -159,6 +159,9 @@ find_package(nlohmann_json CONFIG REQUIRED)
 target_link_libraries(OpenMS PUBLIC nlohmann_json::nlohmann_json)
 find_package(cpptrace CONFIG REQUIRED)
 target_link_libraries(OpenMS PUBLIC cpptrace::cpptrace)
+# this is heuristically generated, and may not be correct
+find_package(unofficial-breakpad CONFIG REQUIRED)
+target_link_libraries(OpenMS PUBLIC unofficial::breakpad::libbreakpad unofficial::breakpad::libbreakpad_client)
 find_package(cista CONFIG REQUIRED)
 target_link_libraries(OpenMS PRIVATE cista::cista)
 
