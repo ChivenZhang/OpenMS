@@ -110,7 +110,7 @@ void TCPClientReactor::startup()
 				{
 					auto reactor = (TCPClientReactor*)handle->loop->data;
 					if (reactor->m_Running == false) uv_stop(handle->loop);
-				} , 500, 1);
+				} , 1000, 1);
 
 				m_EventAsync = &async;
 				uv_run(&loop, UV_RUN_ONCE);

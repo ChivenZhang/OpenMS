@@ -159,7 +159,7 @@ void UDPClientReactor::startup()
 				{
 					auto reactor = (UDPClientReactor*)handle->loop->data;
 					if (reactor->m_Running == false) uv_stop(handle->loop);
-				} , 500, 1);
+				} , 1000, 1);
 
 				m_Connect = true;
 				m_EventAsync = &async;

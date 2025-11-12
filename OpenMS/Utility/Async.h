@@ -198,14 +198,29 @@ public:
     {
     }
 
-    MSAsync(MSAsync const&) = default;
+    MSAsync(MSAsync const&) = delete;
+    MSAsync& operator=(const MSAsync&) = delete;
+
+    MSAsync(MSAsync&& other) noexcept : m_ThisHandle(other.m_ThisHandle)
+    {
+        other.m_ThisHandle = nullptr;
+    }
 
     ~MSAsync()
     {
         if (m_ThisHandle) m_ThisHandle.destroy();
     }
 
-    MSAsync& operator=(const MSAsync&) = default;
+    MSAsync& operator=(MSAsync&& other) noexcept
+    {
+        if (std::addressof(other) != this)
+        {
+            if (m_ThisHandle) m_ThisHandle.destroy();
+            m_ThisHandle = other.m_ThisHandle;
+            other.m_ThisHandle = nullptr;
+        }
+        return *this;
+    }
 
     struct MSAwaitBase
     {
