@@ -17,7 +17,7 @@ bool ChannelInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<IC
 
 void ChannelInboundHandler::channelError(MSRaw<IChannelContext> context, MSError&& exception)
 {
-	MS_ERROR("%s", exception.what());
+	MSPrintError(exception);
 }
 
 bool ChannelOutboundHandler::channelWrite(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)
@@ -27,7 +27,7 @@ bool ChannelOutboundHandler::channelWrite(MSRaw<IChannelContext> context, MSRaw<
 
 void ChannelOutboundHandler::channelError(MSRaw<IChannelContext> context, MSError&& exception)
 {
-	MS_ERROR("%s", exception.what());
+	MSPrintError(exception);
 }
 
 LambdaInboundHandler::LambdaInboundHandler(callback_t const& callback)
@@ -46,6 +46,7 @@ bool LambdaInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<ICh
 void LambdaInboundHandler::channelError(MSRaw<IChannelContext> context, MSError&& exception)
 {
 	if (m_OnError) m_OnError(context, std::forward<MSError>(exception));
+	else MSPrintError(exception);
 }
 
 LambdaOutboundHandler::LambdaOutboundHandler(callback_t const& callback)
@@ -64,4 +65,5 @@ bool LambdaOutboundHandler::channelWrite(MSRaw<IChannelContext> context, MSRaw<I
 void LambdaOutboundHandler::channelError(MSRaw<IChannelContext> context, MSError&& exception)
 {
 	if (m_OnError) m_OnError(context, std::forward<MSError>(exception));
+	else MSPrintError(exception);
 }

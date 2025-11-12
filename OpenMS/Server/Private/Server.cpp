@@ -150,3 +150,19 @@ void Server::onFrame(uint32_t frame)
 void Server::onError(MSError&& error)
 {
 }
+
+#ifdef OPENMS_PLATFORM_WINDOWS
+#include <client/windows/handler/exception_handler.h>
+static bool MinidumpCallback(
+	const wchar_t* dump_path,
+	const wchar_t* id,
+	void* context, EXCEPTION_POINTERS* exinfo,
+	MDRawAssertionInfo* assertion,
+	bool succeeded)
+{
+	return succeeded;
+}
+static google_breakpad::ExceptionHandler exceptionHandler(
+		L".", nullptr, MinidumpCallback, nullptr,
+		google_breakpad::ExceptionHandler::HANDLER_ALL);
+#endif
