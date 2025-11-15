@@ -27,7 +27,7 @@ public:
 	{
 		using return_type = MSTraits<F>::return_data;
 		using argument_type = MSTraits<F>::argument_datas;
-		if constexpr (std::is_same_v<return_type, void>)
+		if constexpr (std::is_same_v<return_type, MSAsync<void>>)
 		{
 			return this->bind(method, [callback](MSStringView input)->MSAsync<MSString>
 			{
