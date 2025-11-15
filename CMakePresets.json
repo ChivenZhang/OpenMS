@@ -9,6 +9,7 @@
 				"CMAKE_BUILD_TYPE": "Debug",
 				"CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_HOME}/scripts/buildsystems/vcpkg.cmake",
 
+				"OPENMS_ENABLE_CONFIG": "ON",
 				"OPENMS_ENABLE_DISCOVERY": "ON",
 				"OPENMS_ENABLE_WEBSERVER": "ON",
 				"OPENMS_ENABLE_GATEWAY": "ON",
@@ -28,6 +29,7 @@
 				"CMAKE_BUILD_TYPE": "RelWithDebInfo",
 				"CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_HOME}/scripts/buildsystems/vcpkg.cmake",
 
+				"OPENMS_ENABLE_CONFIG": "ON",
 				"OPENMS_ENABLE_DISCOVERY": "ON",
 				"OPENMS_ENABLE_WEBSERVER": "ON",
 				"OPENMS_ENABLE_GATEWAY": "ON",
@@ -47,6 +49,7 @@
 				"CMAKE_BUILD_TYPE": "RelWithDebInfo",
 				"CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_HOME}/scripts/buildsystems/vcpkg.cmake",
 
+				"OPENMS_ENABLE_CONFIG": "ON",
 				"OPENMS_ENABLE_DISCOVERY": "ON",
 				"OPENMS_ENABLE_WEBSERVER": "ON",
 				"OPENMS_ENABLE_GATEWAY": "ON",
