@@ -162,9 +162,7 @@ target_link_libraries(OpenMS PUBLIC cpptrace::cpptrace)
 # this is heuristically generated, and may not be correct
 find_package(unofficial-breakpad CONFIG REQUIRED)
 target_link_libraries(OpenMS PUBLIC unofficial::breakpad::libbreakpad unofficial::breakpad::libbreakpad_client)
-find_package(cista CONFIG REQUIRED)
-target_link_libraries(OpenMS PRIVATE cista::cista)
 
 target_include_directories(OpenMS PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(OpenMS PUBLIC ${OPENMS_SOURCE_DIR}/External/iocpp)
-target_link_libraries(OpenMS PRIVATE iocpp)
+target_link_libraries(OpenMS PUBLIC iocpp)
