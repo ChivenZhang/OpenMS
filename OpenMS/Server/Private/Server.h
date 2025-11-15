@@ -9,8 +9,8 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "OpenMS/Server/IServer.h"
-#include "OpenMS/Server/IProperty.h"
+#include "Server/IServer.h"
+#include "Server/IProperty.h"
 #include "Utility/Timer.h"
 #ifndef OPENMS_HEARTBEAT
 #define OPENMS_HEARTBEAT 10 /*second*/
