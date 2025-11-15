@@ -27,9 +27,6 @@
     "name" : "hiredis",
     "version>=" : "1.2.0"
   }, {
-    "name" : "cista",
-    "version>=" : "0.15"
-  }, {
     "name" : "breakpad",
     "version>=" : "2024-02-16"
   } ]
