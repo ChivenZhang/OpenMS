@@ -22,6 +22,8 @@ set(REDIS_SOURCES)
 endif()
 
 add_library(OpenMS STATIC
+		${MYSQL_SOURCES}
+		${REDIS_SOURCES}
 		Endpoint/HTTP/HTTPClient.cpp
 		Endpoint/HTTP/HTTPClient.h
 		Endpoint/HTTP/HTTPProtocol.h
@@ -52,8 +54,10 @@ add_library(OpenMS STATIC
 		Handler/AES/AESHandler.cpp
 		Handler/AES/AESHandler.h
 		MS.h
+		Mailbox/IMail.h
 		Mailbox/IMailBox.h
 		Mailbox/IMailHub.h
+		Mailbox/Private/Mail.h
 		Mailbox/Private/MailBox.cpp
 		Mailbox/Private/MailBox.h
 		Mailbox/Private/MailHub.cpp
@@ -117,17 +121,13 @@ add_library(OpenMS STATIC
 		Server/Private/Property.h
 		Server/Private/Server.cpp
 		Server/Private/Server.h
-        Server/Private/Service.cpp
-        Server/Private/Service.h
 		Utility/Async.cpp
 		Utility/Async.h
+		Utility/QuickQPS.h
 		Utility/Timer.cpp
 		Utility/Timer.h
-		${MYSQL_SOURCES}
-		${REDIS_SOURCES}
-		Mailbox/IMail.h
-		Mailbox/Private/Mail.h
-		Utility/QuickQPS.h
+        Server/Private/Service.cpp
+        Server/Private/Service.h
 )
 
 if(OPENMS_ENABLE_MYSQL)
