@@ -28,7 +28,8 @@ public:
 	bool exist(MSString address) const final;
 
 protected:
-	void error(MSError&& info) override;
+	virtual void error(MSError&& info);
+	virtual IMailTask read(IMail mail) = 0;
 
 private:
 	friend class MailHub;

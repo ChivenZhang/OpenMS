@@ -39,9 +39,4 @@ public:
 		static_assert(std::is_base_of_v<IMailBox, T>);
 		return create(address, [&](){ return MSNew<T>(this, std::forward<ARGS>(args)...); });
 	}
-
-protected:
-	virtual void error(MSError&& info) = 0;
-
-	virtual IMailTask read(IMail mail) = 0;
 };

@@ -47,9 +47,9 @@ MailMan::MailMan(MSRaw<MailHub> context)
 						{
 							mail.Task = mailbox->read(newMail);
 						}
-						catch (MSError& error)
+						catch (MSError& info)
 						{
-							MSPrintError(error);
+							mailbox->error(std::move(info));
 						}
 					}
 					if (bool(mail.Task) == true && mail.Task.done() == false)
