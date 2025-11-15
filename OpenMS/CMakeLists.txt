@@ -166,3 +166,12 @@ target_link_libraries(OpenMS PUBLIC unofficial::breakpad::libbreakpad unofficial
 target_include_directories(OpenMS PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(OpenMS PUBLIC ${OPENMS_SOURCE_DIR}/External/iocpp)
 target_link_libraries(OpenMS PUBLIC iocpp)
+
+if(MSVC)
+target_compile_options(OpenMS PUBLIC /EHsc)
+target_compile_definitions(OpenMS PUBLIC -D_HAS_EXCEPTIONS=1)
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang|Intel")
+target_compile_options(OpenMS PUBLIC -fexceptions)
+else()
+message(WARNING "Unknown compiler, exceptions might not be enabled properly")
+endif()
