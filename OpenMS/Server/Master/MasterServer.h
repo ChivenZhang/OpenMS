@@ -9,7 +9,7 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "OpenMS/Server/Private/Server.h"
+#include "Server/Private/Server.h"
 #include "MasterConfig.h"
 #include "Endpoint/RPC/RPCServer.h"
 

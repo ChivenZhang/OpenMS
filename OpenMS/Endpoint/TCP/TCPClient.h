@@ -10,7 +10,7 @@
 *
 * =================================================*/
 #include "Endpoint/IEndpoint.h"
-#include "OpenMS/Server/IProperty.h"
+#include "Server/IProperty.h"
 #include "Reactor/TCP/TCPClientReactor.h"
 
 /// @brief TCP Client Endpoint

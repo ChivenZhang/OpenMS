@@ -9,7 +9,7 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "OpenMS/Server/Private/Property.h"
+#include "Server/Private/Property.h"
 #include "Mailbox/Private/MailHub.h"
 
 /// @brief

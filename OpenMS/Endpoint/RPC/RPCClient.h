@@ -10,7 +10,7 @@
 *
 * =================================================*/
 #include "Endpoint/IEndpoint.h"
-#include "OpenMS/Server/Private/Property.h"
+#include "Server/Private/Property.h"
 #include "Endpoint/RPC/RPCProtocol.h"
 #include "Reactor/TCP/TCPClientReactor.h"
 #include "Utility/Timer.h"
