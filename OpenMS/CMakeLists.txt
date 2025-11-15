@@ -133,28 +133,28 @@ add_library(OpenMS STATIC
 if(OPENMS_ENABLE_MYSQL)
 target_include_directories(OpenMS PUBLIC $ENV{MYSQL_CLIENT_CUSTOM}/include)
 target_link_directories(OpenMS PUBLIC $ENV{MYSQL_CLIENT_CUSTOM}/lib64/vs14)
-target_link_libraries(OpenMS PRIVATE mysqlcppconn mysqlcppconnx)
+target_link_libraries(OpenMS PUBLIC mysqlcppconn mysqlcppconnx)
 endif()
 
 if(OPENMS_ENABLE_REDIS)
 # this is heuristically generated, and may not be correct
 find_package(hiredis CONFIG REQUIRED)
-target_link_libraries(OpenMS PRIVATE hiredis::hiredis)
+target_link_libraries(OpenMS PUBLIC hiredis::hiredis)
 endif()
 
 find_package(unofficial-http-parser CONFIG REQUIRED)
-target_link_libraries(OpenMS PRIVATE unofficial::http_parser::http_parser)
+target_link_libraries(OpenMS PUBLIC unofficial::http_parser::http_parser)
 find_package(kcp CONFIG REQUIRED)
-target_link_libraries(OpenMS PRIVATE kcp::kcp)
+target_link_libraries(OpenMS PUBLIC kcp::kcp)
 find_package(libuv CONFIG REQUIRED)
-target_link_libraries(OpenMS PRIVATE $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>)
+target_link_libraries(OpenMS PUBLIC $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>)
 find_package(MbedTLS CONFIG REQUIRED)
 # everything
-target_link_libraries(OpenMS PRIVATE MbedTLS::mbedtls)
+target_link_libraries(OpenMS PUBLIC MbedTLS::mbedtls)
 # X.509 certificate manipulation
-target_link_libraries(OpenMS PRIVATE MbedTLS::mbedx509)
+target_link_libraries(OpenMS PUBLIC MbedTLS::mbedx509)
 # cryptographic primitives
-target_link_libraries(OpenMS PRIVATE MbedTLS::mbedcrypto)
+target_link_libraries(OpenMS PUBLIC MbedTLS::mbedcrypto)
 find_package(nlohmann_json CONFIG REQUIRED)
 target_link_libraries(OpenMS PUBLIC nlohmann_json::nlohmann_json)
 find_package(cpptrace CONFIG REQUIRED)
