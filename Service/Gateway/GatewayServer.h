@@ -22,7 +22,7 @@ protected:
 
 protected:
 	uint32_t m_Heartbeat2 = 0;	// For reconnect
-	MSRef<IEndpoint> m_ClientServer;
+	MSRef<IEndpoint> m_TCPServer;
 };
 
 OPENMS_RUN(GatewayServer)

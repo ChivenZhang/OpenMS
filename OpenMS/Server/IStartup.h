@@ -10,11 +10,6 @@
 *
 * =================================================*/
 #include <csignal>
-inline void crash()
-{
-	volatile int* a = (int*)(NULL);
-	*a = 1;
-}
 /// @brief Interface for bootstrap
 class OPENMS_API IStartup
 {
@@ -34,7 +29,6 @@ public:
 		signal(SIGTERM, nullptr);
 		IStartup::Argc = 0;
 		IStartup::Argv = nullptr;
-		crash();
 		return result;
 	}
 
