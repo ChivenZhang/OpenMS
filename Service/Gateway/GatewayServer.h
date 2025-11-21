@@ -19,6 +19,10 @@ public:
 protected:
 	void onInit() override;
 	void onExit() override;
+
+protected:
+	uint32_t m_Heartbeat2 = 0;	// For reconnect
+	MSRef<IEndpoint> m_ClientServer;
 };
 
 OPENMS_RUN(GatewayServer)

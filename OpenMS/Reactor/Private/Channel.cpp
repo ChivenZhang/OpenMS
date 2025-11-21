@@ -94,24 +94,6 @@ void Channel::readChannel(MSRef<IChannelEvent> event)
 			inbounds[i].Handler->channelError(&m_Context, std::move(ex));
 		}
 	}
-
-	auto outbounds = m_Pipeline.getOutbounds();
-	for (size_t i = 0; result && i < outbounds.size(); ++i)
-	{
-		try
-		{
-			result = outbounds[i].Handler->channelWrite(&m_Context, event.get());
-		}
-		catch (MSError& ex)
-		{
-			outbounds[i].Handler->channelError(&m_Context, std::move(ex));
-		}
-		catch (...)
-		{
-			auto ex = cpptrace::logic_error("unknown exception");
-			outbounds[i].Handler->channelError(&m_Context, std::move(ex));
-		}
-	}
 }
 
 void Channel::writeChannel(MSRef<IChannelEvent> event)

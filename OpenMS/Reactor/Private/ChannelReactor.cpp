@@ -35,20 +35,6 @@ void ChannelReactor::startup()
 	for (size_t i = 0; i < m_WorkerList.size(); ++i) m_WorkerList[i] = MSNew<ChannelWorker>(this);
 	for (size_t i = 0; i < m_WorkerList.size(); ++i) m_WorkerThreads[i] = MSThread([=]() { m_WorkerList[i]->startup(); });
 	for (size_t i = 0; i < m_WorkerList.size(); ++i) while (m_WorkerList[i]->running() == false);
-
-#if 0 // test code
-	m_EventThread = MSThread([=]() {
-		auto channel = MSNew<Channel>(this, nullptr, nullptr);
-		onConnect(channel);
-		for (size_t i = 0; i < 10; ++i)
-		{
-			auto event = MSNew<IChannelEvent>(IChannelEvent { "A message!", channel });
-			onInbound(event);
-		}
-		onDisconnect(channel);
-		std::this_thread::sleep_for(std::chrono::seconds(2));
-		});
-#endif
 }
 
 void ChannelReactor::shutdown()
