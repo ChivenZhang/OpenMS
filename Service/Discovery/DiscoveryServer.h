@@ -11,7 +11,7 @@
 * =================================================*/
 #include <OpenMS/Server/Master/MasterServer.h>
 
-class GatewayServer : public MasterServer
+class DiscoveryServer : public MasterServer
 {
 public:
 	MSString identity() const override;
@@ -21,4 +21,4 @@ protected:
 	void onExit() override;
 };
 
-OPENMS_RUN(GatewayServer)
+OPENMS_RUN(DiscoveryServer)

@@ -48,6 +48,7 @@ void GatewayServer::onInit()
 				{
 					.OnHandle = [=](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)->bool
 					{
+						// TODO: Auth token verify here
 						servce->call<void>("world", "entry", 0, MSTuple{ event->Message });
 						return false;
 					},
