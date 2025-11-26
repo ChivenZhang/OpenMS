@@ -119,6 +119,8 @@ public:
 
 protected:
 	IMailTask read(IMail mail) final;
+	virtual MSString onRequest(MSStringView request);
+	virtual void onResponse(MSStringView response);
 
 protected:
 	Timer m_Timer;
