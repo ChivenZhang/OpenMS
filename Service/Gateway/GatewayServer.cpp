@@ -38,8 +38,11 @@ void GatewayServer::onInit()
 		.Workers = property(identity() + ".client.workers", 0U),
 		.Callback = ChannelReactor::callback_t
 		{
-			.OnOpen = [=](MSRef<IChannel> channel)
+			.OnOpen = [=, this](MSRef<IChannel> channel)
 			{
+				auto clientProxy = MSNew<GatewayClient>(channel);
+				hub->create("client" + std::to_string(m_ClientCount++), clientProxy);
+
 				channel->getPipeline()->addFirst("decrypt", MSNew<AESInboundHandler>(AESInboundHandler::config_t
 				{
 					.Key = { AES256_KEY },
@@ -48,8 +51,12 @@ void GatewayServer::onInit()
 				{
 					.OnHandle = [=](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)->bool
 					{
-						// TODO: Auth token verify here
-						servce->call<void>("world", "entry", 0, MSTuple{ event->Message });
+						clientProxy->async<int>("world", "entry", 0, MSTuple{ event->Message }, [](int)
+						{
+						});
+						clientProxy->async<void>("world", "entry", 0, MSTuple{ event->Message }, []()
+						{
+						});
 						return false;
 					},
 				});
@@ -89,4 +96,20 @@ void GatewayServer::onExit()
 	m_TCPServer = nullptr;
 
 	ClusterServer::onExit();
+}
+
+GatewayClient::GatewayClient(MSRef<IChannel> channel)
+	:
+	m_Channel(channel)
+{
+}
+
+MSString GatewayClient::onRequest(MSStringView request)
+{
+	return Service::onRequest(request);
+}
+
+void GatewayClient::onResponse(MSStringView response)
+{
+	Service::onResponse(response);
 }
