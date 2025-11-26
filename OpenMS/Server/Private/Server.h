@@ -22,7 +22,7 @@ public:
 	int startup() final;
 	void shutdown() final;
 	MSString identity() const override;
-	void sendEvent(MSLambda<void()>&& event) final;
+	void postEvent(MSLambda<void()>&& event) final;
 	using IServer::property;
 	MSString property(MSString const& name) const final;
 	uint32_t startTimer(uint64_t timeout, uint64_t repeat, MSLambda<void(uint32_t handle)>&& task) final;

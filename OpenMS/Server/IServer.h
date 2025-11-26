@@ -37,7 +37,7 @@ public:
 
 	virtual MSString identity() const = 0;
 
-	virtual void sendEvent(MSLambda<void()>&& event) = 0;
+	virtual void postEvent(MSLambda<void()>&& event) = 0;
 
 	virtual MSString property(MSString const& name) const = 0;
 

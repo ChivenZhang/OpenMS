@@ -104,7 +104,7 @@ MSString Server::identity() const
 	return "service";
 }
 
-void Server::sendEvent(MSLambda<void()>&& event)
+void Server::postEvent(MSLambda<void()>&& event)
 {
 	MSMutexLock lock(m_Lock);
 	m_Working = true;
@@ -122,7 +122,7 @@ uint32_t Server::startTimer(uint64_t timeout, uint64_t repeat, MSLambda<void(uin
 {
 	return m_Timer.start(timeout, repeat, [=, this](uint32_t handle)
 	{
-		sendEvent([&]() { task(handle); });
+		postEvent([&]() { task(handle); });
 	});
 }
 
