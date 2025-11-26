@@ -28,17 +28,4 @@ protected:
 	MSAtomic<uint32_t> m_ClientCount;
 };
 
-class GatewayClient : public Service
-{
-public:
-	explicit GatewayClient(MSRef<IChannel> channel);
-
-protected:
-	MSString onRequest(MSStringView request) override;
-	void onResponse(MSStringView response) override;
-
-protected:
-	MSRef<IChannel> m_Channel;
-};
-
 OPENMS_RUN(GatewayServer)

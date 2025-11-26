@@ -30,6 +30,7 @@ void GatewayServer::onInit()
 	auto hub = AUTOWIRE(IMailHub)::bean();
 	auto servce = MSNew<Service>();
 	hub->create("gateway", servce);
+	auto possibleServices = property(identity() + ".service", MSStringList());
 
 	m_TCPServer = MSNew<TCPServer>(TCPServer::config_t{
 		.IP = property(identity() + ".client.ip", MSString("127.0.0.1")),
@@ -40,8 +41,8 @@ void GatewayServer::onInit()
 		{
 			.OnOpen = [=, this](MSRef<IChannel> channel)
 			{
-				auto clientProxy = MSNew<GatewayClient>(channel);
-				hub->create("client" + std::to_string(m_ClientCount++), clientProxy);
+				auto clientService = MSNew<Service>();
+				hub->create("client" + std::to_string(m_ClientCount++), clientService);
 
 				channel->getPipeline()->addFirst("decrypt", MSNew<AESInboundHandler>(AESInboundHandler::config_t
 				{
@@ -51,11 +52,22 @@ void GatewayServer::onInit()
 				{
 					.OnHandle = [=](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)->bool
 					{
-						clientProxy->async<int>("world", "entry", 0, MSTuple{ event->Message }, [](int)
+						// TODO: 检查接口访问权限
+
+						struct request_t
 						{
-						});
-						clientProxy->async<void>("world", "entry", 0, MSTuple{ event->Message }, []()
+							uint32_t Service;
+							char Message[0];
+						};
+						auto request = (request_t*)event->Message.data();
+						if (event->Message.size() < sizeof(request_t)) return false;
+						auto message = MSStringView(request->Message, event->Message.size() - sizeof(request_t));
+						uint32_t serviceType = request->Service;
+						if (possibleServices.size() <= serviceType) return false;
+						auto serviceName = possibleServices[serviceType];
+						clientService->async(serviceName, "entry", 100, message, [=](MSStringView response)
 						{
+							channel->writeChannel(IChannelEvent::New(response));
 						});
 						return false;
 					},
@@ -96,20 +108,4 @@ void GatewayServer::onExit()
 	m_TCPServer = nullptr;
 
 	ClusterServer::onExit();
-}
-
-GatewayClient::GatewayClient(MSRef<IChannel> channel)
-	:
-	m_Channel(channel)
-{
-}
-
-MSString GatewayClient::onRequest(MSStringView request)
-{
-	return Service::onRequest(request);
-}
-
-void GatewayClient::onResponse(MSStringView response)
-{
-	Service::onResponse(response);
 }

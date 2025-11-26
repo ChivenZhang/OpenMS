@@ -21,7 +21,7 @@ public:
 		{
 			auto output = co_await [=](MSAwait<MSString> promise)->MSString
 			{
-				this->async<MSString>("author", "verify", 1000, MSTuple{user, pass}, [=](MSString response)
+				this->async("author", "verify", 1000, MSTuple{user, pass}, [=](MSString response)
 				{
 					promise(MSString(response));
 				});

@@ -119,11 +119,6 @@ IMailTask Service::read(IMail mail)
 				auto input = MSStringView(request.Buffer, mail.Body.size() - sizeof(request_t));
 				response = co_await method(input);
 			}
-			else
-			{
-				auto input = MSStringView(request.Buffer, mail.Body.size() - sizeof(request_t));
-				response = onRequest(input);
-			}
 			mail.Type = 1;
 			mail.Body = response;
 			std::swap(mail.From, mail.To);
@@ -143,16 +138,6 @@ IMailTask Service::read(IMail mail)
 			}
 		}
 		if (response) response(mail.Body);
-		else onResponse(mail.Body);
 	}
 	co_return;
-}
-
-MSString Service::onRequest(MSStringView request)
-{
-	return {};
-}
-
-void Service::onResponse(MSStringView response)
-{
 }

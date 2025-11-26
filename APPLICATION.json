@@ -44,7 +44,12 @@
 			"ip": "127.0.0.1",
 			"port": 9090,
 			"workers": 4
-		}
+		},
+		"service": [
+			"logic",
+			"world",
+			"chat"
+		]
 	},
 	"mysql":{
 		"server": {

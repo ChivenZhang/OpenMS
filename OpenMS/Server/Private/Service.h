@@ -25,36 +25,26 @@ public:
 	template<class F, std::enable_if_t<!std::is_same_v<typename MSTraits<F>::return_data, MSTraits<method_t>::return_data> || !std::is_same_v<typename MSTraits<F>::argument_datas, MSTraits<method_t>::argument_datas>, int> = 0>
 	bool bind(MSStringView method, F callback)
 	{
-		using return_type = MSTraits<F>::return_data;
-		using argument_type = MSTraits<F>::argument_datas;
-		if constexpr (std::is_same_v<return_type, MSAsync<void>>)
+		return this->bind(method, [callback](MSStringView input)->MSAsync<MSString>
 		{
-			return this->bind(method, [callback](MSStringView input)->MSAsync<MSString>
+			typename MSTraits<F>::argument_datas request;
+			if constexpr (MSTraits<F>::argument_count)
 			{
-				argument_type request;
-				if constexpr (std::is_same_v<argument_type, MSTuple<void>> == false)
-				{
-					if (MSTypeC(MSString(input), request) == false) co_return {};
-				}
+				if (MSTypeC(MSString(input), request) == false) co_return {};
+			}
+			if constexpr (std::is_same_v<typename MSTraits<F>::return_data, MSAsync<void>>)
+			{
 				co_await std::apply(callback, request);
 				co_return {};
-			});
-		}
-		else
-		{
-			return this->bind(method, [callback](MSStringView input)->MSAsync<MSString>
+			}
+			else
 			{
-				argument_type request;
-				if constexpr (std::is_same_v<argument_type, MSTuple<void>> == false)
-				{
-					if (MSTypeC(MSString(input), request) == false) co_return {};
-				}
 				auto response = co_await std::apply(callback, request);
-				MSString output;
-				MSTypeC(response, output);
-				co_return output;
-			});
-		}
+				MSString result;
+				MSTypeC(response, result);
+				co_return result;
+			}
+		});
 	}
 
 	template<class T, class...Args>
@@ -87,40 +77,24 @@ public:
 		}
 	}
 
-	template<class T, class...Args>
-	bool async(MSStringView service, MSStringView method, uint32_t timeout, MSTuple<Args...>&& args, MSLambda<void(T)> callback)
+	template<class F, class...Args>
+	bool async(MSStringView service, MSStringView method, uint32_t timeout, MSTuple<Args...>&& args, F callback)
 	{
 		MSString request;
-		if constexpr (std::is_void_v<T>)
+		if constexpr (sizeof...(Args) != 0)
 		{
-			if constexpr (sizeof...(Args) != 0)
-			{
-				if (MSTypeC(args, request) == false) return false;
-			}
-			return this->async(service, method, timeout, request, [callback](MSStringView)
-			{
-				if (callback) callback();
-			});
+			if (MSTypeC(args, request) == false) return false;
 		}
-		else
+		return this->async(service, method, timeout, request, [callback](MSStringView response)
 		{
-			if constexpr (sizeof...(Args) != 0)
-			{
-				if (MSTypeC(args, request) == false) return false;
-			}
-			return this->async(service, method, timeout, request, [callback](MSStringView response)
-			{
-				T result;
-				MSTypeC(response, result);
-				if (callback) callback(result);
-			});
-		}
+			typename MSTraits<F>::argument_datas result;
+			if constexpr (MSTraits<F>::argument_count) MSTypeC(response, std::get<0>(result));
+			std::apply(callback, result);
+		});
 	}
 
 protected:
 	IMailTask read(IMail mail) final;
-	virtual MSString onRequest(MSStringView request);
-	virtual void onResponse(MSStringView response);
 
 protected:
 	Timer m_Timer;
