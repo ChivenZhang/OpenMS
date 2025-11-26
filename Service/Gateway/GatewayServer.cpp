@@ -70,7 +70,7 @@ void GatewayServer::onInit()
 	});
 	m_TCPServer->startup();
 
-	m_Heartbeat2 = startTimer(0, OPENMS_HEARTBEAT * 1000, [this](uint32_t handle)
+	m_KeepAlive = startTimer(0, OPENMS_HEARTBEAT * 1000, [this](uint32_t handle)
 	{
 		if (m_TCPServer->connect() == false)
 		{
@@ -82,8 +82,8 @@ void GatewayServer::onInit()
 
 void GatewayServer::onExit()
 {
-	if (m_Heartbeat2) stopTimer(m_Heartbeat2);
-	m_Heartbeat2 = 0;
+	if (m_KeepAlive) stopTimer(m_KeepAlive);
+	m_KeepAlive = 0;
 
 	if (m_TCPServer) m_TCPServer->shutdown();
 	m_TCPServer = nullptr;

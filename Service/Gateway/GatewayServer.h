@@ -21,7 +21,7 @@ protected:
 	void onExit() override;
 
 protected:
-	uint32_t m_Heartbeat2 = 0;	// For reconnect
+	uint32_t m_KeepAlive = 0;	// For reconnect
 	MSRef<IEndpoint> m_TCPServer;
 };
 
