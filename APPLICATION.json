@@ -46,8 +46,8 @@
 			"workers": 4
 		},
 		"service": [
-			"logic",
 			"world",
+			"logic",
 			"chat"
 		]
 	},

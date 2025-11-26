@@ -98,27 +98,7 @@ void ClusterServer::onInit()
 
 	m_Heartbeat = startTimer(0, OPENMS_HEARTBEAT * 1000, [this](uint32_t handle)
 	{
-		if (m_ClusterClient->connect() == false)
-		{
-			m_ClusterClient->shutdown();
-			m_ClusterClient->startup();
-		}
-		if (m_ServiceServer->connect() == false)
-		{
-			m_ServiceServer->shutdown();
-			m_ServiceServer->startup();
-		}
-		if (m_ClusterClient->connect() == true && m_ServiceServer->connect() == true)
-		{
-			MSList<IMailBox::name_t> mailList;
-			AUTOWIRE(IMailHub)::bean()->list(mailList);
-			MSString address = m_ServiceServer->address().lock()->getString();
-			if (m_ClusterClient->call<bool>("push", 1000, address, mailList).first)
-			{
-				MSMutexLock lock(m_MailRouteLock);
-				m_MailRouteMap = m_ClusterClient->call<MSMap<uint32_t, MSStringList>>("pull", 1000).first;
-			}
-		}
+		onPush();
 	});
 }
 
@@ -138,4 +118,30 @@ void ClusterServer::onExit()
 	for (auto& client : m_MailClientMap) client.second->shutdown();
 	m_MailRouteMap.clear();
 	m_MailClientMap.clear();
+}
+
+void ClusterServer::onPush()
+{
+	if (m_ClusterClient->connect() == false)
+	{
+		m_ClusterClient->shutdown();
+		m_ClusterClient->startup();
+	}
+	if (m_ServiceServer->connect() == false)
+	{
+		m_ServiceServer->shutdown();
+		m_ServiceServer->startup();
+	}
+
+	if (m_ClusterClient->connect() == true && m_ServiceServer->connect() == true)
+	{
+		MSList<IMailBox::name_t> mailList;
+		AUTOWIRE(IMailHub)::bean()->list(mailList);
+		MSString address = m_ServiceServer->address().lock()->getString();
+		if (m_ClusterClient->call<bool>("push", 1000, address, mailList).first)
+		{
+			MSMutexLock lock(m_MailRouteLock);
+			m_MailRouteMap = m_ClusterClient->call<MSMap<uint32_t, MSStringList>>("pull", 1000).first;
+		}
+	}
 }

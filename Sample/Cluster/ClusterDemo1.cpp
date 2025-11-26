@@ -19,13 +19,12 @@ public:
 	{
 		this->bind("login", [this](MSString user, MSString pass)->MSAsync<MSString>
 		{
-			auto output = co_await [=](MSAwait<MSString> promise)->MSString
+			auto output = co_await [=](MSAwait<MSString> promise)
 			{
 				this->async("author", "verify", 1000, MSTuple{user, pass}, [=](MSString response)
 				{
 					promise(MSString(response));
 				});
-				return {};
 			};
 			co_return output;
 		});

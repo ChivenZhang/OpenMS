@@ -41,9 +41,6 @@ void GatewayServer::onInit()
 		{
 			.OnOpen = [=, this](MSRef<IChannel> channel)
 			{
-				auto clientService = MSNew<Service>();
-				hub->create("client" + std::to_string(m_ClientCount++), clientService);
-
 				channel->getPipeline()->addFirst("decrypt", MSNew<AESInboundHandler>(AESInboundHandler::config_t
 				{
 					.Key = { AES256_KEY },
@@ -56,7 +53,7 @@ void GatewayServer::onInit()
 
 						struct request_t
 						{
-							uint32_t Service;
+							uint8_t Service;
 							char Message[0];
 						};
 						auto request = (request_t*)event->Message.data();
@@ -65,7 +62,7 @@ void GatewayServer::onInit()
 						uint32_t serviceType = request->Service;
 						if (possibleServices.size() <= serviceType) return false;
 						auto serviceName = possibleServices[serviceType];
-						clientService->async(serviceName, "entry", 100, message, [=](MSStringView response)
+						servce->async(serviceName, "entry", 100, MSTuple{message}, [=](MSStringView response)
 						{
 							channel->writeChannel(IChannelEvent::New(response));
 						});
