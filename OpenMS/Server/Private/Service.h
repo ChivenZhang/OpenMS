@@ -50,9 +50,9 @@ public:
 	template<class T, class...Args>
 	auto call(MSStringView service, MSStringView method, uint32_t timeout, MSTuple<Args...>&& args)
 	{
-		MSString request;
 		if constexpr (std::is_void_v<T>)
 		{
+			MSString request;
 			if constexpr (sizeof...(Args) != 0)
 			{
 				if (MSTypeC(args, request) == false) return false;
@@ -62,6 +62,7 @@ public:
 		}
 		else
 		{
+			MSString request;
 			if constexpr (sizeof...(Args) != 0)
 			{
 				if (MSTypeC(args, request) == false) return MSBinary{T(), false};

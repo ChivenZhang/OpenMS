@@ -66,49 +66,27 @@ public:
 	using RPCServerBase::async;
 	using RPCServerBase::RPCServerBase;
 
-	template <class F, OPENMS_NOT_SAME(typename MSTraits<F>::return_type, void)>
+	template <class F>
 	bool bind(MSStringView name, F method)
 	{
 		return RPCServerBase::bind(name, [method](MSStringView const& input, MSString& output)-> bool
 		{
-			// Convert request to tuple
-
 			typename MSTraits<F>::argument_datas args;
 			if constexpr (MSTraits<F>::argument_count != 0)
 			{
 				if (MSTypeC(input, args) == false) return false;
 			}
-
-			// Call method with tuple args
-
-			auto result = std::apply(method, args);
-
-			// Convert request to string
-
-			if (MSTypeC(result, output) == false) return false;
-			return true;
-		});
-	}
-
-	template <class F, OPENMS_IS_SAME(typename MSTraits<F>::return_type, void)>
-	bool bind(MSStringView name, F method)
-	{
-		return RPCServerBase::bind(name, [method](MSStringView const& input, MSString& output) -> bool
-		{
-			// Convert request to tuple
-
-			typename MSTraits<F>::argument_datas args;
-			if constexpr (MSTraits<F>::argument_count != 0)
+			if constexpr (std::is_void_v<typename MSTraits<F>::return_type>)
 			{
-				if (MSTypeC(input, args) == false) return false;
+				std::apply(method, args);
+				return true;
 			}
-
-			// Call method with tuple args
-
-			std::apply(method, args);
-
-			// Return void output
-			return true;
+			else
+			{
+				auto result = std::apply(method, args);
+				if (MSTypeC(result, output) == false) return false;
+				return true;
+			}
 		});
 	}
 
@@ -119,49 +97,34 @@ public:
 	/// @param timeout unit: ms
 	/// @param args call args
 	/// @return result and true if sent
-	template <class T, class... Args, OPENMS_NOT_SAME(T, void)>
-	MSBinary<T, bool> call(MSStringView const& name, uint32_t timeout, Args &&... args)
+	template <class T, class... Args>
+	auto call(MSStringView const& name, uint32_t timeout, Args &&... args)
 	{
-		// Convert request to string
-
-		MSString input;
-		if constexpr (sizeof...(Args) != 0)
+		if constexpr (std::is_void_v<T>)
 		{
-			if (MSTypeC(std::make_tuple(std::forward<Args>(args)...), input) == false) return {T(), false};
+			MSString request;
+			if constexpr (sizeof...(Args) != 0)
+			{
+				if (MSTypeC(std::make_tuple(std::forward<Args>(args)...), request) == false) return false;
+			}
+			auto response = RPCServerBase::call(name, timeout, request);
+			return response.second;
 		}
-
-		auto output = RPCServerBase::call(name, timeout, input);
-
-		// Convert string to response
-
-		if (output.second)
+		else
 		{
-			T response;
-			if (MSTypeC(output.first, response) == true) return {response, true};
+			MSString request;
+			if constexpr (sizeof...(Args) != 0)
+			{
+				if (MSTypeC(std::make_tuple(std::forward<Args>(args)...), request) == false) return MSBinary{T{}, false};
+			}
+			auto response = RPCServerBase::call(name, timeout, request);
+			if (response.second)
+			{
+				T result;
+				if (MSTypeC(response.first, result) == true) return MSBinary{result, true};
+			}
+			return MSBinary{T{}, false};
 		}
-		return {{}, false};
-	}
-
-	/// @brief synchronous call and return void
-	/// @tparam T void
-	/// @tparam Args args types
-	/// @param name call name
-	/// @param timeout unit: ms
-	/// @param args call args
-	/// @return return true if sent
-	template <class T, class... Args, OPENMS_IS_SAME(T, void)>
-	bool call(MSStringView const& name, uint32_t timeout, Args &&... args)
-	{
-		// Convert request to string
-
-		MSString input;
-		if constexpr (sizeof...(Args) != 0)
-		{
-			if (MSTypeC(std::make_tuple(std::forward<Args>(args)...), input) == false) return false;
-		}
-
-		auto output = RPCServerBase::call(name, timeout, input);
-		return output.second;
 	}
 
 	/// @brief asynchronous call
@@ -172,51 +135,26 @@ public:
 	/// @param args call args
 	/// @param callback call back
 	/// @return return true if sent
-	template <class T, class... Args, OPENMS_NOT_SAME(T, void)>
+	template <class T, class... Args>
 	bool async(MSStringView const& name, uint32_t timeout, MSTuple<Args...> const& args, MSLambda<void(T&&)> callback)
 	{
-		// Convert request to string
-
 		MSString input;
 		if constexpr (sizeof...(Args) != 0)
 		{
 			if (MSTypeC(args, input) == false) return false;
 		}
-
-		// Convert string to response
-
 		return RPCServerBase::async(name, timeout, input, [callback](MSString&& output)
 		{
-			T response;
-			MSTypeC(output, response);
-			if (callback) callback(std::move(response));
-		});
-	}
-
-	/// @brief asynchronous call and return void
-	/// @tparam T void
-	/// @tparam Args args types
-	/// @param name call name
-	/// @param timeout unit: ms
-	/// @param args call args
-	/// @param callback call back
-	/// @return return true if sent
-	template <class T, class... Args, OPENMS_IS_SAME(T, void)>
-	bool async(MSStringView const& name, uint32_t timeout, MSTuple<Args...> const& args, MSLambda<void()> callback)
-	{
-		// Convert request to string
-
-		MSString input;
-		if constexpr (sizeof...(Args) != 0)
-		{
-			if (MSTypeC(args, input) == false) return false;
-		}
-
-		// Convert string to response
-
-		return RPCServerBase::async(name, timeout, input, [callback](MSString&& output)
-		{
-			if (callback) callback();
+			if constexpr (std::is_void_v<T>)
+			{
+				if (callback) callback();
+			}
+			else
+			{
+				T response;
+				MSTypeC(output, response);
+				if (callback) callback(std::move(response));
+			}
 		});
 	}
 };

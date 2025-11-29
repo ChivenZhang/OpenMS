@@ -25,7 +25,7 @@ int main()
 	server->startup();
 	client->startup();
 	client->call<void>("echo", 1000, MSString("Hello,OpenMS!"));
-	client->async<void>("echo", 1000, MSTuple{ MSString("Hello,OpenMS!") }, []()
+	client->async("echo", 1000, MSTuple{ MSString("Hello,OpenMS!") }, []()
 	{
 		MS_INFO("echo: return");
 	});
