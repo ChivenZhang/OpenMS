@@ -207,7 +207,7 @@ MSHnd<IChannelAddress> UDPClientReactor::address() const
 	return m_Connect ? m_LocalAddress : MSHnd<IChannelAddress>();
 }
 
-void UDPClientReactor::write(MSRef<IChannelEvent> event, MSRef<IChannelAddress> address)
+void UDPClientReactor::write(MSRef<IChannelEvent> event)
 {
 	if (m_Running == false) return;
 	auto channel = m_Channel;

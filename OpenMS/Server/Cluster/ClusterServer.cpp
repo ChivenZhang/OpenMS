@@ -29,7 +29,7 @@ void ClusterServer::onInit()
 		.Backlog = property(identity() + ".server.backlog", 0U),
 		.Workers = property(identity() + ".server.workers", 0U),
 	});
-	m_ServiceServer->bind("mailbox", [=](uint32_t from, uint32_t to, uint32_t date, uint32_t type, MSList<char> const& body)
+	m_ServiceServer->bind("mailbox", [=](MSHnd<IChannel> client, uint32_t from, uint32_t to, uint32_t date, uint32_t type, MSList<char> const& body)
 	{
 		IMail mail = {};
 		mail.From = from;
@@ -92,6 +92,12 @@ void ClusterServer::onInit()
 		.IP = property(identity() + ".master.ip", MSString("127.0.0.1")),
 		.PortNum = (uint16_t)property(identity() + ".master.port", 0U),
 	});
+	m_ClusterClient->bind("pull", [this](MSMap<uint32_t, MSStringList> route)
+	{
+		MSMutexLock lock(m_MailRouteLock);
+		m_MailRouteMap = route;
+		MS_DEBUG("updated route");
+	});
 	m_ClusterClient->startup();
 
 	// Push and pull route table
@@ -138,10 +144,6 @@ void ClusterServer::onPush()
 		MSList<IMailBox::name_t> mailList;
 		AUTOWIRE(IMailHub)::bean()->list(mailList);
 		MSString address = m_ServiceServer->address().lock()->getString();
-		if (m_ClusterClient->call<bool>("push", 1000, address, mailList).first)
-		{
-			MSMutexLock lock(m_MailRouteLock);
-			m_MailRouteMap = m_ClusterClient->call<MSMap<uint32_t, MSStringList>>("pull", 1000).first;
-		}
+		m_ClusterClient->call<void>("push", 1000, address, mailList);
 	}
 }

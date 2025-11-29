@@ -15,6 +15,8 @@
 class OPENMS_API IChannelAddress
 {
 public:
+	virtual ~IChannelAddress() = default;
+
 	virtual MSString getAddress() const = 0;
 
 	virtual MSString getHostName() const = 0;

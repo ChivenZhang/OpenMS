@@ -30,8 +30,8 @@ public:
 	bool running() const override;
 	bool connect() const override;
 	MSHnd<IChannelAddress> address() const override;
-	void write(MSRef<IChannelEvent> event, MSRef<IChannelAddress> address) override;
-	MSFuture<bool> write(MSRef<IChannelEvent> event, MSRef<IChannelAddress> address, MSPromise<bool>&& promise) override;
+	void write(MSRef<IChannelEvent> event) override;
+	MSFuture<bool> write(MSRef<IChannelEvent> event, MSPromise<bool>&& promise) override;
 
 protected:
 	virtual void onConnect(MSRef<Channel> channel);

@@ -39,7 +39,7 @@ bool Service::call(MSStringView service, MSStringView method, uint32_t timeout, 
 	auto future = promise.get_future();
 	{
 		MSMutexLock lock(m_MutexSession);
-		m_SessionMap.emplace(mail.Date, [&, sessionID = mail.Date](MSStringView output)
+		m_SessionMap.emplace(mail.Date, [&](MSStringView output)
 		{
 			promise.set_value(MSString(output));
 		});

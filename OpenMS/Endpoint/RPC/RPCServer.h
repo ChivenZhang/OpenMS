@@ -28,7 +28,7 @@ public:
 		uint32_t Workers = 0;
 		uint32_t Buffers = UINT16_MAX;
 	};
-	using method_t = MSLambda<bool(MSStringView const& input, MSString& output)>;
+	using method_t = MSLambda<bool(MSHnd<IChannel> client, MSStringView const& input, MSString& output)>;
 
 public:
 	explicit RPCServerBase(config_t const& config);
@@ -39,11 +39,11 @@ public:
 	MSHnd<IChannelAddress> address() const override;
 
 	bool unbind(MSStringView name);
-	bool invoke(uint32_t hash, MSStringView const& input, MSString& output);
-	bool bind(MSStringView name, MSLambda<bool(MSStringView const& input, MSString& output)>&& method);
+	bool invoke(MSHnd<IChannel> client, uint32_t hash, MSStringView const& input, MSString& output);
+	bool bind(MSStringView name, method_t&& method);
 
-	MSBinary<MSString, bool> call(MSStringView const& name, uint32_t timeout, MSStringView const& input);
-	bool async(MSStringView const& name, uint32_t timeout, MSStringView const& input, MSLambda<void(MSString&&)>&& callback);
+	MSBinary<MSString, bool> call(MSHnd<IChannel> client, MSStringView const& name, uint32_t timeout, MSStringView const& input);
+	bool async(MSHnd<IChannel> client, MSStringView const& name, uint32_t timeout, MSStringView const& input, MSLambda<void(MSString&&)>&& callback);
 
 protected:
 	friend class RPCServerInboundHandler;
@@ -66,39 +66,43 @@ public:
 	using RPCServerBase::async;
 	using RPCServerBase::RPCServerBase;
 
-	template <class F>
+	template<class F, std::enable_if_t<!std::is_same_v<typename MSTraits<F>::return_data, MSTraits<method_t>::return_data> || !std::is_same_v<typename MSTraits<F>::argument_datas, MSTraits<method_t>::argument_datas>, int> = 0>
 	bool bind(MSStringView name, F method)
 	{
-		return RPCServerBase::bind(name, [method](MSStringView const& input, MSString& output)-> bool
+		return RPCServerBase::bind(name, [method](MSHnd<IChannel> client, MSStringView const& input, MSString& output)->bool
 		{
-			typename MSTraits<F>::argument_datas args;
-			if constexpr (MSTraits<F>::argument_count != 0)
+			typename MSRestTypes<typename MSTraits<F>::argument_datas>::rest_datas request;
+			if constexpr (MSRestTypes<typename MSTraits<F>::argument_datas>::rest_count != 0)
 			{
-				if (MSTypeC(input, args) == false) return false;
+				if (MSTypeC(input, request) == false) return false;
 			}
 			if constexpr (std::is_void_v<typename MSTraits<F>::return_type>)
 			{
-				std::apply(method, args);
+				std::apply([&](auto&&... args)
+				{
+					method(client, std::forward<decltype(args)>(args)...);
+				}, request);
 				return true;
 			}
 			else
 			{
-				auto result = std::apply(method, args);
-				if (MSTypeC(result, output) == false) return false;
-				return true;
+				auto response = std::apply([&](auto&&... args)
+				{
+					return method(client, std::forward<decltype(args)>(args)...);
+				}, request);
+				return MSTypeC(response, output);
 			}
 		});
 	}
 
 	/// @brief synchronous call
-	/// @tparam T return type
-	/// @tparam Args args types
+	/// @param client client
 	/// @param name call name
 	/// @param timeout unit: ms
 	/// @param args call args
 	/// @return result and true if sent
 	template <class T, class... Args>
-	auto call(MSStringView const& name, uint32_t timeout, Args &&... args)
+	auto call(MSHnd<IChannel> client, MSStringView const& name, uint32_t timeout, Args &&... args)
 	{
 		if constexpr (std::is_void_v<T>)
 		{
@@ -107,7 +111,7 @@ public:
 			{
 				if (MSTypeC(std::make_tuple(std::forward<Args>(args)...), request) == false) return false;
 			}
-			auto response = RPCServerBase::call(name, timeout, request);
+			auto response = RPCServerBase::call(client, name, timeout, request);
 			return response.second;
 		}
 		else
@@ -117,7 +121,7 @@ public:
 			{
 				if (MSTypeC(std::make_tuple(std::forward<Args>(args)...), request) == false) return MSBinary{T{}, false};
 			}
-			auto response = RPCServerBase::call(name, timeout, request);
+			auto response = RPCServerBase::call(client, name, timeout, request);
 			if (response.second)
 			{
 				T result;
@@ -128,33 +132,25 @@ public:
 	}
 
 	/// @brief asynchronous call
-	/// @tparam T return type
-	/// @tparam Args args types
+	/// @param client client
 	/// @param name call name
 	/// @param timeout unit: ms
 	/// @param args call args
 	/// @param callback call back
 	/// @return return true if sent
-	template <class T, class... Args>
-	bool async(MSStringView const& name, uint32_t timeout, MSTuple<Args...> const& args, MSLambda<void(T&&)> callback)
+	template <class F, class... Args>
+	bool async(MSHnd<IChannel> client, MSStringView const& name, uint32_t timeout, MSTuple<Args...> const& args, F callback)
 	{
-		MSString input;
+		MSString request;
 		if constexpr (sizeof...(Args) != 0)
 		{
-			if (MSTypeC(args, input) == false) return false;
+			if (MSTypeC(args, request) == false) return false;
 		}
-		return RPCServerBase::async(name, timeout, input, [callback](MSString&& output)
+		return RPCServerBase::async(client, name, timeout, request, [callback](MSString&& response)
 		{
-			if constexpr (std::is_void_v<T>)
-			{
-				if (callback) callback();
-			}
-			else
-			{
-				T response;
-				MSTypeC(output, response);
-				if (callback) callback(std::move(response));
-			}
+			typename MSTraits<F>::argument_datas result;
+			if constexpr (MSTraits<F>::argument_count) MSTypeC(response, std::get<0>(result));
+			std::apply(callback, result);
 		});
 	}
 };

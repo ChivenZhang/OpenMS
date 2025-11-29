@@ -157,11 +157,10 @@ MSHnd<IChannelAddress> TCPClientReactor::address() const
 	return m_Connect ? m_LocalAddress : MSHnd<IChannelAddress>();
 }
 
-void TCPClientReactor::write(MSRef<IChannelEvent> event, MSRef<IChannelAddress> address)
+void TCPClientReactor::write(MSRef<IChannelEvent> event)
 {
 	if (m_Running == false) return;
 	auto channel = m_Channel;
-	event->Channel = channel;
 	if (channel && channel->running()) channel->write(event);
 }
 

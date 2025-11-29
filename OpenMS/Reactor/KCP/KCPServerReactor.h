@@ -26,6 +26,7 @@ public:
 	void startup() override;
 	void shutdown() override;
 	MSHnd<IChannelAddress> address() const override;
+	void write(MSRef<IChannelEvent> event) override;
 
 protected:
 	void onConnect(MSRef<Channel> channel) override;

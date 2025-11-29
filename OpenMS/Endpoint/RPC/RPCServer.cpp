@@ -83,7 +83,7 @@ bool RPCServerBase::unbind(MSStringView name)
 	return m_Methods.erase(MSHash(name));
 }
 
-bool RPCServerBase::invoke(uint32_t hash, MSStringView const& input, MSString& output)
+bool RPCServerBase::invoke(MSHnd<IChannel> client, uint32_t hash, MSStringView const& input, MSString& output)
 {
 	decltype(m_Methods)::value_type::second_type method;
 	{
@@ -92,18 +92,18 @@ bool RPCServerBase::invoke(uint32_t hash, MSStringView const& input, MSString& o
 		if (result == m_Methods.end()) return false;
 		method = result->second;
 	}
-	if (method && method(input, output)) return true;
+	if (method && method(client, input, output)) return true;
 	return false;
 }
 
-bool RPCServerBase::bind(MSStringView name, MSLambda<bool(MSStringView const& input, MSString& output)>&& method)
+bool RPCServerBase::bind(MSStringView name, method_t&& method)
 {
 	if (method == nullptr) return false;
 	MSMutexLock lock(m_LockMethod);
 	return m_Methods.emplace(MSHash(name), method).second;
 }
 
-MSBinary<MSString, bool> RPCServerBase::call(MSStringView const& name, uint32_t timeout, MSStringView const& input)
+MSBinary<MSString, bool> RPCServerBase::call(MSHnd<IChannel> client, MSStringView const& name, uint32_t timeout, MSStringView const& input)
 {
 	if (m_Reactor == nullptr || m_Reactor->connect() == false) return {{}, false};
 
@@ -131,7 +131,7 @@ MSBinary<MSString, bool> RPCServerBase::call(MSStringView const& name, uint32_t 
 
 	// Send request to remote server
 
-	m_Reactor->write(IChannelEvent::New(output), nullptr);
+	m_Reactor->write(IChannelEvent::New(output, client));
 
 	auto status = future.wait_for(std::chrono::milliseconds(timeout));
 	{
@@ -145,7 +145,7 @@ MSBinary<MSString, bool> RPCServerBase::call(MSStringView const& name, uint32_t 
 	return {{}, false};
 }
 
-bool RPCServerBase::async(MSStringView const& name, uint32_t timeout, MSStringView const& input, MSLambda<void(MSString&&)>&& callback)
+bool RPCServerBase::async(MSHnd<IChannel> client, MSStringView const& name, uint32_t timeout, MSStringView const& input, MSLambda<void(MSString&&)>&& callback)
 {
 	if (m_Reactor == nullptr || m_Reactor->connect() == false) return false;
 
@@ -186,7 +186,7 @@ bool RPCServerBase::async(MSStringView const& name, uint32_t timeout, MSStringVi
 
 	// Send request to remote server
 
-	m_Reactor->write(IChannelEvent::New(output), nullptr);
+	m_Reactor->write(IChannelEvent::New(output, client));
 	return true;
 }
 
@@ -210,7 +210,7 @@ bool RPCServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<
 			if (message.size() <= m_Server->m_Config.Buffers)
 			{
 				MSString output;
-				if (m_Server->invoke(request.Method, message, output))
+				if (m_Server->invoke(event->Channel, request.Method, message, output))
 				{
 					MSString buffer(sizeof(RPCResponseView) + output.size(), 0);
 					RPCResponseView& response = *(RPCResponseView*)buffer.data();

@@ -95,7 +95,7 @@ bool RPCClientBase::invoke(uint32_t hash, MSStringView const& input, MSString& o
 	return false;
 }
 
-bool RPCClientBase::bind(MSStringView name, MSLambda<bool(MSStringView const& input, MSString& output)>&& method)
+bool RPCClientBase::bind(MSStringView name, method_t&& method)
 {
 	if (method == nullptr) return false;
 	MSMutexLock lock(m_LockMethod);
@@ -130,7 +130,7 @@ MSBinary<MSString, bool> RPCClientBase::call(MSStringView const& name, uint32_t 
 
 	// Send request to remote server
 
-	m_Reactor->write(IChannelEvent::New(output), nullptr);
+	m_Reactor->write(IChannelEvent::New(output));
 
 	auto status = future.wait_for(std::chrono::milliseconds(timeout));
 	{
@@ -185,7 +185,7 @@ bool RPCClientBase::async(MSStringView const& name, uint32_t timeout, MSStringVi
 
 	// Send request to remote server
 
-	m_Reactor->write(IChannelEvent::New(output), nullptr);
+	m_Reactor->write(IChannelEvent::New(output));
 	return true;
 }
 

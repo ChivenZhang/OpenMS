@@ -27,7 +27,7 @@ public:
 
 	virtual MSHnd<IChannelAddress> address() const = 0;
 
-	virtual void write(MSRef<IChannelEvent> event, MSRef<IChannelAddress> address) = 0;
+	virtual void write(MSRef<IChannelEvent> event) = 0;
 
-	virtual MSFuture<bool> write(MSRef<IChannelEvent> event, MSRef<IChannelAddress> address, MSPromise<bool>&& promise) = 0;
+	virtual MSFuture<bool> write(MSRef<IChannelEvent> event, MSPromise<bool>&& promise) = 0;
 };

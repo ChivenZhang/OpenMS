@@ -22,38 +22,43 @@ void MasterServer::onInit()
 		.IP = property(identity() + ".server.ip", MSString("127.0.0.1")),
 		.PortNum = (uint16_t)property(identity() + ".server.port", 0U),
 		.Backlog = property(identity() + ".server.backlog", 0U),
+		.Workers = 1U,
 	});
 	m_ClusterServer->startup();
 
 	// Maintain mail route table
 
 	m_MailUpdateTime = std::chrono::system_clock::now();
-	m_ClusterServer->bind("push", [this](MSString const& address, MSList<IMailBox::name_t> const& mails)->bool
+	m_ClusterServer->bind("push", [this](MSHnd<IChannel> client, MSString const& address, MSList<IMailBox::name_t> const& mails)->bool
 	{
+		m_MailClientSet.insert(client.lock());
+		m_MailClientNewSet.insert(client.lock());
 		for (auto& mail : mails) m_MailRouteMap[mail].insert(address);
 		for (auto& mail : mails) m_MailRouteNewMap[mail].insert(address);
-		MS_INFO("validate %s", address.c_str());
-		return true;
-	});
-
-	m_ClusterServer->bind("pull", [this]()->MSMap<uint32_t, MSSet<MSString>>
-	{
 		auto now = std::chrono::system_clock::now();
 		if (OPENMS_HEARTBEAT <= std::chrono::duration_cast<std::chrono::seconds>(now - m_MailUpdateTime).count())
 		{
 			m_MailUpdateTime = now;
 			m_MailRouteMap = std::move(m_MailRouteNewMap);
-			m_MailRouteNewMap.clear();
+			m_MailClientSet = std::move(m_MailClientNewSet);
 		}
-		return m_MailRouteMap;
+		// 广播同步路由表
+		for (auto& e : m_MailClientSet)
+		{
+			m_ClusterServer->call<void>(e, "pull", 0, m_MailRouteMap);
+		}
+		MS_INFO("validate %s", address.c_str());
+		return true;
 	});
 }
 
 void MasterServer::onExit()
 {
-	m_MailRouteMap.clear();
-	m_MailRouteNewMap.clear();
-
 	if (m_ClusterServer) m_ClusterServer->shutdown();
 	m_ClusterServer = nullptr;
+
+	m_MailClientSet.clear();
+	m_MailClientNewSet.clear();
+	m_MailRouteMap.clear();
+	m_MailRouteNewMap.clear();
 }

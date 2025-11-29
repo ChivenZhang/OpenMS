@@ -16,10 +16,7 @@ class IChannel;
 class OPENMS_API IChannelEvent
 {
 public:
-	static MSRef<IChannelEvent> New(MSCString message);
-	static MSRef<IChannelEvent> New(MSString&& message);
-	static MSRef<IChannelEvent> New(MSStringView message);
-	static MSRef<IChannelEvent> New(MSString const& message);
+	static MSRef<IChannelEvent> New(MSStringView const& message, MSHnd<IChannel> const& channel = {});
 
 public:
 	MSString Message;

@@ -10,30 +10,10 @@
 * =================================================*/
 #include "../IChannelEvent.h"
 
-MSRef<IChannelEvent> IChannelEvent::New(MSCString message)
+MSRef<IChannelEvent> IChannelEvent::New(MSStringView const& message, MSHnd<IChannel> const& channel)
 {
 	auto result = MSNew<IChannelEvent>();
 	result->Message = message;
-	return result;
-}
-
-MSRef<IChannelEvent> IChannelEvent::New(MSString&& message)
-{
-	auto result = MSNew<IChannelEvent>();
-	result->Message = std::move(message);
-	return result;
-}
-
-MSRef<IChannelEvent> IChannelEvent::New(MSStringView message)
-{
-	auto result = MSNew<IChannelEvent>();
-	result->Message = message;
-	return result;
-}
-
-MSRef<IChannelEvent> IChannelEvent::New(MSString const& message)
-{
-	auto result = MSNew<IChannelEvent>();
-	result->Message = message;
+	result->Channel = channel;
 	return result;
 }

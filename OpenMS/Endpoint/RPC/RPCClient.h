@@ -39,7 +39,7 @@ public:
 
 	bool unbind(MSStringView name);
 	bool invoke(uint32_t hash, MSStringView const& input, MSString& output);
-	bool bind(MSStringView name, MSLambda<bool(MSStringView const& input, MSString& output)>&& method);
+	bool bind(MSStringView name, method_t&& method);
 
 	MSBinary<MSString, bool> call(MSStringView const& name, uint32_t timeout, MSStringView const& input);
 	bool async(MSStringView const& name, uint32_t timeout, MSStringView const& input, MSLambda<void(MSString&&)>&& callback);
@@ -65,7 +65,7 @@ public:
 	using RPCClientBase::async;
 	using RPCClientBase::RPCClientBase;
 
-	template <class F>
+	template<class F, std::enable_if_t<!std::is_same_v<typename MSTraits<F>::return_data, MSTraits<method_t>::return_data> || !std::is_same_v<typename MSTraits<F>::argument_datas, MSTraits<method_t>::argument_datas>, int> = 0>
 	bool bind(MSStringView name, F method)
 	{
 		return RPCClientBase::bind(name, [method](MSStringView const& input, MSString& output)->bool

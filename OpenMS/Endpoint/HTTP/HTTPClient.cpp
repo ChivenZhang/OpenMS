@@ -124,7 +124,7 @@ bool HTTPClient::call_internal(request_t const& request, uint8_t type, uint32_t 
 		}
 
 		auto _request = method + " " + params + " " "HTTP/1.1" "\r\n" + headers + "\r\n" + request.Body;
-		m_Reactor->write(IChannelEvent::New(_request), nullptr);
+		m_Reactor->write(IChannelEvent::New(_request));
 
 		auto status = future.wait_for(std::chrono::milliseconds(timeout));
 		if (status == std::future_status::ready) return true;
@@ -132,7 +132,7 @@ bool HTTPClient::call_internal(request_t const& request, uint8_t type, uint32_t 
 	else
 	{
 		auto _request = method + " " + params + " " "HTTP/1.1" "\r\n" + headers + "\r\n" + request.Body;
-		m_Reactor->write(IChannelEvent::New(_request), nullptr);
+		m_Reactor->write(IChannelEvent::New(_request));
 		return m_Reactor->running();
 	}
 

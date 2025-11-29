@@ -60,16 +60,16 @@ MSHnd<IChannelAddress> ChannelReactor::address() const
 	return MSHnd<IChannelAddress>();
 }
 
-void ChannelReactor::write(MSRef<IChannelEvent> event, MSRef<IChannelAddress> address)
+void ChannelReactor::write(MSRef<IChannelEvent> event)
 {
 }
 
-MSFuture<bool> ChannelReactor::write(MSRef<IChannelEvent> event, MSRef<IChannelAddress> address, MSPromise<bool>&& promise)
+MSFuture<bool> ChannelReactor::write(MSRef<IChannelEvent> event, MSPromise<bool>&& promise)
 {
 	if (m_Running == false) return MSFuture<bool>();
 	auto result = promise.get_future();
 	event->Promise = &promise;
-	write(event, address);
+	write(event);
 	return result;
 }
 

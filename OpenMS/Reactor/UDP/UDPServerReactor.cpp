@@ -185,6 +185,13 @@ MSHnd<IChannelAddress> UDPServerReactor::address() const
 	return m_Connect ? m_LocalAddress : MSHnd<IChannelAddress>();
 }
 
+void UDPServerReactor::write(MSRef<IChannelEvent> event)
+{
+	if (m_Running == false || event == nullptr) return;
+	auto channel = event->Channel.lock();
+	if (channel && channel->running()) channel->write(event);
+}
+
 void UDPServerReactor::onConnect(MSRef<Channel> channel)
 {
 	MS_DEBUG("accepted from %s", channel->getRemote().lock()->getString().c_str());

@@ -433,6 +433,19 @@ struct MSTraits<T(C::*)(Args...) const&& noexcept> : MSTraitsBase<T, Args...> {}
 template<class T, class... Args>
 struct MSTraits<std::function<T(Args...)>> : MSTraitsBase<T, Args...> {};
 
+template<class T>
+struct MSRestTypes;
+
+template<class T, class... Args>
+struct MSRestTypes<std::tuple<T, Args...>>
+{
+	using rest_types = std::tuple<Args...>;
+	using rest_datas = std::tuple<std::remove_cvref_t<Args>...>;
+	static constexpr std::size_t rest_count = sizeof...(Args);
+	template<std::size_t N>
+	using rest_type = std::tuple_element<N, std::tuple<Args...>>::type;
+};
+
 // ============================================
 
 #define JSON_USE_IMPLICIT_CONVERSIONS 0
@@ -459,7 +472,7 @@ bool MSTypeC(T const& src, U& dst)
 	return true;
 }
 
-template<class T, class U, OPENMS_NOT_SAME(T, U), OPENMS_IS_TEXT(T), OPENMS_NOT_SCALAR(T)>
+template<class T, class U, OPENMS_NOT_SAME(T, U), OPENMS_IS_TEXT(T)>
 bool MSTypeC(T const& src, U& dst)
 {
 	try
