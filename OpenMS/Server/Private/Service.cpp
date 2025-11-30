@@ -74,7 +74,7 @@ bool Service::async(uint32_t service, uint32_t method, uint32_t timeout, MSStrin
 
 	{
 		MSMutexLock lock(m_MutexSession);
-		m_SessionMap.emplace(mail.Date, [callback, sessionID = mail.Date](MSStringView output)
+		m_SessionMap.emplace(mail.Date, [callback](MSStringView output)
 		{
 			if (callback) callback(output);
 		});

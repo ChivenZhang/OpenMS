@@ -23,6 +23,7 @@ protected:
 protected:
 	uint32_t m_KeepAlive = 0;	// For reconnect
 	MSRef<IEndpoint> m_TCPServer;
+	MSMap<uint32_t, MSRef<IChannel>> m_ClientChannels;
 };
 
 OPENMS_RUN(GatewayServer)

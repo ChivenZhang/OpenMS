@@ -25,8 +25,40 @@ void GatewayServer::onInit()
 	ClusterServer::onInit();
 
 	auto hub = AUTOWIRE(IMailHub)::bean();
-	auto servce = MSNew<Service>();
-	hub->create("gateway", servce);
+
+	auto service = MSNew<Service>();
+	service->bind("login", [=](MSString user, MSString pass)->MSAsync<uint32_t>
+	{
+		co_return co_await [=](MSAwait<uint32_t> promise)
+		{
+			service->async("logic", "login", 100, MSTuple{user, pass}, [=](uint32_t response)
+			{
+				promise(response);
+			});
+		};
+	});
+	service->bind("logout", [=](uint32_t userID)->MSAsync<bool>
+	{
+		co_return co_await [=](MSAwait<bool> promise)
+		{
+			service->async("logic", "logout", 100, MSTuple{userID}, [=](bool response)
+			{
+				promise(response);
+			});
+		};
+	});
+	service->bind("signup", [=](MSString user, MSString pass)->MSAsync<bool>
+	{
+		co_return co_await [=](MSAwait<bool> promise)
+		{
+			service->async("logic", "signup", 100, MSTuple{user, pass}, [=](bool response)
+			{
+				promise(response);
+			});
+		};
+	});
+
+	hub->create("gateway", service);
 
 	m_TCPServer = MSNew<TCPServer>(TCPServer::config_t{
 		.IP = property(identity() + ".client.ip", MSString("127.0.0.1")),
@@ -35,7 +67,7 @@ void GatewayServer::onInit()
 		.Workers = property(identity() + ".client.workers", 0U),
 		.Callback = ChannelReactor::callback_t
 		{
-			.OnOpen = [=](MSRef<IChannel> channel)
+			.OnOpen = [=, this](MSRef<IChannel> channel)
 			{
 				channel->getPipeline()->addFirst("decrypt", MSNew<AESInboundHandler>(AESInboundHandler::config_t
 				{
@@ -43,7 +75,7 @@ void GatewayServer::onInit()
 				}));
 				channel->getPipeline()->addLast("input", IChannelPipeline::handler_in
 				{
-					.OnHandle = [=](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)->bool
+					.OnHandle = [=, this](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)->bool
 					{
 						struct message_t
 						{
@@ -55,9 +87,27 @@ void GatewayServer::onInit()
 						auto message = reinterpret_cast<message_t*>(event->Message.data());
 						auto request = MSStringView(message->Request, event->Message.size() - sizeof(message_t));
 						// TODO: 检查接口访问权限
-						servce->async(message->Service, message->Method, 100, request, [=](MSStringView response)
+						service->async(message->Service, message->Method, 100, request, [=, this](MSStringView response)
 						{
 							channel->writeChannel(IChannelEvent::New(response));
+
+							if (message->Method == MSHash("login") && response.size())
+							{
+								auto serviceName = "client:" + MSString(response);
+								auto clientService = MSNew<Service>();
+								// clientService->bind("request", [=](MSStringView request2)->MSAsync<MSString>
+								// {
+								// 	channel->writeChannel(IChannelEvent::New(request2));
+								// 	co_return {};
+								// });
+								// clientService->bind("response", [=](MSStringView request2)->MSAsync<MSString>
+								// {
+								// 	channel->writeChannel(IChannelEvent::New(request2));
+								// 	co_return {};
+								// });
+								if (hub->create(serviceName, clientService)) onPush();
+								channel->getContext()->attrib()["serviceName"] = serviceName;
+							}
 						});
 						return false;
 					},
@@ -74,6 +124,16 @@ void GatewayServer::onInit()
 						return false;
 					},
 				});
+			},
+			.OnClose = [=, this](MSRef<IChannel> channel)
+			{
+				auto& serviceData = channel->getContext()->attrib()["serviceName"];
+				if (serviceData.has_value())
+				{
+					auto serviceName = std::any_cast<MSString>(serviceData);
+					if (hub->cancel(serviceName)) onPush();
+					channel->getContext()->attrib().erase("serviceName");
+				}
 			},
 		}
 	});
