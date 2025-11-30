@@ -11,8 +11,6 @@
 * =================================================*/
 #include <OpenMS/Server/Cluster/ClusterServer.h>
 
-#include "Server/Private/Service.h"
-
 class GatewayServer : public ClusterServer
 {
 public:

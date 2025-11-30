@@ -18,12 +18,17 @@ public:
 	using method_t = MSLambda<MSAsync<MSString>(MSStringView)>;
 	using session_t = MSLambda<void(MSStringView)>;
 	using MailBox::MailBox;
+
+	bool bind(uint32_t method, method_t&& callback);
+	bool call(uint32_t service, uint32_t method, uint32_t timeout, MSStringView request, MSString& response);
+	bool async(uint32_t service, uint32_t method, uint32_t timeout, MSStringView request, MSLambda<void(MSStringView)>&& callback);
+
 	bool bind(MSStringView method, method_t&& callback);
 	bool call(MSStringView service, MSStringView method, uint32_t timeout, MSStringView request, MSString& response);
-	bool async(MSStringView service, MSStringView method, uint32_t timeout, MSStringView request, MSLambda<void(MSStringView)> callback);
+	bool async(MSStringView service, MSStringView method, uint32_t timeout, MSStringView request, MSLambda<void(MSStringView)>&& callback);
 
 	template<class F, std::enable_if_t<!std::is_same_v<typename MSTraits<F>::return_data, MSTraits<method_t>::return_data> || !std::is_same_v<typename MSTraits<F>::argument_datas, MSTraits<method_t>::argument_datas>, int> = 0>
-	bool bind(MSStringView method, F callback)
+	bool bind(MSStringView method, F&& callback)
 	{
 		return this->bind(method, [callback](MSStringView input)->MSAsync<MSString>
 		{
@@ -79,7 +84,7 @@ public:
 	}
 
 	template<class F, class...Args>
-	bool async(MSStringView service, MSStringView method, uint32_t timeout, MSTuple<Args...>&& args, F callback)
+	bool async(MSStringView service, MSStringView method, uint32_t timeout, MSTuple<Args...>&& args, F&& callback)
 	{
 		MSString request;
 		if constexpr (sizeof...(Args) != 0)

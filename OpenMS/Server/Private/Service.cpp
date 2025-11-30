@@ -16,22 +16,22 @@ struct request_t
 	char Buffer[0];
 };
 
-bool Service::bind(MSStringView method, method_t && callback)
+bool Service::bind(uint32_t method, method_t&& callback)
 {
 	MSMutexLock lock(m_MutexMethod);
-	auto result = m_MethodMap.emplace(MSHash(method), callback);
+	auto result = m_MethodMap.emplace(method, callback);
 	return result.second;
 }
 
-bool Service::call(MSStringView service, MSStringView method, uint32_t timeout, MSStringView request, MSString& response)
+bool Service::call(uint32_t service, uint32_t method, uint32_t timeout, MSStringView request, MSString& response)
 {
 	MSString input(sizeof(request_t) + request.size(), 0);
 	auto& requestView = *(request_t*)input.data();
-	requestView.Method = MSHash(method);
+	requestView.Method = method;
 	if (request.empty() == false) ::memcpy(requestView.Buffer, request.data(), request.size());
 
 	IMail mail = {};
-	mail.To = MSHash(service);
+	mail.To = service;
 	mail.Body = input;
 	mail.Date = ++m_SessionID;
 
@@ -60,15 +60,15 @@ bool Service::call(MSStringView service, MSStringView method, uint32_t timeout, 
 	return false;
 }
 
-bool Service::async(MSStringView service, MSStringView method, uint32_t timeout, MSStringView request, MSLambda<void(MSStringView)> callback)
+bool Service::async(uint32_t service, uint32_t method, uint32_t timeout, MSStringView request, MSLambda<void(MSStringView)>&& callback)
 {
 	MSString input(sizeof(request_t) + request.size(), 0);
 	auto& requestView = *(request_t*)input.data();
-	requestView.Method = MSHash(method);
+	requestView.Method = method;
 	if (request.empty() == false) ::memcpy(requestView.Buffer, request.data(), request.size());
 
 	IMail mail = {};
-	mail.To = MSHash(service);
+	mail.To = service;
 	mail.Body = input;
 	mail.Date = ++m_SessionID;
 
@@ -97,6 +97,21 @@ bool Service::async(MSStringView service, MSStringView method, uint32_t timeout,
 		if (response) response({});
 	});
 	return true;
+}
+
+bool Service::bind(MSStringView method, method_t && callback)
+{
+	return bind(MSHash(method), std::move(callback));
+}
+
+bool Service::call(MSStringView service, MSStringView method, uint32_t timeout, MSStringView request, MSString& response)
+{
+	return call(MSHash(service), MSHash(method), timeout, request, response);
+}
+
+bool Service::async(MSStringView service, MSStringView method, uint32_t timeout, MSStringView request, MSLambda<void(MSStringView)>&& callback)
+{
+	return async(MSHash(service), MSHash(method), timeout, request, std::move(callback));
 }
 
 IMailTask Service::read(IMail mail)

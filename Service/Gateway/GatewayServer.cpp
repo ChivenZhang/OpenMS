@@ -9,14 +9,11 @@
 *
 * =================================================*/
 #include "GatewayServer.h"
-
 #include "Endpoint/TCP/TCPServer.h"
 #include "Handler/AES/AESHandler.h"
 #include "Server/Private/Service.h"
 
 #define AES256_KEY 0x50, 0x71, 0x47, 0x55, 0x6f, 0x4c, 0x36, 0x7a, 0x55, 0x50, 0x38, 0x43, 0x30, 0x42, 0x38, 0x43, 0x2f, 0x55, 0x45, 0x4d, 0x50, 0x49, 0x73, 0x36, 0x4f, 0x63, 0x42, 0x4c, 0x79, 0x32, 0x72, 0x35
-
-// ========================================================================================
 
 MSString GatewayServer::identity() const
 {
@@ -30,7 +27,6 @@ void GatewayServer::onInit()
 	auto hub = AUTOWIRE(IMailHub)::bean();
 	auto servce = MSNew<Service>();
 	hub->create("gateway", servce);
-	auto possibleServices = property(identity() + ".service", MSStringList());
 
 	m_TCPServer = MSNew<TCPServer>(TCPServer::config_t{
 		.IP = property(identity() + ".client.ip", MSString("127.0.0.1")),
@@ -39,7 +35,7 @@ void GatewayServer::onInit()
 		.Workers = property(identity() + ".client.workers", 0U),
 		.Callback = ChannelReactor::callback_t
 		{
-			.OnOpen = [=, this](MSRef<IChannel> channel)
+			.OnOpen = [=](MSRef<IChannel> channel)
 			{
 				channel->getPipeline()->addFirst("decrypt", MSNew<AESInboundHandler>(AESInboundHandler::config_t
 				{
@@ -49,20 +45,17 @@ void GatewayServer::onInit()
 				{
 					.OnHandle = [=](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)->bool
 					{
-						// TODO: 检查接口访问权限
-
-						struct request_t
+						struct message_t
 						{
-							uint8_t Service;
-							char Message[0];
+							uint32_t Service;
+							uint32_t Method;
+							char Request[0];
 						};
-						auto request = (request_t*)event->Message.data();
-						if (event->Message.size() < sizeof(request_t)) return false;
-						auto message = MSStringView(request->Message, event->Message.size() - sizeof(request_t));
-						uint32_t serviceType = request->Service;
-						if (possibleServices.size() <= serviceType) return false;
-						auto serviceName = possibleServices[serviceType];
-						servce->async(serviceName, "entry", 100, MSTuple{message}, [=](MSStringView response)
+						if (event->Message.size() < sizeof(message_t)) return false;
+						auto message = reinterpret_cast<message_t*>(event->Message.data());
+						auto request = MSStringView(message->Request, event->Message.size() - sizeof(message_t));
+						// TODO: 检查接口访问权限
+						servce->async(message->Service, message->Method, 100, request, [=](MSStringView response)
 						{
 							channel->writeChannel(IChannelEvent::New(response));
 						});
