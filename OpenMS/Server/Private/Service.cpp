@@ -10,12 +10,6 @@
 * =================================================*/
 #include "Service.h"
 
-struct request_t
-{
-	uint32_t Method;
-	char Buffer[0];
-};
-
 bool Service::bind(uint32_t method, method_t&& callback)
 {
 	MSMutexLock lock(m_MutexMethod);
@@ -118,9 +112,8 @@ bool Service::async(MSStringView service, MSStringView method, uint32_t timeout,
 
 IMailTask Service::read(IMail mail)
 {
-	switch (mail.Type)
+	if (mail.Type == 0)
 	{
-	case 0:
 		if (sizeof(request_t) <= mail.Body.size())
 		{
 			auto& request = *(request_t*)mail.Body.data();
@@ -135,12 +128,10 @@ IMailTask Service::read(IMail mail)
 				auto input = MSStringView(request.Buffer, mail.Body.size() - sizeof(request_t));
 				co_await method(input);
 			}
-			else
-			{
-				co_await onRead(mail);
-			}
-		} break;
-	case 1:
+		}
+	}
+	else if (mail.Type & OPENMS_MAIL_TYPE_REQUEST)
+	{
 		if (sizeof(request_t) <= mail.Body.size())
 		{
 			auto& request = *(request_t*)mail.Body.data();
@@ -156,31 +147,26 @@ IMailTask Service::read(IMail mail)
 				auto input = MSStringView(request.Buffer, mail.Body.size() - sizeof(request_t));
 				response = co_await method(input);
 			}
-			mail.Type = 2;
+			mail.Type &= ~OPENMS_MAIL_TYPE_REQUEST;
+			mail.Type |= OPENMS_MAIL_TYPE_RESPONSE;
 			mail.Body = response;
 			std::swap(mail.From, mail.To);
 			send(mail);
-		} break;
-	case 2:
-		{
-			session_t response;
-			{
-				MSMutexLock lock(m_MutexSession);
-				auto result = m_SessionMap.find(mail.Date);
-				if (result != m_SessionMap.end())
-				{
-					response = result->second;
-					m_SessionMap.erase(result);
-				}
-			}
-			if (response) response(mail.Body);
-		} break;
-	default: break;
+		}
 	}
-	co_return;
-}
-
-IMailTask Service::onRead(IMail mail)
-{
+	else if (mail.Type & OPENMS_MAIL_TYPE_RESPONSE)
+	{
+		session_t response;
+		{
+			MSMutexLock lock(m_MutexSession);
+			auto result = m_SessionMap.find(mail.Date);
+			if (result != m_SessionMap.end())
+			{
+				response = result->second;
+				m_SessionMap.erase(result);
+			}
+		}
+		if (response) response(mail.Body);
+	}
 	co_return;
 }

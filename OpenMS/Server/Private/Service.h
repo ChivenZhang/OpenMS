@@ -100,10 +100,14 @@ public:
 	}
 
 protected:
-	IMailTask read(IMail mail) final;
-	virtual IMailTask onRead(IMail mail);
+	IMailTask read(IMail mail) override;
 
 protected:
+	struct request_t
+	{
+		uint32_t Method;
+		char Buffer[0];
+	};
 	Timer m_Timer;
 	MSMutex m_MutexMethod;
 	MSMutex m_MutexSession;

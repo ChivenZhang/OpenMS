@@ -17,7 +17,7 @@ public:
 	explicit ForwardService(MSHnd<IChannel> client);
 
 protected:
-	IMailTask onRead(IMail mail) override;
+	IMailTask read(IMail mail) override;
 
 protected:
 	MSHnd<IChannel> m_ClientChannel;
