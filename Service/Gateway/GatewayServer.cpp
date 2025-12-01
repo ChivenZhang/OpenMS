@@ -50,9 +50,9 @@ void GatewayServer::onInit()
 				{
 					if (auto userID = channel->getContext()->userdata()) co_return userID;
 
-					co_return co_await [=, this](MSAwait<uint32_t> promise)
+					co_return co_await [=, this](MSAwait<uint32_t>& promise)
 					{
-						guestService->async("logic", "login", 100, MSTuple{user, pass}, [=, this](uint32_t userID)
+						guestService->async("logic", "login", 100, MSTuple{user, pass}, [=, &promise, this](uint32_t userID)
 						{
 							if (userID)
 							{
@@ -106,8 +106,7 @@ void GatewayServer::onInit()
 						if (mailView.To == MSHash("gateway"))
 						{
 							IMail newMail = {};
-							newMail.From = MSHash("guest:" + std::to_string(guestID));
-							newMail.To = mailView.To;
+							newMail.To = MSHash("guest:" + std::to_string(guestID));
 							newMail.Date = mailView.Date;
 							newMail.Type = mailView.Type | OPENMS_MAIL_TYPE_CLIENT;
 							newMail.Body = MSStringView(mailView.Body, event->Message.size() - sizeof(MailView));
@@ -118,8 +117,7 @@ void GatewayServer::onInit()
 							auto userID = (uint32_t)channel->getContext()->userdata();
 							if (userID == 0) return false;
 							IMail newMail = {};
-							newMail.From = MSHash("proxy:" + std::to_string(userID));
-							newMail.To = mailView.To;
+							newMail.To = MSHash("proxy:" + std::to_string(userID));
 							newMail.Date = mailView.Date;
 							newMail.Type = mailView.Type | OPENMS_MAIL_TYPE_CLIENT;
 							newMail.Body = MSStringView(mailView.Body, event->Message.size() - sizeof(MailView));

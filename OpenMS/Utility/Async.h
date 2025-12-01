@@ -99,7 +99,7 @@ struct MSAsyncPromise : MSPromiseBase
     template<class F>
     auto await_transform(F lambda)
     {
-        using return_type = MSTraits<typename MSTraits<F>::template argument_type<0>>::template argument_type<0>;
+        using return_type = MSTraits<typename MSTraits<F>::template argument_data<0>>::template argument_data<0>;
 
         struct MSLambdaAwaitable
         {
@@ -183,7 +183,7 @@ struct MSAsyncPromise<void> : MSPromiseBase
     template<class F>
     auto await_transform(F lambda)
     {
-        using return_type = MSTraits<typename MSTraits<F>::template argument_type<0>>::template argument_type<0>;
+        using return_type = MSTraits<typename MSTraits<F>::template argument_data<0>>::template argument_data<0>;
 
         struct MSLambdaAwaitable
         {

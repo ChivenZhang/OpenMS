@@ -54,7 +54,10 @@ MailMan::MailMan(MSRaw<MailHub> context)
 					}
 					if (bool(mail.Task) == true && mail.Task.done() == false)
 					{
-						if (mail.Task.state() != MSAsyncState::AWAIT) mail.Task.resume();
+						if (mail.Task.state() != MSAsyncState::AWAIT)
+						{
+							mail.Task.resume();
+						}
 					}
 					if (bool(mail.Task) == false || bool(mail.Task) == true && mail.Task.done() == true)
 					{
