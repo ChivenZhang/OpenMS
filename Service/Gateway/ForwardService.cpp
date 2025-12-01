@@ -1,4 +1,3 @@
-#pragma once
 /*=================================================
 * Copyright © 2020-2025 ChivenZhang.
 * All Rights Reserved.
@@ -9,19 +8,16 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "MS.h"
+#include "ForwardService.h"
 
-/// @brief Interface for mail
-struct IMail
+ForwardService::ForwardService(MSHnd<IChannel> client)
+	:
+	m_ClientChannel(client)
 {
-	// 源服务
-	uint32_t From;
-	// 目标服务
-	uint32_t To;
-	// 时间戳
-	uint32_t Date;
-	// 消息类型（0,1表示请求，2表示响应）
-	uint32_t Type;
-	// 消息体
-	MSStringView Body;
-};
+}
+
+IMailTask ForwardService::onRead(IMail mail)
+{
+	// TODO: 转发消息到客户端
+	return Service::onRead(mail);
+}

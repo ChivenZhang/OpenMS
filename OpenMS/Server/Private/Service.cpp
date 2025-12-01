@@ -33,6 +33,7 @@ bool Service::call(uint32_t service, uint32_t method, uint32_t timeout, MSString
 	IMail mail = {};
 	mail.To = service;
 	mail.Body = input;
+	mail.Type = 1;
 	mail.Date = ++m_SessionID;
 
 	MSPromise<MSString> promise;
@@ -70,6 +71,7 @@ bool Service::async(uint32_t service, uint32_t method, uint32_t timeout, MSStrin
 	IMail mail = {};
 	mail.To = service;
 	mail.Body = input;
+	mail.Type = 1;
 	mail.Date = ++m_SessionID;
 
 	{
@@ -116,8 +118,9 @@ bool Service::async(MSStringView service, MSStringView method, uint32_t timeout,
 
 IMailTask Service::read(IMail mail)
 {
-	if (mail.Type == 0) // Remote Request
+	switch (mail.Type)
 	{
+	case 0:
 		if (sizeof(request_t) <= mail.Body.size())
 		{
 			auto& request = *(request_t*)mail.Body.data();
@@ -127,32 +130,57 @@ IMailTask Service::read(IMail mail)
 				auto result = m_MethodMap.find(request.Method);
 				if (result != m_MethodMap.end()) method = result->second;
 			}
-
+			if (method)
+			{
+				auto input = MSStringView(request.Buffer, mail.Body.size() - sizeof(request_t));
+				co_await method(input);
+			}
+			else
+			{
+				co_await onRead(mail);
+			}
+		} break;
+	case 1:
+		if (sizeof(request_t) <= mail.Body.size())
+		{
+			auto& request = *(request_t*)mail.Body.data();
+			method_t method;
+			{
+				MSMutexLock lock(m_MutexMethod);
+				auto result = m_MethodMap.find(request.Method);
+				if (result != m_MethodMap.end()) method = result->second;
+			}
 			MSString response;
 			if (method)
 			{
 				auto input = MSStringView(request.Buffer, mail.Body.size() - sizeof(request_t));
 				response = co_await method(input);
 			}
-			mail.Type = 1;
+			mail.Type = 2;
 			mail.Body = response;
 			std::swap(mail.From, mail.To);
 			send(mail);
-		}
-	}
-	else // Remote Response
-	{
-		session_t response;
+		} break;
+	case 2:
 		{
-			MSMutexLock lock(m_MutexSession);
-			auto result = m_SessionMap.find(mail.Date);
-			if (result != m_SessionMap.end())
+			session_t response;
 			{
-				response = result->second;
-				m_SessionMap.erase(result);
+				MSMutexLock lock(m_MutexSession);
+				auto result = m_SessionMap.find(mail.Date);
+				if (result != m_SessionMap.end())
+				{
+					response = result->second;
+					m_SessionMap.erase(result);
+				}
 			}
-		}
-		if (response) response(mail.Body);
+			if (response) response(mail.Body);
+		} break;
+	default: break;
 	}
+	co_return;
+}
+
+IMailTask Service::onRead(IMail mail)
+{
 	co_return;
 }

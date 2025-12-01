@@ -41,7 +41,7 @@ public:
 	bool invoke(uint32_t hash, MSStringView const& input, MSString& output);
 	bool bind(MSStringView name, method_t&& method);
 
-	MSBinary<MSString, bool> call(MSStringView const& name, uint32_t timeout, MSStringView const& input);
+	bool call(MSStringView const& name, uint32_t timeout, MSStringView const& input, MSString& output);
 	bool async(MSStringView const& name, uint32_t timeout, MSStringView const& input, MSLambda<void(MSString&&)>&& callback);
 
 protected:
@@ -105,8 +105,8 @@ public:
 			{
 				if (MSTypeC(std::make_tuple(std::forward<Args>(args)...), request) == false) return false;
 			}
-			auto response = RPCClientBase::call(name, timeout, request);
-			return response.second;
+			MSString response;
+			return RPCClientBase::call(name, timeout, request, response);
 		}
 		else
 		{
@@ -115,11 +115,11 @@ public:
 			{
 				if (MSTypeC(std::make_tuple(std::forward<Args>(args)...), request) == false) return MSBinary{T{}, false};
 			}
-			auto response = RPCClientBase::call(name, timeout, request);
-			if (response.second)
+			MSString response;
+			if (RPCClientBase::call(name, timeout, request, response))
 			{
 				T result;
-				if (MSTypeC(response.first, result) == true) return MSBinary{result, true};
+				if (MSTypeC(response, result) == true) return MSBinary{result, true};
 			}
 			return MSBinary{T{}, false};
 		}

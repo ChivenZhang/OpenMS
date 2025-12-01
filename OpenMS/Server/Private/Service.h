@@ -101,6 +101,7 @@ public:
 
 protected:
 	IMailTask read(IMail mail) final;
+	virtual IMailTask onRead(IMail mail);
 
 protected:
 	Timer m_Timer;

@@ -9,6 +9,8 @@
 *
 * =================================================*/
 #include "GatewayServer.h"
+
+#include "ForwardService.h"
 #include "Endpoint/TCP/TCPServer.h"
 #include "Handler/AES/AESHandler.h"
 #include "Server/Private/Service.h"
@@ -85,30 +87,69 @@ void GatewayServer::onInit()
 						};
 						if (event->Message.size() < sizeof(message_t)) return false;
 						auto message = reinterpret_cast<message_t*>(event->Message.data());
-						auto request = MSStringView(message->Request, event->Message.size() - sizeof(message_t));
+						auto content = MSStringView(message->Request, event->Message.size() - sizeof(message_t));
 						// TODO: 检查接口访问权限
-						service->async(message->Service, message->Method, 100, request, [=, this](MSStringView response)
+						switch (message->Service)
 						{
-							channel->writeChannel(IChannelEvent::New(response));
-
-							if (message->Method == MSHash("login") && response.size())
+						case MSHash("gateway"):
 							{
-								auto serviceName = "client:" + MSString(response);
-								auto clientService = MSNew<Service>();
-								// clientService->bind("request", [=](MSStringView request2)->MSAsync<MSString>
-								// {
-								// 	channel->writeChannel(IChannelEvent::New(request2));
-								// 	co_return {};
-								// });
-								// clientService->bind("response", [=](MSStringView request2)->MSAsync<MSString>
-								// {
-								// 	channel->writeChannel(IChannelEvent::New(request2));
-								// 	co_return {};
-								// });
-								if (hub->create(serviceName, clientService)) onPush();
-								channel->getContext()->attrib()["serviceName"] = serviceName;
-							}
-						});
+								switch (message->Method)
+								{
+								case MSHash("login"):
+									{
+										MSTuple<MSString, MSString> request;
+										MSTypeC(content, request);
+										service->async("logic", "login", 100, std::move(request), [=](uint32_t userID)
+										{
+											context->write(IChannelEvent::New(std::to_string(userID)));
+											if (userID)
+											{
+												auto serviceName = "client:" + std::to_string(userID);
+												auto clientService = MSNew<ForwardService>(channel);
+												hub->create(serviceName, clientService);
+												channel->getContext()->userdata() = userID;
+											}
+										});
+									}
+									break;
+								case MSHash("logout"):
+									{
+										MSTuple<uint32_t> request;
+										MSTypeC(content, request);
+										service->async("logic", "logout", 100, std::move(request), [=](bool result)
+										{
+											context->write(IChannelEvent::New(std::to_string(result)));
+											auto userID = (uint32_t)channel->getContext()->userdata();
+											if (userID && result)
+											{
+												auto serviceName = "client:" + std::to_string(userID);
+												hub->cancel(serviceName);
+												channel->getContext()->userdata() = 0;
+											}
+										});
+									}
+									break;
+								case MSHash("signup"):
+									{
+										MSTuple<MSString, MSString> request;
+										MSTypeC(content, request);
+										service->async("logic", "signup", 100, std::move(request), [=](bool result)
+										{
+											context->write(IChannelEvent::New(std::to_string(result)));
+										});
+									}
+									break;
+								}
+							} break;
+						default:
+							{
+								auto userID = channel->getContext()->userdata();
+								if (userID)
+								{
+
+								}
+							} break;
+						}
 						return false;
 					},
 				});
@@ -127,12 +168,12 @@ void GatewayServer::onInit()
 			},
 			.OnClose = [=, this](MSRef<IChannel> channel)
 			{
-				auto& serviceData = channel->getContext()->attrib()["serviceName"];
-				if (serviceData.has_value())
+				auto userID = (uint32_t)channel->getContext()->userdata();
+				if (userID)
 				{
-					auto serviceName = std::any_cast<MSString>(serviceData);
-					if (hub->cancel(serviceName)) onPush();
-					channel->getContext()->attrib().erase("serviceName");
+					auto serviceName = "client:" + std::to_string(userID);
+					hub->cancel(serviceName);
+					channel->getContext()->userdata() = 0;
 				}
 			},
 		}

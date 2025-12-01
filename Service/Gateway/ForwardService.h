@@ -9,19 +9,16 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "MS.h"
+#include <Server/Private/Service.h>
 
-/// @brief Interface for mail
-struct IMail
+class ForwardService : public Service
 {
-	// 源服务
-	uint32_t From;
-	// 目标服务
-	uint32_t To;
-	// 时间戳
-	uint32_t Date;
-	// 消息类型（0,1表示请求，2表示响应）
-	uint32_t Type;
-	// 消息体
-	MSStringView Body;
+public:
+	explicit ForwardService(MSHnd<IChannel> client);
+
+protected:
+	IMailTask onRead(IMail mail) override;
+
+protected:
+	MSHnd<IChannel> m_ClientChannel;
 };

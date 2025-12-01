@@ -25,5 +25,7 @@ public:
 
 	virtual MSFuture<bool> write(MSRef<IChannelEvent> event, MSPromise<bool>& promise) = 0;
 
-	virtual MSStringMap<MSAny>& attrib() = 0;
+	virtual size_t& userdata() = 0;
+
+	virtual MSStringMap<MSAny>& attribs() = 0;
 };

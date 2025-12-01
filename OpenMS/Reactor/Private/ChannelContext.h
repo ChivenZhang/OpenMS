@@ -15,14 +15,16 @@ class Channel;
 class ChannelContext : public IChannelContext
 {
 public:
-	ChannelContext(MSRaw<Channel> channel);
+	explicit ChannelContext(MSRaw<Channel> channel);
 	void close() override;
 	MSFuture<bool> close(MSPromise<bool>& promise) override;
 	void write(MSRef<IChannelEvent> event) override;
 	MSFuture<bool> write(MSRef<IChannelEvent> event, MSPromise<bool>& promise) override;
-	MSStringMap<MSAny>& attrib() override;
+	size_t& userdata() override;
+	MSStringMap<MSAny>& attribs() override;
 
 protected:
+	size_t m_Userdata;
 	MSRaw<Channel> m_Channel;
 	MSStringMap<MSAny> m_AttribMap;
 };

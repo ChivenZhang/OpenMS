@@ -15,7 +15,8 @@
 
 ChannelContext::ChannelContext(MSRaw<Channel> channel)
 	:
-	m_Channel(channel)
+	m_Channel(channel),
+	m_Userdata(0)
 {
 }
 
@@ -39,7 +40,12 @@ MSFuture<bool> ChannelContext::write(MSRef<IChannelEvent> event, MSPromise<bool>
 	return m_Channel->write(event, promise);
 }
 
-MSStringMap<MSAny> &ChannelContext::attrib()
+size_t& ChannelContext::userdata()
+{
+	return m_Userdata;
+}
+
+MSStringMap<MSAny> &ChannelContext::attribs()
 {
 	return m_AttribMap;
 }
