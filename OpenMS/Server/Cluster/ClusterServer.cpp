@@ -25,30 +25,6 @@ void ClusterServer::onInit()
 
 	auto mailHub = AUTOWIRE(IMailHub)::bean();
 
-	// Handle remote mail to local
-
-	m_ServiceServer = MSNew<RPCServer>(RPCServer::config_t{
-		.IP = property(identity() + ".server.ip", MSString("127.0.0.1")),
-		.PortNum = (uint16_t)property(identity() + ".server.port", 0U),
-		.Backlog = property(identity() + ".server.backlog", 0U),
-		.Workers = property(identity() + ".server.workers", 0U),
-	});
-	m_ServiceServer->bind("mailbox", [=](MSHnd<IChannel> client, MSStringView request, MSString& response)
-	{
-		if (sizeof(MailView) <= request.size())
-		{
-			auto& mailView = *(MailView*)request.data();
-			IMail newMail = {};
-			newMail.From = mailView.From;
-			newMail.To = mailView.To;
-			newMail.Date = mailView.Date;
-			newMail.Type = mailView.Type;
-			newMail.Body = MSStringView(mailView.Body, request.size() - sizeof(MailView));
-			mailHub->send(newMail);
-		}
-	});
-	m_ServiceServer->startup();
-
 	// Handle local mail to remote
 
 	mailHub->send([this](IMail mail)->bool
@@ -83,13 +59,12 @@ void ClusterServer::onInit()
 			}
 			client = result.first->second;
 		}
-		if (client == nullptr) return false;
-		if (client->connect() == false)
+		if (client && client->connect() == false)
 		{
 			client->shutdown();
 			client->startup();
 		}
-		if (client->connect() == false) return false;
+		if (client == nullptr || client->connect() == false) return false;
 
 		MSString request(sizeof(MailView) + mail.Body.size(), 0);
 		auto& mailView = *(MailView*)request.data();
@@ -101,6 +76,30 @@ void ClusterServer::onInit()
 		MSString response;
 		return client->call("mailbox", 0, request, response);
 	});
+
+	// Handle remote mail to local
+
+	m_ServiceServer = MSNew<RPCServer>(RPCServer::config_t{
+		.IP = property(identity() + ".server.ip", MSString("127.0.0.1")),
+		.PortNum = (uint16_t)property(identity() + ".server.port", 0U),
+		.Backlog = property(identity() + ".server.backlog", 0U),
+		.Workers = property(identity() + ".server.workers", 0U),
+	});
+	m_ServiceServer->bind("mailbox", [=](MSHnd<IChannel> client, MSStringView request, MSString& response)
+	{
+		if (sizeof(MailView) <= request.size())
+		{
+			auto& mailView = *(MailView*)request.data();
+			IMail newMail = {};
+			newMail.From = mailView.From;
+			newMail.To = mailView.To;
+			newMail.Date = mailView.Date;
+			newMail.Type = mailView.Type;
+			newMail.Body = MSStringView(mailView.Body, request.size() - sizeof(MailView));
+			mailHub->send(newMail);
+		}
+	});
+	m_ServiceServer->startup();
 
 	// Connect to master server
 
