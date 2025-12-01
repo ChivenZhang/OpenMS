@@ -10,6 +10,10 @@
 * =================================================*/
 #include "ClusterServer.h"
 
+#include <utility>
+
+#include "Mailbox/Private/Mail.h"
+
 MSString ClusterServer::identity() const
 {
 	return "cluster";
@@ -19,31 +23,11 @@ void ClusterServer::onInit()
 {
 	if (AUTOWIRE(IProperty)::bean()->property(identity() + ".master").empty()) return;
 
-	auto mails = AUTOWIRE(IMailHub)::bean();
-
-	// Handle remote mail to local
-
-	m_ServiceServer = MSNew<RPCServer>(RPCServer::config_t{
-		.IP = property(identity() + ".server.ip", MSString("127.0.0.1")),
-		.PortNum = (uint16_t)property(identity() + ".server.port", 0U),
-		.Backlog = property(identity() + ".server.backlog", 0U),
-		.Workers = property(identity() + ".server.workers", 0U),
-	});
-	m_ServiceServer->bind("mailbox", [=](MSHnd<IChannel> client, uint32_t from, uint32_t to, uint32_t date, uint32_t type, MSList<char> const& body)
-	{
-		IMail mail = {};
-		mail.From = from;
-		mail.To = to;
-		mail.Date = date;
-		mail.Type = type;
-		mail.Body = MSStringView(body.data(), body.size());
-		mails->send(mail);
-	});
-	m_ServiceServer->startup();
+	auto mailHub = AUTOWIRE(IMailHub)::bean();
 
 	// Handle local mail to remote
 
-	mails->send([this](IMail mail)->bool
+	mailHub->send([this](IMail mail)->bool
 	{
 		// Select remote address to send
 
@@ -75,16 +59,47 @@ void ClusterServer::onInit()
 			}
 			client = result.first->second;
 		}
-		if (client == nullptr) return false;
-		if (client->connect() == false)
+		if (client && client->connect() == false)
 		{
 			client->shutdown();
 			client->startup();
 		}
-		if (client->connect() == false) return false;
+		if (client == nullptr || client->connect() == false) return false;
 
-		return client->call<void>("mailbox", 0, mail.From, mail.To, mail.Date, mail.Type, MSList<char>{mail.Body.begin(), mail.Body.end()});
+		MSString request(sizeof(MailView) + mail.Body.size(), 0);
+		auto& mailView = *(MailView*)request.data();
+		mailView.From = mail.From;
+		mailView.To = mail.To;
+		mailView.Date = mail.Date;
+		mailView.Type = mail.Type;
+		if (mail.Body.empty() == false) ::memcpy(mailView.Body, mail.Body.data(), mail.Body.size());
+		MSString response;
+		return client->call("mailbox", 0, request, response);
 	});
+
+	// Handle remote mail to local
+
+	m_ServiceServer = MSNew<RPCServer>(RPCServer::config_t{
+		.IP = property(identity() + ".server.ip", MSString("127.0.0.1")),
+		.PortNum = (uint16_t)property(identity() + ".server.port", 0U),
+		.Backlog = property(identity() + ".server.backlog", 0U),
+		.Workers = property(identity() + ".server.workers", 0U),
+	});
+	m_ServiceServer->bind("mailbox", [=](MSHnd<IChannel> client, MSStringView request, MSString& response)
+	{
+		if (sizeof(MailView) <= request.size())
+		{
+			auto& mailView = *(MailView*)request.data();
+			IMail newMail = {};
+			newMail.From = mailView.From;
+			newMail.To = mailView.To;
+			newMail.Date = mailView.Date;
+			newMail.Type = mailView.Type;
+			newMail.Body = MSStringView(mailView.Body, request.size() - sizeof(MailView));
+			mailHub->send(newMail);
+		}
+	});
+	m_ServiceServer->startup();
 
 	// Connect to master server
 
@@ -95,8 +110,8 @@ void ClusterServer::onInit()
 	m_ClusterClient->bind("pull", [this](MSMap<uint32_t, MSStringList> route)
 	{
 		MSMutexLock lock(m_MailRouteLock);
-		m_MailRouteMap = route;
-		MS_DEBUG("updated route");
+		m_MailRouteMap = std::move(route);
+		MS_INFO("validate %s", m_ServiceServer->address().lock()->getString().c_str());
 	});
 	m_ClusterClient->startup();
 

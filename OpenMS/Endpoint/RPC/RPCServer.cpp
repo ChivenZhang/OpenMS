@@ -103,15 +103,15 @@ bool RPCServerBase::bind(MSStringView name, method_t&& method)
 	return m_Methods.emplace(MSHash(name), method).second;
 }
 
-MSBinary<MSString, bool> RPCServerBase::call(MSHnd<IChannel> client, MSStringView const& name, uint32_t timeout, MSStringView const& input)
+bool RPCServerBase::call(MSHnd<IChannel> client, MSStringView const& name, uint32_t timeout, MSStringView const& input, MSString& output)
 {
-	if (m_Reactor == nullptr || m_Reactor->connect() == false) return {{}, false};
+	if (m_Reactor == nullptr || m_Reactor->connect() == false) return false;
 
 	// Convert request to string
 
-	MSString output(sizeof(RPCRequestView) + input.size(), 0);
-	auto& request = *(RPCRequestView*)output.data();
-	request.Length = (uint32_t)output.size();
+	MSString buffer(sizeof(RPCRequestView) + input.size(), 0);
+	auto& request = *(RPCRequestView*)buffer.data();
+	request.Length = (uint32_t)buffer.size();
 	request.Session = (++m_Session) | 0x80000000;
 	request.Method = MSHash(name);
 	if (input.empty() == false) ::memcpy(request.Buffer, input.data(), input.size());
@@ -125,13 +125,13 @@ MSBinary<MSString, bool> RPCServerBase::call(MSHnd<IChannel> client, MSStringVie
 		auto& session = m_Sessions[request.Session];
 		session = [&, sessionID = request.Session](MSStringView const& response)
 		{
-			promise.set_value(MSString(response)); 
+			promise.set_value(MSString(response));
 		};
 	}
 
 	// Send request to remote server
 
-	m_Reactor->write(IChannelEvent::New(output, client));
+	m_Reactor->write(IChannelEvent::New(buffer, client));
 
 	auto status = future.wait_for(std::chrono::milliseconds(timeout));
 	{
@@ -140,9 +140,10 @@ MSBinary<MSString, bool> RPCServerBase::call(MSHnd<IChannel> client, MSStringVie
 	}
 	if (status == std::future_status::ready)
 	{
-		return {future.get(), true};
+		output = future.get();
+		return true;
 	}
-	return {{}, false};
+	return false;
 }
 
 bool RPCServerBase::async(MSHnd<IChannel> client, MSStringView const& name, uint32_t timeout, MSStringView const& input, MSLambda<void(MSString&&)>&& callback)

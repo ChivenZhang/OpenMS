@@ -15,9 +15,14 @@
 class Service : public MailBox
 {
 public:
-	using method_t = MSLambda<MSAsync<MSString>(MSStringView)>;
-	using session_t = MSLambda<void(MSStringView)>;
 	using MailBox::MailBox;
+	using session_t = MSLambda<void(MSStringView)>;
+	using method_t = MSLambda<MSAsync<MSString>(MSStringView)>;
+	struct request_t
+	{
+		uint32_t Method;
+		char Buffer[0];
+	};
 
 	bool bind(uint32_t method, method_t&& callback);
 	bool call(uint32_t service, uint32_t method, uint32_t timeout, MSStringView request, MSString& response);
@@ -100,12 +105,12 @@ public:
 	}
 
 protected:
-	IMailTask read(IMail mail) final;
+	IMailTask read(IMail mail) override;
 
 protected:
 	Timer m_Timer;
-	MSMutex m_MutexMethod;
-	MSMutex m_MutexSession;
+	MSMutex m_LockMethod;
+	MSMutex m_LockSession;
 	MSAtomic<uint32_t> m_SessionID;
 	MSMap<uint32_t, method_t> m_MethodMap;
 	MSMap<uint32_t, session_t> m_SessionMap;

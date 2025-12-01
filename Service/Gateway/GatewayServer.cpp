@@ -9,8 +9,12 @@
 *
 * =================================================*/
 #include "GatewayServer.h"
+
+#include "GuestService.h"
+#include "ProxyService.h"
 #include "Endpoint/TCP/TCPServer.h"
 #include "Handler/AES/AESHandler.h"
+#include "Mailbox/Private/Mail.h"
 #include "Server/Private/Service.h"
 
 #define AES256_KEY 0x50, 0x71, 0x47, 0x55, 0x6f, 0x4c, 0x36, 0x7a, 0x55, 0x50, 0x38, 0x43, 0x30, 0x42, 0x38, 0x43, 0x2f, 0x55, 0x45, 0x4d, 0x50, 0x49, 0x73, 0x36, 0x4f, 0x63, 0x42, 0x4c, 0x79, 0x32, 0x72, 0x35
@@ -24,9 +28,7 @@ void GatewayServer::onInit()
 {
 	ClusterServer::onInit();
 
-	auto hub = AUTOWIRE(IMailHub)::bean();
-	auto servce = MSNew<Service>();
-	hub->create("gateway", servce);
+	auto mailHub = AUTOWIRE(IMailHub)::bean();
 
 	m_TCPServer = MSNew<TCPServer>(TCPServer::config_t{
 		.IP = property(identity() + ".client.ip", MSString("127.0.0.1")),
@@ -35,8 +37,61 @@ void GatewayServer::onInit()
 		.Workers = property(identity() + ".client.workers", 0U),
 		.Callback = ChannelReactor::callback_t
 		{
-			.OnOpen = [=](MSRef<IChannel> channel)
+			.OnOpen = [=, this](MSRef<IChannel> channel)
 			{
+				channel->getContext()->userdata() = 0;
+				auto guestID = m_ClientCount.fetch_add(1) + 1;
+				channel->getContext()->attribs()["guestID"] = guestID;
+
+				// Create Guest Service
+
+				auto guestService = MSNew<GuestService>(channel);
+				guestService->bind("login", [=, this](MSString user, MSString pass)-> MSAsync<uint32_t>
+				{
+					if (auto userID = channel->getContext()->userdata()) co_return userID;
+
+					co_return co_await [=, this](MSAwait<uint32_t> promise)
+					{
+						guestService->async("logic", "login", 100, MSTuple{user, pass}, [=, this](uint32_t userID)
+						{
+							if (userID)
+							{
+								auto serviceName = "proxy:" + std::to_string(userID);
+								auto proxyService = MSNew<ProxyService>(channel);
+								if (mailHub->create(serviceName, proxyService)) this->onPush();
+								channel->getContext()->userdata() = userID;
+							}
+							promise(userID);
+						});
+					};
+				});
+				guestService->bind("logout", [=]()-> MSAsync<bool>
+				{
+					auto userID = channel->getContext()->userdata();
+					if (userID == 0) co_return false;
+					co_return co_await [=](MSAwait<bool> promise)
+					{
+						guestService->async("logic", "logout", 100, MSTuple{userID}, [=](bool result)
+						{
+							promise(result);
+						});
+					};
+				});
+				guestService->bind("signup", [=](MSString user, MSString pass)-> MSAsync<bool>
+				{
+					co_return co_await [=](MSAwait<bool> promise)
+					{
+						guestService->async("logic", "signup", 100, MSTuple{user, pass}, [=](bool result)
+						{
+							promise(result);
+						});
+					};
+				});
+
+				if (mailHub->create("guest:" + std::to_string(guestID), guestService)) this->onPush();
+
+				// Create Client Channel
+
 				channel->getPipeline()->addFirst("decrypt", MSNew<AESInboundHandler>(AESInboundHandler::config_t
 				{
 					.Key = { AES256_KEY },
@@ -45,20 +100,31 @@ void GatewayServer::onInit()
 				{
 					.OnHandle = [=](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)->bool
 					{
-						struct message_t
-						{
-							uint32_t Service;
-							uint32_t Method;
-							char Request[0];
-						};
-						if (event->Message.size() < sizeof(message_t)) return false;
-						auto message = reinterpret_cast<message_t*>(event->Message.data());
-						auto request = MSStringView(message->Request, event->Message.size() - sizeof(message_t));
 						// TODO: 检查接口访问权限
-						servce->async(message->Service, message->Method, 100, request, [=](MSStringView response)
+						if (event->Message.size() < sizeof(MailView)) return false;
+						auto& mailView = *(MailView*)event->Message.data();
+						if (mailView.To == MSHash("gateway"))
 						{
-							channel->writeChannel(IChannelEvent::New(response));
-						});
+							IMail newMail = {};
+							newMail.From = MSHash("guest:" + std::to_string(guestID));
+							newMail.To = mailView.To;
+							newMail.Date = mailView.Date;
+							newMail.Type = mailView.Type | OPENMS_MAIL_TYPE_CLIENT;
+							newMail.Body = MSStringView(mailView.Body, event->Message.size() - sizeof(MailView));
+							mailHub->send(newMail);
+						}
+						else
+						{
+							auto userID = (uint32_t)channel->getContext()->userdata();
+							if (userID == 0) return false;
+							IMail newMail = {};
+							newMail.From = MSHash("proxy:" + std::to_string(userID));
+							newMail.To = mailView.To;
+							newMail.Date = mailView.Date;
+							newMail.Type = mailView.Type | OPENMS_MAIL_TYPE_CLIENT;
+							newMail.Body = MSStringView(mailView.Body, event->Message.size() - sizeof(MailView));
+							mailHub->send(newMail);
+						}
 						return false;
 					},
 				});
@@ -74,6 +140,21 @@ void GatewayServer::onInit()
 						return false;
 					},
 				});
+			},
+			.OnClose = [=, this](MSRef<IChannel> channel)
+			{
+				auto& guestData = channel->getContext()->attribs()["guestID"];
+				auto guestID = std::any_cast<uint32_t>(guestData);
+				auto serviceName = "guest:" + std::to_string(guestID);
+				auto result = mailHub->cancel(serviceName);
+
+				if (auto userID = (uint32_t)channel->getContext()->userdata())
+				{
+					serviceName = "proxy:" + std::to_string(userID);
+					result |= mailHub->cancel(serviceName);
+					channel->getContext()->userdata() = 0;
+				}
+				if (result) this->onPush();
 			},
 		}
 	});

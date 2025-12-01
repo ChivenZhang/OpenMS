@@ -248,8 +248,8 @@ bool HTTPServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw
 		{
 			try
 			{
-				handler->m_Context->attrib()["request"] = &handler->m_Request;
-				handler->m_Context->attrib()["response"] = &handler->m_Response;
+				handler->m_Context->attribs()["request"] = &handler->m_Request;
+				handler->m_Context->attribs()["response"] = &handler->m_Response;
 				method(handler->m_Request, handler->m_Response);
 			}
 			catch (MSError const& ex)
@@ -293,8 +293,8 @@ HTTPServerOutboundHandler::HTTPServerOutboundHandler(MSRaw<HTTPServer> server)
 
 bool HTTPServerOutboundHandler::channelWrite(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)
 {
-	auto& requestData = context->attrib()["request"];
-	auto& responseData = context->attrib()["response"];
+	auto& requestData = context->attribs()["request"];
+	auto& responseData = context->attribs()["response"];
 	if(requestData.type() == typeid(HTTPServer::request_t*) && responseData.type() == typeid(HTTPServer::response_t*))
 	{
 		auto& request = *std::any_cast<HTTPServer::request_t*>(requestData);
@@ -320,8 +320,8 @@ bool HTTPServerOutboundHandler::channelWrite(MSRaw<IChannelContext> context, MSR
 
 bool HTTPServerRequestHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)
 {
-	auto& requestData = context->attrib()["request"];
-	auto& responseData = context->attrib()["response"];
+	auto& requestData = context->attribs()["request"];
+	auto& responseData = context->attribs()["response"];
 	if(requestData.type() == typeid(HTTPServer::request_t*) && responseData.type() == typeid(HTTPServer::response_t*))
 	{
 		auto& request = *std::any_cast<HTTPServer::request_t*>(requestData);
@@ -347,8 +347,8 @@ bool HTTPServerRequestHandler::channelRead(MSRaw<IChannelContext> context, MSRaw
 
 bool HTTPServerResponseHandler::channelWrite(MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)
 {
-	auto& requestData = context->attrib()["request"];
-	auto& responseData = context->attrib()["response"];
+	auto& requestData = context->attribs()["request"];
+	auto& responseData = context->attribs()["response"];
 	if(requestData.type() == typeid(HTTPServer::request_t*) && responseData.type() == typeid(HTTPServer::response_t*))
 	{
 		auto& request = *std::any_cast<HTTPServer::request_t*>(requestData);
