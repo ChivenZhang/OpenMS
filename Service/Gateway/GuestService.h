@@ -11,10 +11,10 @@
 * =================================================*/
 #include <Server/Private/Service.h>
 
-class ForwardService : public Service
+class GuestService : public Service
 {
 public:
-	explicit ForwardService(MSHnd<IChannel> client);
+	explicit GuestService(MSHnd<IChannel> client);
 
 protected:
 	IMailTask read(IMail mail) override;

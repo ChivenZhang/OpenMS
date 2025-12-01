@@ -8,18 +8,19 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "ForwardService.h"
+#include "ProxyService.h"
 #include "Reactor/IChannel.h"
 #include "Mailbox/Private/Mail.h"
 
-ForwardService::ForwardService(MSHnd<IChannel> client)
+ProxyService::ProxyService(MSHnd<IChannel> client)
 	:
 	m_ClientChannel(client)
 {
 }
 
-IMailTask ForwardService::read(IMail mail)
+IMailTask ProxyService::read(IMail mail)
 {
+	// Handle client message
 	if (mail.Type & OPENMS_MAIL_TYPE_CLIENT)
 	{
 		if (mail.Type & OPENMS_MAIL_TYPE_REQUEST)
@@ -42,6 +43,7 @@ IMailTask ForwardService::read(IMail mail)
 			}
 		}
 	}
+	// Handle server message
 	else
 	{
 		if (mail.Type & OPENMS_MAIL_TYPE_REQUEST)

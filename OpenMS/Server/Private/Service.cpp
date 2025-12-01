@@ -12,7 +12,7 @@
 
 bool Service::bind(uint32_t method, method_t&& callback)
 {
-	MSMutexLock lock(m_MutexMethod);
+	MSMutexLock lock(m_LockMethod);
 	auto result = m_MethodMap.emplace(method, callback);
 	return result.second;
 }
@@ -27,13 +27,13 @@ bool Service::call(uint32_t service, uint32_t method, uint32_t timeout, MSString
 	IMail mail = {};
 	mail.To = service;
 	mail.Body = input;
-	mail.Type = 1;
+	mail.Type = OPENMS_MAIL_TYPE_REQUEST;
 	mail.Date = ++m_SessionID;
 
 	MSPromise<MSString> promise;
 	auto future = promise.get_future();
 	{
-		MSMutexLock lock(m_MutexSession);
+		MSMutexLock lock(m_LockSession);
 		m_SessionMap.emplace(mail.Date, [&](MSStringView output)
 		{
 			promise.set_value(MSString(output));
@@ -44,7 +44,7 @@ bool Service::call(uint32_t service, uint32_t method, uint32_t timeout, MSString
 
 	auto status = future.wait_for(std::chrono::milliseconds(timeout));
 	{
-		MSMutexLock lock(m_MutexSession);
+		MSMutexLock lock(m_LockSession);
 		m_SessionMap.erase(mail.Date);
 	}
 	if (status == std::future_status::ready)
@@ -65,11 +65,11 @@ bool Service::async(uint32_t service, uint32_t method, uint32_t timeout, MSStrin
 	IMail mail = {};
 	mail.To = service;
 	mail.Body = input;
-	mail.Type = 1;
+	mail.Type = OPENMS_MAIL_TYPE_REQUEST;
 	mail.Date = ++m_SessionID;
 
 	{
-		MSMutexLock lock(m_MutexSession);
+		MSMutexLock lock(m_LockSession);
 		m_SessionMap.emplace(mail.Date, [callback](MSStringView output)
 		{
 			if (callback) callback(output);
@@ -82,7 +82,7 @@ bool Service::async(uint32_t service, uint32_t method, uint32_t timeout, MSStrin
 	{
 		session_t response;
 		{
-			MSMutexLock lock(m_MutexSession);
+			MSMutexLock lock(m_LockSession);
 			auto result = m_SessionMap.find(session);
 			if (result != m_SessionMap.end())
 			{
@@ -119,7 +119,7 @@ IMailTask Service::read(IMail mail)
 			auto& request = *(request_t*)mail.Body.data();
 			method_t method;
 			{
-				MSMutexLock lock(m_MutexMethod);
+				MSMutexLock lock(m_LockMethod);
 				auto result = m_MethodMap.find(request.Method);
 				if (result != m_MethodMap.end()) method = result->second;
 			}
@@ -137,7 +137,7 @@ IMailTask Service::read(IMail mail)
 			auto& request = *(request_t*)mail.Body.data();
 			method_t method;
 			{
-				MSMutexLock lock(m_MutexMethod);
+				MSMutexLock lock(m_LockMethod);
 				auto result = m_MethodMap.find(request.Method);
 				if (result != m_MethodMap.end()) method = result->second;
 			}
@@ -158,7 +158,7 @@ IMailTask Service::read(IMail mail)
 	{
 		session_t response;
 		{
-			MSMutexLock lock(m_MutexSession);
+			MSMutexLock lock(m_LockSession);
 			auto result = m_SessionMap.find(mail.Date);
 			if (result != m_SessionMap.end())
 			{
