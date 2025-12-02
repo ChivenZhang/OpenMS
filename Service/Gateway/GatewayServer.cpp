@@ -45,6 +45,7 @@ void GatewayServer::onInit()
 
 				// Create Guest Service
 
+				constexpr auto H = MSHash("login");
 				auto guestService = MSNew<GuestService>(channel);
 				guestService->bind("login", [=, this](MSString user, MSString pass)-> MSAsync<uint32_t>
 				{
@@ -52,6 +53,8 @@ void GatewayServer::onInit()
 
 					co_return co_await [=, this](MSAwait<uint32_t> promise)
 					{
+						MS_INFO("服务端验证：%s", user.c_str());
+
 						guestService->async("logic", "login", 100, MSTuple{user, pass}, [=, this](uint32_t userID)
 						{
 							if (userID)
@@ -106,7 +109,7 @@ void GatewayServer::onInit()
 						if (mailView.To == MSHash("gateway"))
 						{
 							IMail newMail = {};
-							newMail.To = MSHash("guest:" + std::to_string(guestID));
+							newMail.To = guestService->name();
 							newMail.Date = mailView.Date;
 							newMail.Type = mailView.Type | OPENMS_MAIL_TYPE_CLIENT;
 							newMail.Body = MSStringView(mailView.Body, event->Message.size() - sizeof(MailView));

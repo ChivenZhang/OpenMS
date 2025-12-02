@@ -24,10 +24,6 @@ MSString BusinessServer::identity() const
 void BusinessServer::onInit()
 {
 	ClusterServer::onInit();
-	auto mailHub = AUTOWIRE(IMailHub)::bean();
-
-	auto service = MSNew<Service>();
-	if (mailHub->create("business", service)) this->onPush();
 
 	m_TCPClient = MSNew<TCPClient>(TCPClient::config_t{
 		.IP = "127.0.0.1",
@@ -35,7 +31,7 @@ void BusinessServer::onInit()
 		.Workers = 1,
 		.Callback = ChannelReactor::callback_t
 		{
-			.OnOpen = [this](MSRef<IChannel> channel)
+			.OnOpen = [](MSRef<IChannel> channel)
 			{
 				channel->getPipeline()->addFirst("decrypt", MSNew<AESInboundHandler>(AESInboundHandler::config_t
 				{
@@ -43,8 +39,9 @@ void BusinessServer::onInit()
 				}));
 				channel->getPipeline()->addLast("input", IChannelPipeline::handler_in
 				{
-					.OnHandle = [this](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)->bool
+					.OnHandle = [](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)->bool
 					{
+						MS_INFO("客户端接收：%u", (uint32_t)event->Message.size());
 						return false;
 					},
 				});

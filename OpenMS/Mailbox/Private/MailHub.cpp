@@ -80,7 +80,14 @@ uint32_t MailHub::send(IMail mail)
 		mailView.Date = mail.Date;
 		mailView.Type = mail.Type;
 		if (mail.Body.empty() == false) ::memcpy(mailView.Body, mail.Body.data(), mail.Body.size());
-		toMailbox->m_MailQueue.push({ .Mail = std::move(mailData), });
+
+		IMail newMail = {};
+		newMail.From = mailView.From;
+		newMail.To = mailView.To;
+		newMail.Date = mailView.Date;
+		newMail.Type = mailView.Type;
+		newMail.Body = MSStringView(mailView.Body, mail.Body.size());
+		toMailbox->m_MailQueue.push({ .Mail = std::move(mailData), .Task = toMailbox->read(newMail), });
 		if (idle) enqueue(toMailbox);
 		return mail.Date;
 	}

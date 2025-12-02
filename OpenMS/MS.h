@@ -231,7 +231,7 @@ using MSTuple = std::tuple<TS...>;
 using MSAny = std::any;
 using MSError = std::exception;
 template <class E>
-void MSThrowError(E&& error)
+void MSThrow(E&& error)
 {
 	std::throw_with_nested(error);
 }
