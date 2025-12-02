@@ -231,7 +231,7 @@ using MSTuple = std::tuple<TS...>;
 using MSAny = std::any;
 using MSError = std::exception;
 template <class E>
-void MSThrowError(E&& error)
+void MSThrow(E&& error)
 {
 	std::throw_with_nested(error);
 }
@@ -395,6 +395,8 @@ struct MSTraitsBase
 	static constexpr std::size_t argument_count = sizeof...(Args);
 	template<std::size_t N>
 	using argument_type = std::tuple_element<N, std::tuple<Args...>>::type;
+	template<std::size_t N>
+	using argument_data = std::remove_cvref_t<typename std::tuple_element<N, std::tuple<Args...>>::type>;
 };
 
 template<class T>

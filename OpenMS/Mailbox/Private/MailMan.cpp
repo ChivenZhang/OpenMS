@@ -34,27 +34,12 @@ MailMan::MailMan(MSRaw<MailHub> context)
 				{
 					auto& mail = mailbox->m_MailQueue.front();
 
-					if (bool(mail.Task) == false)
-					{
-						auto& mailView = *(MailView*)mail.Mail.data();
-						IMail newMail = {};
-						newMail.From = mailView.From;
-						newMail.To = mailView.To;
-						newMail.Date = mailView.Date;
-						newMail.Type = mailView.Type;
-						newMail.Body = MSStringView(mailView.Body, mail.Mail.size() - sizeof(MailView));
-						try
-						{
-							mail.Task = mailbox->read(newMail);
-						}
-						catch (MSError& info)
-						{
-							mailbox->error(std::move(info));
-						}
-					}
 					if (bool(mail.Task) == true && mail.Task.done() == false)
 					{
-						if (mail.Task.state() != MSAsyncState::AWAIT) mail.Task.resume();
+						if (mail.Task.state() == MSAsyncState::NONE)
+						{
+							mail.Task.resume();
+						}
 					}
 					if (bool(mail.Task) == false || bool(mail.Task) == true && mail.Task.done() == true)
 					{
