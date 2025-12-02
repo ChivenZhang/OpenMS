@@ -54,6 +54,7 @@ struct MSPromiseBase
     }
 
     MSAsyncState m_ThisState = MSAsyncState::NONE;
+    // MSAsyncState m_LastState = MSAsyncState::NONE;
     std::coroutine_handle<> m_NextHandle;
 };
 
@@ -63,6 +64,10 @@ class MSAsync;
 template<class T>
 struct MSAsyncPromise : MSPromiseBase
 {
+    ~MSAsyncPromise()
+    {
+        MS_INFO("delete promise");
+    }
     MSAsync<T> get_return_object() noexcept;
 
     void unhandled_exception() noexcept
@@ -118,17 +123,10 @@ struct MSAsyncPromise : MSPromiseBase
                 m_NextHandle.promise().m_ThisState = MSAsyncState::AWAIT;
                 m_Future = m_Promise.get_future();
 
-                MSAwait<return_type> promise = [&](return_type && value)
+                MSAwait<return_type> promise = [&, handle](return_type&& value)
                 {
-                    try
-                    {
-                        m_Promise.set_value(value);
-                    }
-                    catch (...)
-                    {
-                        MSThrowError(MSError("MSLambdaAwaitable.await_suspend() at " __FILE__));
-                    }
-                    m_NextHandle.resume();
+                    m_Promise.set_value(value);
+                    if (handle) handle.resume();
                 };
                 m_Lambda(promise);
             }
@@ -202,17 +200,10 @@ struct MSAsyncPromise<void> : MSPromiseBase
                 m_NextHandle.promise().m_ThisState = MSAsyncState::AWAIT;
                 m_Future = m_Promise.get_future();
 
-                MSAwait<return_type> promise = [&](return_type && value)
+                MSAwait<return_type> promise = [&, handle](return_type&& value)
                 {
-                    try
-                    {
-                        m_Promise.set_value(value);
-                    }
-                    catch (...)
-                    {
-                        MSThrowError(MSError("MSLambdaAwaitable.await_suspend() at " __FILE__));
-                    }
-                    m_NextHandle.resume();
+                    m_Promise.set_value(value);
+                    if (handle) handle.resume();
                 };
                 m_Lambda(promise);
             }

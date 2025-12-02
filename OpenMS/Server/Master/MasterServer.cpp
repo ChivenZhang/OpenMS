@@ -29,10 +29,11 @@ void MasterServer::onInit()
 	// Maintain mail route table
 
 	m_MailUpdateTime = std::chrono::system_clock::now();
-	m_ClusterServer->bind("push", [this](MSHnd<IChannel> client, MSString const& address, MSList<IMailBox::name_t> const& mails)->bool
+	m_ClusterServer->bind("push", [this](MSHnd<IChannel> client, MSString const& address, MSList<IMailBox::name_t> const& mails)
 	{
-		m_MailClientSet.insert(client.lock());
-		m_MailClientNewSet.insert(client.lock());
+		auto channel = client.lock();
+		m_MailClientSet.insert(channel);
+		m_MailClientNewSet.insert(channel);
 		for (auto& mail : mails) m_MailRouteMap[mail].insert(address);
 		for (auto& mail : mails) m_MailRouteNewMap[mail].insert(address);
 		auto now = std::chrono::system_clock::now();
@@ -43,12 +44,13 @@ void MasterServer::onInit()
 			m_MailClientSet = std::move(m_MailClientNewSet);
 		}
 		// 广播同步路由表
-		for (auto& e : m_MailClientSet)
+		for (auto& E : m_MailClientSet)
 		{
-			m_ClusterServer->call<void>(e, "pull", 0, m_MailRouteMap);
+			if (E == channel) continue;
+			m_ClusterServer->call<void>(E, "pull", 0, m_MailRouteMap);
 		}
 		MS_INFO("validate %s", address.c_str());
-		return true;
+		return m_MailRouteMap;
 	});
 }
 

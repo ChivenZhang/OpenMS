@@ -50,9 +50,9 @@ void GatewayServer::onInit()
 				{
 					if (auto userID = channel->getContext()->userdata()) co_return userID;
 
-					co_return co_await [=, this](MSAwait<uint32_t>& promise)
+					co_return co_await [=, this](MSAwait<uint32_t> promise)
 					{
-						guestService->async("logic", "login", 100, MSTuple{user, pass}, [=, &promise, this](uint32_t userID)
+						guestService->async("logic", "login", 100, MSTuple{user, pass}, [=, this](uint32_t userID)
 						{
 							if (userID)
 							{
