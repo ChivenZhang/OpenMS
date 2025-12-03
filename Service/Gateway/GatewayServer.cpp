@@ -55,10 +55,12 @@ void GatewayServer::onInit()
 					{
 						MS_INFO("服务端验证：%s", user.c_str());
 
-						guestService->async("logic", "login", 100, MSTuple{user, pass}, [=, this](uint32_t userID)
+						guestService->async("logic", "login", 5000, MSTuple{user, pass}, [=, this](uint32_t userID)
 						{
+							MS_INFO("验证返回！ %s", user.c_str());
 							if (userID)
 							{
+								MS_INFO("验证成功！ %s", user.c_str());
 								auto serviceName = "proxy:" + std::to_string(userID);
 								auto proxyService = MSNew<ProxyService>(channel);
 								if (mailHub->create(serviceName, proxyService)) this->onPush();
@@ -74,7 +76,7 @@ void GatewayServer::onInit()
 					if (userID == 0) co_return false;
 					co_return co_await [=](MSAwait<bool> promise)
 					{
-						guestService->async("logic", "logout", 100, MSTuple{userID}, [=](bool result)
+						guestService->async("logic", "logout", 1000, MSTuple{userID}, [=](bool result)
 						{
 							promise(result);
 						});

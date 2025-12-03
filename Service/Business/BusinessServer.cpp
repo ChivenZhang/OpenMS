@@ -24,6 +24,27 @@ MSString BusinessServer::identity() const
 void BusinessServer::onInit()
 {
 	ClusterServer::onInit();
+	static uint32_t s_UserID = 0;
+	auto mailHub = AUTOWIRE(IMailHub)::bean();
+
+	auto service = MSNew<Service>();
+	service->bind("login", [](MSString user, MSString pass)->MSAsync<uint32_t>
+	{
+		MS_INFO("LOGIN!!!");
+		// TODO:
+		co_return ++s_UserID;
+	});
+	service->bind("logout", [](uint32_t userID)->MSAsync<uint32_t>
+	{
+		// TODO:
+		co_return userID < s_UserID;
+	});
+	service->bind("signup", [](MSString user, MSString pass)->MSAsync<bool>
+	{
+		// TODO:
+		co_return true;
+	});
+	if (mailHub->create("logic", service)) this->onPush();
 
 	m_TCPClient = MSNew<TCPClient>(TCPClient::config_t{
 		.IP = "127.0.0.1",

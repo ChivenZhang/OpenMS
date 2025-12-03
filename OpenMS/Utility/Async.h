@@ -32,10 +32,7 @@ struct MSPromiseBase
     {
         bool await_ready() const noexcept { return false; }
         template<class T>
-        auto await_suspend(std::coroutine_handle<T> handle) noexcept
-        {
-			m_ThisState = &handle.promise().m_ThisState;
-        }
+        void await_suspend(std::coroutine_handle<T> handle) noexcept {}
         void await_resume() noexcept
         {
             (*m_ThisState) = MSAsyncState::PEND;
@@ -55,7 +52,7 @@ struct MSPromiseBase
 
     auto initial_suspend() noexcept
     {
-        return InitAwaitable{};
+        return InitAwaitable{&m_ThisState};
     }
 
     auto final_suspend() noexcept

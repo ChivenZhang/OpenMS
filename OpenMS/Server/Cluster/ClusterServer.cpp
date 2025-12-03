@@ -22,7 +22,6 @@ MSString ClusterServer::identity() const
 void ClusterServer::onInit()
 {
 	if (AUTOWIRE(IProperty)::bean()->property(identity() + ".master").empty()) return;
-
 	auto mailHub = AUTOWIRE(IMailHub)::bean();
 
 	// Handle local mail to remote
@@ -85,7 +84,7 @@ void ClusterServer::onInit()
 		.Backlog = property(identity() + ".server.backlog", 0U),
 		.Workers = property(identity() + ".server.workers", 0U),
 	});
-	m_ServiceServer->bind("mailbox", [=](MSHnd<IChannel> client, MSStringView request, MSString& response)
+	m_ServiceServer->bind("mailbox", [=](MSHnd<IChannel> client, MSStringView const& request, MSString& response)->bool
 	{
 		if (sizeof(MailView) <= request.size())
 		{
@@ -97,7 +96,9 @@ void ClusterServer::onInit()
 			newMail.Type = mailView.Type;
 			newMail.Body = MSStringView(mailView.Body, request.size() - sizeof(MailView));
 			mailHub->send(newMail);
+			return true;
 		}
+		return false;
 	});
 	m_ServiceServer->startup();
 
@@ -117,9 +118,10 @@ void ClusterServer::onInit()
 
 	// Push and pull route table
 
-	m_Heartbeat = startTimer(0, OPENMS_HEARTBEAT * 1000, [this](uint32_t handle)
+	this->onPush();
+	m_Heartbeat = startTimer(OPENMS_HEARTBEAT * 1000, OPENMS_HEARTBEAT * 1000, [this](uint32_t handle)
 	{
-		onPush();
+		this->onPush();
 	});
 }
 
@@ -153,7 +155,6 @@ void ClusterServer::onPush()
 		m_ServiceServer->shutdown();
 		m_ServiceServer->startup();
 	}
-
 	if (m_ClusterClient->connect() == true && m_ServiceServer->connect() == true)
 	{
 		MSList<IMailBox::name_t> mailList;
