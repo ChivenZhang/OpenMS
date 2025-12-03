@@ -103,23 +103,25 @@ struct MSAsyncPromise : MSPromiseBase
     {
         struct MSAsyncAwaitable
         {
-            std::coroutine_handle<MSAsyncPromise<U>> m_ThisHandle;
+            std::coroutine_handle<MSAsyncPromise> m_ThisHandle;
+            std::coroutine_handle<MSAsyncPromise<U>> m_NextHandle;
 
-            bool await_ready() const noexcept { return !m_ThisHandle || m_ThisHandle.done(); }
+            bool await_ready() const noexcept { return !m_NextHandle || m_NextHandle.done(); }
             auto await_suspend(std::coroutine_handle<MSAsyncPromise> handle)
             {
-                handle.promise().m_LastState = handle.promise().m_ThisState;
-                handle.promise().m_ThisState = MSAsyncState::AWAIT;
-                m_ThisHandle.promise().m_NextHandle = handle;
-				return m_ThisHandle;
+                m_ThisHandle = handle;
+                m_ThisHandle.promise().m_LastState = m_ThisHandle.promise().m_ThisState;
+                m_ThisHandle.promise().m_ThisState = MSAsyncState::AWAIT;
+                m_NextHandle.promise().m_NextHandle = m_ThisHandle;
+                return m_NextHandle;
             }
             U await_resume()
             {
                 m_ThisHandle.promise().m_ThisState = m_ThisHandle.promise().m_LastState;
-                return m_ThisHandle.promise().result();
+                return m_NextHandle.promise().result();
             }
-		};
-        return MSAsyncAwaitable{ async.m_ThisHandle };
+        };
+        return MSAsyncAwaitable{ .m_NextHandle = async.m_ThisHandle };
     }
 
     template<class F>
@@ -130,6 +132,7 @@ struct MSAsyncPromise : MSPromiseBase
         struct MSLambdaAwaitable
         {
             F m_Lambda;
+            std::future<return_type> m_Future;
             std::promise<return_type> m_Promise;
             std::coroutine_handle<MSAsyncPromise> m_ThisHandle;
 
@@ -137,14 +140,15 @@ struct MSAsyncPromise : MSPromiseBase
 
             void await_suspend(std::coroutine_handle<MSAsyncPromise> handle)
             {
-                handle.promise().m_LastState = handle.promise().m_ThisState;
-                handle.promise().m_ThisState = MSAsyncState::AWAIT;
                 m_ThisHandle = handle;
+                m_ThisHandle.promise().m_LastState = m_ThisHandle.promise().m_ThisState;
+                m_ThisHandle.promise().m_ThisState = MSAsyncState::AWAIT;
 
-                MSAwait<return_type> promise = [&, handle](return_type&& value)
+                m_Future = m_Promise.get_future();
+                MSAwait<return_type> promise = [this](return_type const& value)
                 {
                     m_Promise.set_value(value);
-                    if (handle) handle.resume();
+                    if (m_ThisHandle) m_ThisHandle.resume();
                 };
                 m_Lambda(promise);
             }
@@ -153,7 +157,7 @@ struct MSAsyncPromise : MSPromiseBase
             {
                 m_ThisHandle.promise().m_ThisState = m_ThisHandle.promise().m_LastState;
                 if (m_ThisHandle.promise().m_Error) MSThrow(MSError("await_resume()" " at " __FILE__));
-                return m_Promise.get_future().get();
+                return m_Future.get();
             }
         };
         return MSLambdaAwaitable{ lambda };
@@ -195,23 +199,25 @@ struct MSAsyncPromise<void> : MSPromiseBase
     {
         struct MSAsyncAwaitable
         {
-            std::coroutine_handle<MSAsyncPromise<U>> m_ThisHandle;
+            std::coroutine_handle<MSAsyncPromise> m_ThisHandle;
+            std::coroutine_handle<MSAsyncPromise<U>> m_NextHandle;
 
-            bool await_ready() const noexcept { return !m_ThisHandle || m_ThisHandle.done(); }
+            bool await_ready() const noexcept { return !m_NextHandle || m_NextHandle.done(); }
             auto await_suspend(std::coroutine_handle<MSAsyncPromise> handle)
             {
-                handle.promise().m_LastState = handle.promise().m_ThisState;
-                handle.promise().m_ThisState = MSAsyncState::AWAIT;
-                m_ThisHandle.promise().m_NextHandle = handle;
-                return m_ThisHandle;
+                m_ThisHandle = handle;
+                m_ThisHandle.promise().m_LastState = m_ThisHandle.promise().m_ThisState;
+                m_ThisHandle.promise().m_ThisState = MSAsyncState::AWAIT;
+                m_NextHandle.promise().m_NextHandle = m_ThisHandle;
+                return m_NextHandle;
             }
             U await_resume()
             {
                 m_ThisHandle.promise().m_ThisState = m_ThisHandle.promise().m_LastState;
-                return m_ThisHandle.promise().result();
+                return m_NextHandle.promise().result();
             }
         };
-        return MSAsyncAwaitable{ async.m_ThisHandle };
+        return MSAsyncAwaitable{ .m_NextHandle = async.m_ThisHandle };
     }
 
     template<class F>
@@ -222,6 +228,7 @@ struct MSAsyncPromise<void> : MSPromiseBase
         struct MSLambdaAwaitable
         {
             F m_Lambda;
+            std::future<return_type> m_Future;
             std::promise<return_type> m_Promise;
             std::coroutine_handle<MSAsyncPromise> m_ThisHandle;
 
@@ -229,14 +236,15 @@ struct MSAsyncPromise<void> : MSPromiseBase
 
             void await_suspend(std::coroutine_handle<MSAsyncPromise> handle)
             {
-                handle.promise().m_LastState = handle.promise().m_ThisState;
-                handle.promise().m_ThisState = MSAsyncState::AWAIT;
                 m_ThisHandle = handle;
+                m_ThisHandle.promise().m_LastState = m_ThisHandle.promise().m_ThisState;
+                m_ThisHandle.promise().m_ThisState = MSAsyncState::AWAIT;
 
-                MSAwait<return_type> promise = [&, handle](return_type&& value)
+                m_Future = m_Promise.get_future();
+                MSAwait<return_type> promise = [this](return_type const& value)
                 {
                     m_Promise.set_value(value);
-                    if (handle) handle.resume();
+                    if (m_ThisHandle) m_ThisHandle.resume();
                 };
                 m_Lambda(promise);
             }
@@ -245,7 +253,7 @@ struct MSAsyncPromise<void> : MSPromiseBase
             {
                 m_ThisHandle.promise().m_ThisState = m_ThisHandle.promise().m_LastState;
                 if (m_ThisHandle.promise().m_Error) MSThrow(MSError("await_resume()" " at " __FILE__));
-                return m_Promise.get_future().get();
+                return m_Future.get();
             }
         };
         return MSLambdaAwaitable{ lambda };
@@ -326,7 +334,7 @@ private:
 template<class T>
 MSAsync<T> MSAsyncPromise<T>::get_return_object() noexcept
 {
-    return MSAsync<T>(std::coroutine_handle<MSAsyncPromise>::from_promise(*this));
+    return MSAsync<T>(std::coroutine_handle<MSAsyncPromise<T>>::from_promise(*this));
 }
 
 inline MSAsync<void> MSAsyncPromise<void>::get_return_object() noexcept
