@@ -24,28 +24,28 @@ IMailTask GuestService::read(IMail mail)
 {
 	if (mail.Type & OPENMS_MAIL_TYPE_REQUEST)
 	{
-		if (mail.Type & OPENMS_MAIL_TYPE_CLIENT)
+		if (sizeof(request_t) <= mail.Body.size())
 		{
-			if (sizeof(request_t) <= mail.Body.size())
+			auto& request = *(request_t*)mail.Body.data();
+			method_t method;
 			{
-				auto& request = *(request_t*)mail.Body.data();
-				method_t method;
-				{
-					MSMutexLock lock(m_LockMethod);
-					auto result = m_MethodMap.find(request.Method);
-					if (result != m_MethodMap.end()) method = result->second;
-				}
-				MSString response;
-				if (method)
-				{
-					auto input = MSStringView(request.Buffer, mail.Body.size() - sizeof(request_t));
-					response = co_await method(input);
-				}
-				mail.Type &= ~OPENMS_MAIL_TYPE_REQUEST;
-				mail.Type |= OPENMS_MAIL_TYPE_RESPONSE;
-				mail.Body = response;
-				std::swap(mail.From, mail.To);
+				MSMutexLock lock(m_LockMethod);
+				auto result = m_MethodMap.find(request.Method);
+				if (result != m_MethodMap.end()) method = result->second;
+			}
+			MSString response;
+			if (method)
+			{
+				auto input = MSStringView(request.Buffer, mail.Body.size() - sizeof(request_t));
+				response = co_await method(input);
+			}
+			mail.Type &= ~OPENMS_MAIL_TYPE_REQUEST;
+			mail.Type |= OPENMS_MAIL_TYPE_RESPONSE;
+			mail.Body = response;
+			std::swap(mail.From, mail.To);
 
+			if (mail.Type & OPENMS_MAIL_TYPE_CLIENT)
+			{
 				if (auto client = m_ClientChannel.lock())
 				{
 					auto userID = (uint32_t)client->getContext()->userdata();
@@ -58,6 +58,10 @@ IMailTask GuestService::read(IMail mail)
 					if (mail.Body.empty() == false) ::memcpy(mailView.Body, mail.Body.data(), mail.Body.size());
 					client->writeChannel(IChannelEvent::New(buffer));
 				}
+			}
+			else
+			{
+				send(mail);
 			}
 		}
 	}

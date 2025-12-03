@@ -40,6 +40,10 @@ MailMan::MailMan(MSRaw<MailHub> context)
 						{
 							mail.Task.resume();
 						}
+						else if(mail.Task.state() == MSAsyncState::AWAIT)
+						{
+							mailbox->m_MailQueue.push(std::move(mail));
+						}
 					}
 					if (bool(mail.Task) == false || bool(mail.Task) == true && mail.Task.done() == true)
 					{

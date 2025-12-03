@@ -55,10 +55,11 @@ void GatewayServer::onInit()
 					{
 						MS_INFO("服务端验证：%s", user.c_str());
 
-						guestService->async("logic", "login", 100, MSTuple{user, pass}, [=, this](uint32_t userID)
+						guestService->async("logic", "login", 10000, MSTuple{user, pass}, [=, this](uint32_t userID)
 						{
 							if (userID)
 							{
+								MS_INFO("验证成功！ %s", user.c_str());
 								auto serviceName = "proxy:" + std::to_string(userID);
 								auto proxyService = MSNew<ProxyService>(channel);
 								if (mailHub->create(serviceName, proxyService)) this->onPush();
@@ -74,7 +75,7 @@ void GatewayServer::onInit()
 					if (userID == 0) co_return false;
 					co_return co_await [=](MSAwait<bool> promise)
 					{
-						guestService->async("logic", "logout", 100, MSTuple{userID}, [=](bool result)
+						guestService->async("logic", "logout", 500, MSTuple{userID}, [=](bool result)
 						{
 							promise(result);
 						});
@@ -84,7 +85,7 @@ void GatewayServer::onInit()
 				{
 					co_return co_await [=](MSAwait<bool> promise)
 					{
-						guestService->async("logic", "signup", 100, MSTuple{user, pass}, [=](bool result)
+						guestService->async("logic", "signup", 500, MSTuple{user, pass}, [=](bool result)
 						{
 							promise(result);
 						});
@@ -109,7 +110,7 @@ void GatewayServer::onInit()
 						if (mailView.To == MSHash("gateway"))
 						{
 							IMail newMail = {};
-							newMail.To = guestService->name();
+							newMail.To = MSHash("guest:" + std::to_string(guestID));
 							newMail.Date = mailView.Date;
 							newMail.Type = mailView.Type | OPENMS_MAIL_TYPE_CLIENT;
 							newMail.Body = MSStringView(mailView.Body, event->Message.size() - sizeof(MailView));
