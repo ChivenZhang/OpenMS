@@ -33,10 +33,9 @@ MailMan::MailMan(MSRaw<MailHub> context)
 				if (mailbox->m_MailQueue.empty() == false)
 				{
 					auto& mail = mailbox->m_MailQueue.front();
-
 					if (bool(mail.Task) == true && mail.Task.done() == false)
 					{
-						if (mail.Task.state() == MSAsyncState::NONE)
+						if (mail.Task.state() == MSAsyncState::NONE || mail.Task.state() == MSAsyncState::YIELD)
 						{
 							mail.Task.resume();
 						}
