@@ -60,10 +60,12 @@ struct MSPromiseBase
         return FinalAwaitable{};
     }
 
+    std::coroutine_handle<> m_ThisHandle;
     std::coroutine_handle<> m_NextHandle;
     MSAsyncState m_ThisState = MSAsyncState::NONE;
     MSAsyncState m_LastState = MSAsyncState::NONE;
     MSAsyncState* m_RootState = &m_ThisState;
+    std::coroutine_handle<>* m_RootHandle = &m_ThisHandle;
 };
 
 template<class T>
@@ -78,6 +80,7 @@ struct MSAsyncPromise : MSPromiseBase
     {
         m_ThisState = MSAsyncState::DONE;
         *m_RootState = m_ThisState;
+        *m_RootHandle = nullptr;
         m_Error = std::current_exception();
     }
 
@@ -85,6 +88,7 @@ struct MSAsyncPromise : MSPromiseBase
     {
         m_ThisState = MSAsyncState::DONE;
         *m_RootState = m_ThisState;
+        *m_RootHandle = nullptr;
         m_Value = std::move(value);
     }
 
@@ -101,11 +105,13 @@ struct MSAsyncPromise : MSPromiseBase
                 m_ThisHandle.promise().m_LastState = m_ThisHandle.promise().m_ThisState;
                 m_ThisHandle.promise().m_ThisState = MSAsyncState::YIELD;
                 *m_ThisHandle.promise().m_RootState = m_ThisHandle.promise().m_ThisState;
+                *m_ThisHandle.promise().m_RootHandle = m_ThisHandle;
             }
             auto await_resume() noexcept
             {
                 m_ThisHandle.promise().m_ThisState = m_ThisHandle.promise().m_LastState;
                 *m_ThisHandle.promise().m_RootState = m_ThisHandle.promise().m_ThisState;
+                *m_ThisHandle.promise().m_RootHandle = nullptr;
                 if (m_ThisHandle.promise().m_Error) MSThrow(MSError("await_resume()" " at " __FILE__));
             }
         };
@@ -131,17 +137,22 @@ struct MSAsyncPromise : MSPromiseBase
             auto await_suspend(std::coroutine_handle<MSAsyncPromise> handle)
             {
                 m_ThisHandle = handle;
-                m_NextHandle.promise().m_RootState = m_ThisHandle.promise().m_RootState;
                 m_ThisHandle.promise().m_LastState = m_ThisHandle.promise().m_ThisState;
                 m_ThisHandle.promise().m_ThisState = MSAsyncState::AWAIT;
                 *m_ThisHandle.promise().m_RootState = m_ThisHandle.promise().m_ThisState;
+                *m_ThisHandle.promise().m_RootHandle = m_ThisHandle;
+
                 m_NextHandle.promise().m_NextHandle = m_ThisHandle;
+                m_NextHandle.promise().m_RootState = m_ThisHandle.promise().m_RootState;
+                m_NextHandle.promise().m_RootHandle = m_ThisHandle.promise().m_RootHandle;
                 return m_NextHandle;
             }
             U await_resume()
             {
                 m_ThisHandle.promise().m_ThisState = m_ThisHandle.promise().m_LastState;
                 *m_ThisHandle.promise().m_RootState = m_ThisHandle.promise().m_ThisState;
+                *m_ThisHandle.promise().m_RootHandle = nullptr;
+
                 if (m_ThisHandle.promise().m_Error) MSThrow(MSError("await_resume()" " at " __FILE__));
                 return m_NextHandle.promise().result();
             }
@@ -169,6 +180,7 @@ struct MSAsyncPromise : MSPromiseBase
                 m_ThisHandle.promise().m_LastState = m_ThisHandle.promise().m_ThisState;
                 m_ThisHandle.promise().m_ThisState = MSAsyncState::AWAIT;
                 *m_ThisHandle.promise().m_RootState = m_ThisHandle.promise().m_ThisState;
+                *m_ThisHandle.promise().m_RootHandle = m_ThisHandle;
 
                 m_Future = m_Promise.get_future();
                 MSAwait<return_type> promise = [this](return_type const& value)
@@ -183,6 +195,8 @@ struct MSAsyncPromise : MSPromiseBase
             {
                 m_ThisHandle.promise().m_ThisState = m_ThisHandle.promise().m_LastState;
                 *m_ThisHandle.promise().m_RootState = m_ThisHandle.promise().m_ThisState;
+                *m_ThisHandle.promise().m_RootHandle = nullptr;
+
                 if (m_ThisHandle.promise().m_Error) MSThrow(MSError("await_resume()" " at " __FILE__));
                 return m_Future.get();
             }
@@ -203,6 +217,7 @@ struct MSAsyncPromise<void> : MSPromiseBase
     {
         m_ThisState = MSAsyncState::DONE;
         *m_RootState = m_ThisState;
+        *m_RootHandle = nullptr;
         m_Error = std::current_exception();
     }
 
@@ -210,6 +225,7 @@ struct MSAsyncPromise<void> : MSPromiseBase
     {
         m_ThisState = MSAsyncState::DONE;
         *m_RootState = m_ThisState;
+        *m_RootHandle = nullptr;
     }
 
     auto yield_value(std::nullptr_t) noexcept
@@ -230,6 +246,8 @@ struct MSAsyncPromise<void> : MSPromiseBase
             {
                 m_ThisHandle.promise().m_ThisState = m_ThisHandle.promise().m_LastState;
                 *m_ThisHandle.promise().m_RootState = m_ThisHandle.promise().m_ThisState;
+                *m_ThisHandle.promise().m_RootHandle = nullptr;
+
                 if (m_ThisHandle.promise().m_Error) MSThrow(MSError("await_resume()" " at " __FILE__));
             }
         };
@@ -253,17 +271,22 @@ struct MSAsyncPromise<void> : MSPromiseBase
             auto await_suspend(std::coroutine_handle<MSAsyncPromise> handle)
             {
                 m_ThisHandle = handle;
-                m_NextHandle.promise().m_RootState = m_ThisHandle.promise().m_RootState;
                 m_ThisHandle.promise().m_LastState = m_ThisHandle.promise().m_ThisState;
                 m_ThisHandle.promise().m_ThisState = MSAsyncState::AWAIT;
                 *m_ThisHandle.promise().m_RootState = m_ThisHandle.promise().m_ThisState;
+                *m_ThisHandle.promise().m_RootHandle = m_ThisHandle;
+
                 m_NextHandle.promise().m_NextHandle = m_ThisHandle;
+                m_NextHandle.promise().m_RootState = m_ThisHandle.promise().m_RootState;
+                m_NextHandle.promise().m_RootHandle = m_ThisHandle.promise().m_RootHandle;
                 return m_NextHandle;
             }
             U await_resume()
             {
                 m_ThisHandle.promise().m_ThisState = m_ThisHandle.promise().m_LastState;
                 *m_ThisHandle.promise().m_RootState = m_ThisHandle.promise().m_ThisState;
+                *m_ThisHandle.promise().m_RootHandle = nullptr;
+
                 if (m_ThisHandle.promise().m_Error) MSThrow(MSError("await_resume()" " at " __FILE__));
                 return m_NextHandle.promise().result();
             }
@@ -305,6 +328,8 @@ struct MSAsyncPromise<void> : MSPromiseBase
             {
                 m_ThisHandle.promise().m_ThisState = m_ThisHandle.promise().m_LastState;
                 *m_ThisHandle.promise().m_RootState = m_ThisHandle.promise().m_ThisState;
+                *m_ThisHandle.promise().m_RootHandle = nullptr;
+
                 if (m_ThisHandle.promise().m_Error) MSThrow(MSError("await_resume()" " at " __FILE__));
                 return m_Future.get();
             }
@@ -360,7 +385,8 @@ public:
 
     void resume()
     {
-        m_ThisHandle.resume();
+        if (bool(*m_ThisHandle.promise().m_RootHandle) && m_ThisHandle.promise().m_RootHandle->done() == false) m_ThisHandle.promise().m_RootHandle->resume();
+        else m_ThisHandle.resume();
     }
 
     void destroy()
