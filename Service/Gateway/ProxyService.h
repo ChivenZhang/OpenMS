@@ -14,11 +14,12 @@
 class ProxyService : public Service
 {
 public:
-	explicit ProxyService(MSHnd<IChannel> client);
+	explicit ProxyService(MSHnd<IChannel> client, uint32_t userID);
 
 protected:
 	IMailTask read(IMail mail) override;
 
 protected:
+	uint32_t m_UserID;
 	MSHnd<IChannel> m_ClientChannel;
 };

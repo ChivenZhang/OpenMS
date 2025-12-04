@@ -12,8 +12,9 @@
 #include "Reactor/IChannel.h"
 #include "Mailbox/Private/Mail.h"
 
-ProxyService::ProxyService(MSHnd<IChannel> client)
+ProxyService::ProxyService(MSHnd<IChannel> client, uint32_t userID)
 	:
+	m_UserID(userID),
 	m_ClientChannel(client)
 {
 }
@@ -25,17 +26,17 @@ IMailTask ProxyService::read(IMail mail)
 	{
 		if (mail.Type & OPENMS_MAIL_TYPE_REQUEST)
 		{
+			mail.To = MSHash("player:" + std::to_string(m_UserID));
 			send(mail);
 		}
 		else if (mail.Type & OPENMS_MAIL_TYPE_RESPONSE)
 		{
 			if (auto client = m_ClientChannel.lock())
 			{
-				auto userID = (uint32_t)client->getContext()->userdata();
 				MSString buffer(sizeof(MailView) + mail.Body.size(), 0);
 				auto& mailView = *(MailView*)buffer.data();
-				mailView.From = name();
-				mailView.To = MSHash("client:" + std::to_string(userID));
+				mailView.From = MSHash("proxy:" + std::to_string(m_UserID));
+				mailView.To = MSHash("client:" + std::to_string(m_UserID));
 				mailView.Date = mail.Date;
 				mailView.Type = mail.Type;
 				if (mail.Body.empty() == false) ::memcpy(mailView.Body, mail.Body.data(), mail.Body.size());
@@ -50,11 +51,10 @@ IMailTask ProxyService::read(IMail mail)
 		{
 			if (auto client = m_ClientChannel.lock())
 			{
-				auto userID = (uint32_t)client->getContext()->userdata();
 				MSString buffer(sizeof(MailView) + mail.Body.size(), 0);
 				auto& mailView = *(MailView*)buffer.data();
-				mailView.From = name();
-				mailView.To = MSHash("client:" + std::to_string(userID));
+				mailView.From = mail.From;
+				mailView.To = MSHash("client:" + std::to_string(m_UserID));
 				mailView.Date = mail.Date;
 				mailView.Type = mail.Type;
 				if (mail.Body.empty() == false) ::memcpy(mailView.Body, mail.Body.data(), mail.Body.size());
@@ -63,6 +63,7 @@ IMailTask ProxyService::read(IMail mail)
 		}
 		else if (mail.Type & OPENMS_MAIL_TYPE_RESPONSE)
 		{
+			mail.From = MSHash("proxy:" + std::to_string(m_UserID));
 			send(mail);
 		}
 	}

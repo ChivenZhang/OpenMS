@@ -27,24 +27,31 @@ void BusinessServer::onInit()
 	static uint32_t s_UserID = 0;
 	auto mailHub = AUTOWIRE(IMailHub)::bean();
 
-	auto service = MSNew<Service>();
-	service->bind("login", [](MSString user, MSString pass)->MSAsync<uint32_t>
+	auto logicService = MSNew<Service>();
+	logicService->bind("login", [=, this](MSString user, MSString pass)->MSAsync<uint32_t>
 	{
-		MS_INFO("LOGIN!!!");
-		// TODO:
-		co_return ++s_UserID;
+		auto userID = ++s_UserID;
+
+		auto playerService = MSNew<Service>();
+		playerService->bind("attack", []()->MSAsync<void>
+		{
+			MS_INFO("BiuBiu!!!");
+			co_return;
+		});
+		if (mailHub->create("player:" + std::to_string(userID), playerService)) this->onPush();
+		co_return userID;
 	});
-	service->bind("logout", [](uint32_t userID)->MSAsync<uint32_t>
+	logicService->bind("logout", [](uint32_t userID)->MSAsync<uint32_t>
 	{
-		// TODO:
 		co_return userID < s_UserID;
 	});
-	service->bind("signup", [](MSString user, MSString pass)->MSAsync<bool>
+	logicService->bind("signup", [](MSString user, MSString pass)->MSAsync<bool>
 	{
-		// TODO:
 		co_return true;
 	});
-	if (mailHub->create("logic", service)) this->onPush();
+	if (mailHub->create("logic", logicService)) this->onPush();
+
+	MSRef<IChannel> clientChannel;
 
 	m_TCPClient = MSNew<TCPClient>(TCPClient::config_t{
 		.IP = "127.0.0.1",
@@ -52,8 +59,10 @@ void BusinessServer::onInit()
 		.Workers = 1,
 		.Callback = ChannelReactor::callback_t
 		{
-			.OnOpen = [](MSRef<IChannel> channel)
+			.OnOpen = [&clientChannel, this](MSRef<IChannel> channel)
 			{
+				clientChannel = channel;
+
 				channel->getPipeline()->addFirst("decrypt", MSNew<AESInboundHandler>(AESInboundHandler::config_t
 				{
 					.Key = { AES256_KEY },
@@ -79,7 +88,7 @@ void BusinessServer::onInit()
 					},
 				});
 
-				MSString content(R"(["guest", "guest"])");
+				MSString content(R"(["admin", "123456"])");
 				MSString request(sizeof(MailView) + sizeof(Service::request_t) + content.size(), 0);
 				auto& mailView = *(MailView*)request.data();
 				mailView.From = 0;
@@ -94,6 +103,21 @@ void BusinessServer::onInit()
 		}
 	});
 	m_TCPClient->startup();
+
+	this->startTimer(4000, 0, [=](uint32_t handle)
+	{
+		MSString content(R"()");
+		MSString request(sizeof(MailView) + sizeof(Service::request_t) + content.size(), 0);
+		auto& mailView = *(MailView*)request.data();
+		mailView.From = 0;
+		mailView.To = MSHash("player:1");
+		mailView.Date = 0;
+		mailView.Type = OPENMS_MAIL_TYPE_REQUEST | OPENMS_MAIL_TYPE_CLIENT;
+		auto& mailRequest = *(Service::request_t*)mailView.Body;
+		mailRequest.Method = MSHash("attack");
+		if (content.empty() == false) ::memcpy(mailRequest.Buffer, content.data(), content.size());
+		clientChannel->writeChannel(IChannelEvent::New(MSStringView(request)));
+	});
 }
 
 void BusinessServer::onExit()
