@@ -9,7 +9,6 @@
 *
 * =================================================*/
 #include "GatewayServer.h"
-
 #include "GuestService.h"
 #include "ProxyService.h"
 #include "Endpoint/TCP/TCPServer.h"
@@ -51,11 +50,15 @@ void GatewayServer::onInit()
 				{
 					if (auto userID = channel->getContext()->userdata()) co_return userID;
 
+					MS_INFO("服务端让出：%s", user.c_str());
+
+					co_yield 123;
+
 					co_return co_await [=, this](MSAwait<uint32_t> promise)
 					{
 						MS_INFO("服务端验证：%s", user.c_str());
 
-						guestService->async("logic", "login", 10000, MSTuple{user, pass}, [=, this](uint32_t userID)
+						guestService->async("logic", "login", 1000, MSTuple{user, pass}, [=, this](uint32_t userID)
 						{
 							if (userID)
 							{
@@ -64,6 +67,10 @@ void GatewayServer::onInit()
 								auto proxyService = MSNew<ProxyService>(channel);
 								if (mailHub->create(serviceName, proxyService)) this->onPush();
 								channel->getContext()->userdata() = userID;
+							}
+							else
+							{
+								MS_INFO("验证失败！ %s", user.c_str());
 							}
 							promise(userID);
 						});
