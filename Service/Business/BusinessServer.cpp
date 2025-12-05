@@ -94,7 +94,7 @@ void BusinessServer::onInit()
 				mailView.From = 0;
 				mailView.To = MSHash("gateway");
 				mailView.Date = 0;
-				mailView.Type = OPENMS_MAIL_TYPE_REQUEST;
+				mailView.Type = OPENMS_MAIL_TYPE_REQUEST | OPENMS_MAIL_TYPE_CLIENT;
 				auto& mailRequest = *(Service::request_t*)mailView.Body;
 				mailRequest.Method = MSHash("login");
 				::memcpy(mailRequest.Buffer, content.data(), content.size());

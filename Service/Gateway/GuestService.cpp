@@ -14,8 +14,9 @@
 #include "Reactor/IChannel.h"
 #include "Mailbox/Private/Mail.h"
 
-GuestService::GuestService(MSHnd<IChannel> client)
+GuestService::GuestService(MSHnd<IChannel> client, uint32_t guestID)
 	:
+	m_GuestID(guestID),
 	m_ClientChannel(client)
 {
 }
@@ -51,8 +52,8 @@ IMailTask GuestService::read(IMail mail)
 					auto userID = (uint32_t)client->getContext()->userdata();
 					MSString buffer(sizeof(MailView) + mail.Body.size(), 0);
 					auto& mailView = *(MailView*)buffer.data();
-					mailView.From = name();
-					mailView.To = MSHash("client:" + std::to_string(userID));
+					mailView.From = mail.From;
+					mailView.To = mail.To;
 					mailView.Date = mail.Date;
 					mailView.Type = mail.Type;
 					if (mail.Body.empty() == false) ::memcpy(mailView.Body, mail.Body.data(), mail.Body.size());

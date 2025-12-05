@@ -44,7 +44,7 @@ MailMan::MailMan(MSRaw<MailHub> context)
 							mailbox->m_MailQueue.push(std::move(mail));
 						}
 					}
-					if (bool(mail.Task) == false || bool(mail.Task) == true && mail.Task.done() == true)
+					if (bool(mail.Task) == false || mail.Task.done() == true)
 					{
 						mailbox->m_MailQueue.pop();
 					}

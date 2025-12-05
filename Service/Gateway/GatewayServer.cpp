@@ -45,7 +45,7 @@ void GatewayServer::onInit()
 				// Create Guest Service
 
 				constexpr auto H = MSHash("login");
-				auto guestService = MSNew<GuestService>(channel);
+				auto guestService = MSNew<GuestService>(channel, guestID);
 				guestService->bind("login", [=, this](MSString user, MSString pass)-> MSAsync<uint32_t>
 				{
 					if (auto userID = channel->getContext()->userdata()) co_return userID;
@@ -114,7 +114,7 @@ void GatewayServer::onInit()
 						if (mailView.To == MSHash("gateway"))
 						{
 							IMail newMail = {};
-							newMail.From = MSHash("client:" + std::to_string(guestID));
+							newMail.From = mailView.From;
 							newMail.To = MSHash("guest:" + std::to_string(guestID));
 							newMail.Date = mailView.Date;
 							newMail.Type = mailView.Type | OPENMS_MAIL_TYPE_CLIENT;
@@ -127,7 +127,7 @@ void GatewayServer::onInit()
 							auto userID = (uint32_t)channel->getContext()->userdata();
 							if (userID == 0) return false;
 							IMail newMail = {};
-							newMail.From = MSHash("client:" + std::to_string(guestID));
+							newMail.From = mailView.From;
 							newMail.To = MSHash("proxy:" + std::to_string(userID));
 							newMail.Date = mailView.Date;
 							newMail.Type = mailView.Type;
