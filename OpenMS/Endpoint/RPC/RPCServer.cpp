@@ -39,7 +39,12 @@ void RPCServerBase::startup()
 		{
 			.OnOpen = [this](MSRef<IChannel> channel)
 			{
+				if (m_Config.Callback.OnOpen) m_Config.Callback.OnOpen(channel);
 				channel->getPipeline()->addLast("default", MSNew<RPCServerInboundHandler>(this));
+			},
+			.OnClose = [this](MSRef<IChannel> channel)
+			{
+				if (m_Config.Callback.OnClose) m_Config.Callback.OnClose(channel);
 			},
 		}
 	);

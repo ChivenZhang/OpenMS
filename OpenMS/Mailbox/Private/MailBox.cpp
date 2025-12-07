@@ -13,10 +13,10 @@
 
 MailBox::~MailBox()
 {
-	while (m_MailQueue.size())
+	while (m_MailQueue.empty() == false)
 	{
 		auto& handle = m_MailQueue.front().Task;
-		if (handle && handle.done() == false) handle.destroy();
+		while (handle && handle.done() == false) std::this_thread::yield();
 		m_MailQueue.pop();
 	}
 }
@@ -29,7 +29,6 @@ IMailBox::name_t MailBox::name() const
 uint32_t MailBox::send(IMail mail)
 {
 	if (m_Context == nullptr) return 0;
-	mail.From = m_HashName;
 	return m_Context->send(mail);
 }
 

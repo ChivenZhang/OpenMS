@@ -23,7 +23,7 @@ protected:
 	void onExit() override;
 
 protected:
-	MSRef<TCPClient> m_TCPClient;
+
 };
 
 OPENMS_RUN(BusinessServer)

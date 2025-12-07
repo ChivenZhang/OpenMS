@@ -11,15 +11,6 @@
 * =================================================*/
 #include <Server/Private/Service.h>
 
-class ProxyService : public Service
+class PlayerService : public Service
 {
-public:
-	explicit ProxyService(MSHnd<IChannel> client, uint32_t userID);
-
-protected:
-	IMailTask read(IMail mail) override;
-
-protected:
-	uint32_t m_UserID;
-	MSHnd<IChannel> m_ClientChannel;
 };

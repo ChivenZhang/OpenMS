@@ -405,9 +405,9 @@ public:
     }
 
 private:
-    std::coroutine_handle<promise_type> m_ThisHandle;
     template<class U>
     friend class MSAsyncPromise;
+    std::coroutine_handle<promise_type> m_ThisHandle;
 };
 
 template<class T>

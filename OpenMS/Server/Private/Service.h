@@ -25,12 +25,12 @@ public:
 	};
 
 	bool bind(uint32_t method, method_t&& callback);
-	bool call(uint32_t service, uint32_t method, uint32_t timeout, MSStringView request, MSString& response);
-	bool async(uint32_t service, uint32_t method, uint32_t timeout, MSStringView request, MSLambda<void(MSStringView)>&& callback);
+	bool call(uint32_t service, uint32_t method, uint32_t forward, uint32_t timeout, MSStringView request, MSString& response);
+	bool async(uint32_t service, uint32_t method, uint32_t forward, uint32_t timeout, MSStringView request, MSLambda<void(MSStringView)>&& callback);
 
 	bool bind(MSStringView method, method_t&& callback);
-	bool call(MSStringView service, MSStringView method, uint32_t timeout, MSStringView request, MSString& response);
-	bool async(MSStringView service, MSStringView method, uint32_t timeout, MSStringView request, MSLambda<void(MSStringView)>&& callback);
+	bool call(MSStringView service, MSStringView method, MSStringView forward, uint32_t timeout, MSStringView request, MSString& response);
+	bool async(MSStringView service, MSStringView method, MSStringView forward, uint32_t timeout, MSStringView request, MSLambda<void(MSStringView)>&& callback);
 
 	template<class F, std::enable_if_t<!std::is_same_v<typename MSTraits<F>::return_data, MSTraits<method_t>::return_data> || !std::is_same_v<typename MSTraits<F>::argument_datas, MSTraits<method_t>::argument_datas>, int> = 0>
 	bool bind(MSStringView method, F&& callback)
@@ -58,7 +58,7 @@ public:
 	}
 
 	template<class T, class...Args>
-	auto call(MSStringView service, MSStringView method, uint32_t timeout, MSTuple<Args...>&& args)
+	auto call(MSStringView service, MSStringView method, MSStringView forward, uint32_t timeout, MSTuple<Args...>&& args)
 	{
 		if constexpr (std::is_void_v<T>)
 		{
@@ -68,7 +68,7 @@ public:
 				if (MSTypeC(args, request) == false) return false;
 			}
 			MSString response;
-			return this->call(service, method, timeout, request, response);
+			return this->call(service, method, forward, timeout, request, response);
 		}
 		else
 		{
@@ -78,7 +78,7 @@ public:
 				if (MSTypeC(args, request) == false) return MSBinary{T(), false};
 			}
 			MSString response;
-			if (this->call(service, method, timeout, request, response) == false)
+			if (this->call(service, method, forward, timeout, request, response) == false)
 			{
 				return MSBinary{T(), false};
 			}
@@ -89,14 +89,14 @@ public:
 	}
 
 	template<class F, class...Args>
-	bool async(MSStringView service, MSStringView method, uint32_t timeout, MSTuple<Args...>&& args, F&& callback)
+	bool async(MSStringView service, MSStringView method, MSStringView forward, uint32_t timeout, MSTuple<Args...>&& args, F&& callback)
 	{
 		MSString request;
 		if constexpr (sizeof...(Args) != 0)
 		{
 			if (MSTypeC(args, request) == false) return false;
 		}
-		return this->async(service, method, timeout, request, [callback](MSStringView response)
+		return this->async(service, method, forward, timeout, request, [callback](MSStringView response)
 		{
 			typename MSTraits<F>::argument_datas result;
 			if constexpr (MSTraits<F>::argument_count) MSTypeC(response, std::get<0>(result));

@@ -13,6 +13,7 @@
 				"OPENMS_ENABLE_DISCOVERY": "ON",
 				"OPENMS_ENABLE_GATEWAY": "ON",
 				"OPENMS_ENABLE_BUSINESS": "ON",
+				"OPENMS_ENABLE_FRONTEND": "ON",
 				"OPENMS_ENABLE_WEBSERVER": "OFF",
 				"OPENMS_ENABLE_SAMPLE": "OFF",
 				"OPENMS_ENABLE_MYSQL": "OFF",
@@ -34,6 +35,7 @@
 				"OPENMS_ENABLE_DISCOVERY": "ON",
 				"OPENMS_ENABLE_GATEWAY": "ON",
 				"OPENMS_ENABLE_BUSINESS": "ON",
+				"OPENMS_ENABLE_FRONTEND": "ON",
 				"OPENMS_ENABLE_WEBSERVER": "OFF",
 				"OPENMS_ENABLE_SAMPLE": "OFF",
 				"OPENMS_ENABLE_MYSQL": "OFF",
@@ -55,14 +57,15 @@
 				"OPENMS_ENABLE_DISCOVERY": "ON",
 				"OPENMS_ENABLE_GATEWAY": "ON",
 				"OPENMS_ENABLE_BUSINESS": "ON",
+				"OPENMS_ENABLE_FRONTEND": "ON",
 				"OPENMS_ENABLE_WEBSERVER": "OFF",
 				"OPENMS_ENABLE_SAMPLE": "OFF",
 				"OPENMS_ENABLE_MYSQL": "OFF",
 				"OPENMS_ENABLE_REDIS": "OFF"
 			},
 			"environment": {
-				"VCPKG_HOME1": "F:/Library/Windows/vcpkg-static",
-				"VCPKG_HOME": "D:/ChivenZhang/GitProject/Library/Window/vcpkg"
+				"VCPKG_HOME": "F:/Library/Windows/vcpkg-static",
+				"VCPKG_HOME1": "D:/ChivenZhang/GitProject/Library/Window/vcpkg"
 			}
 		}
 	]

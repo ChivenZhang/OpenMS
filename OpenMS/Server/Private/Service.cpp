@@ -17,7 +17,7 @@ bool Service::bind(uint32_t method, method_t&& callback)
 	return result.second;
 }
 
-bool Service::call(uint32_t service, uint32_t method, uint32_t timeout, MSStringView request, MSString& response)
+bool Service::call(uint32_t service, uint32_t method, uint32_t forward, uint32_t timeout, MSStringView request, MSString& response)
 {
 	MSString input(sizeof(request_t) + request.size(), 0);
 	auto& requestView = *(request_t*)input.data();
@@ -25,10 +25,13 @@ bool Service::call(uint32_t service, uint32_t method, uint32_t timeout, MSString
 	if (request.empty() == false) ::memcpy(requestView.Buffer, request.data(), request.size());
 
 	IMail mail = {};
+	mail.From = name();
 	mail.To = service;
+	mail.Copy = forward;
 	mail.Body = input;
-	mail.Type = OPENMS_MAIL_TYPE_REQUEST;
 	mail.Date = ++m_SessionID;
+	mail.Type = OPENMS_MAIL_TYPE_REQUEST;
+	if (forward != MSHash(nullptr)) mail.Type |= OPENMS_MAIL_TYPE_FORWARD;
 
 	MSPromise<MSString> promise;
 	auto future = promise.get_future();
@@ -55,7 +58,7 @@ bool Service::call(uint32_t service, uint32_t method, uint32_t timeout, MSString
 	return false;
 }
 
-bool Service::async(uint32_t service, uint32_t method, uint32_t timeout, MSStringView request, MSLambda<void(MSStringView)>&& callback)
+bool Service::async(uint32_t service, uint32_t method, uint32_t forward, uint32_t timeout, MSStringView request, MSLambda<void(MSStringView)>&& callback)
 {
 	MSString input(sizeof(request_t) + request.size(), 0);
 	auto& requestView = *(request_t*)input.data();
@@ -63,10 +66,13 @@ bool Service::async(uint32_t service, uint32_t method, uint32_t timeout, MSStrin
 	if (request.empty() == false) ::memcpy(requestView.Buffer, request.data(), request.size());
 
 	IMail mail = {};
+	mail.From = name();
 	mail.To = service;
+	mail.Copy = forward;
 	mail.Body = input;
-	mail.Type = OPENMS_MAIL_TYPE_REQUEST;
 	mail.Date = ++m_SessionID;
+	mail.Type = OPENMS_MAIL_TYPE_REQUEST;
+	if (forward != MSHash(nullptr)) mail.Type |= OPENMS_MAIL_TYPE_FORWARD;
 
 	{
 		MSMutexLock lock(m_LockSession);
@@ -100,35 +106,22 @@ bool Service::bind(MSStringView method, method_t && callback)
 	return bind(MSHash(method), std::move(callback));
 }
 
-bool Service::call(MSStringView service, MSStringView method, uint32_t timeout, MSStringView request, MSString& response)
+bool Service::call(MSStringView service, MSStringView method, MSStringView forward, uint32_t timeout, MSStringView request, MSString& response)
 {
-	return call(MSHash(service), MSHash(method), timeout, request, response);
+	return call(MSHash(service), MSHash(method), MSHash(forward), timeout, request, response);
 }
 
-bool Service::async(MSStringView service, MSStringView method, uint32_t timeout, MSStringView request, MSLambda<void(MSStringView)>&& callback)
+bool Service::async(MSStringView service, MSStringView method, MSStringView forward, uint32_t timeout, MSStringView request, MSLambda<void(MSStringView)>&& callback)
 {
-	return async(MSHash(service), MSHash(method), timeout, request, std::move(callback));
+	return async(MSHash(service), MSHash(method), MSHash(forward), timeout, request, std::move(callback));
 }
 
 IMailTask Service::read(IMail mail)
 {
-	if (mail.Type == 0)
+	if (mail.Type & OPENMS_MAIL_TYPE_FORWARD)
 	{
-		if (sizeof(request_t) <= mail.Body.size())
-		{
-			auto& request = *(request_t*)mail.Body.data();
-			method_t method;
-			{
-				MSMutexLock lock(m_LockMethod);
-				auto result = m_MethodMap.find(request.Method);
-				if (result != m_MethodMap.end()) method = result->second;
-			}
-			if (method)
-			{
-				auto input = MSStringView(request.Buffer, mail.Body.size() - sizeof(request_t));
-				co_await method(input);
-			}
-		}
+		mail.Type &= ~OPENMS_MAIL_TYPE_FORWARD;
+		send(mail);
 	}
 	else if (mail.Type & OPENMS_MAIL_TYPE_REQUEST)
 	{
@@ -151,6 +144,7 @@ IMailTask Service::read(IMail mail)
 			mail.Type |= OPENMS_MAIL_TYPE_RESPONSE;
 			mail.Body = response;
 			std::swap(mail.From, mail.To);
+			if (mail.Copy != MSHash(nullptr)) mail.Type |= OPENMS_MAIL_TYPE_FORWARD;
 			send(mail);
 		}
 	}
