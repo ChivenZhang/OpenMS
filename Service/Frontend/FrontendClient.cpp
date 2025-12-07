@@ -158,7 +158,6 @@ void FrontendClient::onInit()
 									MS_INFO("登出结果：%d", result2);
 								});
 							});
-
 						}
 					});
 				});
