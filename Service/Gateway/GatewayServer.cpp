@@ -54,15 +54,15 @@ void GatewayServer::onInit()
 					{
 						MS_INFO("服务端验证：%s", user.c_str());
 
-						guestService->async("logic", "login", 1000, MSTuple{user, pass}, [=, this](uint32_t userID)
+						guestService->async("logic", "login", "", 10000, MSTuple{user, pass}, [=, this](uint32_t userID)
 						{
 							if (userID)
 							{
-								MS_INFO("验证成功！ %s", user.c_str());
 								auto serviceName = "proxy:" + std::to_string(userID);
 								auto proxyService = MSNew<ProxyService>(channel, userID);
 								if (mailHub->create(serviceName, proxyService)) this->onPush();
 								channel->getContext()->userdata() = userID;
+								MS_INFO("验证成功！ %s", user.c_str());
 							}
 							else
 							{
@@ -78,7 +78,7 @@ void GatewayServer::onInit()
 					if (userID == 0) co_return false;
 					co_return co_await [=](MSAwait<bool> promise)
 					{
-						guestService->async("logic", "logout", 500, MSTuple{userID}, [=](bool result)
+						guestService->async("logic", "logout", "", 500, MSTuple{userID}, [=](bool result)
 						{
 							promise(result);
 						});
@@ -88,7 +88,7 @@ void GatewayServer::onInit()
 				{
 					co_return co_await [=](MSAwait<bool> promise)
 					{
-						guestService->async("logic", "signup", 500, MSTuple{user, pass}, [=](bool result)
+						guestService->async("logic", "signup", "", 500, MSTuple{user, pass}, [=](bool result)
 						{
 							promise(result);
 						});
@@ -110,28 +110,30 @@ void GatewayServer::onInit()
 						// TODO: 检查接口访问权限
 						if (event->Message.size() < sizeof(MailView)) return false;
 						auto& mailView = *(MailView*)event->Message.data();
-						// Client <=> Guest <=> Logic
-						if (mailView.To == MSHash("gateway"))
+						if (mailView.To == MSHash("guest"))
 						{
 							IMail newMail = {};
 							newMail.From = mailView.From;
 							newMail.To = MSHash("guest:" + std::to_string(guestID));
+							newMail.Copy = MSHash(nullptr);
 							newMail.Date = mailView.Date;
 							newMail.Type = mailView.Type | OPENMS_MAIL_TYPE_CLIENT;
 							newMail.Body = MSStringView(mailView.Body, event->Message.size() - sizeof(MailView));
 							mailHub->send(newMail);
 						}
-						// Client <=> Proxy <=> Player
 						else
 						{
 							auto userID = (uint32_t)channel->getContext()->userdata();
 							if (userID == 0) return false;
 							IMail newMail = {};
 							newMail.From = mailView.From;
-							newMail.To = MSHash("proxy:" + std::to_string(userID));
+							newMail.To = mailView.To;
+							newMail.Copy = MSHash("proxy:" + std::to_string(userID));
 							newMail.Date = mailView.Date;
-							newMail.Type = mailView.Type;
+							newMail.Type = mailView.Type | OPENMS_MAIL_TYPE_FORWARD;
 							newMail.Body = MSStringView(mailView.Body, event->Message.size() - sizeof(MailView));
+							if (newMail.Type & OPENMS_MAIL_TYPE_REQUEST) newMail.Type |= OPENMS_MAIL_TYPE_CLIENT;
+							if (newMail.Type & OPENMS_MAIL_TYPE_RESPONSE) newMail.Type &= ~OPENMS_MAIL_TYPE_CLIENT;
 							mailHub->send(newMail);
 						}
 						return false;

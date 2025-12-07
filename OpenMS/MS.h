@@ -369,7 +369,7 @@ inline constexpr uint64_t MSHash64(const char* const first, const size_t count) 
 }
 inline constexpr uint32_t MSHash(const char* const value) noexcept
 {
-	size_t count = 0; for (size_t i = 0; value[i]; ++i) ++count;
+	size_t count = 0; for (size_t i = 0; value && value[i]; ++i) ++count;
 	return MSHash32(value, count);
 }
 inline const uint32_t MSHash(MSString const& value) noexcept

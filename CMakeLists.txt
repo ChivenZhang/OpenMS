@@ -36,6 +36,10 @@ if(OPENMS_ENABLE_BUSINESS)
     add_subdirectory(${OPENMS_SOURCE_DIR}/Service/Business)
 endif()
 
+if(OPENMS_ENABLE_FRONTEND)
+    add_subdirectory(${OPENMS_SOURCE_DIR}/Service/Frontend)
+endif()
+
 if(OPENMS_ENABLE_CONFIG)
 file(CREATE_LINK "${OPENMS_SOURCE_DIR}/APPLICATION.json" "${CMAKE_BINARY_DIR}/APPLICATION.json")
 endif()

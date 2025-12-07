@@ -27,6 +27,7 @@ public:
 		uint32_t Backlog = 0;
 		uint32_t Workers = 0;
 		uint32_t Buffers = UINT16_MAX;
+		TCPServerReactor::callback_tcp_t Callback;
 	};
 	using method_t = MSLambda<bool(MSHnd<IChannel> client, MSStringView const& input, MSString& output)>;
 
@@ -47,7 +48,7 @@ public:
 
 protected:
 	friend class RPCServerInboundHandler;
-	const config_t m_Config;
+	config_t m_Config;
 	Timer m_Timer;
 	MSMutex m_LockMethod;
 	MSMutex m_LockSession;

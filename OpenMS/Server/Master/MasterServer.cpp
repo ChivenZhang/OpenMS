@@ -23,34 +23,62 @@ void MasterServer::onInit()
 		.PortNum = (uint16_t)property(identity() + ".server.port", 0U),
 		.Backlog = property(identity() + ".server.backlog", 0U),
 		.Workers = 1U,
+		.Callback
+		{
+			.OnOpen = [this](MSRef<IChannel> channel)
+			{
+				MSMutexLock lock(m_LockClient);
+				m_ClientInfoMap[channel] = {};
+			},
+			.OnClose = [this](MSRef<IChannel> channel)
+			{
+				MSMutexLock lock(m_LockClient);
+				m_ClientInfoMap.erase(channel);
+
+				// 广播路由表
+				MSMap<uint32_t, MSStringList> result;
+				for (auto& infos : m_ClientInfoMap)
+				{
+					for (auto& mail : infos.second.MailTables)
+					{
+						result[mail].push_back(infos.second.MailIPAddr);
+					}
+				}
+				for (auto& e : m_ClientInfoMap)
+				{
+					if (e.first == channel) continue;
+					m_ClusterServer->call<void>(e.first, "pull", 0, result);
+				}
+			},
+		},
 	});
 	m_ClusterServer->startup();
 
 	// Maintain mail route table
 
-	m_MailUpdateTime = std::chrono::system_clock::now();
-	m_ClusterServer->bind("push", [this](MSHnd<IChannel> client, MSString const& address, MSList<IMailBox::name_t> const& mails)
+	m_ClusterServer->bind("push", [this](MSHnd<IChannel> client, MSString const& address, MSList<uint32_t> const& mails)
 	{
+		MSMutexLock lock(m_LockClient);
 		auto channel = client.lock();
-		m_MailClientSet.insert(channel);
-		m_MailClientNewSet.insert(channel);
-		for (auto& mail : mails) m_MailRouteMap[mail].insert(address);
-		for (auto& mail : mails) m_MailRouteNewMap[mail].insert(address);
-		auto now = std::chrono::system_clock::now();
-		if (OPENMS_HEARTBEAT <= std::chrono::duration_cast<std::chrono::seconds>(now - m_MailUpdateTime).count())
+		m_ClientInfoMap[channel].MailIPAddr = address;
+		m_ClientInfoMap[channel].MailTables = mails;
+
+		// 广播路由表
+		MSMap<uint32_t, MSStringList> result;
+		for (auto& infos : m_ClientInfoMap)
 		{
-			m_MailUpdateTime = now;
-			m_MailRouteMap = std::move(m_MailRouteNewMap);
-			m_MailClientSet = std::move(m_MailClientNewSet);
+			for (auto& mail : infos.second.MailTables)
+			{
+				result[mail].push_back(infos.second.MailIPAddr);
+			}
 		}
-		// 广播同步路由表
-		for (auto& E : m_MailClientSet)
+		for (auto& info : m_ClientInfoMap)
 		{
-			if (E == channel) continue;
-			m_ClusterServer->call<void>(E, "pull", 0, m_MailRouteMap);
+			if (info.first == channel) continue;
+			m_ClusterServer->call<void>(info.first, "pull", 0, result);
 		}
 		MS_INFO("validate %s", address.c_str());
-		return m_MailRouteMap;
+		return result;
 	});
 }
 
@@ -59,8 +87,5 @@ void MasterServer::onExit()
 	if (m_ClusterServer) m_ClusterServer->shutdown();
 	m_ClusterServer = nullptr;
 
-	m_MailClientSet.clear();
-	m_MailClientNewSet.clear();
-	m_MailRouteMap.clear();
-	m_MailRouteNewMap.clear();
+	m_ClientInfoMap.clear();
 }

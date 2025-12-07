@@ -62,7 +62,8 @@ uint32_t MailHub::send(IMail mail)
 	if (mail.Date == 0) mail.Date = m_Session++;
 	{
 		MSMutexLock lock(m_MailboxLock);
-		auto result = m_MailboxMap.find(mail.To);
+		auto toName = (mail.Type & OPENMS_MAIL_TYPE_FORWARD) ? mail.Copy : mail.To;
+		auto result = m_MailboxMap.find(toName);
 		if (result == m_MailboxMap.end() || result->second == nullptr)
 		{
 			if (m_RemoteCall && m_RemoteCall(mail)) return mail.Date;
@@ -77,6 +78,7 @@ uint32_t MailHub::send(IMail mail)
 		auto& mailView = *(MailView*)mailData.data();
 		mailView.From = mail.From;
 		mailView.To = mail.To;
+		mailView.Copy = mail.Copy;
 		mailView.Date = mail.Date;
 		mailView.Type = mail.Type;
 		if (mail.Body.empty() == false) ::memcpy(mailView.Body, mail.Body.data(), mail.Body.size());
@@ -84,6 +86,7 @@ uint32_t MailHub::send(IMail mail)
 		IMail newMail = {};
 		newMail.From = mailView.From;
 		newMail.To = mailView.To;
+		newMail.Copy = mailView.Copy;
 		newMail.Date = mailView.Date;
 		newMail.Type = mailView.Type;
 		newMail.Body = MSStringView(mailView.Body, mail.Body.size());

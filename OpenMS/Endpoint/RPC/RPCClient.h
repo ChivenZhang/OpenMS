@@ -26,6 +26,7 @@ public:
 		uint16_t PortNum = 0;
 		uint32_t Workers = 0;
 		uint32_t Buffers = UINT16_MAX;
+		TCPClientReactor::callback_tcp_t Callback;
 	};
 	using method_t = MSLambda<bool(MSStringView const& input, MSString& output)>;
 

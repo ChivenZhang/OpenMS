@@ -9,12 +9,8 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "MS.h"
+#include <Server/Private/Service.h>
 
-/// @brief view for mail
-struct MailView
+class PlayerService : public Service
 {
-	uint32_t From, To, Copy;	// 源服务，目标服务，抄送服务
-	uint32_t Date, Type;// 时间戳，消息类型
-	char Body[0];
 };

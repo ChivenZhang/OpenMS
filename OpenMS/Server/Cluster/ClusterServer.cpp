@@ -33,10 +33,11 @@ void ClusterServer::onInit()
 		MSString address;
 		{
 			MSMutexLock lock(m_MailRouteLock);
-			auto result = m_MailRouteMap.find(mail.To);
+			auto toName = (mail.Type & OPENMS_MAIL_TYPE_FORWARD) ? mail.Copy : mail.To;
+			auto result = m_MailRouteMap.find(toName);
 			if (result == m_MailRouteMap.end()) return false;
 			auto& routes = result->second;
-			address = routes[rand() % routes.size()];
+			address = routes.front();
 		}
 		if (address.empty()) return false;
 
@@ -69,6 +70,7 @@ void ClusterServer::onInit()
 		auto& mailView = *(MailView*)request.data();
 		mailView.From = mail.From;
 		mailView.To = mail.To;
+		mailView.Copy = mail.Copy;
 		mailView.Date = mail.Date;
 		mailView.Type = mail.Type;
 		if (mail.Body.empty() == false) ::memcpy(mailView.Body, mail.Body.data(), mail.Body.size());
@@ -92,6 +94,7 @@ void ClusterServer::onInit()
 			IMail newMail = {};
 			newMail.From = mailView.From;
 			newMail.To = mailView.To;
+			newMail.Copy = mailView.Copy;
 			newMail.Date = mailView.Date;
 			newMail.Type = mailView.Type;
 			newMail.Body = MSStringView(mailView.Body, request.size() - sizeof(MailView));

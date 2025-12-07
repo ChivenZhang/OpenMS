@@ -1,6 +1,6 @@
 #pragma once
 /*=================================================
-* Copyright @ 2020-2025 ChivenZhang.
+* Copyright © 2020-2025 ChivenZhang.
 * All Rights Reserved.
 * =====================Note=========================
 *
@@ -9,12 +9,12 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "Server/Private/Server.h"
-#include "MasterConfig.h"
-#include "Endpoint/RPC/RPCServer.h"
+#include <Server/Private/Server.h>
+#include <Endpoint/TCP/TCPClient.h>
 
-/// @brief Base Master Service
-class MasterServer : public Server, public RESOURCE(MasterConfig)
+#include "Mailbox/Private/MailHub.h"
+
+class FrontendClient : public Server
 {
 public:
 	MSString identity() const override;
@@ -22,14 +22,10 @@ public:
 protected:
 	void onInit() override;
 	void onExit() override;
+	void onUpdate(float time) override;
 
 protected:
-	struct info_t
-	{
-		MSString MailIPAddr;
-		MSList<uint32_t> MailTables;
-	};
-	MSMutex m_LockClient;
-	MSRef<RPCServer> m_ClusterServer;
-	MSMap<MSRef<IChannel>, info_t> m_ClientInfoMap;
+	MSRef<MailHub> m_MailHub;
+	MSRef<TCPClient> m_TCPClient;
+	MSRef<IChannel> m_TCPChannel;
 };

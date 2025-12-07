@@ -23,7 +23,12 @@ GuestService::GuestService(MSHnd<IChannel> client, uint32_t guestID)
 
 IMailTask GuestService::read(IMail mail)
 {
-	if (mail.Type & OPENMS_MAIL_TYPE_REQUEST)
+	if (mail.Type & OPENMS_MAIL_TYPE_FORWARD)
+	{
+		mail.Type &= ~OPENMS_MAIL_TYPE_FORWARD;
+		send(mail);
+	}
+	else if (mail.Type & OPENMS_MAIL_TYPE_REQUEST)
 	{
 		if (sizeof(request_t) <= mail.Body.size())
 		{
@@ -44,16 +49,17 @@ IMailTask GuestService::read(IMail mail)
 			mail.Type |= OPENMS_MAIL_TYPE_RESPONSE;
 			mail.Body = response;
 			std::swap(mail.From, mail.To);
+			if (mail.Copy != MSHash(nullptr)) mail.Type |= OPENMS_MAIL_TYPE_FORWARD;
 
 			if (mail.Type & OPENMS_MAIL_TYPE_CLIENT)
 			{
 				if (auto client = m_ClientChannel.lock())
 				{
-					auto userID = (uint32_t)client->getContext()->userdata();
 					MSString buffer(sizeof(MailView) + mail.Body.size(), 0);
 					auto& mailView = *(MailView*)buffer.data();
 					mailView.From = mail.From;
 					mailView.To = mail.To;
+					mailView.Copy = mail.Copy;
 					mailView.Date = mail.Date;
 					mailView.Type = mail.Type;
 					if (mail.Body.empty() == false) ::memcpy(mailView.Body, mail.Body.data(), mail.Body.size());

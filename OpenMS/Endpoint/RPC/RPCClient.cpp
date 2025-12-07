@@ -30,15 +30,19 @@ RPCClientBase::RPCClientBase(config_t const& config)
 
 void RPCClientBase::startup()
 {
-	auto config = m_Config;
 	m_Reactor = MSNew<TCPClientReactor>(
-		IPv4Address::New(config.IP, config.PortNum),
-		config.Workers,
+		IPv4Address::New(m_Config.IP, m_Config.PortNum),
+		m_Config.Workers,
 		TCPClientReactor::callback_tcp_t
 		{
 			.OnOpen = [this](MSRef<IChannel> channel)
 			{
+				if (m_Config.Callback.OnOpen) m_Config.Callback.OnOpen(channel);
 				channel->getPipeline()->addLast("default", MSNew<RPCClientInboundHandler>(this));
+			},
+			.OnClose = [this](MSRef<IChannel> channel)
+			{
+				if (m_Config.Callback.OnClose) m_Config.Callback.OnClose(channel);
 			},
 		}
 	);
