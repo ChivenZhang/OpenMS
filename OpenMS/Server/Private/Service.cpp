@@ -1,4 +1,6 @@
-﻿/*=================================================
+﻿#include "Service.h"
+#include "Service.h"
+/*=================================================
 * Copyright © 2020-2025 ChivenZhang.
 * All Rights Reserved.
 * =====================Note=========================
@@ -9,6 +11,18 @@
 *
 * =================================================*/
 #include "Service.h"
+
+void Service::unbind()
+{
+	MSMutexLock lock(m_LockMethod);
+	m_MethodMap.clear();
+}
+
+bool Service::unbind(uint32_t method)
+{
+	MSMutexLock lock(m_LockMethod);
+	return !!m_MethodMap.erase(method);
+}
 
 bool Service::bind(uint32_t method, method_t&& callback)
 {
@@ -99,6 +113,11 @@ bool Service::async(uint32_t service, uint32_t method, uint32_t forward, uint32_
 		if (response) response({});
 	});
 	return true;
+}
+
+bool Service::unbind(MSStringView method)
+{
+	return unbind(MSHash(method));
 }
 
 bool Service::bind(MSStringView method, method_t && callback)

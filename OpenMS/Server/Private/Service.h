@@ -24,10 +24,13 @@ public:
 		char Buffer[0];
 	};
 
+	void unbind();
+	bool unbind(uint32_t method);
 	bool bind(uint32_t method, method_t&& callback);
 	bool call(uint32_t service, uint32_t method, uint32_t forward, uint32_t timeout, MSStringView request, MSString& response);
 	bool async(uint32_t service, uint32_t method, uint32_t forward, uint32_t timeout, MSStringView request, MSLambda<void(MSStringView)>&& callback);
 
+	bool unbind(MSStringView method);
 	bool bind(MSStringView method, method_t&& callback);
 	bool call(MSStringView service, MSStringView method, MSStringView forward, uint32_t timeout, MSStringView request, MSString& response);
 	bool async(MSStringView service, MSStringView method, MSStringView forward, uint32_t timeout, MSStringView request, MSLambda<void(MSStringView)>&& callback);
