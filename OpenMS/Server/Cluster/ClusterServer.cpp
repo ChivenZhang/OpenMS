@@ -164,8 +164,11 @@ void ClusterServer::onPush()
 		AUTOWIRE(IMailHub)::bean()->list(mailList);
 		MSString address = m_ServiceServer->address().lock()->getString();
 		MSMutexLock lock(m_MailRouteLock);
-		auto result = m_ClusterClient->call<MSMap<uint32_t, MSStringList>>("push", 1000, address, mailList);
-		if (result.second) m_MailRouteMap = result.first;
-		MS_INFO("validate %s, count %u", address.c_str(), (uint32_t)m_MailRouteMap.size());
+		auto result = m_ClusterClient->call<MSMap<uint32_t, MSStringList>>("push", 200, address, mailList);
+		if (result.second)
+		{
+			m_MailRouteMap = result.first;
+			MS_INFO("validate %s, count %u", address.c_str(), (uint32_t)m_MailRouteMap.size());
+		}
 	}
 }
