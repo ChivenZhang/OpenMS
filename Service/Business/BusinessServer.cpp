@@ -25,58 +25,71 @@ void BusinessServer::onInit()
 	auto mailHub = AUTOWIRE(IMailHub)::bean();
 
 	auto logicService = MSNew<Service>();
-	logicService->bind("login", [=, this](MSString user, MSString pass)->MSAsync<uint32_t>
+
+	// Login/out Module
+
+	logicService->bind("login", [=, this, _logic = logicService.get()](MSString user, MSString pass)->MSAsync<uint32_t>
 	{
 		MS_INFO("服务端：LOGIN!!!");
 		static uint32_t s_UserID = 0;
 		auto userID = ++s_UserID;
 
-		auto serverService = MSNew<ServerService>();
-		serverService->bind("readyBattle", [=, this]()->MSAsync<bool>
 		{
-			MS_INFO("服务端：READY BATTLE!!!"); // TODO：Match battle
+			MSMutexLock lock(m_UserLock);
+			auto& userInfo = m_UserInfos[userID];
+			userInfo.LastUpdate = 1.0f * ::clock() / CLOCKS_PER_SEC;
+			userInfo.Online = true;
+		}
 
-			auto playerService = MSNew<PlayerService>();
-			playerService->bind("startBattle", [=, service = playerService.get()]()->MSAsync<bool>
-			{
-				MS_INFO("用户 %u 开始游戏", userID);
-				service->call<void>("client:" + std::to_string(userID), "onStartBattle", "proxy:" + std::to_string(userID), 0, MSTuple{});
-				co_return true;
-			});
-			playerService->bind("stopBattle", [=, service = playerService.get()]()->MSAsync<bool>
-			{
-				MS_INFO("用户 %u 结束游戏", userID);
-				service->call<void>("client:" + std::to_string(userID), "onStopBattle", "proxy:" + std::to_string(userID), 0, MSTuple{});
-				co_return true;
-			});
-			playerService->bind("attack", [=, service = playerService.get()]()->MSAsync<bool>
-			{
-				MS_INFO("用户 %u 发动攻击", userID);
-				service->call<void>("client:" + std::to_string(userID), "onAttack", "proxy:" + std::to_string(userID), 0, MSTuple{});
-				co_return true;
-			});
+		auto serverService = MSNew<ServerService>();
+		serverService->bind("readyBattle", [=, this](uint32_t gameID)->MSAsync<bool>
+		{
+			MS_INFO("服务端：READY BATTLE!!!");
+			m_MatchQueue.push(userID);
+
+			auto playerService = MSNew<PlayerService>(userID);
 			if (mailHub->create("player:" + std::to_string(userID), playerService)) this->onPush();
 
-			co_return co_await [=](MSAwait<bool> promise)
+			// Match battle
+			if (2 <= m_MatchQueue.size())
 			{
-				MS_INFO("服务端：START BATTLE!!!");	// Assume battle ready
-				playerService->async("player:" + std::to_string(userID), "startBattle", "", 200, MSTuple{}, [=](bool result)
+				for (auto i=0; i<2; ++i)
 				{
-					MS_INFO("服务端：STARTED BATTLE %d", result);
-					promise(result);
-				});
-			};
+					auto userID2 = m_MatchQueue.front();
+					m_MatchQueue.pop();
+					_logic->call<bool>("player:" + std::to_string(userID2), "startBattle", "", 0, MSTuple{});
+				}
+			}
+
+			co_return true;
+		});
+		serverService->bind("notifyBattle", [=, this]()->MSAsync<void>
+		{
+			MSMutexLock lock(m_BattleLock);
+			auto result = m_UserInfos.find(userID);
+			if (result != m_UserInfos.end() && result->second.Online)
+			{
+				auto& userInfo = result->second;
+				userInfo.LastUpdate = 1.0f * ::clock() / CLOCKS_PER_SEC;
+			}
+			co_return;
 		});
 		if (mailHub->create("server:" + std::to_string(userID), serverService)) this->onPush();
 		co_return userID;
 	});
-	logicService->bind("logout", [=](uint32_t userID)->MSAsync<bool>
+	logicService->bind("logout", [=, this](uint32_t userID)->MSAsync<bool>
 	{
 		MS_INFO("服务端：LOGOUT!!!");	// TODO: 心跳超时，自动登出
 		auto result = false;
 		result |= mailHub->cancel("server:" + std::to_string(userID));
 		result |= mailHub->cancel("player:" + std::to_string(userID));
 		if (result) this->onPush();
+		if (result)
+		{
+			MSMutexLock lock(m_UserLock);
+			auto& userInfo = m_UserInfos[userID];
+			userInfo.Online = false;
+		}
 		co_return true;
 	});
 	logicService->bind("signup", [](MSString user, MSString pass)->MSAsync<bool>
@@ -84,7 +97,30 @@ void BusinessServer::onInit()
 		MS_INFO("服务端：SIGNUP!!!");
 		co_return false;
 	});
+
+	// Match Module
+
+	logicService->bind("matchBattle", [_this = logicService.get()](uint32_t userID)->MSAsync<uint32_t>
+	{
+		MS_INFO("服务端：START BATTLE!!!");	// Assume battle ready
+		_this->call<bool>("player:" + std::to_string(userID), "startBattle", "", 0, MSTuple{});
+		co_return 0;
+	});
+
 	if (mailHub->create("logic", logicService)) this->onPush();
+
+	/*startTimer(0, 2000, [=, this](uint32_t handle)
+	{
+		MSMutexLock lock(m_UserLock);
+		auto now = 1.0f * ::clock() / CLOCKS_PER_SEC;
+		for (auto& userInfo : m_UserInfos)
+		{
+			if (userInfo.second.Online && userInfo.second.LastUpdate + 10.0f <= now)
+			{
+				logicService->call<bool>("logic", "logout", "", 0, MSTuple{ userInfo.first });
+			}
+		}
+	});*/
 }
 
 void BusinessServer::onExit()

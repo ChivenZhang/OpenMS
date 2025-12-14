@@ -135,6 +135,7 @@ bool RPCClientBase::call(MSStringView const& name, uint32_t timeout, MSStringVie
 	// Send request to remote server
 
 	m_Reactor->write(IChannelEvent::New(buffer));
+	MS_INFO("客户端=>服务端:%u", (uint32_t)buffer.size());
 
 	auto status = future.wait_for(std::chrono::milliseconds(timeout));
 	{
@@ -191,6 +192,7 @@ bool RPCClientBase::async(MSStringView const& name, uint32_t timeout, MSStringVi
 	// Send request to remote server
 
 	m_Reactor->write(IChannelEvent::New(output));
+	MS_INFO("客户端=>服务端:%u", (uint32_t)output.size());
 	return true;
 }
 
@@ -206,44 +208,41 @@ bool RPCClientInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<
 	auto& package = *(RPCRequestBase*)m_Buffer.data();
 	if (sizeof(RPCRequestBase) <= m_Buffer.size() && package.Length <= m_Buffer.size())
 	{
+		MS_INFO("客户端<=服务端:%u", package.Length);
 		// Call from server
 		if (package.Session & 0X80000000)
 		{
-			auto& request = *(RPCRequestView*)m_Buffer.data();
-			auto message = MSStringView(request.Buffer, request.Length - sizeof(RPCRequestView));
-			if (message.size() <= m_Client->m_Config.Buffers)
+			auto buffer = m_Buffer.substr(0, package.Length);
+			auto& request = *(RPCRequestView*)buffer.data();
+			auto message = MSStringView(request.Buffer, buffer.size() - sizeof(RPCRequestView));
+			MSString output;
+			if (m_Client->invoke(request.Method, message, output))
 			{
-				MSString output;
-				if (m_Client->invoke(request.Method, message, output))
-				{
-					MSString buffer(sizeof(RPCResponseView) + output.size(), 0);
-					RPCResponseView& response = *(RPCResponseView*)buffer.data();
-					response.Length = (uint32_t)buffer.size();
-					response.Session = request.Session;
-					if (output.empty() == false) ::memcpy(response.Buffer, output.data(), output.size());
+				MSString buffer(sizeof(RPCResponseView) + output.size(), 0);
+				RPCResponseView& response = *(RPCResponseView*)buffer.data();
+				response.Length = (uint32_t)buffer.size();
+				response.Session = request.Session;
+				if (output.empty() == false) ::memcpy(response.Buffer, output.data(), output.size());
 
-					context->write(IChannelEvent::New(buffer));
-				}
+				context->write(IChannelEvent::New(buffer));
 			}
 		}
 		else
 		{
-			auto& response = *(RPCResponseView*)m_Buffer.data();
-			auto message = MSStringView(response.Buffer, response.Length - sizeof(RPCResponseView));
-			if (message.size() <= m_Client->m_Config.Buffers)
+			auto buffer = m_Buffer.substr(0, package.Length);
+			auto& response = *(RPCResponseView*)buffer.data();
+			auto message = MSStringView(response.Buffer, buffer.size() - sizeof(RPCResponseView));
+			decltype(m_Client->m_Sessions)::value_type::second_type callback;
 			{
-				decltype(m_Client->m_Sessions)::value_type::second_type callback;
+				MSMutexLock lock(m_Client->m_LockSession);
+				auto result = m_Client->m_Sessions.find(response.Session);
+				if (result != m_Client->m_Sessions.end())
 				{
-					MSMutexLock lock(m_Client->m_LockSession);
-					auto result = m_Client->m_Sessions.find(response.Session);
-					if (result != m_Client->m_Sessions.end())
-					{
-						callback = result->second;
-						m_Client->m_Sessions.erase(result);
-					}
+					callback = result->second;
+					m_Client->m_Sessions.erase(result);
 				}
-				if (callback) callback(message);
 			}
+			if (callback) callback(message);
 		}
 		m_Buffer = m_Buffer.substr(package.Length);
 	}

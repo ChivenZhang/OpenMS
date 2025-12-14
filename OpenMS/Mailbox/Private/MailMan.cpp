@@ -46,6 +46,14 @@ MailMan::MailMan(MSRaw<MailHub> context)
 					}
 					if (bool(mail.Task) == false || mail.Task.done() == true)
 					{
+						try
+						{
+							if (mail.Task) mail.Task.value();
+						}
+						catch(MSError const& ex)
+						{
+							MSPrintError(ex);
+						}
 						mailbox->m_MailQueue.pop();
 					}
 				}

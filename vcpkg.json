@@ -7,7 +7,7 @@
     "version>=" : "1.7"
   }, {
     "name" : "libuv",
-    "version>=" : "1.49.2"
+    "version>=" : "1.51.0"
   }, {
     "name" : "mbedtls",
     "version>=" : "3.6.1"

@@ -6,6 +6,8 @@ add_executable(BusinessServer
         PlayerService.h
         ServerService.cpp
         ServerService.h
+        SpaceService.cpp
+        SpaceService.h
 )
 add_dependencies(BusinessServer OpenMS)
 target_include_directories(BusinessServer PUBLIC ${OPENMS_SOURCE_DIR})

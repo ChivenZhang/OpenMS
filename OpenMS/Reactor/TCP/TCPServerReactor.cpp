@@ -315,7 +315,7 @@ void TCPServerReactor::on_read(uv_stream_t* stream, ssize_t nread, const uv_buf_
 	auto channel = ((TCPChannel*)client->data)->shared_from_this();
 	if (channel == nullptr) return;
 
-	if (nread <= 0 || channel->running() == false)
+	if (nread < 0 || channel->running() == false)
 	{
 		uv_close((uv_handle_t*)stream, nullptr);
 		free(buf->base);
@@ -324,8 +324,12 @@ void TCPServerReactor::on_read(uv_stream_t* stream, ssize_t nread, const uv_buf_
 		return;
 	}
 
+	printf("服务端接收：");
+	for (auto i = 0; i < nread; ++i) printf("%u ", (uint8_t)buf->base[i]);
+	printf("\n");
+
 	auto event = MSNew<IChannelEvent>();
-	event->Message = MSString((char*)buf->base, nread);
+	event->Message = MSString(buf->base, nread);
 	event->Channel = channel;
 	reactor->onInbound(event);
 
@@ -356,6 +360,11 @@ void TCPServerReactor::on_send(uv_async_t* handle)
 		auto req = (uv_write_t*)malloc(sizeof(uv_write_t));
 		req->data = event.get();
 		auto buf = uv_buf_init(event->Message.data(), (uint32_t)event->Message.size());
+
+		printf("服务端发送：");
+		for (auto i = 0; i < buf.len; ++i) printf("%u ", (uint8_t)buf.base[i]);
+		printf("\n");
+
 		auto result = uv_write(req, (uv_stream_t*)client, &buf, 1, [](uv_write_t* req, int status)
 		{
 			auto event = (IChannelEvent*)req->data;

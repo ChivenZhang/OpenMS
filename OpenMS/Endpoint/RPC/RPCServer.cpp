@@ -137,6 +137,7 @@ bool RPCServerBase::call(MSHnd<IChannel> client, MSStringView const& name, uint3
 	// Send request to remote server
 
 	m_Reactor->write(IChannelEvent::New(buffer, client));
+	MS_INFO("服务端=>客户端：%u", (uint32_t)buffer.size());
 
 	auto status = future.wait_for(std::chrono::milliseconds(timeout));
 	{
@@ -193,6 +194,7 @@ bool RPCServerBase::async(MSHnd<IChannel> client, MSStringView const& name, uint
 	// Send request to remote server
 
 	m_Reactor->write(IChannelEvent::New(output, client));
+	MS_INFO("服务端=>客户端：%u", (uint32_t)output.size());
 	return true;
 }
 
@@ -208,6 +210,7 @@ bool RPCServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<
 	auto& package = *(RPCRequestBase*)m_Buffer.data();
 	if (sizeof(RPCRequestBase) <= m_Buffer.size() && package.Length <= m_Buffer.size())
 	{
+		MS_INFO("服务端<=客户端:%u", package.Length);
 		// Call from client
 		if ((package.Session & 0X80000000) == 0)
 		{

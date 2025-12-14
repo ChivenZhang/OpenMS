@@ -58,6 +58,7 @@ void MasterServer::onInit()
 
 	m_ClusterServer->bind("push", [this](MSHnd<IChannel> client, MSString const& address, MSList<uint32_t> const& mails)
 	{
+			MS_INFO("validate 0");
 		MSMutexLock lock(m_LockClient);
 		auto channel = client.lock();
 		m_ClientInfoMap[channel].MailIPAddr = address;
@@ -77,7 +78,7 @@ void MasterServer::onInit()
 			if (info.first == channel) continue;
 			m_ClusterServer->call<void>(info.first, "pull", 0, result);
 		}
-		MS_INFO("validate %s", address.c_str());
+		MS_INFO("validate %s, count %u", address.c_str(), (uint32_t)result.size());
 		return result;
 	});
 }

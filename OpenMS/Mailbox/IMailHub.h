@@ -27,5 +27,5 @@ public:
 
 	virtual bool send(MSLambda<bool(IMail mail)> func) = 0;
 
-	virtual void list(MSList<IMailBox::name_t>& result) = 0;
+	virtual void list(MSList<uint32_t>& result) = 0;
 };

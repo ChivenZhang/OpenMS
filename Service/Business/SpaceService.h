@@ -1,6 +1,6 @@
 #pragma once
 /*=================================================
-* Copyright @ 2020-2025 ChivenZhang.
+* Copyright © 2020-2025 ChivenZhang.
 * All Rights Reserved.
 * =====================Note=========================
 *
@@ -9,25 +9,10 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "MS.h"
+#include <Server/Private/Service.h>
 
-struct RPCRequestBase
+class SpaceService : public Service
 {
-	uint32_t Length;
-	uint32_t Session;
-};
-
-struct RPCRequestView
-{
-	uint32_t Length;
-	uint32_t Session;
-	uint32_t Method;
-	char Buffer[0];
-};
-
-struct RPCResponseView
-{
-	uint32_t Length;
-	uint32_t Session;
-	char Buffer[0];
+public:
+	explicit SpaceService(uint32_t spaceID);
 };

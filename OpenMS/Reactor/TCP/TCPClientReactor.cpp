@@ -287,7 +287,7 @@ void TCPClientReactor::on_read(uv_stream_t* stream, ssize_t nread, const uv_buf_
 	auto channel = reactor->m_Channel;
 	if (channel == nullptr) return;
 
-	if (nread <= 0 || channel->running() == false)
+	if (nread < 0 || channel->running() == false)
 	{
 		free(buf->base);
 
@@ -295,9 +295,13 @@ void TCPClientReactor::on_read(uv_stream_t* stream, ssize_t nread, const uv_buf_
 		return;
 	}
 
+	printf("客户端接收：");
+	for (auto i = 0; i < nread; ++i) printf("%u ", (uint8_t)buf->base[i]);
+	printf("\n");
+
 	// 处理接收到的数据
 	auto event = MSNew<IChannelEvent>();
-	event->Message = MSString((char*)buf->base, nread);
+	event->Message = MSString(buf->base, nread);
 	event->Channel = channel;
 	reactor->onInbound(event);
 
@@ -330,6 +334,11 @@ void TCPClientReactor::on_send(uv_async_t* handle)
 		auto req = (uv_write_t*)malloc(sizeof(uv_write_t));
 		req->data = event.get();
 		auto buf = uv_buf_init(event->Message.data(), (uint32_t)event->Message.size());
+
+		printf("客户端发送：");
+		for (auto i = 0; i < buf.len; ++i) printf("%u ", (uint8_t)buf.base[i]);
+		printf("\n");
+
 		auto result = uv_write(req, (uv_stream_t*)client, &buf, 1, [](uv_write_t* req, int status)
 		{
 			auto event = (IChannelEvent*)req->data;

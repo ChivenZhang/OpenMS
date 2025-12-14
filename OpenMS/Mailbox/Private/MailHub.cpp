@@ -40,6 +40,7 @@ bool MailHub::create(MSString address, MSRef<IMailBox> value)
 	result.first->second = mailbox;
 	mailbox->m_Context = this;
 	mailbox->m_HashName = MSHash(address);
+	mailbox->m_TextName = address;
 	return true;
 }
 
@@ -108,7 +109,7 @@ void MailHub::list(MSList<uint32_t>& result)
 	MSMutexLock lock(m_MailboxLock);
 	for (auto& mailbox : m_MailboxMap)
 	{
-		result.push_back(mailbox.second->name());
+		result.push_back(mailbox.second->hash());
 	}
 }
 
