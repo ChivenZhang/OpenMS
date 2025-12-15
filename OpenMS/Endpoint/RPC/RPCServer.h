@@ -12,7 +12,7 @@
 #include "Endpoint/IEndpoint.h"
 #include "Server/Private/Property.h"
 #include "Endpoint/RPC/RPCProtocol.h"
-#include "Reactor/TCP/TCPServerReactor.h"
+#include "Reactor/TCP2/TCPServerReactor2.h"
 #include "Utility/Timer.h"
 class RPCServerInboundHandler;
 
@@ -27,7 +27,7 @@ public:
 		uint32_t Backlog = 0;
 		uint32_t Workers = 0;
 		uint32_t Buffers = UINT16_MAX;
-		TCPServerReactor::callback_tcp_t Callback;
+		TCPServerReactor2::callback_tcp_t Callback;
 	};
 	using method_t = MSLambda<bool(MSHnd<IChannel> client, MSStringView const& input, MSString& output)>;
 
@@ -53,7 +53,7 @@ protected:
 	MSMutex m_LockMethod;
 	MSMutex m_LockSession;
 	MSAtomic<uint32_t> m_Session;
-	MSRef<TCPServerReactor> m_Reactor;
+	MSRef<TCPServerReactor2> m_Reactor;
 	MSMap<uint32_t, method_t> m_Methods;
 	MSMap<uint32_t, MSLambda<void(MSStringView const&)>> m_Sessions;
 };

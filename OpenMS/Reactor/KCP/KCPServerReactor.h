@@ -47,5 +47,6 @@ protected:
 	MSList<MSRef<Channel>> m_ChannelsRemoved;
 	MSMap<uint32_t, MSRef<Channel>> m_ChannelMap;
 	MSLambda<uint32_t(MSRef<IChannelAddress>)> m_OnSession;
+	MSAtomic<bool> m_Sending;
 	uv_async_t* m_EventAsync = nullptr;
 };

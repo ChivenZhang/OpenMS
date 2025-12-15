@@ -29,5 +29,8 @@
   }, {
     "name" : "breakpad",
     "version>=" : "2024-02-16"
+  }, {
+    "name" : "asio",
+    "version>=" : "1.32.0"
   } ]
 }

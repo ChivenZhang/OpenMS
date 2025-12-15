@@ -197,6 +197,7 @@ void TCPServerReactor::onDisconnect(MSRef<Channel> channel)
 void TCPServerReactor::onOutbound(MSRef<IChannelEvent> event, bool flush)
 {
 	ChannelReactor::onOutbound(event, flush);
+	m_Sending = true;
 	uv_async_send(m_EventAsync);
 }
 

@@ -42,5 +42,6 @@ protected:
 	MSRef<ISocketAddress> m_LocalAddress;
 	MSMap<uint32_t, MSRef<Channel>> m_ChannelMap;
 	MSMap<MSRaw<IChannelEvent>, MSRef<IChannelEvent>> m_EventCache;
+	MSAtomic<bool> m_Sending;
 	uv_async_t* m_EventAsync = nullptr;
 };

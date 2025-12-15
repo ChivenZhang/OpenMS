@@ -102,6 +102,12 @@ add_library(OpenMS STATIC
 		Reactor/TCP/TCPClientReactor.h
 		Reactor/TCP/TCPServerReactor.cpp
 		Reactor/TCP/TCPServerReactor.h
+		Reactor/TCP2/TCPChannel2.cpp
+		Reactor/TCP2/TCPChannel2.h
+		Reactor/TCP2/TCPClientReactor2.cpp
+		Reactor/TCP2/TCPClientReactor2.h
+		Reactor/TCP2/TCPServerReactor2.cpp
+		Reactor/TCP2/TCPServerReactor2.h
 		Reactor/UDP/UDPChannel.cpp
 		Reactor/UDP/UDPChannel.h
 		Reactor/UDP/UDPClientReactor.cpp
@@ -142,6 +148,8 @@ find_package(hiredis CONFIG REQUIRED)
 target_link_libraries(OpenMS PUBLIC hiredis::hiredis)
 endif()
 
+find_package(asio CONFIG REQUIRED)
+target_link_libraries(OpenMS PRIVATE asio::asio)
 find_package(unofficial-http-parser CONFIG REQUIRED)
 target_link_libraries(OpenMS PUBLIC unofficial::http_parser::http_parser)
 find_package(kcp CONFIG REQUIRED)

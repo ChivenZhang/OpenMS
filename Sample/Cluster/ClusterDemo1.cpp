@@ -21,7 +21,7 @@ public:
 		{
 			auto output = co_await [=](MSAwait<MSString> promise)
 			{
-				this->async("author", "verify", 1000, MSTuple{user, pass}, [=](MSString response)
+				this->async("author", "verify", "", 1000, MSTuple{user, pass}, [=](MSString response)
 				{
 					promise(MSString(response));
 				});
@@ -55,7 +55,7 @@ void ClusterDemo1::onInit()
 
 		while (m_Running)
 		{
-			auto response = loginService->call<MSString>("author", "verify", 1000, MSTuple{"admin", "123456"});
+			auto response = loginService->call<MSString>("author", "verify", "", 1000, MSTuple{"admin", "123456"});
 			MS_DEBUG("Get %s", response.first.c_str());
 
 			qps.hit();

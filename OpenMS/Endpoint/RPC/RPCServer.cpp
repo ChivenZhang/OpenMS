@@ -31,11 +31,11 @@ RPCServerBase::RPCServerBase(config_t const& config)
 void RPCServerBase::startup()
 {
 	auto config = m_Config;
-	m_Reactor = MSNew<TCPServerReactor>(
+	m_Reactor = MSNew<TCPServerReactor2>(
 		IPv4Address::New(config.IP, config.PortNum),
 		config.Backlog,
 		config.Workers,
-		TCPServerReactor::callback_tcp_t
+		TCPServerReactor2::callback_tcp_t
 		{
 			.OnOpen = [this](MSRef<IChannel> channel)
 			{

@@ -30,10 +30,10 @@ RPCClientBase::RPCClientBase(config_t const& config)
 
 void RPCClientBase::startup()
 {
-	m_Reactor = MSNew<TCPClientReactor>(
+	m_Reactor = MSNew<TCPClientReactor2>(
 		IPv4Address::New(m_Config.IP, m_Config.PortNum),
 		m_Config.Workers,
-		TCPClientReactor::callback_tcp_t
+		TCPClientReactor2::callback_tcp_t
 		{
 			.OnOpen = [this](MSRef<IChannel> channel)
 			{

@@ -1,5 +1,3 @@
-#include "ChannelReactor.h"
-#include "ChannelReactor.h"
 /*=================================================
 * Copyright © 2020-2025 ChivenZhang.
 * All Rights Reserved.
@@ -15,7 +13,6 @@
 ChannelReactor::ChannelReactor(size_t workerNum, callback_t callback)
 	:
 	m_Running(false),
-	m_Sending(false),
 	m_Connect(false),
 	m_OnOpen(callback.OnOpen),
 	m_OnClose(callback.OnClose),
@@ -98,5 +95,4 @@ void ChannelReactor::onOutbound(MSRef<IChannelEvent> event, bool flush)
 	if (event == nullptr || event->Channel.expired()) return;
 	MSMutexLock lock(m_EventLock);
 	m_EventQueue.push(event);
-	m_Sending = true;
 }
