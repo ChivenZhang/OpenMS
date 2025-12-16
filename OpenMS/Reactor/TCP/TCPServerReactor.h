@@ -11,7 +11,6 @@
 * =================================================*/
 #include "../Private/ChannelReactor.h"
 #include "../Private/ChannelAddress.h"
-#include <uv.h>
 
 class TCPServerReactor : public ChannelReactor
 {
@@ -31,16 +30,10 @@ protected:
 	void onOutbound(MSRef<IChannelEvent> event, bool flush) override;
 
 protected:
-	static void on_connect(uv_stream_t* server, int status);
-	static void on_alloc(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf);
-	static void on_read(uv_stream_t* stream, ssize_t nread, const uv_buf_t* buf);
-	static void on_send(uv_async_t* handle);
-
-protected:
 	uint32_t m_Backlog;
+	MSAtomic<bool> m_Sending;
+	MSLambda<void()> m_FireAsync;
 	MSRef<ISocketAddress> m_Address;
 	MSRef<ISocketAddress> m_LocalAddress;
 	MSMap<uint32_t, MSRef<Channel>> m_ChannelMap;
-	MSMap<MSRaw<IChannelEvent>, MSRef<IChannelEvent>> m_EventCache;
-	uv_async_t* m_EventAsync = nullptr;
 };

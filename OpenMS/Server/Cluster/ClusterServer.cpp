@@ -31,15 +31,20 @@ void ClusterServer::onInit()
 		// Select remote address to send
 
 		MSString address;
+		do
 		{
 			MSMutexLock lock(m_MailRouteLock);
 			auto toName = (mail.Type & OPENMS_MAIL_TYPE_FORWARD) ? mail.Copy : mail.To;
 			auto result = m_MailRouteMap.find(toName);
-			if (result == m_MailRouteMap.end()) return false;
+			if (result == m_MailRouteMap.end()) break;
 			auto& routes = result->second;
 			address = routes.front();
+		} while (false);
+		if (address.empty())
+		{
+			MS_ERROR("send %u => %u failed", mail.From, mail.To);
+			return false;
 		}
-		if (address.empty()) return false;
 
 		// Select an RPC client to send
 
@@ -74,6 +79,7 @@ void ClusterServer::onInit()
 		mailView.Date = mail.Date;
 		mailView.Type = mail.Type;
 		if (mail.Body.empty() == false) ::memcpy(mailView.Body, mail.Body.data(), mail.Body.size());
+		MS_INFO("远程调用: %u => %u", mail.From, mail.To);
 		MSString response;
 		return client->call("mailbox", 0, request, response);
 	});
@@ -98,6 +104,7 @@ void ClusterServer::onInit()
 			newMail.Date = mailView.Date;
 			newMail.Type = mailView.Type;
 			newMail.Body = MSStringView(mailView.Body, request.size() - sizeof(MailView));
+			MS_INFO("被远程调用: %u => %u", newMail.From, newMail.To);
 			mailHub->send(newMail);
 			return true;
 		}
@@ -115,17 +122,17 @@ void ClusterServer::onInit()
 	{
 		MSMutexLock lock(m_MailRouteLock);
 		m_MailRouteMap = std::move(route);
-		MS_INFO("validate %s, count %u", m_ServiceServer->address().lock()->getString().c_str(), (uint32_t)m_MailRouteMap.size());
+		MS_INFO("refresh %s, count %u", m_ServiceServer->address().lock()->getString().c_str(), (uint32_t)m_MailRouteMap.size());
 	});
 	m_ClusterClient->startup();
 
 	// Push and pull route table
 
 	this->onPush();
-	m_Heartbeat = startTimer(OPENMS_HEARTBEAT * 1000, OPENMS_HEARTBEAT * 1000, [this](uint32_t handle)
+	/*m_Heartbeat = startTimer(OPENMS_HEARTBEAT * 1000, OPENMS_HEARTBEAT * 1000, [this](uint32_t handle)
 	{
 		this->onPush();
-	});
+	});*/
 }
 
 void ClusterServer::onExit()
@@ -160,15 +167,19 @@ void ClusterServer::onPush()
 	}
 	if (m_ClusterClient->connect() == true && m_ServiceServer->connect() == true)
 	{
-		MSList<IMailBox::name_t> mailList;
+		MSList<uint32_t> mailList;
 		AUTOWIRE(IMailHub)::bean()->list(mailList);
 		MSString address = m_ServiceServer->address().lock()->getString();
 		MSMutexLock lock(m_MailRouteLock);
-		auto result = m_ClusterClient->call<MSMap<uint32_t, MSStringList>>("push", 200, address, mailList);
+		auto result = m_ClusterClient->call<MSMap<uint32_t, MSStringList>>("push", 1000, address, mailList);
 		if (result.second)
 		{
 			m_MailRouteMap = result.first;
 			MS_INFO("validate %s, count %u", address.c_str(), (uint32_t)m_MailRouteMap.size());
+		}
+		else
+		{
+			MS_ERROR("validate failed");
 		}
 	}
 }

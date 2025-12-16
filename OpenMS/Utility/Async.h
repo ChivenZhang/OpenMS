@@ -100,6 +100,7 @@ struct MSAsyncPromise : MSPromiseBase
 		*m_RootState = m_ThisState;
 		*m_RootHandle = nullptr;
 		m_Value = std::move(value);
+		m_Error = nullptr;
 	}
 
 	auto yield_value(T value) noexcept
@@ -124,7 +125,8 @@ struct MSAsyncPromise : MSPromiseBase
 				m_ThisHandle.promise().m_ThisState = m_ThisHandle.promise().m_LastState;
 				*m_ThisHandle.promise().m_RootState = m_ThisHandle.promise().m_ThisState;
 				*m_ThisHandle.promise().m_RootHandle = nullptr;
-				if (m_ThisHandle.promise().m_Error) MSThrow(MSError("await_resume()" " at " __FILE__));
+
+				if (m_ThisHandle.promise().m_Error) std::rethrow_exception(m_ThisHandle.promise().m_Error);
 			}
 		};
 		m_Value = std::move(value);
@@ -133,7 +135,17 @@ struct MSAsyncPromise : MSPromiseBase
 
 	T& result()
 	{
-		if (m_Error) MSThrow(MSError("result()" " at " __FILE__));
+		if (m_Error)
+		{
+			try
+			{
+				std::rethrow_exception(m_Error);
+			}
+			catch (...)
+			{
+				MSThrow(MSError("result()" " at " __FILE__));
+			}
+		}
 		return m_Value;
 	}
 
@@ -167,7 +179,8 @@ struct MSAsyncPromise : MSPromiseBase
 				*m_ThisHandle.promise().m_RootState = m_ThisHandle.promise().m_ThisState;
 				*m_ThisHandle.promise().m_RootHandle = nullptr;
 
-				if (m_ThisHandle.promise().m_Error) MSThrow(MSError("await_resume()" " at " __FILE__));
+				if (m_ThisHandle.promise().m_Error) std::rethrow_exception(m_ThisHandle.promise().m_Error);
+
 				return m_NextHandle.promise().result();
 			}
 		};
@@ -211,7 +224,8 @@ struct MSAsyncPromise : MSPromiseBase
 				*m_ThisHandle.promise().m_RootState = m_ThisHandle.promise().m_ThisState;
 				*m_ThisHandle.promise().m_RootHandle = nullptr;
 
-				if (m_ThisHandle.promise().m_Error) MSThrow(MSError("await_resume()" " at " __FILE__));
+				if (m_ThisHandle.promise().m_Error) std::rethrow_exception(m_ThisHandle.promise().m_Error);
+
 				return m_Future.get();
 			}
 		};
@@ -240,6 +254,7 @@ struct MSAsyncPromise<void> : MSPromiseBase
 		m_ThisState = MSAsyncState::DONE;
 		*m_RootState = m_ThisState;
 		*m_RootHandle = nullptr;
+		m_Error = nullptr;
 	}
 
 	auto yield_value(std::nullptr_t) noexcept
@@ -264,7 +279,7 @@ struct MSAsyncPromise<void> : MSPromiseBase
 				*m_ThisHandle.promise().m_RootState = m_ThisHandle.promise().m_ThisState;
 				*m_ThisHandle.promise().m_RootHandle = nullptr;
 
-				if (m_ThisHandle.promise().m_Error) MSThrow(MSError("await_resume()" " at " __FILE__));
+				if (m_ThisHandle.promise().m_Error) std::rethrow_exception(m_ThisHandle.promise().m_Error);
 			}
 		};
 		return MSYieldAwaitable{};
@@ -272,7 +287,7 @@ struct MSAsyncPromise<void> : MSPromiseBase
 
 	void result() const
 	{
-		if (m_Error) MSThrow(MSError("result()" " at " __FILE__));
+		if (m_Error) std::rethrow_exception(m_Error);
 	}
 
 	template <class U>
@@ -305,7 +320,8 @@ struct MSAsyncPromise<void> : MSPromiseBase
 				*m_ThisHandle.promise().m_RootState = m_ThisHandle.promise().m_ThisState;
 				*m_ThisHandle.promise().m_RootHandle = nullptr;
 
-				if (m_ThisHandle.promise().m_Error) MSThrow(MSError("await_resume()" " at " __FILE__));
+				if (m_ThisHandle.promise().m_Error) std::rethrow_exception(m_ThisHandle.promise().m_Error);
+
 				return m_NextHandle.promise().result();
 			}
 		};
@@ -348,7 +364,8 @@ struct MSAsyncPromise<void> : MSPromiseBase
 				*m_ThisHandle.promise().m_RootState = m_ThisHandle.promise().m_ThisState;
 				*m_ThisHandle.promise().m_RootHandle = nullptr;
 
-				if (m_ThisHandle.promise().m_Error) MSThrow(MSError("await_resume()" " at " __FILE__));
+				if (m_ThisHandle.promise().m_Error) std::rethrow_exception(m_ThisHandle.promise().m_Error);
+
 				return m_Future.get();
 			}
 		};
@@ -428,7 +445,7 @@ public:
 
 private:
 	template <class U>
-	friend class MSAsyncPromise;
+	friend struct MSAsyncPromise;
 	std::coroutine_handle<promise_type> m_ThisHandle;
 };
 

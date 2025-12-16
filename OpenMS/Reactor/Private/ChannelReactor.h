@@ -37,13 +37,12 @@ protected:
 	virtual void onConnect(MSRef<Channel> channel);
 	virtual void onDisconnect(MSRef<Channel> channel);
 	virtual void onInbound(MSRef<IChannelEvent> event);
-	virtual void onOutbound(MSRef<IChannelEvent> event, bool flush = false);
+	virtual void onOutbound(MSRef<IChannelEvent> event, bool flush);
 
 protected:
 	MSMutex m_EventLock;
 	MSThread m_EventThread;
 	MSAtomic<bool> m_Running;
-	MSAtomic<bool> m_Sending;
 	MSAtomic<bool> m_Connect;
 	MSList<MSThread> m_WorkerThreads;
 	MSList<MSRef<ChannelWorker>> m_WorkerList;

@@ -11,14 +11,20 @@
 #include "TCPChannel.h"
 #include "../Private/ChannelReactor.h"
 
-TCPChannel::TCPChannel(MSRaw<ChannelReactor> reactor, MSRef<IChannelAddress> local, MSRef<IChannelAddress> remote, uint32_t workID, uv_tcp_t* handle)
+TCPChannel::TCPChannel(MSRaw<ChannelReactor> reactor, MSRef<IChannelAddress> local, MSRef<IChannelAddress> remote, uint32_t workID, asio::ip::tcp::socket&& handle)
 	:
 	Channel(reactor, local, remote, workID),
-	m_Handle(handle)
+	m_Socket(std::forward<asio::ip::tcp::socket>(handle)),
+	m_Buffer{}
 {
 }
 
-uv_tcp_t* TCPChannel::getHandle() const
+asio::ip::tcp::socket* TCPChannel::getSocket()
 {
-	return m_Handle;
+	return &m_Socket;
+}
+
+MSArrayView<char> TCPChannel::getBuffer()
+{
+	return m_Buffer;
 }

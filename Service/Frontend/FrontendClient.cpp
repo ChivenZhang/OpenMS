@@ -63,6 +63,8 @@ void FrontendClient::onInit()
 		mailView.Type = mail.Type;
 		if (mail.Body.empty() == false) ::memcpy(mailView.Body, mail.Body.data(), mail.Body.size());
 		m_TCPChannel->writeChannel(IChannelEvent::New(request));
+
+		MS_INFO("客户请求：%u => %u", mailView.From, mailView.To);
 		return true;
 	});
 
@@ -78,10 +80,10 @@ void FrontendClient::onInit()
 			{
 				m_TCPChannel = channel;
 
-				channel->getPipeline()->addFirst("decrypt", MSNew<AESInboundHandler>(AESInboundHandler::config_t
+				/*channel->getPipeline()->addFirst("decrypt", MSNew<AESInboundHandler>(AESInboundHandler::config_t
 				{
 					.Key = { AES256_KEY },
-				}));
+				}));*/
 				channel->getPipeline()->addLast("input", IChannelPipeline::handler_in
 				{
 					.OnHandle = [=](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)->bool
@@ -101,10 +103,10 @@ void FrontendClient::onInit()
 						return false;
 					},
 				});
-				channel->getPipeline()->addFirst("encrypt", MSNew<AESOutboundHandler>(AESOutboundHandler::config_t
+				/*channel->getPipeline()->addFirst("encrypt", MSNew<AESOutboundHandler>(AESOutboundHandler::config_t
 				{
 					.Key = { AES256_KEY },
-				}));
+				}));*/
 				channel->getPipeline()->addLast("output", IChannelPipeline::handler_out
 				{
 					.OnHandle = [](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)->bool
@@ -124,9 +126,21 @@ void FrontendClient::onInit()
 					channel->getContext()->userdata() = userID;
 
 					auto playerService = MSNew<Service>();
-					playerService->bind("onStartBattle", [=]()->MSAsync<void>
+					playerService->bind("onStartBattle", [=, _this = playerService.get()]()->MSAsync<void>
 					{
 						MS_INFO("开始游戏");
+
+						MS_INFO("尝试攻击...");
+						_this->async("player:" + std::to_string(userID), "attack", "proxy:" + std::to_string(userID), 100, MSTuple{}, [=](bool result)
+						{
+							MS_INFO("攻击结果：%d", result);
+
+							MS_INFO("尝试登出...");
+							_this->async("guest", "logout", "", 1000, MSTuple{userID}, [=](bool result2)
+							{
+								MS_INFO("登出结果：%d", result2);
+							});
+						});
 						co_return;
 					});
 					playerService->bind("onAttack", [=]()->MSAsync<void>
@@ -142,23 +156,9 @@ void FrontendClient::onInit()
 					mailHub->create("client:" + std::to_string(userID), playerService);
 
 					MS_INFO("尝试开局...");
-					playerService->async("server:" + std::to_string(userID), "readyBattle", "proxy:" + std::to_string(userID), 1000, MSTuple{}, [=](bool result)
+					playerService->async("server:" + std::to_string(userID), "readyBattle", "proxy:" + std::to_string(userID), 30000, MSTuple{ 0U }, [=](bool result)
 					{
 						MS_INFO("开局结果：%d", result);
-						if (result)
-						{
-							MS_INFO("尝试攻击...");
-							playerService->async("player:" + std::to_string(userID), "attack", "proxy:" + std::to_string(userID), 100, MSTuple{}, [=](bool result)
-							{
-								MS_INFO("攻击结果：%d", result);
-
-								MS_INFO("尝试登出...");
-								clientService->async("guest", "logout", "", 1000, MSTuple{userID}, [=](bool result2)
-								{
-									MS_INFO("登出结果：%d", result2);
-								});
-							});
-						}
 					});
 				});
 			},

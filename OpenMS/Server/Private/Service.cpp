@@ -39,7 +39,7 @@ bool Service::call(uint32_t service, uint32_t method, uint32_t forward, uint32_t
 	if (request.empty() == false) ::memcpy(requestView.Buffer, request.data(), request.size());
 
 	IMail mail = {};
-	mail.From = name();
+	mail.From = hash();
 	mail.To = service;
 	mail.Copy = forward;
 	mail.Body = input;
@@ -80,7 +80,7 @@ bool Service::async(uint32_t service, uint32_t method, uint32_t forward, uint32_
 	if (request.empty() == false) ::memcpy(requestView.Buffer, request.data(), request.size());
 
 	IMail mail = {};
-	mail.From = name();
+	mail.From = hash();
 	mail.To = service;
 	mail.Copy = forward;
 	mail.Body = input;
@@ -144,6 +144,7 @@ IMailTask Service::read(IMail mail)
 	}
 	else if (mail.Type & OPENMS_MAIL_TYPE_REQUEST)
 	{
+		MS_INFO("%s\t%u => %u #%u %s", name().c_str(), mail.From, mail.To, mail.Date, mail.Body.substr(sizeof(uint32_t)).data());
 		if (sizeof(request_t) <= mail.Body.size())
 		{
 			auto& request = *(request_t*)mail.Body.data();
@@ -169,6 +170,7 @@ IMailTask Service::read(IMail mail)
 	}
 	else if (mail.Type & OPENMS_MAIL_TYPE_RESPONSE)
 	{
+		MS_INFO("%s\t%u <= %u #%u %s", name().c_str(), mail.To, mail.From, mail.Date, mail.Body.data());
 		session_t response;
 		{
 			MSMutexLock lock(m_LockSession);

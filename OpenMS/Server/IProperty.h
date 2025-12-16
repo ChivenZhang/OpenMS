@@ -22,7 +22,7 @@ public:
 	template <class T>
 	T property(MSString const& name, T const& value = T()) const
 	{
-		return TTextC::from_string(property(name), value);
+		return MSTextC::from_string(property(name), value);
 	}
 };
 
@@ -36,6 +36,6 @@ public:
 	template <class T>
 	T value(T const& value = T()) const
 	{
-		return TTextC::from_string(this->value(), T());
+		return MSTextC::from_string(this->value(), T());
 	}
 };

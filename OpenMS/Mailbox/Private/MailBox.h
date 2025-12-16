@@ -20,7 +20,8 @@ class MailBox : public IMailBox
 public:
 	MailBox() = default;
 	~MailBox() override;
-	name_t name() const final;
+	MSString name() const final;
+	uint32_t hash() const final;
 	uint32_t send(IMail mail) final;
 	using IMailBox::create;
 	bool create(MSString address, MSRef<IMailBox> value) final;
@@ -35,6 +36,7 @@ private:
 	friend class MailHub;
 	friend class MailMan;
 	uint32_t m_HashName = 0;
+	MSString m_TextName;
 	MSRaw<IMailHub> m_Context = nullptr;
 	MSMutex m_MailLock;
 	MSAtomic<uint32_t> m_Session;

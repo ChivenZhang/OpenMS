@@ -10,14 +10,14 @@
 *
 * =================================================*/
 #include "../Private/Channel.h"
-#include <uv.h>
+#include <asio.hpp>
 
 class UDPChannel : public Channel
 {
 public:
-	UDPChannel(MSRaw<ChannelReactor> reactor, MSRef<IChannelAddress> local, MSRef<IChannelAddress> remote, uint32_t workID, uv_udp_t* handle);
-	uv_udp_t* getHandle() const;
+	UDPChannel(MSRaw<ChannelReactor> reactor, MSRef<IChannelAddress> local, MSRef<IChannelAddress> remote, uint32_t workID, asio::ip::udp::endpoint handle);
+	asio::ip::udp::endpoint const& getEndpoint() const;
 
 protected:
-	uv_udp_t* m_Handle;
+	asio::ip::udp::endpoint m_Endpoint;
 };

@@ -44,7 +44,6 @@ void GatewayServer::onInit()
 
 				// Create Guest Service
 
-				constexpr auto H = MSHash("login");
 				auto guestService = MSNew<GuestService>(channel, guestID);
 				guestService->bind("login", [=, this](MSString user, MSString pass)-> MSAsync<uint32_t>
 				{
@@ -99,10 +98,10 @@ void GatewayServer::onInit()
 
 				// Create Client Channel
 
-				channel->getPipeline()->addFirst("decrypt", MSNew<AESInboundHandler>(AESInboundHandler::config_t
+				/*channel->getPipeline()->addFirst("decrypt", MSNew<AESInboundHandler>(AESInboundHandler::config_t
 				{
 					.Key = { AES256_KEY },
-				}));
+				}));*/
 				channel->getPipeline()->addLast("input", IChannelPipeline::handler_in
 				{
 					.OnHandle = [=](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)->bool
@@ -139,10 +138,10 @@ void GatewayServer::onInit()
 						return false;
 					},
 				});
-				channel->getPipeline()->addFirst("encrypt", MSNew<AESOutboundHandler>(AESOutboundHandler::config_t
+				/*channel->getPipeline()->addFirst("encrypt", MSNew<AESOutboundHandler>(AESOutboundHandler::config_t
 				{
 					.Key = { AES256_KEY },
-				}));
+				}));*/
 				channel->getPipeline()->addLast("output", IChannelPipeline::handler_out
 				{
 					.OnHandle = [](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)->bool

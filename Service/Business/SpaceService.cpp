@@ -1,4 +1,3 @@
-#pragma once
 /*=================================================
 * Copyright © 2020-2025 ChivenZhang.
 * All Rights Reserved.
@@ -9,10 +8,8 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include <Server/Private/Service.h>
+#include "SpaceService.h"
 
-class PlayerService : public Service
+SpaceService::SpaceService(uint32_t spaceID)
 {
-public:
-	explicit PlayerService(uint32_t userID);
-};
+}

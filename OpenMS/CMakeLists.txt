@@ -142,6 +142,8 @@ find_package(hiredis CONFIG REQUIRED)
 target_link_libraries(OpenMS PUBLIC hiredis::hiredis)
 endif()
 
+find_package(asio CONFIG REQUIRED)
+target_link_libraries(OpenMS PRIVATE asio::asio)
 find_package(unofficial-http-parser CONFIG REQUIRED)
 target_link_libraries(OpenMS PUBLIC unofficial::http_parser::http_parser)
 find_package(kcp CONFIG REQUIRED)

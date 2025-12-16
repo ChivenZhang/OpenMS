@@ -7,7 +7,7 @@
     "version>=" : "1.7"
   }, {
     "name" : "libuv",
-    "version>=" : "1.49.2"
+    "version>=" : "1.51.0"
   }, {
     "name" : "mbedtls",
     "version>=" : "3.6.1"
@@ -29,5 +29,8 @@
   }, {
     "name" : "breakpad",
     "version>=" : "2024-02-16"
+  }, {
+    "name" : "asio",
+    "version>=" : "1.32.0"
   } ]
 }

@@ -137,6 +137,7 @@ bool RPCServerBase::call(MSHnd<IChannel> client, MSStringView const& name, uint3
 	// Send request to remote server
 
 	m_Reactor->write(IChannelEvent::New(buffer, client));
+	MS_INFO("服务端=>客户端：%u", (uint32_t)buffer.size());
 
 	auto status = future.wait_for(std::chrono::milliseconds(timeout));
 	{
@@ -157,25 +158,25 @@ bool RPCServerBase::async(MSHnd<IChannel> client, MSStringView const& name, uint
 
 	// Convert request to string
 
-	MSString output(sizeof(RPCRequestView) + input.size(), 0);
-	auto& requestView = *(RPCRequestView*)output.data();
-	requestView.Length = (uint32_t)output.size();
-	requestView.Session = ++m_Session;
-	requestView.Method = MSHash(name);
-	if (output.empty() == false) ::memcpy(requestView.Buffer, input.data(), input.size());
+	MSString buffer(sizeof(RPCRequestView) + input.size(), 0);
+	auto& request = *(RPCRequestView*)buffer.data();
+	request.Length = (uint32_t)buffer.size();
+	request.Session = (++m_Session) | 0x80000000;
+	request.Method = MSHash(name);
+	if (input.empty() == false) ::memcpy(request.Buffer, input.data(), input.size());
 
 	// Set timer to handle response
 
 	{
 		MSMutexLock lock(m_LockMethod);
-		auto& session = m_Sessions[requestView.Session];
+		auto& session = m_Sessions[request.Session];
 		session = [callback](MSStringView const& response)
 		{
 			if (callback) callback(MSString(response));
 		};
 	}
 
-	m_Timer.start(timeout, 0, [sessionID = requestView.Session, this](uint32_t handle)
+	m_Timer.start(timeout, 0, [sessionID = request.Session, this](uint32_t handle)
 	{
 		decltype(m_Sessions)::value_type::second_type callback;
 		{
@@ -192,7 +193,8 @@ bool RPCServerBase::async(MSHnd<IChannel> client, MSStringView const& name, uint
 
 	// Send request to remote server
 
-	m_Reactor->write(IChannelEvent::New(output, client));
+	m_Reactor->write(IChannelEvent::New(buffer, client));
+	MS_INFO("服务端=>客户端：%u", (uint32_t)buffer.size());
 	return true;
 }
 
@@ -208,6 +210,7 @@ bool RPCServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<
 	auto& package = *(RPCRequestBase*)m_Buffer.data();
 	if (sizeof(RPCRequestBase) <= m_Buffer.size() && package.Length <= m_Buffer.size())
 	{
+		MS_INFO("服务端<=客户端:%u", package.Length);
 		// Call from client
 		if ((package.Session & 0X80000000) == 0)
 		{

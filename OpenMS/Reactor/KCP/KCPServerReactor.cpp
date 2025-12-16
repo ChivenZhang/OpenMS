@@ -268,6 +268,7 @@ void KCPServerReactor::onDisconnect(MSRef<Channel> channel)
 void KCPServerReactor::onOutbound(MSRef<IChannelEvent> event, bool flush)
 {
 	ChannelReactor::onOutbound(event, flush);
+	m_Sending = true;
 	uv_async_send(m_EventAsync);
 }
 

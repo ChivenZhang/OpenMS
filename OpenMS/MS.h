@@ -235,18 +235,19 @@ void MSThrow(E&& error)
 {
 	std::throw_with_nested(error);
 }
-inline void MSPrintError(const MSError& error, uint32_t level =  0)
+inline void MSPrintError(MSError const& error, uint32_t level =  0)
 {
-	MS_ERROR("%s exception: %s", MSString(level, ' ').c_str(), error.what());
+	MS_ERROR("%s exception: %s", MSString(level, '\t').c_str(), error.what());
 	try
 	{
 		std::rethrow_if_nested(error);
-	}
-	catch (const std::exception& nestedException)
+	} catch (MSError const& nested)
 	{
-		MSPrintError(nestedException, level + 1);
+		MSPrintError(nested, level + 1);
+	} catch (...)
+	{
+		MS_ERROR("%s exception: %s", MSString(level + 1, '\t').c_str(), "Unknown nested exception");
 	}
-	catch (...) {}
 }
 template <class T>
 using MSLambda = std::function<T>;
@@ -657,7 +658,7 @@ bool MSTypeC(MSString const& src, MSStringView& dst)
 }
 #endif
 
-struct TTextC
+struct MSTextC
 {
 	template <class T>
 	static MSString to_string(T const& value, MSString const& string = MSString())

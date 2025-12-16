@@ -21,7 +21,12 @@ MailBox::~MailBox()
 	}
 }
 
-IMailBox::name_t MailBox::name() const
+MSString MailBox::name() const
+{
+	return m_TextName;
+}
+
+uint32_t MailBox::hash() const
 {
 	return m_HashName;
 }
