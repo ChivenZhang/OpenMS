@@ -102,12 +102,6 @@ add_library(OpenMS STATIC
 		Reactor/TCP/TCPClientReactor.h
 		Reactor/TCP/TCPServerReactor.cpp
 		Reactor/TCP/TCPServerReactor.h
-		Reactor/TCP2/TCPChannel2.cpp
-		Reactor/TCP2/TCPChannel2.h
-		Reactor/TCP2/TCPClientReactor2.cpp
-		Reactor/TCP2/TCPClientReactor2.h
-		Reactor/TCP2/TCPServerReactor2.cpp
-		Reactor/TCP2/TCPServerReactor2.h
 		Reactor/UDP/UDPChannel.cpp
 		Reactor/UDP/UDPChannel.h
 		Reactor/UDP/UDPClientReactor.cpp

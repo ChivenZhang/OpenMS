@@ -31,11 +31,11 @@ RPCServerBase::RPCServerBase(config_t const& config)
 void RPCServerBase::startup()
 {
 	auto config = m_Config;
-	m_Reactor = MSNew<TCPServerReactor2>(
+	m_Reactor = MSNew<TCPServerReactor>(
 		IPv4Address::New(config.IP, config.PortNum),
 		config.Backlog,
 		config.Workers,
-		TCPServerReactor2::callback_tcp_t
+		TCPServerReactor::callback_tcp_t
 		{
 			.OnOpen = [this](MSRef<IChannel> channel)
 			{
@@ -158,25 +158,25 @@ bool RPCServerBase::async(MSHnd<IChannel> client, MSStringView const& name, uint
 
 	// Convert request to string
 
-	MSString output(sizeof(RPCRequestView) + input.size(), 0);
-	auto& requestView = *(RPCRequestView*)output.data();
-	requestView.Length = (uint32_t)output.size();
-	requestView.Session = ++m_Session;
-	requestView.Method = MSHash(name);
-	if (output.empty() == false) ::memcpy(requestView.Buffer, input.data(), input.size());
+	MSString buffer(sizeof(RPCRequestView) + input.size(), 0);
+	auto& request = *(RPCRequestView*)buffer.data();
+	request.Length = (uint32_t)buffer.size();
+	request.Session = (++m_Session) | 0x80000000;
+	request.Method = MSHash(name);
+	if (input.empty() == false) ::memcpy(request.Buffer, input.data(), input.size());
 
 	// Set timer to handle response
 
 	{
 		MSMutexLock lock(m_LockMethod);
-		auto& session = m_Sessions[requestView.Session];
+		auto& session = m_Sessions[request.Session];
 		session = [callback](MSStringView const& response)
 		{
 			if (callback) callback(MSString(response));
 		};
 	}
 
-	m_Timer.start(timeout, 0, [sessionID = requestView.Session, this](uint32_t handle)
+	m_Timer.start(timeout, 0, [sessionID = request.Session, this](uint32_t handle)
 	{
 		decltype(m_Sessions)::value_type::second_type callback;
 		{
@@ -193,8 +193,8 @@ bool RPCServerBase::async(MSHnd<IChannel> client, MSStringView const& name, uint
 
 	// Send request to remote server
 
-	m_Reactor->write(IChannelEvent::New(output, client));
-	MS_INFO("服务端=>客户端：%u", (uint32_t)output.size());
+	m_Reactor->write(IChannelEvent::New(buffer, client));
+	MS_INFO("服务端=>客户端：%u", (uint32_t)buffer.size());
 	return true;
 }
 

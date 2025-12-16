@@ -19,7 +19,7 @@ TCPServer::TCPServer(config_t const& config)
 void TCPServer::startup()
 {
 	auto config = m_Config;
-	m_Reactor = MSNew<TCPServerReactor2>(
+	m_Reactor = MSNew<TCPServerReactor>(
 		IPv4Address::New(config.IP, config.PortNum),
 		config.Backlog,
 		config.Workers,

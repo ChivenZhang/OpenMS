@@ -19,7 +19,7 @@ TCPClient::TCPClient(config_t const& config)
 void TCPClient::startup()
 {
 	auto config = m_Config;
-	m_Reactor = MSNew<TCPClientReactor2>(
+	m_Reactor = MSNew<TCPClientReactor>(
 		IPv4Address::New(config.IP, config.PortNum),
 		config.Workers,
 		config.Callback

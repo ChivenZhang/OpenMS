@@ -11,7 +11,7 @@
 * =================================================*/
 #include "Endpoint/IEndpoint.h"
 #include "Server/IProperty.h"
-#include "Reactor/TCP2/TCPClientReactor2.h"
+#include "Reactor/TCP/TCPClientReactor.h"
 
 /// @brief TCP Client Endpoint
 class TCPClient : public IEndpoint
@@ -22,7 +22,7 @@ public:
 		MSString IP;
 		uint16_t PortNum = 0;
 		uint32_t Workers = 0;
-		TCPClientReactor2::callback_tcp_t Callback;
+		TCPClientReactor::callback_tcp_t Callback;
 	};
 
 public:
@@ -35,5 +35,5 @@ public:
 
 protected:
 	const config_t m_Config;
-	MSRef<TCPClientReactor2> m_Reactor;
+	MSRef<TCPClientReactor> m_Reactor;
 };

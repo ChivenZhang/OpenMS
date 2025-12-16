@@ -11,7 +11,7 @@
 * =================================================*/
 #include "Endpoint/IEndpoint.h"
 #include "Server/IProperty.h"
-#include "Reactor/TCP2/TCPServerReactor2.h"
+#include "Reactor/TCP/TCPServerReactor.h"
 
 /// @brief TCP Server Endpoint
 class TCPServer : public IEndpoint
@@ -23,7 +23,7 @@ public:
 		uint16_t PortNum = 0;
 		uint32_t Backlog = 0;
 		uint32_t Workers = 0;
-		TCPServerReactor2::callback_tcp_t Callback;
+		TCPServerReactor::callback_tcp_t Callback;
 	};
 
 public:
@@ -36,5 +36,5 @@ public:
 
 protected:
 	const config_t m_Config;
-	MSRef<TCPServerReactor2> m_Reactor;
+	MSRef<TCPServerReactor> m_Reactor;
 };

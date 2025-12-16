@@ -30,10 +30,10 @@ RPCClientBase::RPCClientBase(config_t const& config)
 
 void RPCClientBase::startup()
 {
-	m_Reactor = MSNew<TCPClientReactor2>(
+	m_Reactor = MSNew<TCPClientReactor>(
 		IPv4Address::New(m_Config.IP, m_Config.PortNum),
 		m_Config.Workers,
-		TCPClientReactor2::callback_tcp_t
+		TCPClientReactor::callback_tcp_t
 		{
 			.OnOpen = [this](MSRef<IChannel> channel)
 			{
@@ -156,25 +156,25 @@ bool RPCClientBase::async(MSStringView const& name, uint32_t timeout, MSStringVi
 
 	// Convert request to string
 
-	MSString output(sizeof(RPCRequestView) + input.size(), 0);
-	auto& requestView = *(RPCRequestView*)output.data();
-	requestView.Length = (uint32_t)output.size();
-	requestView.Session = ++m_Session;
-	requestView.Method = MSHash(name);
-	if (output.empty() == false) ::memcpy(requestView.Buffer, input.data(), input.size());
+	MSString buffer(sizeof(RPCRequestView) + input.size(), 0);
+	auto& request = *(RPCRequestView*)buffer.data();
+	request.Length = (uint32_t)buffer.size();
+	request.Session = (++m_Session) & 0x7FFFFFFF;
+	request.Method = MSHash(name);
+	if (input.empty() == false) ::memcpy(request.Buffer, input.data(), input.size());
 
 	// Set timer to handle response
 
 	{
 		MSMutexLock lock(m_LockSession);
-		auto& session = m_Sessions[requestView.Session];
+		auto& session = m_Sessions[request.Session];
 		session = [callback](MSStringView const& response)
 		{
 			if (callback) callback(MSString(response));
 		};
 	}
 
-	m_Timer.start(timeout, 0, [sessionID = requestView.Session, this](uint32_t handle)
+	m_Timer.start(timeout, 0, [sessionID = request.Session, this](uint32_t handle)
 	{
 		decltype(m_Sessions)::value_type::second_type callback;
 		{
@@ -191,8 +191,8 @@ bool RPCClientBase::async(MSStringView const& name, uint32_t timeout, MSStringVi
 
 	// Send request to remote server
 
-	m_Reactor->write(IChannelEvent::New(output));
-	MS_INFO("客户端=>服务端:%u", (uint32_t)output.size());
+	m_Reactor->write(IChannelEvent::New(buffer));
+	MS_INFO("客户端=>服务端:%u", (uint32_t)buffer.size());
 	return true;
 }
 
