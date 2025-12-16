@@ -21,5 +21,5 @@ public:
 
 protected:
 	asio::ip::tcp::socket m_Socket;
-	char m_Buffer[1460];
+	char m_Buffer[2048];
 };

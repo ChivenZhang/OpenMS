@@ -112,7 +112,7 @@ void UDPClientReactor::startup()
 			MSLambda<void(MSHnd<UDPChannel> channel)> read_func;
 			MSLambda<void(MSHnd<UDPChannel> channel, MSRef<IChannelEvent> event)> write_func;
 
-			char buffer[1472];
+			char buffer[2048];
 
 			read_func = [&](MSHnd<UDPChannel> channel)
 			{
