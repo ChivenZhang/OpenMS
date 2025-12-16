@@ -12,7 +12,6 @@
 #include <OpenMS/Endpoint/TCP/TCPClient.h>
 
 #include "Utility/QuickQPS.h"
-
 QuickQPS qps;
 auto T = ::clock();
 

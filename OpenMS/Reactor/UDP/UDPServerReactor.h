@@ -11,7 +11,6 @@
 * =================================================*/
 #include "../Private/ChannelReactor.h"
 #include "../Private/ChannelAddress.h"
-#include <uv.h>
 
 class UDPServerReactor : public ChannelReactor
 {
@@ -31,18 +30,13 @@ protected:
 	void onOutbound(MSRef<IChannelEvent> event, bool flush) override;
 
 protected:
-	static void on_alloc(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf);
-	static void on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf, const struct sockaddr* addr, unsigned flags);
-	static void on_send(uv_async_t* handle);
-
-protected:
+	bool m_Broadcast;
+	bool m_Multicast;
 	uint32_t m_Backlog;
-	bool m_Broadcast, m_Multicast;
+	MSAtomic<bool> m_Sending;
+	MSLambda<void()> m_FireAsync;
 	MSRef<ISocketAddress> m_Address;
 	MSRef<ISocketAddress> m_LocalAddress;
 	MSList<MSRef<Channel>> m_Channels;
 	MSMap<uint32_t, MSHnd<Channel>> m_ChannelMap;
-	MSMap<MSRaw<IChannelEvent>, MSRef<IChannelEvent>> m_EventCache;
-	MSAtomic<bool> m_Sending;
-	uv_async_t* m_EventAsync = nullptr;
 };

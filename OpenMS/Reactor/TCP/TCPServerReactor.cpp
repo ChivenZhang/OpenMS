@@ -34,15 +34,30 @@ void TCPServerReactor::startup()
 		asio::io_context loop;
 		using namespace asio::ip;
 
-		// Bind and listen to the socket
-
 		do
 		{
+			// Bind and listen to the socket
+
 			auto reactor = this;
-			tcp::acceptor server(loop, tcp::endpoint(address::from_string(m_Address->getAddress()), m_Address->getPort()));
-			if (server.is_open() == false)
+			tcp::acceptor server(loop);
+			tcp::endpoint endpoint(address::from_string(m_Address->getAddress()), m_Address->getPort());
+			asio::error_code error;
+			error = server.open(endpoint.protocol(), error);
+			if (error)
 			{
-				MS_ERROR("failed to listen and accept");
+				MS_ERROR("failed to open: %s", error.message().c_str());
+				break;
+			}
+			error = server.bind(endpoint, error);
+			if (error)
+			{
+				MS_ERROR("failed to bind: %s", error.message().c_str());
+				break;
+			}
+			error = server.listen((int32_t)m_Backlog, error);
+			if (error)
+			{
+				MS_ERROR("failed to listen: %s", error.message().c_str());
 				break;
 			}
 
@@ -54,20 +69,16 @@ void TCPServerReactor::startup()
 				auto address = server.local_endpoint().address().to_string();
 				auto portNum = server.local_endpoint().port();
 				auto family = server.local_endpoint().protocol().family();
-				if (family == AF_INET)
-				{
-					localAddress = MSNew<IPv4Address>(address, portNum);
-				}
-				else if (family == AF_INET6)
-				{
-					localAddress = MSNew<IPv6Address>(address, portNum);
-				}
+				if (family == AF_INET) localAddress = MSNew<IPv4Address>(address, portNum);
+				else if (family == AF_INET6) localAddress = MSNew<IPv6Address>(address, portNum);
 				else MS_ERROR("unknown address family: %d", family);
 				if (localAddress == nullptr) break;
 				m_LocalAddress = localAddress;
 			}
 
 			MS_INFO("listening on %s:%d", m_LocalAddress->getAddress().c_str(), m_LocalAddress->getPort());
+
+			// Read and write data in async way
 
 			MSLambda<void()> accept_func;
 			MSLambda<void(MSHnd<TCPChannel> channel)> read_func;
@@ -79,6 +90,7 @@ void TCPServerReactor::startup()
 				{
 					auto socket = client->getSocket();
 					auto buffer = client->getBuffer();
+					if (socket->is_open() == false) return;
 					socket->async_read_some(asio::buffer(buffer.data(), buffer.size()), [=](asio::error_code error, size_t length)
 					{
 						if (error)
@@ -92,7 +104,6 @@ void TCPServerReactor::startup()
 							event->Message = MSString(buffer.data(), length);
 							event->Channel = channel;
 							reactor->onInbound(event);
-
 							read_func(channel);
 						}
 					});
@@ -104,7 +115,7 @@ void TCPServerReactor::startup()
 				if (auto client = channel.lock())
 				{
 					auto socket = client->getSocket();
-
+					if (socket->is_open() == false) return;
 					socket->async_write_some(asio::buffer(event->Message), [&, event, channel](asio::error_code error, size_t length)
 					{
 						if (error)
@@ -148,28 +159,16 @@ void TCPServerReactor::startup()
 							auto address = client.local_endpoint().address().to_string();
 							auto portNum = client.local_endpoint().port();
 							auto family = client.local_endpoint().protocol().family();
-							if (family == AF_INET)
-							{
-								localAddress = MSNew<IPv4Address>(address, portNum);
-							}
-							else if (family == AF_INET6)
-							{
-								localAddress = MSNew<IPv6Address>(address, portNum);
-							}
+							if (family == AF_INET) localAddress = MSNew<IPv4Address>(address, portNum);
+							else if (family == AF_INET6) localAddress = MSNew<IPv6Address>(address, portNum);
 							else MS_ERROR("unknown address family: %d", family);
 						}
 						{
 							auto address = client.remote_endpoint().address().to_string();
 							auto portNum = client.remote_endpoint().port();
 							auto family = client.remote_endpoint().protocol().family();
-							if (family == AF_INET)
-							{
-								remoteAddress = MSNew<IPv4Address>(address, portNum);
-							}
-							else if (family == AF_INET6)
-							{
-								remoteAddress = MSNew<IPv6Address>(address, portNum);
-							}
+							if (family == AF_INET) remoteAddress = MSNew<IPv4Address>(address, portNum);
+							else if (family == AF_INET6) remoteAddress = MSNew<IPv6Address>(address, portNum);
 							else MS_ERROR("unknown address family: %d", family);
 						}
 						if (localAddress == nullptr || remoteAddress == nullptr)
@@ -186,7 +185,7 @@ void TCPServerReactor::startup()
 				});
 			};
 
-			m_EventAsync = [&]()
+			m_FireAsync = [&]()
 			{
 				loop.post([&]()
 				{
@@ -203,12 +202,13 @@ void TCPServerReactor::startup()
 			accept_func();
 
 			// Run the event loop
+
 			asio::steady_timer timer(loop);
 			MSLambda<void()> timer_func;
 			timer_func = [&]()
 			{
 				timer.expires_after(std::chrono::milliseconds(1000));
-				timer.async_wait([&](asio::error_code error)
+				timer.async_wait([&](asio::error_code)
 				{
 					if (m_Running == false) loop.stop();
 					else timer_func();
@@ -219,7 +219,7 @@ void TCPServerReactor::startup()
 			promise.set_value();
 			loop.run();
 			m_Connect = false;
-			m_EventAsync = nullptr;
+			m_FireAsync = nullptr;
 
 			// Close all channels
 
@@ -286,5 +286,5 @@ void TCPServerReactor::onDisconnect(MSRef<Channel> channel)
 void TCPServerReactor::onOutbound(MSRef<IChannelEvent> event, bool flush)
 {
 	ChannelReactor::onOutbound(event, flush);
-	if (m_Sending == false) m_EventAsync();
+	if (m_Sending == false) m_FireAsync();
 }

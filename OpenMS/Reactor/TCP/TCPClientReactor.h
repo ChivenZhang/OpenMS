@@ -31,8 +31,8 @@ protected:
 
 protected:
 	MSRef<Channel> m_Channel;
+	MSAtomic<bool> m_Sending;
+	MSLambda<void()> m_FireAsync;
 	MSRef<ISocketAddress> m_Address;
 	MSRef<ISocketAddress> m_LocalAddress;
-	MSAtomic<bool> m_Sending;
-	MSLambda<void()> m_EventAsync;
 };

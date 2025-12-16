@@ -31,143 +31,182 @@ void UDPClientReactor::startup()
 
 	m_EventThread = MSThread([=, &promise]()
 	{
-		uv_loop_t loop;
-		uv_udp_t client;
-		uv_async_t async;
-
-		uv_loop_init(&loop);
-		uv_udp_init(&loop, &client);
-		uv_async_init(&loop, &async, on_send);
+		asio::io_context loop;
+		using namespace asio::ip;
 
 		do
 		{
 			// Bind and listen to the socket
 
-			if (true)
+			auto reactor = this;
+			udp::socket client(loop);
+			udp::endpoint endpoint(address::from_string(m_Address->getAddress()), m_Address->getPort());
+			asio::error_code error;
+			error = client.open(endpoint.protocol(), error);
+			if (error)
 			{
-				sockaddr_storage addr = {};
-				uint32_t result = UV_EINVAL;
-				if (auto ipv4 = MSCast<IPv4Address>(m_Address))
+				MS_ERROR("failed to open: %s", error.message().c_str());
+				break;
+			}
+			error = client.set_option(udp::socket::broadcast(m_Broadcast), error);
+			if (error)
+			{
+				MS_ERROR("failed to set broadcast option: %s", error.message().c_str());
+				break;
+			}
+			if (m_Multicast)
+			{
+				error = client.set_option(udp::socket::reuse_address(true), error);
+				if (error)
 				{
-					result = uv_ip4_addr(ipv4->getAddress().c_str(), ipv4->getPort(), (sockaddr_in*)&addr);
+					MS_ERROR("failed to set reuse_address option: %s", error.message().c_str());
+					break;
 				}
-				else if (auto ipv6 = MSCast<IPv6Address>(m_Address))
+				error = client.set_option(multicast::join_group(endpoint.address()), error);
+				if (error)
 				{
-					result = uv_ip6_addr(ipv6->getAddress().c_str(), ipv6->getPort(), (sockaddr_in6*)&addr);
+					MS_ERROR("failed to set multicast option: %s", error.message().c_str());
+					break;
 				}
-				if (result) MS_ERROR("invalid address: %s", ::uv_strerror(result));
-				if (result) break;
-
-				result = uv_udp_connect(&client, (sockaddr*)&addr);
-				if (result) MS_ERROR("connect error: %s", ::uv_strerror(result));
-				if (result) break;
-
-				result = uv_udp_set_broadcast(&client, m_Broadcast ? 1 : 0);
-				if (result) MS_ERROR("set broadcast error: %s", ::uv_strerror(result));
-				if (result) break;
-
-				result = uv_udp_set_multicast_loop(&client, m_Multicast ? 1 : 0);
-				if (result) MS_ERROR("set multicast loop error: %s", ::uv_strerror(result));
-				if (result) break;
+			}
+			error = client.connect(endpoint, error);
+			if (error)
+			{
+				MS_ERROR("failed to connect: %s", error.message().c_str());
+				break;
 			}
 
 			// Get the actual ip and port number
 
+			MSRef<ISocketAddress> localAddress, remoteAddress;
 			if (true)
 			{
-				sockaddr_storage addr = {};
-				int addrLen = sizeof(addr);
-				MSRef<ISocketAddress> localAddress, remoteAddress;
-
-				auto result = uv_udp_getsockname((uv_udp_t*)&client, (sockaddr*)&addr, &addrLen);
-				if (result == 0)
 				{
-					if (addr.ss_family == AF_INET)
-					{
-						auto in_addr = (sockaddr_in*)&addr;
-						char ip_str[INET_ADDRSTRLEN];
-						inet_ntop(AF_INET, &in_addr->sin_addr, ip_str, sizeof(ip_str));
-						auto address = ip_str;
-						auto portNum = ntohs(in_addr->sin_port);
-						localAddress = MSNew<IPv4Address>(address, portNum);
-					}
-					else if (addr.ss_family == AF_INET6)
-					{
-						auto in6_addr = (sockaddr_in6*)&addr;
-						char ip_str[INET6_ADDRSTRLEN];
-						inet_ntop(AF_INET6, &in6_addr->sin6_addr, ip_str, sizeof(ip_str));
-						auto portNum = ntohs(in6_addr->sin6_port);
-						auto address = ip_str;
-						localAddress = MSNew<IPv6Address>(address, portNum);
-					}
-					else MS_ERROR("unknown address family: %d", addr.ss_family);
+					auto address = client.local_endpoint().address().to_string();
+					auto portNum = client.local_endpoint().port();
+					auto family = client.local_endpoint().protocol().family();
+					if (family == AF_INET) localAddress = MSNew<IPv4Address>(address, portNum);
+					else if (family == AF_INET6) localAddress = MSNew<IPv6Address>(address, portNum);
+					else MS_ERROR("unknown address family: %d", family);
 				}
-				else MS_ERROR("failed to get socket name: %s", ::uv_strerror(result));
-
-				result = uv_udp_getpeername(&client, (sockaddr*)&addr, &addrLen);
-				if (result == 0)
 				{
-					if (addr.ss_family == AF_INET)
-					{
-						auto in_addr = (sockaddr_in*)&addr;
-						char ip_str[INET_ADDRSTRLEN];
-						inet_ntop(AF_INET, &in_addr->sin_addr, ip_str, sizeof(ip_str));
-						auto address = ip_str;
-						auto portNum = ntohs(in_addr->sin_port);
-						remoteAddress = MSNew<IPv4Address>(address, portNum);
-					}
-					else if (addr.ss_family == AF_INET6)
-					{
-						auto in6_addr = (sockaddr_in6*)&addr;
-						char ip_str[INET6_ADDRSTRLEN];
-						inet_ntop(AF_INET6, &in6_addr->sin6_addr, ip_str, sizeof(ip_str));
-						auto portNum = ntohs(in6_addr->sin6_port);
-						auto address = ip_str;
-						remoteAddress = MSNew<IPv6Address>(address, portNum);
-					}
-					else MS_ERROR("unknown address family: %d", addr.ss_family);
+					auto address = client.remote_endpoint().address().to_string();
+					auto portNum = client.remote_endpoint().port();
+					auto family = client.remote_endpoint().protocol().family();
+					if (family == AF_INET) remoteAddress = MSNew<IPv4Address>(address, portNum);
+					else if (family == AF_INET6) remoteAddress = MSNew<IPv6Address>(address, portNum);
+					else MS_ERROR("unknown address family: %d", family);
 				}
-				else MS_ERROR("failed to get socket name: %s", ::uv_strerror(result));
-
-				if (localAddress == nullptr || remoteAddress == nullptr) break;
+				if (localAddress == nullptr || remoteAddress == nullptr)
+				{
+					client.close();
+					return;
+				}
 				m_LocalAddress = localAddress;
-
-				auto channel = MSNew<UDPChannel>(this, localAddress, remoteAddress, (uint32_t)(rand() % m_WorkerList.size()), &client);
-				client.data = channel.get();
-				onConnect(channel);
-
-				MS_PRINT("listening on %s:%d", localAddress->getAddress().c_str(), localAddress->getPort());
 			}
 
-			// Start receiving data
+			MS_INFO("listening on %s:%d", m_LocalAddress->getAddress().c_str(), m_LocalAddress->getPort());
 
-			if (true)
+			// Read and write data in async way
+
+			MSLambda<void(MSHnd<UDPChannel> channel)> read_func;
+			MSLambda<void(MSHnd<UDPChannel> channel, MSRef<IChannelEvent> event)> write_func;
+
+			char buffer[1472];
+
+			read_func = [&](MSHnd<UDPChannel> channel)
 			{
-				auto result = uv_udp_recv_start(&client, on_alloc, on_read);
-				if (result) MS_ERROR("recv start error: %s", ::uv_strerror(result));
-				if (result) break;
-			}
+				if (auto _channel = channel.lock())
+				{
+					client.async_receive(asio::buffer(buffer), [=, &read_func](asio::error_code error, size_t length)
+					{
+						if (error)
+						{
+							MS_ERROR("can't read from socket: %s", error.message().c_str());
+							reactor->onDisconnect(channel.lock());
+						}
+						else
+						{
+							auto event = MSNew<IChannelEvent>();
+							event->Message = MSString(buffer, length);
+							event->Channel = channel;
+							reactor->onInbound(event);
+							read_func(channel);
+						}
+					});
+				}
+			};
+
+			write_func = [&](MSHnd<UDPChannel> channel, MSRef<IChannelEvent> event)
+			{
+				if (auto _channel = channel.lock())
+				{
+					client.async_send_to(asio::buffer(event->Message), client.remote_endpoint(), [=, &write_func](asio::error_code error, size_t length)
+					{
+						if (error)
+						{
+							if (event->Promise) event->Promise->set_value(false);
+
+							MS_ERROR("can't write to socket: %s", error.message().c_str());
+							reactor->onDisconnect(channel.lock());
+						}
+						else
+						{
+							if (event->Promise) event->Promise->set_value(true);
+
+							MSMutexLock lock(reactor->m_EventLock);
+							if (reactor->m_EventQueue.empty())
+							{
+								reactor->m_Sending = false;
+							}
+							else
+							{
+								auto nextEvent = reactor->m_EventQueue.front();
+								reactor->m_EventQueue.pop();
+								write_func(channel, nextEvent);
+							}
+						}
+					});
+				}
+			};
+
+			m_FireAsync = [&]()
+			{
+				loop.post([&]()
+				{
+					if (reactor->m_Sending) return;
+					reactor->m_Sending = true;
+					MSMutexLock lock(reactor->m_EventLock);
+					if (reactor->m_EventQueue.empty()) return;
+					auto event = reactor->m_EventQueue.front();
+					reactor->m_EventQueue.pop();
+					write_func(MSCast<UDPChannel>(event->Channel.lock()), event);
+				});
+			};
+
+			auto channel = MSNew<UDPChannel>(this, localAddress, remoteAddress, (uint32_t)(rand() % m_WorkerList.size()), client.remote_endpoint());
+			onConnect(channel);
+			read_func(MSCast<UDPChannel>(m_Channel));
 
 			// Run the event loop
 
+			asio::steady_timer timer(loop);
+			MSLambda<void()> timer_func;
+			timer_func = [&]()
 			{
-				loop.data = this;
-				async.data = this;
-				uv_timer_t timer;
-				uv_timer_init(&loop, &timer);
-				uv_timer_start(&timer, [](uv_timer_t* handle)
+				timer.expires_after(std::chrono::milliseconds(1000));
+				timer.async_wait([&](asio::error_code)
 				{
-					auto reactor = (UDPClientReactor*)handle->loop->data;
-					if (reactor->m_Running == false) uv_stop(handle->loop);
-				} , 1000, 1);
-
-				m_Connect = true;
-				m_EventAsync = &async;
-				promise.set_value();
-				uv_run(&loop, UV_RUN_DEFAULT);
-				m_EventAsync = nullptr;
-				m_Connect = false;
-			}
+					if (m_Running == false) loop.stop();
+					else timer_func();
+				});
+			};
+			timer_func();
+			m_Connect = true;
+			promise.set_value();
+			loop.run();
+			m_Connect = false;
+			m_FireAsync = nullptr;
 
 			// Close all channels
 
@@ -177,17 +216,12 @@ void UDPClientReactor::startup()
 				m_Channel = nullptr;
 			}
 
-			uv_close((uv_handle_t*)&client, nullptr);
-			uv_loop_close(&loop);
-
 			MS_PRINT("closed client");
 			return;
-		} while (false);
 
-		uv_close((uv_handle_t*)&client, nullptr);
-		uv_loop_close(&loop);
+		} while (false);
 		promise.set_value();
-		});
+	});
 
 	future.wait();
 }
@@ -196,10 +230,8 @@ void UDPClientReactor::shutdown()
 {
 	if (m_Running == false) return;
 	ChannelReactor::shutdown();
-	m_Channel = nullptr;
 
-	for (auto& e : m_EventCache) if (e.second->Promise) e.second->Promise->set_value(false);
-	m_EventCache.clear();
+	m_Channel = nullptr;
 }
 
 MSHnd<IChannelAddress> UDPClientReactor::address() const
@@ -236,92 +268,5 @@ void UDPClientReactor::onDisconnect(MSRef<Channel> channel)
 void UDPClientReactor::onOutbound(MSRef<IChannelEvent> event, bool flush)
 {
 	ChannelReactor::onOutbound(event, flush);
-	m_Sending = true;
-	uv_async_send(m_EventAsync);
-}
-
-void UDPClientReactor::on_alloc(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf)
-{
-	buf->base = (char*)malloc(suggested_size);
-	buf->len = (uint32_t)suggested_size;
-}
-
-void UDPClientReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf, const sockaddr* peer, unsigned flags)
-{
-	auto reactor = (UDPClientReactor*)req->loop->data;
-	auto channel = reactor->m_Channel;
-
-	if (nread == 0 || peer == nullptr)
-	{
-		free(buf->base);
-		return;
-	}
-
-	if (nread < 0 || channel->running() == false)
-	{
-		free(buf->base);
-
-		reactor->onDisconnect(channel);
-		return;
-	}
-
-	auto event = MSNew<IChannelEvent>();
-	event->Message = MSString((char*)buf->base, nread);
-	event->Channel = channel->weak_from_this();
-	reactor->onInbound(event);
-
-	free(buf->base);
-}
-
-void UDPClientReactor::on_send(uv_async_t* handle)
-{
-	auto reactor = (UDPClientReactor*)handle->loop->data;
-	if (reactor->m_Running == false || reactor->m_Sending == false) return;
-
-	MSMutexLock lock(reactor->m_EventLock);
-	reactor->m_Sending = false;
-
-	while (reactor->m_EventQueue.empty() == false)
-	{
-		auto event = reactor->m_EventQueue.front();
-		reactor->m_EventQueue.pop();
-		reactor->m_EventCache[event.get()] = event;
-
-		auto channel = MSCast<UDPChannel>(event->Channel.lock());
-		if (channel == nullptr) continue;
-		if (channel->running() == false) reactor->onDisconnect(channel);
-		if (channel->running() == false) continue;
-		if (event->Message.empty()) continue;
-		auto client = channel->getHandle();
-
-		auto req = (uv_udp_send_t*)malloc(sizeof(uv_udp_send_t));
-		req->data = event.get();
-		auto buf = uv_buf_init(event->Message.data(), (uint32_t)event->Message.size());
-		auto result = uv_udp_send(req, client, &buf, 1, nullptr, [](uv_udp_send_t* req, int status)
-		{
-			auto event = (IChannelEvent*)req->data;
-			auto reactor = (UDPClientReactor*)req->handle->loop->data;
-			auto channel = MSCast<UDPChannel>(event->Channel.lock());
-			free(req);
-
-			if (event->Promise) event->Promise->set_value(status == 0);
-			reactor->m_EventCache.erase(event);
-
-			if (channel && status)
-			{
-				MS_ERROR("write error: %s", uv_strerror(status));
-				reactor->onDisconnect(channel);
-			}
-		});
-		if (result)
-		{
-			free(req);
-
-			if (event->Promise) event->Promise->set_value(false);
-			reactor->m_EventCache.erase(event.get());
-
-			MS_ERROR("write error: %s", uv_strerror(result));
-			reactor->onDisconnect(channel);
-		}
-	}
+	if (m_Sending == false) m_FireAsync();
 }

@@ -11,6 +11,10 @@
 #include <OpenMS/Endpoint/UDP/UDPServer.h>
 #include <OpenMS/Endpoint/UDP/UDPClient.h>
 
+#include "Utility/QuickQPS.h"
+QuickQPS qps;
+auto T = ::clock();
+
 int main()
 {
 	auto server = MSNew<UDPServer>(UDPServer::config_t{
@@ -23,7 +27,15 @@ int main()
 				{
 					.OnHandle = [](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)
 					{
-						MS_INFO("%s", event->Message.c_str());
+						qps.hit();
+						auto t = ::clock();
+						if (T + 5000 <= t)
+						{
+							MS_INFO("QPS %f", qps.get());
+							T = t;
+						}
+
+						MS_DEBUG("%s", event->Message.c_str());
 						context->write(IChannelEvent::New("This is server"));
 						return true;
 					}
@@ -41,7 +53,7 @@ int main()
 				{
 					.OnHandle = [](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)
 					{
-						MS_INFO("%s", event->Message.c_str());
+						MS_DEBUG("%s", event->Message.c_str());
 						context->write(IChannelEvent::New("This is client"));
 						return true;
 					}

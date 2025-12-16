@@ -32,27 +32,76 @@ void TCPClientReactor::startup()
 		asio::io_context loop;
 		using namespace asio::ip;
 
-		// Bind and listen to the socket
-
 		do
 		{
+			// Bind and listen to the socket
+
 			auto reactor = this;
 			tcp::socket client(loop);
+			tcp::endpoint endpoint(address::from_string(m_Address->getAddress()), m_Address->getPort());
+			asio::error_code error;
+			error = client.open(endpoint.protocol(), error);
+			if (error)
+			{
+				MS_ERROR("failed to open: %s", error.message().c_str());
+				break;
+			}
+			error = client.connect(endpoint, error);
+			if (error)
+			{
+				MS_ERROR("failed to connect: %s", error.message().c_str());
+				break;
+			}
+
+			// Get the actual ip and port number
+
+			MSRef<ISocketAddress> localAddress, remoteAddress;
+			if (true)
+			{
+				{
+					auto address = client.local_endpoint().address().to_string();
+					auto portNum = client.local_endpoint().port();
+					auto family = client.local_endpoint().protocol().family();
+					if (family == AF_INET) localAddress = MSNew<IPv4Address>(address, portNum);
+					else if (family == AF_INET6) localAddress = MSNew<IPv6Address>(address, portNum);
+					else MS_ERROR("unknown address family: %d", family);
+				}
+				{
+					auto address = client.remote_endpoint().address().to_string();
+					auto portNum = client.remote_endpoint().port();
+					auto family = client.remote_endpoint().protocol().family();
+					if (family == AF_INET) remoteAddress = MSNew<IPv4Address>(address, portNum);
+					else if (family == AF_INET6) remoteAddress = MSNew<IPv6Address>(address, portNum);
+					else MS_ERROR("unknown address family: %d", family);
+				}
+				if (localAddress == nullptr || remoteAddress == nullptr)
+				{
+					client.close();
+					break;
+				}
+				m_LocalAddress = localAddress;
+			}
+
+			MS_INFO("listening on %s:%d", m_LocalAddress->getAddress().c_str(), m_LocalAddress->getPort());
+
+			// Read and write data in async way
+
 			MSLambda<void(MSHnd<TCPChannel> channel)> read_func;
 			MSLambda<void(MSHnd<TCPChannel> channel, MSRef<IChannelEvent> event)> write_func;
 
 			read_func = [&](MSHnd<TCPChannel> channel)
 			{
-				if (auto client = channel.lock())
+				if (auto _channel = channel.lock())
 				{
-					auto socket = client->getSocket();
-					auto buffer = client->getBuffer();
-					socket->async_read_some(asio::buffer(buffer.data(), buffer.size()), [=](asio::error_code error, size_t length)
+					auto socket = _channel->getSocket();
+					auto buffer = _channel->getBuffer();
+					if (socket->is_open() == false) return;
+					socket->async_read_some(asio::buffer(buffer.data(), buffer.size()), [=, &read_func](asio::error_code error, size_t length)
 					{
 						if (error)
 						{
 							MS_ERROR("can't read from socket: %s", error.message().c_str());
-							reactor->onDisconnect(client->shared_from_this());
+							reactor->onDisconnect(channel.lock());
 						}
 						else
 						{
@@ -60,7 +109,6 @@ void TCPClientReactor::startup()
 							event->Message = MSString(buffer.data(), length);
 							event->Channel = channel;
 							reactor->onInbound(event);
-
 							read_func(channel);
 						}
 					});
@@ -69,11 +117,11 @@ void TCPClientReactor::startup()
 
 			write_func = [&](MSHnd<TCPChannel> channel, MSRef<IChannelEvent> event)
 			{
-				if (auto client = channel.lock())
+				if (auto _channel = channel.lock())
 				{
-					auto socket = client->getSocket();
-
-					socket->async_write_some(asio::buffer(event->Message), [&, event, channel](asio::error_code error, size_t length)
+					auto socket = _channel->getSocket();
+					if (socket->is_open() == false) return;
+					socket->async_write_some(asio::buffer(event->Message), [=, &write_func](asio::error_code error, size_t length)
 					{
 						if (error)
 						{
@@ -102,58 +150,7 @@ void TCPClientReactor::startup()
 				}
 			};
 
-			asio::error_code error;
-			client.connect(tcp::endpoint(address::from_string(m_Address->getAddress()), m_Address->getPort()), error);
-			if (error)
-			{
-				MS_ERROR("failed to connect: %s", error.message().c_str());
-				break;
-			}
-
-			// Get the actual ip and port number
-
-			MSRef<ISocketAddress> localAddress, remoteAddress;
-			if (true)
-			{
-				{
-					auto address = client.local_endpoint().address().to_string();
-					auto portNum = client.local_endpoint().port();
-					auto family = client.local_endpoint().protocol().family();
-					if (family == AF_INET)
-					{
-						localAddress = MSNew<IPv4Address>(address, portNum);
-					}
-					else if (family == AF_INET6)
-					{
-						localAddress = MSNew<IPv6Address>(address, portNum);
-					}
-					else MS_ERROR("unknown address family: %d", family);
-				}
-				{
-					auto address = client.remote_endpoint().address().to_string();
-					auto portNum = client.remote_endpoint().port();
-					auto family = client.remote_endpoint().protocol().family();
-					if (family == AF_INET)
-					{
-						remoteAddress = MSNew<IPv4Address>(address, portNum);
-					}
-					else if (family == AF_INET6)
-					{
-						remoteAddress = MSNew<IPv6Address>(address, portNum);
-					}
-					else MS_ERROR("unknown address family: %d", family);
-				}
-				if (localAddress == nullptr || remoteAddress == nullptr)
-				{
-					client.close();
-					return;
-				}
-				m_LocalAddress = localAddress;
-			}
-
-			MS_INFO("listening on %s:%d", localAddress->getAddress().c_str(), localAddress->getPort());
-
-			m_EventAsync = [&]()
+			m_FireAsync = [&]()
 			{
 				loop.post([&]()
 				{
@@ -167,17 +164,21 @@ void TCPClientReactor::startup()
 				});
 			};
 
-			auto channel = MSNew<TCPChannel>(reactor, localAddress, remoteAddress, (uint32_t)(rand() % reactor->m_WorkerList.size()), std::move(client));
-			reactor->onConnect(channel);
-			read_func(channel);
+			if (true)
+			{
+				auto channel = MSNew<TCPChannel>(reactor, localAddress, remoteAddress, (uint32_t)(rand() % reactor->m_WorkerList.size()), std::move(client));
+				reactor->onConnect(channel);
+				read_func(MSCast<TCPChannel>(m_Channel));
+			}
 
 			// Run the event loop
+
 			asio::steady_timer timer(loop);
 			MSLambda<void()> timer_func;
 			timer_func = [&]()
 			{
 				timer.expires_after(std::chrono::milliseconds(1000));
-				timer.async_wait([&](asio::error_code error)
+				timer.async_wait([&](asio::error_code)
 				{
 					if (m_Running == false) loop.stop();
 					else timer_func();
@@ -188,7 +189,7 @@ void TCPClientReactor::startup()
 			promise.set_value();
 			loop.run();
 			m_Connect = false;
-			m_EventAsync = nullptr;
+			m_FireAsync = nullptr;
 
 			// Close channel
 
@@ -248,5 +249,5 @@ void TCPClientReactor::onDisconnect(MSRef<Channel> channel)
 void TCPClientReactor::onOutbound(MSRef<IChannelEvent> event, bool flush)
 {
 	ChannelReactor::onOutbound(event, flush);
-	if (m_Sending == false) m_EventAsync();
+	if (m_Sending == false) m_FireAsync();
 }

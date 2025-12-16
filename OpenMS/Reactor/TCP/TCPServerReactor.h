@@ -31,9 +31,9 @@ protected:
 
 protected:
 	uint32_t m_Backlog;
+	MSAtomic<bool> m_Sending;
+	MSLambda<void()> m_FireAsync;
 	MSRef<ISocketAddress> m_Address;
 	MSRef<ISocketAddress> m_LocalAddress;
 	MSMap<uint32_t, MSRef<Channel>> m_ChannelMap;
-	MSAtomic<bool> m_Sending;
-	MSLambda<void()> m_EventAsync;
 };

@@ -11,10 +11,10 @@
 #include "TCPChannel.h"
 #include "../Private/ChannelReactor.h"
 
-TCPChannel::TCPChannel(MSRaw<ChannelReactor> reactor, MSRef<IChannelAddress> local, MSRef<IChannelAddress> remote, uint32_t workID, asio::ip::tcp::socket handle)
+TCPChannel::TCPChannel(MSRaw<ChannelReactor> reactor, MSRef<IChannelAddress> local, MSRef<IChannelAddress> remote, uint32_t workID, asio::ip::tcp::socket&& handle)
 	:
 	Channel(reactor, local, remote, workID),
-	m_Socket(std::move(handle)),
+	m_Socket(std::forward<asio::ip::tcp::socket>(handle)),
 	m_Buffer{}
 {
 }

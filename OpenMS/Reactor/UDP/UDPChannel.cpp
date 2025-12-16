@@ -10,14 +10,14 @@
 * =================================================*/
 #include "UDPChannel.h"
 
-UDPChannel::UDPChannel(MSRaw<ChannelReactor> reactor, MSRef<IChannelAddress> local, MSRef<IChannelAddress> remote, uint32_t workID, uv_udp_t* handle)
+UDPChannel::UDPChannel(MSRaw<ChannelReactor> reactor, MSRef<IChannelAddress> local, MSRef<IChannelAddress> remote, uint32_t workID, asio::ip::udp::endpoint handle)
 	:
 	Channel(reactor, local, remote, workID),
-	m_Handle(handle)
+	m_Endpoint(handle)
 {
 }
 
-uv_udp_t* UDPChannel::getHandle() const
+asio::ip::udp::endpoint const& UDPChannel::getEndpoint() const
 {
-	return m_Handle;
+	return m_Endpoint;
 }
