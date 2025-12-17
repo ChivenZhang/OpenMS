@@ -10,22 +10,28 @@
 * =================================================*/
 #include "KCPChannel.h"
 
-KCPChannel::KCPChannel(MSRaw<ChannelReactor> reactor, MSRef<IChannelAddress> local, MSRef<IChannelAddress> remote, uint32_t workID, uv_udp_t* handle, ikcpcb* session)
+KCPChannel::KCPChannel(MSRaw<ChannelReactor> reactor, MSRef<IChannelAddress> local, MSRef<IChannelAddress> remote, uint32_t workID, ikcpcb* session, asio::ip::udp::socket* socket, asio::ip::udp::endpoint handle)
 	:
 	Channel(reactor, local, remote, workID),
-	m_Handle(handle),
-	m_Session(session)
+	m_Socket(socket),
+	m_Session(session),
+	m_Endpoint(handle)
 {
 }
 
 KCPChannel::~KCPChannel()
 {
-	ikcp_release(m_Session); m_Session = nullptr;
+	::ikcp_release(m_Session); m_Session = nullptr;
 }
 
-uv_udp_t* KCPChannel::getHandle() const
+MSRaw<ChannelReactor> KCPChannel::getReactor() const
 {
-	return m_Handle;
+	return this->m_Reactor;
+}
+
+asio::ip::udp::socket* KCPChannel::getSocket() const
+{
+	return m_Socket;
 }
 
 ikcpcb* KCPChannel::getSession() const
@@ -33,7 +39,7 @@ ikcpcb* KCPChannel::getSession() const
 	return m_Session;
 }
 
-MSRaw<ChannelReactor> KCPChannel::getReactor() const
+asio::ip::udp::endpoint const& KCPChannel::getEndpoint() const
 {
-	return m_Reactor;
+	return m_Endpoint;
 }

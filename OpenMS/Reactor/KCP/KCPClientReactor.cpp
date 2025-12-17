@@ -10,10 +10,10 @@
 * =================================================*/
 #include "KCPClientReactor.h"
 #include "KCPChannel.h"
-#include <ikcp.h>
 
-#if 1 // From official kcp demo: https://github.com/skywind3000/kcp/blob/master/test.h
-
+// From official kcp demo: https://github.com/skywind3000/kcp/blob/master/test.h
+namespace
+{
 #if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)
 #include <windows.h>
 #elif !defined(__unix)
@@ -27,50 +27,49 @@
 #include <sys/types.h>
 #endif
 
-/* get system time */
-static inline void itimeofday(long* sec, long* usec)
-{
+	/* get system time */
+	void itimeofday(long* sec, long* usec)
+	{
 #if defined(__unix)
-	struct timeval time;
-	gettimeofday(&time, NULL);
-	if (sec) *sec = time.tv_sec;
-	if (usec) *usec = time.tv_usec;
+		struct timeval time;
+		gettimeofday(&time, NULL);
+		if (sec) *sec = time.tv_sec;
+		if (usec) *usec = time.tv_usec;
 #else
-	static long mode = 0, addsec = 0;
-	BOOL retval;
-	static IINT64 freq = 1;
-	IINT64 qpc;
-	if (mode == 0) {
-		retval = QueryPerformanceFrequency((LARGE_INTEGER*)&freq);
-		freq = (freq == 0) ? 1 : freq;
+		static long mode = 0, addsec = 0;
+		BOOL retval;
+		static IINT64 freq = 1;
+		IINT64 qpc;
+		if (mode == 0) {
+			retval = QueryPerformanceFrequency((LARGE_INTEGER*)&freq);
+			freq = (freq == 0) ? 1 : freq;
+			retval = QueryPerformanceCounter((LARGE_INTEGER*)&qpc);
+			addsec = (long)time(NULL);
+			addsec = addsec - (long)((qpc / freq) & 0x7fffffff);
+			mode = 1;
+		}
 		retval = QueryPerformanceCounter((LARGE_INTEGER*)&qpc);
-		addsec = (long)time(NULL);
-		addsec = addsec - (long)((qpc / freq) & 0x7fffffff);
-		mode = 1;
+		retval = retval * 2;
+		if (sec) *sec = (long)(qpc / freq) + addsec;
+		if (usec) *usec = (long)((qpc % freq) * 1000000 / freq);
+#endif
 	}
-	retval = QueryPerformanceCounter((LARGE_INTEGER*)&qpc);
-	retval = retval * 2;
-	if (sec) *sec = (long)(qpc / freq) + addsec;
-	if (usec) *usec = (long)((qpc % freq) * 1000000 / freq);
-#endif
-}
 
-/* get clock in millisecond 64 */
-static inline IINT64 iclock64(void)
-{
-	long s, u;
-	IINT64 value;
-	itimeofday(&s, &u);
-	value = ((IINT64)s) * 1000 + (u / 1000);
-	return value;
-}
+	/* get clock in millisecond 64 */
+	IINT64 iclock64(void)
+	{
+		long s, u;
+		IINT64 value;
+		itimeofday(&s, &u);
+		value = ((IINT64)s) * 1000 + (u / 1000);
+		return value;
+	}
 
-static inline IUINT32 iclock()
-{
-	return (IUINT32)(iclock64() & 0xfffffffful);
+	IUINT32 iclock()
+	{
+		return (IUINT32)(iclock64() & 0xfffffffful);
+	}
 }
-
-#endif
 
 KCPClientReactor::KCPClientReactor(MSRef<ISocketAddress> address, size_t workerNum, callback_kcp_t callback)
 	:
@@ -90,134 +89,201 @@ void KCPClientReactor::startup()
 
 	m_EventThread = MSThread([=, &promise]()
 	{
-		uv_loop_t loop;
-		uv_udp_t client;
-		uv_async_t async;
-
-		uv_loop_init(&loop);
-		uv_udp_init(&loop, &client);
-		uv_async_init(&loop, &async, on_send);
+		asio::io_context loop;
+		using namespace asio::ip;
 
 		do
 		{
 			// Bind and listen to the socket
 
+			auto reactor = this;
+			udp::socket client(loop);
+			udp::endpoint endpoint(address::from_string(m_Address->getAddress()), m_Address->getPort());
+			asio::error_code error;
+			error = client.open(endpoint.protocol(), error);
+			if (error)
 			{
-				sockaddr_storage addr = {};
-				uint32_t result = UV_EINVAL;
-				if (auto ipv4 = MSCast<IPv4Address>(m_Address))
-				{
-					result = uv_ip4_addr(ipv4->getAddress().c_str(), ipv4->getPort(), (sockaddr_in*)&addr);
-				}
-				else if (auto ipv6 = MSCast<IPv6Address>(m_Address))
-				{
-					result = uv_ip6_addr(ipv6->getAddress().c_str(), ipv6->getPort(), (sockaddr_in6*)&addr);
-				}
-				if (result) MS_ERROR("invalid address: %s", ::uv_strerror(result));
-				if (result) break;
-
-				result = uv_udp_connect(&client, (sockaddr*)&addr);
-				if (result) MS_ERROR("connect error: %s", ::uv_strerror(result));
-				if (result) break;
-
-				result = uv_udp_recv_start(&client, on_alloc, on_read);
-				if (result) MS_ERROR("recv start error: %s", ::uv_strerror(result));
-				if (result) break;
+				MS_ERROR("failed to open: %s", error.message().c_str());
+				break;
+			}
+			error = client.connect(endpoint, error);
+			if (error)
+			{
+				MS_ERROR("failed to connect: %s", error.message().c_str());
+				break;
 			}
 
 			// Get the actual ip and port number
 
+			MSRef<ISocketAddress> localAddress, remoteAddress;
+			if (true)
 			{
-				sockaddr_storage addr = {};
-				int addrLen = sizeof(addr);
-				MSRef<ISocketAddress> localAddress;
-
-				auto result = uv_udp_getsockname(&client, reinterpret_cast<sockaddr *>(&addr), &addrLen);
-				if (result == 0)
 				{
-					if (addr.ss_family == AF_INET)
-					{
-						auto in_addr = (sockaddr_in*)&addr;
-						char ip_str[INET_ADDRSTRLEN];
-						inet_ntop(AF_INET, &in_addr->sin_addr, ip_str, sizeof(ip_str));
-						auto address = ip_str;
-						auto portNum = ntohs(in_addr->sin_port);
-						localAddress = MSNew<IPv4Address>(address, portNum);
-					}
-					else if (addr.ss_family == AF_INET6)
-					{
-						auto in6_addr = (sockaddr_in6*)&addr;
-						char ip_str[INET6_ADDRSTRLEN];
-						inet_ntop(AF_INET6, &in6_addr->sin6_addr, ip_str, sizeof(ip_str));
-						auto address = ip_str;
-						auto portNum = ntohs(in6_addr->sin6_port);
-						localAddress = MSNew<IPv6Address>(address, portNum);
-					}
-					else MS_ERROR("unknown address family: %d", addr.ss_family);
+					auto address = client.local_endpoint().address().to_string();
+					auto portNum = client.local_endpoint().port();
+					auto family = client.local_endpoint().protocol().family();
+					if (family == AF_INET) localAddress = MSNew<IPv4Address>(address, portNum);
+					else if (family == AF_INET6) localAddress = MSNew<IPv6Address>(address, portNum);
+					else MS_ERROR("unknown address family: %d", family);
 				}
-				else MS_ERROR("failed to get socket name: %s", ::uv_strerror(result));
-
-				if (localAddress == nullptr) break;
+				{
+					auto address = client.remote_endpoint().address().to_string();
+					auto portNum = client.remote_endpoint().port();
+					auto family = client.remote_endpoint().protocol().family();
+					if (family == AF_INET) remoteAddress = MSNew<IPv4Address>(address, portNum);
+					else if (family == AF_INET6) remoteAddress = MSNew<IPv6Address>(address, portNum);
+					else MS_ERROR("unknown address family: %d", family);
+				}
+				if (localAddress == nullptr || remoteAddress == nullptr)
+				{
+					error = client.shutdown(tcp::socket::shutdown_both, error);
+					if (error) MS_ERROR("failed to shutdown: %s", error.message().c_str());
+					error = client.close(error);
+					if (error) MS_ERROR("failed to close: %s", error.message().c_str());
+					return;
+				}
 				m_LocalAddress = localAddress;
-
-				MS_PRINT("listening on %s:%d", localAddress->getAddress().c_str(), localAddress->getPort());
 			}
 
-			// Send the initial data for session id
+			MS_INFO("listening on %s:%d", m_LocalAddress->getAddress().c_str(), m_LocalAddress->getPort());
 
+			// Read and write data in async way
+
+			char buffer[2048];
+
+			MSLambda<void(MSHnd<KCPChannel> channel)> read_func;
+			read_func = [&](MSHnd<KCPChannel> channel)
 			{
-				size_t count = 0;
-				MSStringView message("\0", 1);
-				while (count < message.size())
+				if (auto _channel = channel.lock())
 				{
-					auto buf = uv_buf_init((char*)message.data() + count, (unsigned)(message.size() - count));
-					auto result = uv_udp_try_send(&client, &buf, 1, nullptr);
-					if (result == UV_EAGAIN) continue;
-					if (result < 0) break;
-					count += result;
+					client.async_receive(asio::buffer(buffer), [=, &read_func](asio::error_code error, size_t length)
+					{
+						if (error)
+						{
+							MS_ERROR("can't read from socket: %s", error.message().c_str());
+							reactor->onDisconnect(channel.lock());
+						}
+						else
+						{
+							ikcp_input(_channel->getSession(), buffer, length);
+							read_func(channel);
+						}
+					});
 				}
+			};
+
+			// Create a new channel and session
+
+			client.send(asio::buffer("\0", 1), 0, error);
+			if (error)
+			{
+				MS_ERROR("failed to send: %s", error.message().c_str());
+				break;
 			}
+			client.receive(asio::buffer(buffer), 0, error);
+			if (error)
+			{
+				MS_ERROR("failed to receive from socket: %s", error.message().c_str());
+				break;
+			}
+			auto session = ikcp_create(ikcp_getconv(buffer), nullptr);
+			auto channel = MSNew<KCPChannel>(reactor, localAddress, remoteAddress, (uint32_t)(rand() % reactor->m_WorkerList.size()), session, &client, client.remote_endpoint());
+			session->user = channel.get();
+			ikcp_setoutput(session, on_output);
+			ikcp_wndsize(session, 128, 128);
+			ikcp_nodelay(session, 1, 20, 2, 1);
+			onConnect(channel);
+			read_func(MSCast<KCPChannel>(m_Channel));
+
+			asio::steady_timer ticker(loop);
+			MSLambda<void()> tick_func;
+			tick_func = [&]()
+			{
+				ticker.async_wait([&](asio::error_code)
+				{
+					reactor->m_ChannelRemoved = nullptr;
+
+					// Update all kcp sessions
+
+					do
+					{
+						if (channel == nullptr || channel->running() == false) break;
+						auto session = channel->getSession();
+
+						auto nowTime = iclock();
+						auto nextTime = ikcp_check(session, nowTime);
+						if (nextTime <= nowTime) ikcp_update(session, nowTime);
+
+						char buffer2[2048];
+						auto length = ikcp_recv(session, buffer2, sizeof(buffer2));
+						if (0 < length)
+						{
+							auto event = MSNew<IChannelEvent>();
+							event->Message = MSStringView(buffer2, length);
+							event->Channel = channel;
+							reactor->onInbound(event);
+						}
+					} while (false);
+
+					MSMutexLock lock(reactor->m_EventLock);
+					while (reactor->m_EventQueue.size())
+					{
+						auto event = reactor->m_EventQueue.front();
+						reactor->m_EventQueue.pop();
+
+						auto result = -1;
+						do
+						{
+							auto channel = MSCast<KCPChannel>(event->Channel.lock());
+							if (channel == nullptr || channel->running() == false) break;
+							if (event->Message.empty()) break;
+
+							result = ikcp_send(session, event->Message.data(), (int)event->Message.size());
+							if (result < 0) reactor->onDisconnect(channel);
+						} while (false);
+
+						if (event->Promise) event->Promise->set_value(result == 0);
+					}
+
+					tick_func();
+				});
+			};
+			tick_func();
 
 			// Run the event loop
 
+			asio::steady_timer timer(loop);
+			MSLambda<void()> timer_func;
+			timer_func = [&]()
 			{
-				loop.data = this;
-				async.data = this;
-				uv_timer_t timer;
-				uv_timer_init(&loop, &timer);
-				uv_timer_start(&timer, [](uv_timer_t* handle)
+				timer.expires_after(std::chrono::milliseconds(1000));
+				timer.async_wait([&](asio::error_code)
 				{
-					auto reactor = (KCPClientReactor*)handle->loop->data;
-					if (reactor->m_Running == false) uv_stop(handle->loop);
-				} , 1000, 1);
-
-				m_Connect = true;
-				m_EventAsync = &async;
-				promise.set_value();
-				uv_run(&loop, UV_RUN_DEFAULT);
-				m_EventAsync = nullptr;
-				m_Connect = false;
-			}
+					if (m_Running == false) loop.stop();
+					else timer_func();
+				});
+			};
+			timer_func();
+			m_Connect = true;
+			promise.set_value();
+			loop.run();
+			m_Connect = false;
 
 			// Close all channels
 
+			if (true)
 			{
 				if (m_Channel) onDisconnect(m_Channel);
 				m_Channel = nullptr;
 				m_ChannelRemoved = nullptr;
 			}
 
-			uv_close((uv_handle_t*)&client, nullptr);
-			uv_loop_close(&loop);
-
 			MS_PRINT("closed client");
 			return;
-		} while (false);
 
-		uv_close((uv_handle_t*)&client, nullptr);
-		uv_loop_close(&loop);
+		} while (false);
 		promise.set_value();
-		});
+	});
 
 	future.wait();
 }
@@ -226,6 +292,7 @@ void KCPClientReactor::shutdown()
 {
 	if (m_Running == false) return;
 	ChannelReactor::shutdown();
+
 	m_Channel = nullptr;
 	m_ChannelRemoved = nullptr;
 }
@@ -256,217 +323,28 @@ void KCPClientReactor::onDisconnect(MSRef<Channel> channel)
 {
 	MS_DEBUG("rejected from %s", channel->getRemote().lock()->getString().c_str());
 
-	m_ChannelRemoved = channel;
 	m_Connect = false;
 	m_Channel = nullptr;
+	m_ChannelRemoved = channel;
 	ChannelReactor::onDisconnect(channel);
 }
 
 void KCPClientReactor::onOutbound(MSRef<IChannelEvent> event, bool flush)
 {
 	ChannelReactor::onOutbound(event, flush);
-	m_Sending = true;
-	uv_async_send(m_EventAsync);
-}
-
-void KCPClientReactor::on_alloc(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf)
-{
-	buf->base = (char*)malloc(suggested_size);
-	buf->len = (uint32_t)suggested_size;
-}
-
-void KCPClientReactor::on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf, const sockaddr* peer, unsigned flags)
-{
-	auto reactor = (KCPClientReactor*)req->loop->data;
-	auto channel = reactor->m_Channel;
-	auto client = req;
-
-	if (nread == 0 || peer == nullptr)
-	{
-		free(buf->base);
-		return;
-	}
-
-	if (channel == nullptr)
-	{
-		// Get the actual ip and port number
-
-		sockaddr_storage addr = {};
-		int addrLen = sizeof(addr);
-		MSRef<ISocketAddress> localAddress, remoteAddress;
-
-		auto result = uv_udp_getsockname(client, (sockaddr*)&addr, &addrLen);
-		if (result == 0)
-		{
-			if (addr.ss_family == AF_INET)
-			{
-				auto in_addr = (sockaddr_in*)&addr;
-				char ip_str[INET_ADDRSTRLEN];
-				inet_ntop(AF_INET, &in_addr->sin_addr, ip_str, sizeof(ip_str));
-				auto address = ip_str;
-				auto portNum = ntohs(in_addr->sin_port);
-				localAddress = MSNew<IPv4Address>(address, portNum);
-			}
-			else if (addr.ss_family == AF_INET6)
-			{
-				auto in6_addr = (sockaddr_in6*)&addr;
-				char ip_str[INET6_ADDRSTRLEN];
-				inet_ntop(AF_INET6, &in6_addr->sin6_addr, ip_str, sizeof(ip_str));
-				auto address = ip_str;
-				auto portNum = ntohs(in6_addr->sin6_port);
-				localAddress = MSNew<IPv6Address>(address, portNum);
-			}
-			else MS_ERROR("unknown address family: %d", addr.ss_family);
-		}
-		else MS_ERROR("failed to get socket name: %s", ::uv_strerror(result));
-
-		result = uv_udp_getpeername(client, (sockaddr*)&addr, &addrLen);
-		if (result == 0)
-		{
-			if (addr.ss_family == AF_INET)
-			{
-				auto in_addr = (sockaddr_in*)&addr;
-				char ip_str[INET_ADDRSTRLEN];
-				inet_ntop(AF_INET, &in_addr->sin_addr, ip_str, sizeof(ip_str));
-				auto address = ip_str;
-				auto portNum = ntohs(in_addr->sin_port);
-				remoteAddress = MSNew<IPv4Address>(address, portNum);
-			}
-			else if (addr.ss_family == AF_INET6)
-			{
-				auto in6_addr = (sockaddr_in6*)&addr;
-				char ip_str[INET6_ADDRSTRLEN];
-				inet_ntop(AF_INET6, &in6_addr->sin6_addr, ip_str, sizeof(ip_str));
-				auto portNum = ntohs(in6_addr->sin6_port);
-				auto address = ip_str;
-				remoteAddress = MSNew<IPv6Address>(address, portNum);
-			}
-			else MS_ERROR("unknown address family: %d", addr.ss_family);
-		}
-		else MS_ERROR("failed to get socket name: %s", ::uv_strerror(result));
-
-		if (localAddress == nullptr || remoteAddress == nullptr)
-		{
-			free(buf->base);
-			return;
-		}
-
-		// Create a new channel and session
-
-		auto sessionID = ikcp_getconv(buf->base);
-		auto session = ikcp_create(sessionID, nullptr);
-		channel = MSNew<KCPChannel>(reactor, localAddress, remoteAddress, (uint32_t)(rand() % reactor->m_WorkerList.size()), client, session);
-		session->user = channel.get();
-		ikcp_setoutput(session, on_output);
-		ikcp_wndsize(session, 128, 128);
-		ikcp_nodelay(session, 1, 20, 2, 1);
-		reactor->onConnect(channel);
-
-		free(buf->base);
-		return;
-	}
-
-	// Process the incoming data : nread >= 0
-
-	if (nread < 0 || channel->running() == false)
-	{
-		free(buf->base);
-
-		reactor->onDisconnect(channel);
-		return;
-	}
-
-	auto _channel = MSCast<KCPChannel>(channel);
-	auto result = ikcp_input(_channel->getSession(), (char*)buf->base, (uint32_t)nread);
-	if (result < 0)
-	{
-		free(buf->base);
-
-		reactor->onDisconnect(channel);
-		return;
-	}
-
-	free(buf->base);
 }
 
 int KCPClientReactor::on_output(const char* buf, int len, IKCPCB* kcp, void* user)
 {
 	auto channel = (KCPChannel*)user;
+	auto socket = channel->getSocket();
 	auto reactor = MSCast<KCPClientReactor>(channel->getReactor());
-	auto client = channel->getHandle();
-	auto remote = channel->getRemote().lock();
-
-	// Send the data
-
-	size_t count = 0;
-	MSStringView message(buf, len);
-	while (count < message.size())
+	asio::error_code error;
+	auto length = socket->send_to(asio::buffer(buf, len), channel->getEndpoint(), 0, error);
+	if (error)
 	{
-		auto buffer = uv_buf_init((char*)message.data() + count, (unsigned)(message.size() - count));
-		auto result = uv_udp_try_send(client, &buffer, 1, nullptr);
-		if (result == UV_EAGAIN) continue;
-		if (result < 0)
-		{
-			reactor->onDisconnect(channel->shared_from_this());
-			return -1;
-		}
-		count += result;
+		reactor->onDisconnect(channel->shared_from_this());
+		return -1;
 	}
-	return (int)count;
-}
-
-void KCPClientReactor::on_send(uv_async_t* handle)
-{
-	auto reactor = (KCPClientReactor*)handle->loop->data;
-	reactor->m_ChannelRemoved = nullptr;
-
-	if (reactor->m_Channel)
-	{
-		auto channel = MSCast<KCPChannel>(reactor->m_Channel);
-		if (channel == nullptr || channel->running() == false) return;
-		auto session = channel->getSession();
-
-		auto nowTime = iclock();
-		auto nextTime = ikcp_check(session, nowTime);
-		if (nextTime <= nowTime) ikcp_update(session, nowTime);
-
-		char buffer[2048];
-		auto result = ikcp_recv(channel->getSession(), buffer, sizeof(buffer));
-		if (0 < result)
-		{
-			auto event = MSNew<IChannelEvent>();
-			event->Message = MSStringView(buffer, result);
-			event->Channel = channel;
-			while (0 <= result)
-			{
-				result = ikcp_recv(channel->getSession(), buffer, sizeof(buffer));
-				if (result < 0) break;
-				event->Message += MSStringView(buffer, result);
-			}
-			reactor->onInbound(event);
-		}
-	}
-
-	if (reactor->m_Running == false) uv_stop(handle->loop);
-	if (reactor->m_Running == false || reactor->m_Sending == false) return;
-
-	MSMutexLock lock(reactor->m_EventLock);
-	reactor->m_Sending = false;
-
-	while (reactor->m_EventQueue.size())
-	{
-		auto event = reactor->m_EventQueue.front();
-		reactor->m_EventQueue.pop();
-
-		auto channel = MSCast<KCPChannel>(event->Channel.lock());
-		if (channel == nullptr) continue;
-		if (channel->running() == false) reactor->onDisconnect(channel);
-		if (channel->running() == false) continue;
-		if (event->Message.empty()) continue;
-		auto session = channel->getSession();
-
-		auto result = ikcp_send(session, event->Message.data(), (int)event->Message.size());
-		if (result < 0) reactor->onDisconnect(channel);
-		if (event->Promise) event->Promise->set_value(result == 0);
-	}
+	return length;
 }

@@ -99,7 +99,10 @@ void UDPClientReactor::startup()
 				}
 				if (localAddress == nullptr || remoteAddress == nullptr)
 				{
-					client.close();
+					error = client.shutdown(tcp::socket::shutdown_both, error);
+					if (error) MS_ERROR("failed to shutdown: %s", error.message().c_str());
+					error = client.close(error);
+					if (error) MS_ERROR("failed to close: %s", error.message().c_str());
 					return;
 				}
 				m_LocalAddress = localAddress;
