@@ -131,8 +131,7 @@ void KCPServerReactor::startup()
 
 							session->user = channel.get();
 							ikcp_setoutput(session, on_output);
-							ikcp_wndsize(session, 128, 128);
-							ikcp_nodelay(session, 1, 10, 2, 1);
+							ikcp_nodelay(session, 1, 5, 1, 1);
 							// Pass the session id to remote client
 							asio::error_code result;
 							server.send_to(asio::buffer(session, sizeof(uint32_t)), client, 0, result);
@@ -160,10 +159,6 @@ void KCPServerReactor::startup()
 								event->Message = MSStringView(buffer2, length2);
 								event->Channel = channel;
 								reactor->onInbound(event);
-
-								auto nowTime = iclock();
-								auto nextTime = ikcp_check(session, nowTime);
-								if (nextTime <= nowTime) ikcp_update(session, nowTime);
 
 								length2 = ikcp_recv(session, buffer2, sizeof(buffer2));
 							}
@@ -194,6 +189,17 @@ void KCPServerReactor::startup()
 						auto nowTime = iclock();
 						auto nextTime = ikcp_check(session, nowTime);
 						if (nextTime <= nowTime) ikcp_update(session, nowTime);
+
+						auto length2 = ikcp_recv(session, buffer2, sizeof(buffer2));
+						while (0 < length2)
+						{
+							auto event = MSNew<IChannelEvent>();
+							event->Message = MSStringView(buffer2, length2);
+							event->Channel = channel;
+							reactor->onInbound(event);
+
+							length2 = ikcp_recv(session, buffer2, sizeof(buffer2));
+						}
 					}
 
 					MSMutexLock lock(reactor->m_EventLock);
