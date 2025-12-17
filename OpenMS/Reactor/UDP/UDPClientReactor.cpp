@@ -144,7 +144,7 @@ void UDPClientReactor::startup()
 			{
 				if (auto _channel = channel.lock())
 				{
-					client.async_send_to(asio::buffer(event->Message), client.remote_endpoint(), [=, &write_func](asio::error_code error, size_t length)
+					client.async_send(asio::buffer(event->Message), [=, &write_func](asio::error_code error, size_t length)
 					{
 						if (error)
 						{

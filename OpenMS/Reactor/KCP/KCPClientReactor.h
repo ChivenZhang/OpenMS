@@ -15,10 +15,7 @@
 class KCPClientReactor : public ChannelReactor
 {
 public:
-	struct callback_kcp_t : callback_t
-	{
-		MSLambda<uint32_t(MSRef<IChannelAddress>)> Session;
-	};
+	using callback_kcp_t = callback_t;
 
 public:
 	KCPClientReactor(MSRef<ISocketAddress> address, size_t workerNum, callback_kcp_t callback);

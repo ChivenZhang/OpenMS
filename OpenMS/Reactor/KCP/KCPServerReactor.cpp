@@ -12,63 +12,11 @@
 #include "KCPChannel.h"
 #include <asio.hpp>
 
-// From official kcp demo: https://github.com/skywind3000/kcp/blob/master/test.h
 namespace
 {
-#if defined(WIN32) || defined(_WIN32) || defined(WIN64) || defined(_WIN64)
-#include <windows.h>
-#elif !defined(__unix)
-#define __unix
-#endif
-
-#ifdef __unix
-#include <unistd.h>
-#include <sys/time.h>
-#include <sys/wait.h>
-#include <sys/types.h>
-#endif
-
-	/* get system time */
-	void itimeofday(long* sec, long* usec)
-	{
-#if defined(__unix)
-		struct timeval time;
-		gettimeofday(&time, NULL);
-		if (sec) *sec = time.tv_sec;
-		if (usec) *usec = time.tv_usec;
-#else
-		static long mode = 0, addsec = 0;
-		BOOL retval;
-		static IINT64 freq = 1;
-		IINT64 qpc;
-		if (mode == 0) {
-			retval = QueryPerformanceFrequency((LARGE_INTEGER*)&freq);
-			freq = (freq == 0) ? 1 : freq;
-			retval = QueryPerformanceCounter((LARGE_INTEGER*)&qpc);
-			addsec = (long)time(NULL);
-			addsec = addsec - (long)((qpc / freq) & 0x7fffffff);
-			mode = 1;
-		}
-		retval = QueryPerformanceCounter((LARGE_INTEGER*)&qpc);
-		retval = retval * 2;
-		if (sec) *sec = (long)(qpc / freq) + addsec;
-		if (usec) *usec = (long)((qpc % freq) * 1000000 / freq);
-#endif
-	}
-
-	/* get clock in millisecond 64 */
-	IINT64 iclock64(void)
-	{
-		long s, u;
-		IINT64 value;
-		itimeofday(&s, &u);
-		value = ((IINT64)s) * 1000 + (u / 1000);
-		return value;
-	}
-
 	IUINT32 iclock()
 	{
-		return (IUINT32)(iclock64() & 0xfffffffful);
+		return (IUINT32)(std::chrono::steady_clock::now().time_since_epoch().count() / 1000000);
 	}
 }
 
@@ -128,14 +76,7 @@ void KCPServerReactor::startup()
 				if (family == AF_INET) localAddress = MSNew<IPv4Address>(address, portNum);
 				else if (family == AF_INET6) localAddress = MSNew<IPv6Address>(address, portNum);
 				else MS_ERROR("unknown address family: %d", family);
-				if (localAddress == nullptr)
-				{
-					error = server.shutdown(tcp::socket::shutdown_both, error);
-					if (error) MS_ERROR("failed to shutdown: %s", error.message().c_str());
-					error = server.close(error);
-					if (error) MS_ERROR("failed to close: %s", error.message().c_str());
-					break;
-				}
+				if (localAddress == nullptr) break;
 				m_LocalAddress = localAddress;
 			}
 
@@ -144,6 +85,7 @@ void KCPServerReactor::startup()
 			// Read and write data in async way
 
 			char buffer[2048];
+			char buffer2[2048];
 			udp::endpoint remote;
 
 			MSLambda<void()> read_func;
@@ -190,11 +132,11 @@ void KCPServerReactor::startup()
 							session->user = channel.get();
 							ikcp_setoutput(session, on_output);
 							ikcp_wndsize(session, 128, 128);
-							ikcp_nodelay(session, 1, 20, 2, 1);
+							ikcp_nodelay(session, 1, 10, 2, 1);
 							// Pass the session id to remote client
-							auto result = ikcp_send(session, nullptr, 0);
-							if (result < 0) return;
-							reactor->onConnect(channel);
+							asio::error_code result;
+							server.send_to(asio::buffer(session, sizeof(uint32_t)), client, 0, result);
+							if (!result) reactor->onConnect(channel);
 
 							read_func();
 							return;
@@ -208,13 +150,29 @@ void KCPServerReactor::startup()
 						else
 						{
 							auto _channel = MSCast<KCPChannel>(channel);
-							ikcp_input(_channel->getSession(), buffer, length);
+							auto session = _channel->getSession();
+							ikcp_input(session, buffer, (long)length);
+
+							auto length2 = ikcp_recv(session, buffer2, sizeof(buffer2));
+							while (0 < length2)
+							{
+								auto event = MSNew<IChannelEvent>();
+								event->Message = MSStringView(buffer2, length2);
+								event->Channel = channel;
+								reactor->onInbound(event);
+
+								auto nowTime = iclock();
+								auto nextTime = ikcp_check(session, nowTime);
+								if (nextTime <= nowTime) ikcp_update(session, nowTime);
+
+								length2 = ikcp_recv(session, buffer2, sizeof(buffer2));
+							}
+
 							read_func();
 						}
 					});
 				}
 			};
-
 			read_func();
 
 			asio::steady_timer ticker(loop);
@@ -227,7 +185,6 @@ void KCPServerReactor::startup()
 
 					// Update all kcp sessions
 
-					char buffer2[2048];
 					for (size_t i = 0; i < reactor->m_Channels.size(); ++i)
 					{
 						auto channel = MSCast<KCPChannel>(reactor->m_Channels[i]);
@@ -237,15 +194,6 @@ void KCPServerReactor::startup()
 						auto nowTime = iclock();
 						auto nextTime = ikcp_check(session, nowTime);
 						if (nextTime <= nowTime) ikcp_update(session, nowTime);
-
-						auto length = ikcp_recv(session, buffer2, sizeof(buffer2));
-						if (0 < length)
-						{
-							auto event = MSNew<IChannelEvent>();
-							event->Message = MSStringView(buffer2, length);
-							event->Channel = channel;
-							reactor->onInbound(event);
-						}
 					}
 
 					MSMutexLock lock(reactor->m_EventLock);
@@ -306,6 +254,7 @@ void KCPServerReactor::startup()
 				m_ChannelsRemoved.clear();
 			}
 
+			if (loop.stopped() == false) loop.stop();
 			MS_PRINT("closed server");
 			return;
 
@@ -374,11 +323,11 @@ int KCPServerReactor::on_output(const char* buf, int len, IKCPCB* kcp, void* use
 	auto reactor = MSCast<KCPServerReactor>(channel->getReactor());
 	auto& remote = channel->getEndpoint();
 	asio::error_code error;
-	auto result = socket->send_to(asio::buffer(buf, len), remote, 0, error);
+	socket->send_to(asio::buffer(buf, len), remote, 0, error);
 	if (error)
 	{
 		reactor->onDisconnect(channel->shared_from_this());
 		return -1;
 	}
-	return result;
+	return 0;
 }
