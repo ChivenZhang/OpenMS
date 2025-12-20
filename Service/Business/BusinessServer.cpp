@@ -48,7 +48,7 @@ void BusinessServer::onInit()
 			m_MatchQueue.push(userID);
 
 			auto playerService = MSNew<PlayerService>(userID);
-			if (mailHub->create("player:" + std::to_string(userID), playerService)) this->onPush();
+			mailHub->create("player:" + std::to_string(userID), playerService);
 
 			// Match battle
 			if (2 <= m_MatchQueue.size())
@@ -74,7 +74,7 @@ void BusinessServer::onInit()
 			}
 			co_return;
 		});
-		if (mailHub->create("server:" + std::to_string(userID), serverService)) this->onPush();
+		mailHub->create("server:" + std::to_string(userID), serverService);
 		co_return userID;
 	});
 	logicService->bind("logout", [=, this](uint32_t userID)->MSAsync<bool>
@@ -83,7 +83,6 @@ void BusinessServer::onInit()
 		auto result = false;
 		result |= mailHub->cancel("server:" + std::to_string(userID));
 		result |= mailHub->cancel("player:" + std::to_string(userID));
-		if (result) this->onPush();
 		if (result)
 		{
 			MSMutexLock lock(m_UserLock);
@@ -107,9 +106,9 @@ void BusinessServer::onInit()
 		co_return 0;
 	});
 
-	if (mailHub->create("logic", logicService)) this->onPush();
+	mailHub->create("logic", logicService);
 
-	/*startTimer(0, 2000, [=, this](uint32_t handle)
+	startTimer(0, 2000, [=, this](uint32_t handle)
 	{
 		MSMutexLock lock(m_UserLock);
 		auto now = 1.0f * ::clock() / CLOCKS_PER_SEC;
@@ -120,7 +119,7 @@ void BusinessServer::onInit()
 				logicService->call<bool>("logic", "logout", "", 0, MSTuple{ userInfo.first });
 			}
 		}
-	});*/
+	});
 }
 
 void BusinessServer::onExit()

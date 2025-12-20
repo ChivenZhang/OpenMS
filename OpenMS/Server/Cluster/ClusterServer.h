@@ -23,7 +23,6 @@ public:
 protected:
 	void onInit() override;
 	void onExit() override;
-	void onPush();
 
 protected:
 	uint32_t m_Heartbeat = 0;

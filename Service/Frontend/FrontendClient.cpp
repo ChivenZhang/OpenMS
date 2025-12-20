@@ -45,7 +45,7 @@ void FrontendClient::onInit()
 
 	// Handle local mail to remote
 
-	mailHub->send([=, this](IMail mail)->bool
+	mailHub->failed([=, this](IMail mail)->bool
 	{
 		auto client = m_TCPClient;
 		if (client && client->connect() == false)

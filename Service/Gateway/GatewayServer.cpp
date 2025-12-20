@@ -59,7 +59,7 @@ void GatewayServer::onInit()
 							{
 								auto serviceName = "proxy:" + std::to_string(userID);
 								auto proxyService = MSNew<ProxyService>(channel, userID);
-								if (mailHub->create(serviceName, proxyService)) this->onPush();
+								mailHub->create(serviceName, proxyService);
 								channel->getContext()->userdata() = userID;
 								MS_INFO("验证成功！ %s", user.c_str());
 							}
@@ -94,7 +94,7 @@ void GatewayServer::onInit()
 					};
 				});
 
-				if (mailHub->create("guest:" + std::to_string(guestID), guestService)) this->onPush();
+				mailHub->create("guest:" + std::to_string(guestID), guestService);
 
 				// Create Client Channel
 
@@ -156,15 +156,14 @@ void GatewayServer::onInit()
 				auto& guestData = channel->getContext()->attribs()["guestID"];
 				auto guestID = std::any_cast<uint32_t>(guestData);
 				auto serviceName = "guest:" + std::to_string(guestID);
-				auto result = mailHub->cancel(serviceName);
+				mailHub->cancel(serviceName);
 
 				if (auto userID = (uint32_t)channel->getContext()->userdata())
 				{
 					serviceName = "proxy:" + std::to_string(userID);
-					result |= mailHub->cancel(serviceName);
+					mailHub->cancel(serviceName);
 					channel->getContext()->userdata() = 0;
 				}
-				if (result) this->onPush();
 			},
 		}
 	});

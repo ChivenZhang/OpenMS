@@ -23,8 +23,9 @@ public:
 	bool cancel(MSString address) override;
 	bool exist(MSString address) override;
 	uint32_t send(IMail mail) override;
-	bool send(MSLambda<bool(IMail mail)> func) override;
 	void list(MSList<uint32_t>& result) override;
+	bool failed(MSLambda<bool(IMail mail)> callback) override;
+	bool change(MSLambda<void(MSString address)> callback) override;
 
 private:
 	friend class MailMan;
@@ -37,7 +38,8 @@ protected:
 	MSMutex m_MailboxLock;
 	MSMutexUnlock m_MailboxUnlock;
 	MSAtomic<bool> m_Running;
-	MSLambda<bool(IMail mail)> m_RemoteCall;
+	MSLambda<bool(IMail mail)> m_OnFailed;
+	MSLambda<void(MSString address)> m_OnChange;
 	MSAtomic<uint32_t> m_Session;
 	MSList<MSRef<MailMan>> m_Delivers;
 	MSMap<uint32_t, MSRef<MailBox>> m_MailboxMap;

@@ -62,7 +62,6 @@ MailMan::MailMan(MSRaw<MailHub> context)
 						mailbox->m_MailQueue.pop();
 					}
 				}
-				MS_INFO("%s %u", mailbox->m_TextName.c_str(), mailbox->m_MailQueue.size());
 				if (mailbox->m_MailQueue.empty() == false)
 				{
 					m_Context->enqueue(mailbox);
