@@ -119,7 +119,7 @@ bool MailHub::enqueue(MSHnd<IMailBox> mailbox)
 		MSMutexLock lock(m_MailLock);
 		m_MailboxQueue.push(mailbox.lock());
 	}
-	m_MailUnlock.notify_one();
+	m_MailUnlock.notify_all();
 	return true;
 }
 
