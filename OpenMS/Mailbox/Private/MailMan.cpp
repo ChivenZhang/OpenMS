@@ -22,14 +22,19 @@ MailMan::MailMan(MSRaw<MailHub> context)
 	{
 		while (m_Context->m_Running)
 		{
-			MSUniqueLock lock(m_Context->m_MailLock);
 			MSHnd<IMailBox> element;
-			m_Context->m_MailUnlock.wait(lock, [&]() { return m_Context->m_Running == false || m_Context->dequeue(element); });
-			if (m_Context->m_Running == false) break;
+			{
+				MSUniqueLock lock(m_Context->m_MailLock);
+				while (m_Context->m_Running && m_Context->dequeue(element) == false)
+				{
+					m_Context->m_MailUnlock.wait(lock);
+				}
+				if (m_Context->m_Running == false) break;
+			}
 
 			if (auto mailbox = MSCast<MailBox>(element.lock()))
 			{
-				MSMutexLock lock2(mailbox->m_MailLock);
+				MSMutexLock lock(mailbox->m_MailLock);
 				if (mailbox->m_MailQueue.empty() == false)
 				{
 					auto& mail = mailbox->m_MailQueue.front();
@@ -57,6 +62,7 @@ MailMan::MailMan(MSRaw<MailHub> context)
 						mailbox->m_MailQueue.pop();
 					}
 				}
+				MS_INFO("%s %u", mailbox->m_TextName.c_str(), mailbox->m_MailQueue.size());
 				if (mailbox->m_MailQueue.empty() == false)
 				{
 					m_Context->enqueue(mailbox);

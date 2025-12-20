@@ -53,7 +53,7 @@ void GatewayServer::onInit()
 					{
 						MS_INFO("服务端验证：%s", user.c_str());
 
-						guestService->async("logic", "login", "", 10000, MSTuple{user, pass}, [=, this](uint32_t userID)
+						guestService->async("logic", "login", "", 1000, MSTuple{user, pass}, [=, this](uint32_t userID)
 						{
 							if (userID)
 							{
@@ -98,10 +98,10 @@ void GatewayServer::onInit()
 
 				// Create Client Channel
 
-				/*channel->getPipeline()->addFirst("decrypt", MSNew<AESInboundHandler>(AESInboundHandler::config_t
+				channel->getPipeline()->addFirst("decrypt", MSNew<AESInboundHandler>(AESInboundHandler::config_t
 				{
 					.Key = { AES256_KEY },
-				}));*/
+				}));
 				channel->getPipeline()->addLast("input", IChannelPipeline::handler_in
 				{
 					.OnHandle = [=](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)->bool
@@ -138,10 +138,10 @@ void GatewayServer::onInit()
 						return false;
 					},
 				});
-				/*channel->getPipeline()->addFirst("encrypt", MSNew<AESOutboundHandler>(AESOutboundHandler::config_t
+				channel->getPipeline()->addFirst("encrypt", MSNew<AESOutboundHandler>(AESOutboundHandler::config_t
 				{
 					.Key = { AES256_KEY },
-				}));*/
+				}));
 				channel->getPipeline()->addLast("output", IChannelPipeline::handler_out
 				{
 					.OnHandle = [](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)->bool

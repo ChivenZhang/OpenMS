@@ -144,12 +144,10 @@ endif()
 
 find_package(asio CONFIG REQUIRED)
 target_link_libraries(OpenMS PRIVATE asio::asio)
-find_package(unofficial-http-parser CONFIG REQUIRED)
-target_link_libraries(OpenMS PUBLIC unofficial::http_parser::http_parser)
 find_package(kcp CONFIG REQUIRED)
 target_link_libraries(OpenMS PUBLIC kcp::kcp)
-find_package(libuv CONFIG REQUIRED)
-target_link_libraries(OpenMS PUBLIC $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>)
+find_package(unofficial-http-parser CONFIG REQUIRED)
+target_link_libraries(OpenMS PUBLIC unofficial::http_parser::http_parser)
 find_package(MbedTLS CONFIG REQUIRED)
 # everything
 target_link_libraries(OpenMS PUBLIC MbedTLS::mbedtls)
@@ -164,6 +162,8 @@ target_link_libraries(OpenMS PUBLIC cpptrace::cpptrace)
 # this is heuristically generated, and may not be correct
 find_package(unofficial-breakpad CONFIG REQUIRED)
 target_link_libraries(OpenMS PUBLIC unofficial::breakpad::libbreakpad unofficial::breakpad::libbreakpad_client)
+find_package(libuv CONFIG REQUIRED)
+target_link_libraries(OpenMS PRIVATE $<IF:$<TARGET_EXISTS:libuv::uv_a>,libuv::uv_a,libuv::uv>)
 
 target_include_directories(OpenMS PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(OpenMS PUBLIC ${OPENMS_SOURCE_DIR}/External/iocpp)

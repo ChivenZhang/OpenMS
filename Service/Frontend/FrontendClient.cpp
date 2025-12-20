@@ -80,10 +80,10 @@ void FrontendClient::onInit()
 			{
 				m_TCPChannel = channel;
 
-				/*channel->getPipeline()->addFirst("decrypt", MSNew<AESInboundHandler>(AESInboundHandler::config_t
+				channel->getPipeline()->addFirst("decrypt", MSNew<AESInboundHandler>(AESInboundHandler::config_t
 				{
 					.Key = { AES256_KEY },
-				}));*/
+				}));
 				channel->getPipeline()->addLast("input", IChannelPipeline::handler_in
 				{
 					.OnHandle = [=](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)->bool
@@ -103,10 +103,10 @@ void FrontendClient::onInit()
 						return false;
 					},
 				});
-				/*channel->getPipeline()->addFirst("encrypt", MSNew<AESOutboundHandler>(AESOutboundHandler::config_t
+				channel->getPipeline()->addFirst("encrypt", MSNew<AESOutboundHandler>(AESOutboundHandler::config_t
 				{
 					.Key = { AES256_KEY },
-				}));*/
+				}));
 				channel->getPipeline()->addLast("output", IChannelPipeline::handler_out
 				{
 					.OnHandle = [](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)->bool
@@ -117,7 +117,7 @@ void FrontendClient::onInit()
 				});
 
 				MS_INFO("尝试登录...");
-				clientService->async("guest", "login", "", 1000, R"(["admin","123456"])", [=](MSStringView&& response)
+				clientService->async("guest", "login", "", 5000, R"(["admin","123456"])", [=](MSStringView&& response)
 				{
 					MS_INFO("登录结果：%s", response.data());
 					if (response.empty()) return;
