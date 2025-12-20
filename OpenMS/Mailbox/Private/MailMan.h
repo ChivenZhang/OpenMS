@@ -20,7 +20,6 @@ public:
 	~MailMan();
 
 protected:
-	MSMutex m_MailLock;
 	MSThread m_MailThread;
 	MSRaw<MailHub> m_Context;
 };
