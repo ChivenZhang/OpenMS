@@ -41,13 +41,16 @@ bool MailHub::create(MSString address, MSRef<IMailBox> value)
 	mailbox->m_Context = this;
 	mailbox->m_HashName = MSHash(address);
 	mailbox->m_TextName = address;
+	if (m_OnChange) m_OnChange(address);
 	return true;
 }
 
 bool MailHub::cancel(MSString address)
 {
 	MSMutexLock lock(m_MailboxLock);
-	return m_MailboxMap.erase(MSHash(address));
+	auto result = m_MailboxMap.erase(MSHash(address));
+	if (result && m_OnChange) m_OnChange(address);
+	return result;
 }
 
 bool MailHub::exist(MSString address)
@@ -67,7 +70,7 @@ uint32_t MailHub::send(IMail mail)
 		auto result = m_MailboxMap.find(toName);
 		if (result == m_MailboxMap.end() || result->second == nullptr)
 		{
-			if (m_RemoteCall && m_RemoteCall(mail)) return mail.Date;
+			if (m_OnFailed && m_OnFailed(mail)) return mail.Date;
 			return 0;
 		}
 		toMailbox = result->second;
@@ -97,13 +100,6 @@ uint32_t MailHub::send(IMail mail)
 	}
 }
 
-bool MailHub::send(MSLambda<bool(IMail mail)> func)
-{
-	if (m_RemoteCall) return false;
-	m_RemoteCall = func;
-	return true;
-}
-
 void MailHub::list(MSList<uint32_t>& result)
 {
 	MSMutexLock lock(m_MailboxLock);
@@ -111,6 +107,20 @@ void MailHub::list(MSList<uint32_t>& result)
 	{
 		result.push_back(mailbox.second->hash());
 	}
+}
+
+bool MailHub::failed(MSLambda<bool(IMail mail)> callback)
+{
+	if (m_OnFailed) return false;
+	m_OnFailed = callback;
+	return true;
+}
+
+bool MailHub::change(MSLambda<void(MSString address)> callback)
+{
+	if (m_OnChange) return false;
+	m_OnChange = callback;
+	return true;
 }
 
 bool MailHub::enqueue(MSHnd<IMailBox> mailbox)
