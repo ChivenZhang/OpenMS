@@ -22,7 +22,7 @@ MailMan::MailMan(MSRaw<MailHub> context)
 	{
 		while (m_Context->m_Running)
 		{
-			MSUniqueLock lock(m_MailLock);
+			MSUniqueLock lock(m_Context->m_MailLock);
 			MSHnd<IMailBox> element;
 			m_Context->m_MailUnlock.wait(lock, [&]() { return m_Context->m_Running == false || m_Context->dequeue(element); });
 			if (m_Context->m_Running == false) break;

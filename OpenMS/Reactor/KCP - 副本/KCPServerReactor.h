@@ -11,6 +11,7 @@
 * =================================================*/
 #include "../Private/ChannelReactor.h"
 #include "../Private/ChannelAddress.h"
+#include <uv.h>
 
 class KCPServerReactor : public ChannelReactor
 {
@@ -31,15 +32,21 @@ protected:
 	void onConnect(MSRef<Channel> channel) override;
 	void onDisconnect(MSRef<Channel> channel) override;
 	void onOutbound(MSRef<IChannelEvent> event, bool flush) override;
-	static int on_output(const char* buf, int len, struct IKCPCB* kcp, void* user);
 
 protected:
-	uint32_t m_Backlog;
-	uint32_t m_Session;
+	static void on_alloc(uv_handle_t* handle, size_t suggested_size, uv_buf_t* buf);
+	static void on_read(uv_udp_t* req, ssize_t nread, const uv_buf_t* buf, const struct sockaddr* addr, unsigned flags);
+	static int on_output(const char* buf, int len, struct IKCPCB* kcp, void* user);
+	static void on_send(uv_async_t* handle);
+
+protected:
+	uint32_t m_Backlog, m_Session;
 	MSRef<ISocketAddress> m_Address;
 	MSRef<ISocketAddress> m_LocalAddress;
 	MSList<MSRef<Channel>> m_Channels;
 	MSList<MSRef<Channel>> m_ChannelsRemoved;
-	MSMap<uint32_t, MSHnd<Channel>> m_ChannelMap;
+	MSMap<uint32_t, MSRef<Channel>> m_ChannelMap;
 	MSLambda<uint32_t(MSRef<IChannelAddress>)> m_OnSession;
+	MSAtomic<bool> m_Sending;
+	uv_async_t* m_EventAsync = nullptr;
 };

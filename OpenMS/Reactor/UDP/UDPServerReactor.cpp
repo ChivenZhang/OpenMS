@@ -89,7 +89,14 @@ void UDPServerReactor::startup()
 				if (family == AF_INET) localAddress = MSNew<IPv4Address>(address, portNum);
 				else if (family == AF_INET6) localAddress = MSNew<IPv6Address>(address, portNum);
 				else MS_ERROR("unknown address family: %d", family);
-				if (localAddress == nullptr) break;
+				if (localAddress == nullptr)
+				{
+					error = server.shutdown(tcp::socket::shutdown_both, error);
+					if (error) MS_ERROR("failed to shutdown: %s", error.message().c_str());
+					error = server.close(error);
+					if (error) MS_ERROR("failed to close: %s", error.message().c_str());
+					break;
+				}
 				m_LocalAddress = localAddress;
 			}
 
@@ -136,7 +143,7 @@ void UDPServerReactor::startup()
 							}
 							if (localAddress == nullptr || remoteAddress == nullptr)
 							{
-								MS_ERROR("failed to get socket name");
+								read_func();
 								return;
 							}
 

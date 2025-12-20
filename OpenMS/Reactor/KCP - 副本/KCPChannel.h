@@ -10,21 +10,19 @@
 *
 * =================================================*/
 #include "../Private/Channel.h"
-#include <asio.hpp>
+#include <uv.h>
 #include <ikcp.h>
 
 class KCPChannel : public Channel
 {
 public:
-	KCPChannel(MSRaw<ChannelReactor> reactor, MSRef<IChannelAddress> local, MSRef<IChannelAddress> remote, uint32_t workID, ikcpcb* session, asio::ip::udp::socket* socket, asio::ip::udp::endpoint handle);
+	KCPChannel(MSRaw<ChannelReactor> reactor, MSRef<IChannelAddress> local, MSRef<IChannelAddress> remote, uint32_t workID, uv_udp_t* handle, ikcpcb* session);
 	~KCPChannel() override;
-	MSRaw<ChannelReactor> getReactor() const;
-	asio::ip::udp::socket* getSocket() const;
+	uv_udp_t* getHandle() const;
 	ikcpcb* getSession() const;
-	asio::ip::udp::endpoint const& getEndpoint() const;
+	MSRaw<ChannelReactor> getReactor() const;
 
 protected:
+	uv_udp_t* m_Handle;
 	ikcpcb* m_Session;
-	asio::ip::udp::socket* m_Socket;
-	asio::ip::udp::endpoint m_Endpoint;
 };
