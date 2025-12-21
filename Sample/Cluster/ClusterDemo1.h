@@ -19,10 +19,6 @@ public:
 protected:
 	void onInit() override;
 	void onExit() override;
-
-protected:
-	MSThread m_Thread;
-	MSAtomic<bool> m_Running;
 };
 
 OPENMS_RUN(ClusterDemo1)
