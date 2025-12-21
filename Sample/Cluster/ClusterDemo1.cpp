@@ -43,11 +43,13 @@ void ClusterDemo1::onInit()
 {
 	ClusterServer::onInit();
 
-	auto hub = AUTOWIRE(IMailHub)::bean();
+	auto mailHub = AUTOWIRE(IMailHub)::bean();
 	auto loginService = MSNew<LoginService>();
-	hub->create("login", loginService);
+	mailHub->create("login", loginService);
 
-	// RPC : login.login() => author.verify()
+	// RPC
+	// login.login() => author.verify()
+
 	auto response = loginService->call<MSString>("login", "login", "", 1000, MSTuple{"admin", "123456"});
 	MS_INFO("Login result: %s", response.first.c_str());
 }
