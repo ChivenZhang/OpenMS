@@ -19,7 +19,7 @@ public:
 		this->bind("verify", [](MSString user, MSString pass)->MSAsync<MSString>
 		{
 			MS_DEBUG("success %s %s", user.c_str(), pass.c_str());
-			co_return "success";
+			co_return "SUCCESS";
 		});
 	}
 };
@@ -36,8 +36,8 @@ void ClusterDemo2::onInit()
 {
 	ClusterServer::onInit();
 
-	auto hub = AUTOWIRE(IMailHub)::bean();
-	hub->create("author", MSNew<AuthorService>());
+	auto mailHub = AUTOWIRE(IMailHub)::bean();
+	mailHub->create("author", MSNew<AuthorService>());
 }
 
 void ClusterDemo2::onExit()

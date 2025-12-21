@@ -47,32 +47,12 @@ void ClusterDemo1::onInit()
 	auto loginService = MSNew<LoginService>();
 	hub->create("login", loginService);
 
-	m_Running = true;
-	m_Thread = MSThread([=, this]()
-	{
-		QuickQPS qps;
-		auto T = ::clock();
-
-		while (m_Running)
-		{
-			auto response = loginService->call<MSString>("author", "verify", "", 1000, MSTuple{"admin", "123456"});
-			MS_DEBUG("Get %s", response.first.c_str());
-
-			qps.hit();
-			auto t = ::clock();
-			if (T + 5000 <= t)
-			{
-				MS_INFO("QPS %f", qps.get());
-				T = t;
-			}
-		}
-	});
+	// RPC : login.login() => author.verify()
+	auto response = loginService->call<MSString>("login", "login", "", 1000, MSTuple{"admin", "123456"});
+	MS_INFO("Login result: %s", response.first.c_str());
 }
 
 void ClusterDemo1::onExit()
 {
-	m_Running = false;
-	if (m_Thread.joinable()) m_Thread.join();
-
 	ClusterServer::onExit();
 }
