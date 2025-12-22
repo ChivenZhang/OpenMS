@@ -9,24 +9,25 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "MS.h"
-#if 20 <= OPENMS_CPP_VERSION
+#include <future>
 #include <variant>
 #include <coroutine>
+#include <functional>
+#include "TraitsUtility.h"
 
 // ==================== Await<T> ====================
 
 template <class T>
-using MSAwait = MSLambda<void(T)>;
+using TAwait = std::function<void(T)>;
 
 // =================== Promise<T> ===================
 
-enum class MSAsyncState
+enum class TAsyncState
 {
 	NONE = 0, PEND, AWAIT, YIELD, DONE,
 };
 
-struct MSPromiseBase
+struct TPromiseBase
 {
 	struct InitAwaitable
 	{
@@ -39,10 +40,10 @@ struct MSPromiseBase
 
 		void await_resume() noexcept
 		{
-			(*m_ThisState) = MSAsyncState::PEND;
+			(*m_ThisState) = TAsyncState::PEND;
 		}
 
-		MSAsyncState* m_ThisState;
+		TAsyncState* m_ThisState;
 	};
 
 	struct FinalAwaitable
@@ -72,23 +73,23 @@ struct MSPromiseBase
 
 	std::coroutine_handle<> m_ThisHandle;
 	std::coroutine_handle<> m_NextHandle;
-	MSAsyncState m_ThisState = MSAsyncState::NONE;
-	MSAsyncState m_LastState = MSAsyncState::NONE;
-	MSAsyncState* m_RootState = &m_ThisState;
+	TAsyncState m_ThisState = TAsyncState::NONE;
+	TAsyncState m_LastState = TAsyncState::NONE;
+	TAsyncState* m_RootState = &m_ThisState;
 	std::coroutine_handle<>* m_RootHandle = &m_ThisHandle;
 };
 
 template <class T>
-class MSAsync;
+class TAsync;
 
 template <class T>
-struct MSAsyncPromise : MSPromiseBase
+struct TAsyncPromise : TPromiseBase
 {
-	MSAsync<T> get_return_object() noexcept;
+	TAsync<T> get_return_object() noexcept;
 
 	void unhandled_exception() noexcept
 	{
-		m_ThisState = MSAsyncState::DONE;
+		m_ThisState = TAsyncState::DONE;
 		*m_RootState = m_ThisState;
 		*m_RootHandle = nullptr;
 		m_Error = std::current_exception();
@@ -96,7 +97,7 @@ struct MSAsyncPromise : MSPromiseBase
 
 	void return_value(T value) noexcept
 	{
-		m_ThisState = MSAsyncState::DONE;
+		m_ThisState = TAsyncState::DONE;
 		*m_RootState = m_ThisState;
 		*m_RootHandle = nullptr;
 		m_Value = std::move(value);
@@ -105,17 +106,17 @@ struct MSAsyncPromise : MSPromiseBase
 
 	auto yield_value(T value) noexcept
 	{
-		struct MSYieldAwaitable
+		struct TYieldAwaitable
 		{
-			std::coroutine_handle<MSAsyncPromise> m_ThisHandle;
+			std::coroutine_handle<TAsyncPromise> m_ThisHandle;
 
 			bool await_ready() const noexcept { return false; }
 
-			void await_suspend(std::coroutine_handle<MSAsyncPromise> handle)
+			void await_suspend(std::coroutine_handle<TAsyncPromise> handle)
 			{
 				m_ThisHandle = handle;
 				m_ThisHandle.promise().m_LastState = m_ThisHandle.promise().m_ThisState;
-				m_ThisHandle.promise().m_ThisState = MSAsyncState::YIELD;
+				m_ThisHandle.promise().m_ThisState = TAsyncState::YIELD;
 				*m_ThisHandle.promise().m_RootState = m_ThisHandle.promise().m_ThisState;
 				*m_ThisHandle.promise().m_RootHandle = m_ThisHandle;
 			}
@@ -130,40 +131,30 @@ struct MSAsyncPromise : MSPromiseBase
 			}
 		};
 		m_Value = std::move(value);
-		return MSYieldAwaitable{};
+		return TYieldAwaitable{};
 	}
 
 	T& result()
 	{
-		if (m_Error)
-		{
-			try
-			{
-				std::rethrow_exception(m_Error);
-			}
-			catch (...)
-			{
-				MSThrow(MSError("result()" " at " __FILE__));
-			}
-		}
+		if (m_Error) std::rethrow_exception(m_Error);
 		return m_Value;
 	}
 
 	template <class U>
-	auto await_transform(MSAsync<U>&& async)
+	auto await_transform(TAsync<U>&& async)
 	{
-		struct MSAsyncAwaitable
+		struct TAsyncAwaitable
 		{
-			std::coroutine_handle<MSAsyncPromise> m_ThisHandle;
-			std::coroutine_handle<MSAsyncPromise<U>> m_NextHandle;
+			std::coroutine_handle<TAsyncPromise> m_ThisHandle;
+			std::coroutine_handle<TAsyncPromise<U>> m_NextHandle;
 
 			bool await_ready() const noexcept { return !m_NextHandle || m_NextHandle.done(); }
 
-			auto await_suspend(std::coroutine_handle<MSAsyncPromise> handle)
+			auto await_suspend(std::coroutine_handle<TAsyncPromise> handle)
 			{
 				m_ThisHandle = handle;
 				m_ThisHandle.promise().m_LastState = m_ThisHandle.promise().m_ThisState;
-				m_ThisHandle.promise().m_ThisState = MSAsyncState::AWAIT;
+				m_ThisHandle.promise().m_ThisState = TAsyncState::AWAIT;
 				*m_ThisHandle.promise().m_RootState = m_ThisHandle.promise().m_ThisState;
 				*m_ThisHandle.promise().m_RootHandle = m_ThisHandle;
 
@@ -184,33 +175,33 @@ struct MSAsyncPromise : MSPromiseBase
 				return m_NextHandle.promise().result();
 			}
 		};
-		return MSAsyncAwaitable{.m_NextHandle = async.m_ThisHandle};
+		return TAsyncAwaitable{.m_NextHandle = async.m_ThisHandle};
 	}
 
 	template <class F>
 	auto await_transform(F lambda)
 	{
-		using return_type = MSTraits<typename MSTraits<F>::template argument_data<0>>::template argument_data<0>;
+		using return_type = TTraits<typename TTraits<F>::template argument_data<0>>::template argument_data<0>;
 
-		struct MSLambdaAwaitable
+		struct TLambdaAwaitable
 		{
 			F m_Lambda;
 			std::future<return_type> m_Future;
 			std::promise<return_type> m_Promise;
-			std::coroutine_handle<MSAsyncPromise> m_ThisHandle;
+			std::coroutine_handle<TAsyncPromise> m_ThisHandle;
 
 			bool await_ready() const noexcept { return false; }
 
-			void await_suspend(std::coroutine_handle<MSAsyncPromise> handle)
+			void await_suspend(std::coroutine_handle<TAsyncPromise> handle)
 			{
 				m_ThisHandle = handle;
 				m_ThisHandle.promise().m_LastState = m_ThisHandle.promise().m_ThisState;
-				m_ThisHandle.promise().m_ThisState = MSAsyncState::AWAIT;
+				m_ThisHandle.promise().m_ThisState = TAsyncState::AWAIT;
 				*m_ThisHandle.promise().m_RootState = m_ThisHandle.promise().m_ThisState;
 				*m_ThisHandle.promise().m_RootHandle = m_ThisHandle;
 
 				m_Future = m_Promise.get_future();
-				MSAwait<return_type> promise = [this](return_type const& value)
+				TAwait<return_type> promise = [this](return_type const& value)
 				{
 					m_Promise.set_value(value);
 					if (m_ThisHandle) m_ThisHandle.resume();
@@ -229,7 +220,7 @@ struct MSAsyncPromise : MSPromiseBase
 				return m_Future.get();
 			}
 		};
-		return MSLambdaAwaitable{lambda};
+		return TLambdaAwaitable{lambda};
 	}
 
 	T m_Value;
@@ -237,13 +228,13 @@ struct MSAsyncPromise : MSPromiseBase
 };
 
 template <>
-struct MSAsyncPromise<void> : MSPromiseBase
+struct TAsyncPromise<void> : TPromiseBase
 {
-	MSAsync<void> get_return_object() noexcept;
+	TAsync<void> get_return_object() noexcept;
 
 	void unhandled_exception() noexcept
 	{
-		m_ThisState = MSAsyncState::DONE;
+		m_ThisState = TAsyncState::DONE;
 		*m_RootState = m_ThisState;
 		*m_RootHandle = nullptr;
 		m_Error = std::current_exception();
@@ -251,7 +242,7 @@ struct MSAsyncPromise<void> : MSPromiseBase
 
 	void return_void() noexcept
 	{
-		m_ThisState = MSAsyncState::DONE;
+		m_ThisState = TAsyncState::DONE;
 		*m_RootState = m_ThisState;
 		*m_RootHandle = nullptr;
 		m_Error = nullptr;
@@ -259,17 +250,17 @@ struct MSAsyncPromise<void> : MSPromiseBase
 
 	auto yield_value(std::nullptr_t) noexcept
 	{
-		struct MSYieldAwaitable
+		struct TYieldAwaitable
 		{
-			std::coroutine_handle<MSAsyncPromise> m_ThisHandle;
+			std::coroutine_handle<TAsyncPromise> m_ThisHandle;
 
 			bool await_ready() const noexcept { return false; }
 
-			void await_suspend(std::coroutine_handle<MSAsyncPromise> handle)
+			void await_suspend(std::coroutine_handle<TAsyncPromise> handle)
 			{
 				m_ThisHandle = handle;
 				m_ThisHandle.promise().m_LastState = m_ThisHandle.promise().m_ThisState;
-				m_ThisHandle.promise().m_ThisState = MSAsyncState::YIELD;
+				m_ThisHandle.promise().m_ThisState = TAsyncState::YIELD;
 				*m_ThisHandle.promise().m_RootState = m_ThisHandle.promise().m_ThisState;
 			}
 
@@ -282,7 +273,7 @@ struct MSAsyncPromise<void> : MSPromiseBase
 				if (m_ThisHandle.promise().m_Error) std::rethrow_exception(m_ThisHandle.promise().m_Error);
 			}
 		};
-		return MSYieldAwaitable{};
+		return TYieldAwaitable{};
 	}
 
 	void result() const
@@ -291,20 +282,20 @@ struct MSAsyncPromise<void> : MSPromiseBase
 	}
 
 	template <class U>
-	auto await_transform(MSAsync<U>&& async)
+	auto await_transform(TAsync<U>&& async)
 	{
-		struct MSAsyncAwaitable
+		struct TAsyncAwaitable
 		{
-			std::coroutine_handle<MSAsyncPromise> m_ThisHandle;
-			std::coroutine_handle<MSAsyncPromise<U>> m_NextHandle;
+			std::coroutine_handle<TAsyncPromise> m_ThisHandle;
+			std::coroutine_handle<TAsyncPromise<U>> m_NextHandle;
 
 			bool await_ready() const noexcept { return !m_NextHandle || m_NextHandle.done(); }
 
-			auto await_suspend(std::coroutine_handle<MSAsyncPromise> handle)
+			auto await_suspend(std::coroutine_handle<TAsyncPromise> handle)
 			{
 				m_ThisHandle = handle;
 				m_ThisHandle.promise().m_LastState = m_ThisHandle.promise().m_ThisState;
-				m_ThisHandle.promise().m_ThisState = MSAsyncState::AWAIT;
+				m_ThisHandle.promise().m_ThisState = TAsyncState::AWAIT;
 				*m_ThisHandle.promise().m_RootState = m_ThisHandle.promise().m_ThisState;
 				*m_ThisHandle.promise().m_RootHandle = m_ThisHandle;
 
@@ -325,32 +316,32 @@ struct MSAsyncPromise<void> : MSPromiseBase
 				return m_NextHandle.promise().result();
 			}
 		};
-		return MSAsyncAwaitable{.m_NextHandle = async.m_ThisHandle};
+		return TAsyncAwaitable{.m_NextHandle = async.m_ThisHandle};
 	}
 
 	template <class F>
 	auto await_transform(F lambda)
 	{
-		using return_type = MSTraits<typename MSTraits<F>::template argument_data<0>>::template argument_data<0>;
+		using return_type = TTraits<typename TTraits<F>::template argument_data<0>>::template argument_data<0>;
 
-		struct MSLambdaAwaitable
+		struct TLambdaAwaitable
 		{
 			F m_Lambda;
 			std::future<return_type> m_Future;
 			std::promise<return_type> m_Promise;
-			std::coroutine_handle<MSAsyncPromise> m_ThisHandle;
+			std::coroutine_handle<TAsyncPromise> m_ThisHandle;
 
 			bool await_ready() const noexcept { return false; }
 
-			void await_suspend(std::coroutine_handle<MSAsyncPromise> handle)
+			void await_suspend(std::coroutine_handle<TAsyncPromise> handle)
 			{
 				m_ThisHandle = handle;
 				m_ThisHandle.promise().m_LastState = m_ThisHandle.promise().m_ThisState;
-				m_ThisHandle.promise().m_ThisState = MSAsyncState::AWAIT;
+				m_ThisHandle.promise().m_ThisState = TAsyncState::AWAIT;
 				*m_ThisHandle.promise().m_RootState = m_ThisHandle.promise().m_ThisState;
 
 				m_Future = m_Promise.get_future();
-				MSAwait<return_type> promise = [this](return_type const& value)
+				TAwait<return_type> promise = [this](return_type const& value)
 				{
 					m_Promise.set_value(value);
 					if (m_ThisHandle) m_ThisHandle.resume();
@@ -369,7 +360,7 @@ struct MSAsyncPromise<void> : MSPromiseBase
 				return m_Future.get();
 			}
 		};
-		return MSLambdaAwaitable{lambda};
+		return TLambdaAwaitable{lambda};
 	}
 
 	std::exception_ptr m_Error;
@@ -378,30 +369,30 @@ struct MSAsyncPromise<void> : MSPromiseBase
 // ==================== Async<T> ====================
 
 template <class T>
-class MSAsync
+class TAsync
 {
 public:
-	using promise_type = MSAsyncPromise<T>;
+	using promise_type = TAsyncPromise<T>;
 	template <class U>
-	using await_type = MSLambda<void(U)>;
+	using await_type = std::function<void(U)>;
 
-	MSAsync() : m_ThisHandle(nullptr)
+	TAsync() : m_ThisHandle(nullptr)
 	{
 	}
 
-	explicit MSAsync(std::coroutine_handle<promise_type> handle) : m_ThisHandle(handle)
+	explicit TAsync(std::coroutine_handle<promise_type> handle) : m_ThisHandle(handle)
 	{
 	}
 
-	MSAsync(MSAsync&& other) noexcept : m_ThisHandle(other.m_ThisHandle) { other.m_ThisHandle = nullptr; }
+	TAsync(TAsync&& other) noexcept : m_ThisHandle(other.m_ThisHandle) { other.m_ThisHandle = nullptr; }
 
-	~MSAsync() { if (m_ThisHandle) m_ThisHandle.destroy(); }
+	~TAsync() { if (m_ThisHandle) m_ThisHandle.destroy(); }
 
-	MSAsync(MSAsync const&) = delete;
+	TAsync(TAsync const&) = delete;
 
-	MSAsync& operator=(const MSAsync&) = delete;
+	TAsync& operator=(const TAsync&) = delete;
 
-	MSAsync& operator=(MSAsync&& other) noexcept
+	TAsync& operator=(TAsync&& other) noexcept
 	{
 		if (this != std::addressof(other))
 		{
@@ -433,7 +424,7 @@ public:
 		m_ThisHandle.destroy();
 	}
 
-	MSAsyncState state() const
+	TAsyncState state() const
 	{
 		return *m_ThisHandle.promise().m_RootState;
 	}
@@ -445,19 +436,17 @@ public:
 
 private:
 	template <class U>
-	friend struct MSAsyncPromise;
+	friend struct TAsyncPromise;
 	std::coroutine_handle<promise_type> m_ThisHandle;
 };
 
 template <class T>
-MSAsync<T> MSAsyncPromise<T>::get_return_object() noexcept
+TAsync<T> TAsyncPromise<T>::get_return_object() noexcept
 {
-	return MSAsync<T>(std::coroutine_handle<MSAsyncPromise<T>>::from_promise(*this));
+	return TAsync<T>(std::coroutine_handle<TAsyncPromise<T>>::from_promise(*this));
 }
 
-inline MSAsync<void> MSAsyncPromise<void>::get_return_object() noexcept
+inline TAsync<void> TAsyncPromise<void>::get_return_object() noexcept
 {
-	return MSAsync(std::coroutine_handle<MSAsyncPromise>::from_promise(*this));
+	return TAsync(std::coroutine_handle<TAsyncPromise>::from_promise(*this));
 }
-
-#endif
