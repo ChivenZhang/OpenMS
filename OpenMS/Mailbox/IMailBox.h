@@ -10,7 +10,12 @@
 *
 * =================================================*/
 #include "IMail.h"
-#include "Utility/Async.h"
+#include "Utility/AsyncUtility.h"
+template<class T>
+using MSAsync = TAsync<T>;
+template<class T>
+using MSAwait = TAwait<T>;
+using MSAsyncState = TAsyncState;
 class IMailHub;
 using IMailTask = MSAsync<void>;
 
