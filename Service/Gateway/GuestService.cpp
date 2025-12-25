@@ -44,31 +44,32 @@ IMailTask GuestService::read(IMail mail)
 			{
 				auto input = MSStringView(request.Buffer, mail.Body.size() - sizeof(request_t));
 				response = co_await method(input);
-			}
-			mail.Type &= ~OPENMS_MAIL_TYPE_REQUEST;
-			mail.Type |= OPENMS_MAIL_TYPE_RESPONSE;
-			mail.Body = response;
-			std::swap(mail.From, mail.To);
-			if (mail.Copy != MSHash(nullptr)) mail.Type |= OPENMS_MAIL_TYPE_FORWARD;
 
-			if (mail.Type & OPENMS_MAIL_TYPE_CLIENT)
-			{
-				if (auto client = m_ClientChannel.lock())
+				mail.Type &= ~OPENMS_MAIL_TYPE_REQUEST;
+				mail.Type |= OPENMS_MAIL_TYPE_RESPONSE;
+				mail.Body = response;
+				std::swap(mail.From, mail.To);
+				if (mail.Copy != MSHash(nullptr)) mail.Type |= OPENMS_MAIL_TYPE_FORWARD;
+
+				if (mail.Type & OPENMS_MAIL_TYPE_CLIENT)
 				{
-					MSString buffer(sizeof(MailView) + mail.Body.size(), 0);
-					auto& mailView = *(MailView*)buffer.data();
-					mailView.From = mail.From;
-					mailView.To = mail.To;
-					mailView.Copy = mail.Copy;
-					mailView.Date = mail.Date;
-					mailView.Type = mail.Type;
-					if (mail.Body.empty() == false) ::memcpy(mailView.Body, mail.Body.data(), mail.Body.size());
-					client->writeChannel(IChannelEvent::New(buffer));
+					if (auto client = m_ClientChannel.lock())
+					{
+						MSString buffer(sizeof(MailView) + mail.Body.size(), 0);
+						auto& mailView = *(MailView*)buffer.data();
+						mailView.From = mail.From;
+						mailView.To = mail.To;
+						mailView.Copy = mail.Copy;
+						mailView.Date = mail.Date;
+						mailView.Type = mail.Type;
+						if (mail.Body.empty() == false) ::memcpy(mailView.Body, mail.Body.data(), mail.Body.size());
+						client->writeChannel(IChannelEvent::New(buffer));
+					}
 				}
-			}
-			else
-			{
-				send(mail);
+				else
+				{
+					send(mail);
+				}
 			}
 		}
 	}

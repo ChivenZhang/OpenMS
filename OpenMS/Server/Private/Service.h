@@ -35,17 +35,17 @@ public:
 	bool call(MSStringView service, MSStringView method, MSStringView forward, uint32_t timeout, MSStringView request, MSString& response);
 	bool async(MSStringView service, MSStringView method, MSStringView forward, uint32_t timeout, MSStringView request, MSLambda<void(MSStringView)>&& callback);
 
-	template<class F, std::enable_if_t<!std::is_same_v<typename MSTraits<F>::return_data, MSTraits<method_t>::return_data> || !std::is_same_v<typename MSTraits<F>::argument_datas, MSTraits<method_t>::argument_datas>, int> = 0>
+	template<class F, std::enable_if_t<!std::is_same_v<typename TTraits<F>::return_data, TTraits<method_t>::return_data> || !std::is_same_v<typename TTraits<F>::argument_datas, TTraits<method_t>::argument_datas>, int> = 0>
 	bool bind(MSStringView method, F&& callback)
 	{
 		return this->bind(method, [callback](MSStringView input)->MSAsync<MSString>
 		{
-			typename MSTraits<F>::argument_datas request;
-			if constexpr (MSTraits<F>::argument_count)
+			typename TTraits<F>::argument_datas request;
+			if constexpr (TTraits<F>::argument_count)
 			{
 				if (MSTypeC(MSString(input), request) == false) co_return {};
 			}
-			if constexpr (std::is_same_v<typename MSTraits<F>::return_data, MSAsync<void>>)
+			if constexpr (std::is_same_v<typename TTraits<F>::return_data, MSAsync<void>>)
 			{
 				co_await std::apply(callback, request);
 				co_return {};
@@ -101,8 +101,8 @@ public:
 		}
 		return this->async(service, method, forward, timeout, request, [callback](MSStringView response)
 		{
-			typename MSTraits<F>::argument_datas result;
-			if constexpr (MSTraits<F>::argument_count) MSTypeC(response, std::get<0>(result));
+			typename TTraits<F>::argument_datas result;
+			if constexpr (TTraits<F>::argument_count) MSTypeC(response, std::get<0>(result));
 			std::apply(callback, result);
 		});
 	}

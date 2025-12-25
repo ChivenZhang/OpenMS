@@ -10,10 +10,9 @@
 *
 * =================================================*/
 #include "Endpoint/IEndpoint.h"
-#include "Server/Private/Property.h"
-#include "Endpoint/RPC/RPCProtocol.h"
 #include "Reactor/TCP/TCPServerReactor.h"
 #include "Utility/Timer.h"
+#include "Utility/TraitsUtility.h"
 class RPCServerInboundHandler;
 
 /// @brief RPC Server Base
@@ -67,17 +66,17 @@ public:
 	using RPCServerBase::async;
 	using RPCServerBase::RPCServerBase;
 
-	template<class F, std::enable_if_t<!std::is_same_v<typename MSTraits<F>::return_data, MSTraits<method_t>::return_data> || !std::is_same_v<typename MSTraits<F>::argument_datas, MSTraits<method_t>::argument_datas>, int> = 0>
+	template<class F, std::enable_if_t<!std::is_same_v<typename TTraits<F>::return_data, TTraits<method_t>::return_data> || !std::is_same_v<typename TTraits<F>::argument_datas, TTraits<method_t>::argument_datas>, int> = 0>
 	bool bind(MSStringView name, F method)
 	{
 		return RPCServerBase::bind(name, [method](MSHnd<IChannel> client, MSStringView const& input, MSString& output)->bool
 		{
-			typename MSRestTypes<typename MSTraits<F>::argument_datas>::rest_datas request;
-			if constexpr (MSRestTypes<typename MSTraits<F>::argument_datas>::rest_count != 0)
+			typename TSecondTypes<typename TTraits<F>::argument_datas>::second_datas request;
+			if constexpr (TSecondTypes<typename TTraits<F>::argument_datas>::second_count != 0)
 			{
 				if (MSTypeC(input, request) == false) return false;
 			}
-			if constexpr (std::is_void_v<typename MSTraits<F>::return_type>)
+			if constexpr (std::is_void_v<typename TTraits<F>::return_type>)
 			{
 				std::apply([&](auto&&... args)
 				{
@@ -149,8 +148,8 @@ public:
 		}
 		return RPCServerBase::async(client, name, timeout, request, [callback](MSString&& response)
 		{
-			typename MSTraits<F>::argument_datas result;
-			if constexpr (MSTraits<F>::argument_count) MSTypeC(response, std::get<0>(result));
+			typename TTraits<F>::argument_datas result;
+			if constexpr (TTraits<F>::argument_count) MSTypeC(response, std::get<0>(result));
 			std::apply(callback, result);
 		});
 	}
