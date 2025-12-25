@@ -9,6 +9,8 @@
 *
 * =================================================*/
 #include "RPCServer.h"
+
+#include "RPCProtocol.h"
 #include "Reactor/Private/ChannelHandler.h"
 
 class RPCServerInboundHandler : public ChannelInboundHandler
@@ -128,7 +130,7 @@ bool RPCServerBase::call(MSHnd<IChannel> client, MSStringView const& name, uint3
 	{
 		MSMutexLock lock(m_LockMethod);
 		auto& session = m_Sessions[request.Session];
-		session = [&, sessionID = request.Session](MSStringView const& response)
+		session = [&](MSStringView const& response)
 		{
 			promise.set_value(MSString(response));
 		};

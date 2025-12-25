@@ -159,13 +159,14 @@ IMailTask Service::read(IMail mail)
 			{
 				auto input = MSStringView(request.Buffer, mail.Body.size() - sizeof(request_t));
 				response = co_await method(input);
+
+				mail.Type &= ~OPENMS_MAIL_TYPE_REQUEST;
+				mail.Type |= OPENMS_MAIL_TYPE_RESPONSE;
+				mail.Body = response;
+				std::swap(mail.From, mail.To);
+				if (mail.Copy != MSHash(nullptr)) mail.Type |= OPENMS_MAIL_TYPE_FORWARD;
+				send(mail);
 			}
-			mail.Type &= ~OPENMS_MAIL_TYPE_REQUEST;
-			mail.Type |= OPENMS_MAIL_TYPE_RESPONSE;
-			mail.Body = response;
-			std::swap(mail.From, mail.To);
-			if (mail.Copy != MSHash(nullptr)) mail.Type |= OPENMS_MAIL_TYPE_FORWARD;
-			send(mail);
 		}
 	}
 	else if (mail.Type & OPENMS_MAIL_TYPE_RESPONSE)

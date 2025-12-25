@@ -18,7 +18,13 @@
 // ==================== Await<T> ====================
 
 template <class T>
-using TAwait = std::function<void(T)>;
+struct TAwaitTraits { using type = std::function<void(T)>; };
+
+template <>
+struct TAwaitTraits<void> { using type = std::function<void()>; };
+
+template <class T>
+using TAwait = TAwaitTraits<T>::type;
 
 // =================== Promise<T> ===================
 
@@ -181,7 +187,7 @@ struct TAsyncPromise : TPromiseBase
 	template <class F>
 	auto await_transform(F lambda)
 	{
-		using return_type = TTraits<typename TTraits<F>::template argument_data<0>>::template argument_data<0>;
+		using return_type = TFirstType<typename TTraits<typename TTraits<F>::template argument_data<0>>::argument_datas>::first_type;
 
 		struct TLambdaAwaitable
 		{
@@ -201,12 +207,24 @@ struct TAsyncPromise : TPromiseBase
 				*m_ThisHandle.promise().m_RootHandle = m_ThisHandle;
 
 				m_Future = m_Promise.get_future();
-				TAwait<return_type> promise = [this](return_type const& value)
+				if constexpr (std::is_void_v<return_type>)
 				{
-					m_Promise.set_value(value);
-					if (m_ThisHandle) m_ThisHandle.resume();
-				};
-				m_Lambda(promise);
+					TAwait<return_type> promise = [this]()
+					{
+						m_Promise.set_value();
+						if (m_ThisHandle) m_ThisHandle.resume();
+					};
+					m_Lambda(promise);
+				}
+				else
+				{
+					TAwait<return_type> promise = [this](return_type const& value)
+					{
+						m_Promise.set_value(value);
+						if (m_ThisHandle) m_ThisHandle.resume();
+					};
+					m_Lambda(promise);
+				}
 			}
 
 			return_type await_resume()
@@ -322,7 +340,7 @@ struct TAsyncPromise<void> : TPromiseBase
 	template <class F>
 	auto await_transform(F lambda)
 	{
-		using return_type = TTraits<typename TTraits<F>::template argument_data<0>>::template argument_data<0>;
+		using return_type = TFirstType<typename TTraits<typename TTraits<F>::template argument_data<0>>::argument_datas>::first_type;
 
 		struct TLambdaAwaitable
 		{
@@ -341,12 +359,24 @@ struct TAsyncPromise<void> : TPromiseBase
 				*m_ThisHandle.promise().m_RootState = m_ThisHandle.promise().m_ThisState;
 
 				m_Future = m_Promise.get_future();
-				TAwait<return_type> promise = [this](return_type const& value)
+				if constexpr (std::is_void_v<return_type>)
 				{
-					m_Promise.set_value(value);
-					if (m_ThisHandle) m_ThisHandle.resume();
-				};
-				m_Lambda(promise);
+					TAwait<return_type> promise = [this]()
+					{
+						m_Promise.set_value();
+						if (m_ThisHandle) m_ThisHandle.resume();
+					};
+					m_Lambda(promise);
+				}
+				else
+				{
+					TAwait<return_type> promise = [this](return_type const& value)
+					{
+						m_Promise.set_value(value);
+						if (m_ThisHandle) m_ThisHandle.resume();
+					};
+					m_Lambda(promise);
+				}
 			}
 
 			return_type await_resume()

@@ -10,10 +10,10 @@
 *
 * =================================================*/
 #include "Endpoint/IEndpoint.h"
-#include "Server/Private/Property.h"
 #include "Endpoint/RPC/RPCProtocol.h"
 #include "Reactor/TCP/TCPClientReactor.h"
 #include "Utility/Timer.h"
+#include "Utility/TraitsUtility.h"
 class RPCClientInboundHandler;
 
 /// @brief RPC Client Base
@@ -66,17 +66,17 @@ public:
 	using RPCClientBase::async;
 	using RPCClientBase::RPCClientBase;
 
-	template<class F, std::enable_if_t<!std::is_same_v<typename MSTraits<F>::return_data, MSTraits<method_t>::return_data> || !std::is_same_v<typename MSTraits<F>::argument_datas, MSTraits<method_t>::argument_datas>, int> = 0>
+	template<class F, std::enable_if_t<!std::is_same_v<typename TTraits<F>::return_data, TTraits<method_t>::return_data> || !std::is_same_v<typename TTraits<F>::argument_datas, TTraits<method_t>::argument_datas>, int> = 0>
 	bool bind(MSStringView name, F method)
 	{
 		return RPCClientBase::bind(name, [method](MSStringView const& input, MSString& output)->bool
 		{
-			typename MSTraits<F>::argument_datas request;
-			if constexpr (MSTraits<F>::argument_count != 0)
+			typename TTraits<F>::argument_datas request;
+			if constexpr (TTraits<F>::argument_count != 0)
 			{
 				if (MSTypeC(input, request) == false) return false;
 			}
-			if constexpr (std::is_void_v<typename MSTraits<F>::return_type>)
+			if constexpr (std::is_void_v<typename TTraits<F>::return_type>)
 			{
 				std::apply(method, request);
 				return true;
@@ -144,8 +144,8 @@ public:
 		}
 		return RPCClientBase::async(name, timeout, request, [callback](MSString&& response)
 		{
-			typename MSTraits<F>::argument_datas result;
-			if constexpr (MSTraits<F>::argument_count) MSTypeC(response, std::get<0>(result));
+			typename TTraits<F>::argument_datas result;
+			if constexpr (TTraits<F>::argument_count) MSTypeC(response, std::get<0>(result));
 			std::apply(callback, result);
 		});
 	}
