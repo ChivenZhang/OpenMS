@@ -45,15 +45,15 @@ void GatewayServer::onInit()
 				// Create Guest Service
 
 				auto guestService = MSNew<GuestService>(channel, guestID);
-				guestService->bind("login", [=, this](MSString user, MSString pass)-> MSAsync<uint32_t>
+				guestService->bind("login", [=, self = guestService.get()](MSString user, MSString pass)-> MSAsync<uint32_t>
 				{
 					if (auto userID = channel->getContext()->userdata()) co_return userID;
 
-					co_return co_await [=, this](MSAwait<uint32_t> promise)
+					co_return co_await [=](MSAwait<uint32_t> promise)
 					{
 						MS_INFO("服务端验证：%s", user.c_str());
 
-						guestService->async("logic", "login", "", 1000, MSTuple{user, pass}, [=, this](uint32_t userID)
+						guestService->async("logic", "login", "", 1000, MSTuple{user, pass}, [=](uint32_t userID)
 						{
 							if (userID)
 							{
@@ -67,28 +67,36 @@ void GatewayServer::onInit()
 							{
 								MS_INFO("验证失败！ %s", user.c_str());
 							}
+
+							self->call<void>("client", "onLogin", "", 0, MSTuple{userID});
+
 							promise(userID);
 						});
 					};
 				});
-				guestService->bind("logout", [=]()-> MSAsync<bool>
+				guestService->bind("logout", [=, self = guestService.get()]()-> MSAsync<bool>
 				{
 					auto userID = channel->getContext()->userdata();
 					if (userID == 0) co_return false;
+
 					co_return co_await [=](MSAwait<bool> promise)
 					{
 						guestService->async("logic", "logout", "", 500, MSTuple{userID}, [=](bool result)
 						{
+							self->call<void>("client", "onLogout", "", 0, MSTuple{result});
+
 							promise(result);
 						});
 					};
 				});
-				guestService->bind("signup", [=](MSString user, MSString pass)-> MSAsync<bool>
+				guestService->bind("signup", [=, self = guestService.get()](MSString user, MSString pass)-> MSAsync<bool>
 				{
 					co_return co_await [=](MSAwait<bool> promise)
 					{
 						guestService->async("logic", "signup", "", 500, MSTuple{user, pass}, [=](bool result)
 						{
+							self->call<void>("client", "onSignup", "", 0, MSTuple{result});
+
 							promise(result);
 						});
 					};
@@ -151,7 +159,7 @@ void GatewayServer::onInit()
 					},
 				});
 			},
-			.OnClose = [=, this](MSRef<IChannel> channel)
+			.OnClose = [=](MSRef<IChannel> channel)
 			{
 				auto& guestData = channel->getContext()->attribs()["guestID"];
 				auto guestID = std::any_cast<uint32_t>(guestData);

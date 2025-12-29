@@ -26,17 +26,32 @@ void FrontendClient::onInit()
 {
 	auto mailHub = m_MailHub = MSNew<MailHub>();
 	auto clientService = MSNew<Service>();
-	clientService->bind("createClient", [=](uint32_t userID)->MSAsync<void>
+	clientService->bind("onLogin", [=](uint32_t userID)->MSAsync<void>
+	{
+		MS_INFO("登录回调");
+		co_return;
+	});
+	clientService->bind("onLogout", [=](bool result)->MSAsync<void>
+	{
+		MS_INFO("注销回调");
+		co_return;
+	});
+	clientService->bind("onSignup", [=](bool result)->MSAsync<void>
+	{
+		MS_INFO("注册回调");
+		co_return;
+	});
+	clientService->bind("onCreateClient", [=](uint32_t userID)->MSAsync<void>
 	{
 		MS_INFO("创建角色");
 		co_return;
 	});
-	clientService->bind("createGhost", [=](uint32_t userID)->MSAsync<void>
+	clientService->bind("onCreateGhost", [=](uint32_t userID)->MSAsync<void>
 	{
 		MS_INFO("创建代理");
 		co_return;
 	});
-	clientService->bind("deleteGhost", [=](uint32_t userID)->MSAsync<void>
+	clientService->bind("onDeleteGhost", [=](uint32_t userID)->MSAsync<void>
 	{
 		MS_INFO("删除角色/代理");
 		co_return;
