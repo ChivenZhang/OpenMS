@@ -139,7 +139,7 @@ bool RPCServerBase::call(MSHnd<IChannel> client, MSStringView const& name, uint3
 	// Send request to remote server
 
 	m_Reactor->write(IChannelEvent::New(buffer, client));
-	MS_INFO("服务端=>客户端：%u", (uint32_t)buffer.size());
+	MS_INFO("地址 %s 发送:长度 %u 会话 %u 内容 %s", m_Reactor->address().lock()->getString().c_str(), request.Length, request.Session, input.data());
 
 	auto status = future.wait_for(std::chrono::milliseconds(timeout));
 	{
@@ -196,7 +196,7 @@ bool RPCServerBase::async(MSHnd<IChannel> client, MSStringView const& name, uint
 	// Send request to remote server
 
 	m_Reactor->write(IChannelEvent::New(buffer, client));
-	MS_INFO("服务端=>客户端：%u", (uint32_t)buffer.size());
+	MS_INFO("地址 %s 发送:长度 %u 会话 %u 内容 %s", m_Reactor->address().lock()->getString().c_str(), request.Length, request.Session, input.data());
 	return true;
 }
 
@@ -212,12 +212,12 @@ bool RPCServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<
 	auto& package = *(RPCRequestBase*)m_Buffer.data();
 	if (sizeof(RPCRequestBase) <= m_Buffer.size() && package.Length <= m_Buffer.size())
 	{
-		MS_INFO("服务端<=客户端:%u", package.Length);
 		// Call from client
 		if ((package.Session & 0X80000000) == 0)
 		{
 			auto& request = *(RPCRequestView*)m_Buffer.data();
 			auto message = MSStringView(request.Buffer, request.Length - sizeof(RPCRequestView));
+			MS_INFO("地址 %s 接收:长度 %u 会话 %u 内容 %s", m_Server->m_Reactor->address().lock()->getString().c_str(), package.Length, package.Session, message.data());
 			if (message.size() <= m_Server->m_Config.Buffers)
 			{
 				MSString output;
@@ -237,6 +237,7 @@ bool RPCServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<
 		{
 			auto& response = *(RPCResponseView*)m_Buffer.data();
 			auto message = MSStringView(response.Buffer, response.Length - sizeof(RPCResponseView));
+			MS_INFO("地址 %s 接收:长度 %u 会话 %u 内容 %s", m_Server->m_Reactor->address().lock()->getString().c_str(), package.Length, package.Session, message.data());
 			if (message.size() <= m_Server->m_Config.Buffers)
 			{
 				decltype(m_Server->m_Sessions)::value_type::second_type callback;

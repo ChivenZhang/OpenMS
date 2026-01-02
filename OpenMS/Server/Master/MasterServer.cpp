@@ -58,7 +58,7 @@ void MasterServer::onInit()
 
 	m_ClusterServer->bind("push", [this](MSHnd<IChannel> client, MSString const& address, MSList<uint32_t> const& mails)
 	{
-			MS_INFO("validate 0");
+		MS_INFO("validate 0");
 		MSMutexLock lock(m_LockClient);
 		auto channel = client.lock();
 		m_ClientInfoMap[channel].MailIPAddr = address;

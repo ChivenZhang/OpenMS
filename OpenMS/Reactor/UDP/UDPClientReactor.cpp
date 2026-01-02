@@ -144,7 +144,7 @@ void UDPClientReactor::startup()
 			{
 				if (auto _channel = channel.lock())
 				{
-					client.async_send(asio::buffer(event->Message), [=, &write_func](asio::error_code error, size_t length)
+					client.async_send(asio::buffer(event->Message), [=, &write_func](asio::error_code error, size_t length) mutable
 					{
 						if (error)
 						{
@@ -164,9 +164,9 @@ void UDPClientReactor::startup()
 							}
 							else
 							{
-								auto nextEvent = reactor->m_EventQueue.front();
+								event = reactor->m_EventQueue.front();
 								reactor->m_EventQueue.pop();
-								write_func(channel, nextEvent);
+								write_func(MSCast<UDPChannel>(event->Channel.lock()), event);
 							}
 						}
 					});

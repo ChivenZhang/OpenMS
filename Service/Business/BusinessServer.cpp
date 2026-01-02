@@ -28,7 +28,7 @@ void BusinessServer::onInit()
 
 	// Login/out Module
 
-	logicService->bind("login", [=, this, _logic = logicService.get()](MSString user, MSString pass)->MSAsync<uint32_t>
+	logicService->bind("login", [=, this](MSString user, MSString pass)->MSAsync<uint32_t>
 	{
 		MS_INFO("服务端：LOGIN!!!");
 		static uint32_t s_UserID = 0;
@@ -42,24 +42,15 @@ void BusinessServer::onInit()
 		}
 
 		auto serverService = MSNew<ServerService>();
-		serverService->bind("readyBattle", [=, this](uint32_t gameID)->MSAsync<bool>
+		serverService->bind("readyBattle", [=](uint32_t gameID)->MSAsync<bool>
 		{
 			MS_INFO("服务端：READY BATTLE!!!");
-			m_MatchQueue.push(userID);
 
 			auto playerService = MSNew<PlayerService>(userID);
 			mailHub->create("player:" + std::to_string(userID), playerService);
 
 			// Match battle
-			if (2 <= m_MatchQueue.size())
-			{
-				for (auto i=0; i<2; ++i)
-				{
-					auto userID2 = m_MatchQueue.front();
-					m_MatchQueue.pop();
-					_logic->call<bool>("player:" + std::to_string(userID2), "startBattle", "", 0, MSTuple{});
-				}
-			}
+			// self->call<bool>("player:" + std::to_string(userID), "startBattle", "", 0, MSTuple{});
 
 			co_return true;
 		});

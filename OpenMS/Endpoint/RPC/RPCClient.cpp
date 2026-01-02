@@ -126,7 +126,7 @@ bool RPCClientBase::call(MSStringView const& name, uint32_t timeout, MSStringVie
 	{
 		MSMutexLock lock(m_LockSession);
 		auto& session = m_Sessions[request.Session];
-		session = [&, sessionID = request.Session](MSStringView const& response)
+		session = [&](MSStringView const& response)
 		{
 			promise.set_value(MSString(response));
 		};
@@ -135,7 +135,7 @@ bool RPCClientBase::call(MSStringView const& name, uint32_t timeout, MSStringVie
 	// Send request to remote server
 
 	m_Reactor->write(IChannelEvent::New(buffer));
-	MS_INFO("客户端=>服务端:%u", (uint32_t)buffer.size());
+	MS_INFO("地址 %s 发送:长度 %u 会话 %u 内容 %s", m_Reactor->address().lock()->getString().c_str(), request.Length, request.Session, input.data());
 
 	auto status = future.wait_for(std::chrono::milliseconds(timeout));
 	{
@@ -192,7 +192,7 @@ bool RPCClientBase::async(MSStringView const& name, uint32_t timeout, MSStringVi
 	// Send request to remote server
 
 	m_Reactor->write(IChannelEvent::New(buffer));
-	MS_INFO("客户端=>服务端:%u", (uint32_t)buffer.size());
+	MS_INFO("地址 %s 发送:长度 %u 会话 %u 内容 %s", m_Reactor->address().lock()->getString().c_str(), request.Length, request.Session, input.data());
 	return true;
 }
 
@@ -208,13 +208,13 @@ bool RPCClientInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<
 	auto& package = *(RPCRequestBase*)m_Buffer.data();
 	if (sizeof(RPCRequestBase) <= m_Buffer.size() && package.Length <= m_Buffer.size())
 	{
-		MS_INFO("客户端<=服务端:%u", package.Length);
 		// Call from server
 		if (package.Session & 0X80000000)
 		{
 			auto buffer = m_Buffer.substr(0, package.Length);
 			auto& request = *(RPCRequestView*)buffer.data();
 			auto message = MSStringView(request.Buffer, buffer.size() - sizeof(RPCRequestView));
+			MS_INFO("地址 %s 接收:长度 %u 会话 %u 内容 %s", m_Client->m_Reactor->address().lock()->getString().c_str(), package.Length, package.Session, message.data());
 			MSString output;
 			if (m_Client->invoke(request.Method, message, output))
 			{
@@ -232,6 +232,7 @@ bool RPCClientInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<
 			auto buffer = m_Buffer.substr(0, package.Length);
 			auto& response = *(RPCResponseView*)buffer.data();
 			auto message = MSStringView(response.Buffer, buffer.size() - sizeof(RPCResponseView));
+			MS_INFO("地址 %s 接收:长度 %u 会话 %u 内容 %s", m_Client->m_Reactor->address().lock()->getString().c_str(), package.Length, package.Session, message.data());
 			decltype(m_Client->m_Sessions)::value_type::second_type callback;
 			{
 				MSMutexLock lock(m_Client->m_LockSession);

@@ -23,7 +23,7 @@ void HTTPServer::startup()
 	auto config = m_Config;
 	if (config.Callback.OnOpen == nullptr)
 	{
-		config.Callback.OnOpen = [=](MSRef<IChannel> channel)
+		config.Callback.OnOpen = [this](MSRef<IChannel> channel)
 		{
 			channel->getPipeline()->addFirst("inbound", MSNew<HTTPServerInboundHandler>(this));
 			channel->getPipeline()->addLast("outbound", MSNew<HTTPServerOutboundHandler>(this));

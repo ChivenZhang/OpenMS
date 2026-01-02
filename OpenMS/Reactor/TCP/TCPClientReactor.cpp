@@ -98,6 +98,7 @@ void TCPClientReactor::startup()
 					if (socket->is_open() == false) return;
 					socket->async_read_some(asio::buffer(buffer.data(), buffer.size()), [=, &read_func](asio::error_code error, size_t length)
 					{
+						MS_DEBUG("tcp async read: %s 长度 %u 状态 %u", channel.lock()->getRemote().lock()->getString().c_str(), length, error);
 						if (error)
 						{
 							MS_ERROR("can't read from socket: %s", error.message().c_str());
@@ -121,8 +122,9 @@ void TCPClientReactor::startup()
 				{
 					auto socket = _channel->getSocket();
 					if (socket->is_open() == false) return;
-					socket->async_write_some(asio::buffer(event->Message), [=, &write_func](asio::error_code error, size_t length)
+					socket->async_write_some(asio::buffer(event->Message), [=, &write_func](asio::error_code error, size_t length) mutable
 					{
+						MS_DEBUG("tcp async write: %s 长度 %u 状态 %u", channel.lock()->getRemote().lock()->getString().c_str(), length, error);
 						if (error)
 						{
 							if (event->Promise) event->Promise->set_value(false);
@@ -141,9 +143,9 @@ void TCPClientReactor::startup()
 							}
 							else
 							{
-								auto nextEvent = reactor->m_EventQueue.front();
+								event = reactor->m_EventQueue.front();
 								reactor->m_EventQueue.pop();
-								write_func(channel, nextEvent);
+								write_func(MSCast<TCPChannel>(event->Channel.lock()), event);
 							}
 						}
 					});

@@ -98,7 +98,7 @@ void KCPClientReactor::startup()
 			{
 				if (auto _channel = channel.lock())
 				{
-					client.async_receive(asio::buffer(buffer), [=, &buffer2, &read_func](asio::error_code error, size_t length)
+					client.async_receive(asio::buffer(buffer), [=, &read_func, &buffer2](asio::error_code error, size_t length)
 					{
 						if (error)
 						{

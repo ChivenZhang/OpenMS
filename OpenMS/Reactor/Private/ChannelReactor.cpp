@@ -30,7 +30,7 @@ void ChannelReactor::startup()
 {
 	m_Running = true;
 	for (size_t i = 0; i < m_WorkerList.size(); ++i) m_WorkerList[i] = MSNew<ChannelWorker>(this);
-	for (size_t i = 0; i < m_WorkerList.size(); ++i) m_WorkerThreads[i] = MSThread([=]() { m_WorkerList[i]->startup(); });
+	for (size_t i = 0; i < m_WorkerList.size(); ++i) m_WorkerThreads[i] = MSThread([=, this]() { m_WorkerList[i]->startup(); });
 	for (size_t i = 0; i < m_WorkerList.size(); ++i) while (m_WorkerList[i]->running() == false);
 }
 

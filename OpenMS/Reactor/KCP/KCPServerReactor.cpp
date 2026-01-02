@@ -28,7 +28,7 @@ KCPServerReactor::KCPServerReactor(MSRef<ISocketAddress> address, uint32_t backl
 	m_Address(address)
 {
 	if (m_Address == nullptr || m_Address->getAddress().empty()) m_Address = MSNew<IPv4Address>("0.0.0.0", 0);
-	if (m_OnSession == nullptr) m_OnSession = [=](MSRef<IChannelAddress>) { return m_Session++; };
+	if (m_OnSession == nullptr) m_OnSession = [this](MSRef<IChannelAddress>) { return m_Session++; };
 }
 
 void KCPServerReactor::startup()
@@ -39,7 +39,7 @@ void KCPServerReactor::startup()
 	MSPromise<void> promise;
 	auto future = promise.get_future();
 
-	m_EventThread = MSThread([=, &promise]()
+	m_EventThread = MSThread([=, &promise, this]()
 	{
 		asio::io_context loop;
 		using namespace asio::ip;
@@ -93,7 +93,7 @@ void KCPServerReactor::startup()
 			{
 				if (server.is_open())
 				{
-					server.async_receive_from(asio::buffer(buffer), remote, [&](asio::error_code error, size_t length)
+					server.async_receive_from(asio::buffer(buffer), remote, [=, &read_func, &server, &buffer2](asio::error_code error, size_t length)
 					{
 						auto client = remote;
 

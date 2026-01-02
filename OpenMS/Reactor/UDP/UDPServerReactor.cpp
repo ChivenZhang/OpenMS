@@ -114,7 +114,7 @@ void UDPServerReactor::startup()
 			{
 				if (server.is_open())
 				{
-					server.async_receive_from(asio::buffer(buffer), remote, [&](asio::error_code error, size_t length)
+					server.async_receive_from(asio::buffer(buffer), remote, [=, &read_func, &buffer, &server, &remote](asio::error_code error, size_t length) mutable
 					{
 						auto client = remote;
 
@@ -173,7 +173,7 @@ void UDPServerReactor::startup()
 				auto client = channel.lock();
 				if (server.is_open() && client)
 				{
-					server.async_send_to(asio::buffer(event->Message), client->getEndpoint(), [&, event, channel](asio::error_code error, size_t length)
+					server.async_send_to(asio::buffer(event->Message), client->getEndpoint(), [=, &write_func](asio::error_code error, size_t length) mutable
 					{
 						if (error)
 						{
@@ -193,9 +193,9 @@ void UDPServerReactor::startup()
 							}
 							else
 							{
-								auto nextEvent = reactor->m_EventQueue.front();
+								event = reactor->m_EventQueue.front();
 								reactor->m_EventQueue.pop();
-								write_func(channel, nextEvent);
+								write_func(MSCast<UDPChannel>(event->Channel.lock()), event);
 							}
 						}
 					});

@@ -21,7 +21,7 @@ add_subdirectory(${OPENMS_SOURCE_DIR}/Service/Discovery)
 endif()
 
 if(OPENMS_ENABLE_GATEWAY)
-    add_subdirectory(${OPENMS_SOURCE_DIR}/Service/Gateway)
+add_subdirectory(${OPENMS_SOURCE_DIR}/Service/Gateway)
 endif()
 
 if(OPENMS_ENABLE_MYSQL OR OPENMS_ENABLE_REDIS)
@@ -33,11 +33,11 @@ add_subdirectory(${OPENMS_SOURCE_DIR}/Service/WebServer)
 endif()
 
 if(OPENMS_ENABLE_BUSINESS)
-    add_subdirectory(${OPENMS_SOURCE_DIR}/Service/Business)
+add_subdirectory(${OPENMS_SOURCE_DIR}/Service/Business)
 endif()
 
 if(OPENMS_ENABLE_FRONTEND)
-    add_subdirectory(${OPENMS_SOURCE_DIR}/Service/Frontend)
+add_subdirectory(${OPENMS_SOURCE_DIR}/Service/Frontend)
 endif()
 
 if(OPENMS_ENABLE_CONFIG)

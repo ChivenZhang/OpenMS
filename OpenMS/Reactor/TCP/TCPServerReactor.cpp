@@ -91,12 +91,13 @@ void TCPServerReactor::startup()
 					auto socket = client->getSocket();
 					auto buffer = client->getBuffer();
 					if (socket->is_open() == false) return;
-					socket->async_read_some(asio::buffer(buffer.data(), buffer.size()), [=](asio::error_code error, size_t length)
+					socket->async_read_some(asio::buffer(buffer.data(), buffer.size()), [=, &read_func](asio::error_code error, size_t length)
 					{
+						MS_DEBUG("tcp async read: %s 长度 %u 状态 %u", channel.lock()->getRemote().lock()->getString().c_str(), length, error);
 						if (error)
 						{
 							MS_ERROR("can't read from socket: %s", error.message().c_str());
-							reactor->onDisconnect(client->shared_from_this());
+							reactor->onDisconnect(channel.lock());
 						}
 						else
 						{
@@ -116,8 +117,9 @@ void TCPServerReactor::startup()
 				{
 					auto socket = client->getSocket();
 					if (socket->is_open() == false) return;
-					socket->async_write_some(asio::buffer(event->Message), [&, event, channel](asio::error_code error, size_t length)
+					socket->async_write_some(asio::buffer(event->Message), [=, &write_func](asio::error_code error, size_t length) mutable
 					{
+						MS_DEBUG("tcp async write: %s %p 长度 %u 状态 %u", channel.lock()->getRemote().lock()->getString().c_str(), channel.lock().get(), length, error);
 						if (error)
 						{
 							if (event->Promise) event->Promise->set_value(false);
@@ -136,9 +138,9 @@ void TCPServerReactor::startup()
 							}
 							else
 							{
-								auto nextEvent = reactor->m_EventQueue.front();
+								event = reactor->m_EventQueue.front();
 								reactor->m_EventQueue.pop();
-								write_func(channel, nextEvent);
+								write_func(MSCast<TCPChannel>(event->Channel.lock()), event);
 							}
 						}
 					});
@@ -147,7 +149,7 @@ void TCPServerReactor::startup()
 
 			accept_func = [&]()
 			{
-				server.async_accept([&](asio::error_code error, tcp::socket client)
+				server.async_accept([=, &accept_func, &read_func](asio::error_code error, tcp::socket client)
 				{
 					if (error) MS_ERROR("failed to accept: %s", error.message().c_str());
 					else
@@ -187,14 +189,17 @@ void TCPServerReactor::startup()
 
 			m_FireAsync = [&]()
 			{
-				loop.post([&]()
+				loop.post([=]()
 				{
 					if (reactor->m_Sending) return;
 					reactor->m_Sending = true;
-					MSMutexLock lock(reactor->m_EventLock);
-					if (reactor->m_EventQueue.empty()) return;
-					auto event = reactor->m_EventQueue.front();
-					reactor->m_EventQueue.pop();
+					MSRef<IChannelEvent> event;
+					{
+						MSMutexLock lock(reactor->m_EventLock);
+						if (reactor->m_EventQueue.empty()) return;
+						event = reactor->m_EventQueue.front();
+						reactor->m_EventQueue.pop();
+					}
 					write_func(MSCast<TCPChannel>(event->Channel.lock()), event);
 				});
 			};
