@@ -53,7 +53,7 @@ void GatewayServer::onInit()
 					{
 						MS_INFO("服务端验证：%s", user.c_str());
 
-						guestService->async("logic", "login", "", 1000, MSTuple{user, pass}, [=](uint32_t userID)
+						self->async("logic", "login", "", 1000, MSTuple{user, pass}, [=](uint32_t userID)
 						{
 							if (userID)
 							{
@@ -81,7 +81,7 @@ void GatewayServer::onInit()
 
 					co_return co_await [=](MSAwait<bool> promise)
 					{
-						guestService->async("logic", "logout", "", 500, MSTuple{userID}, [=](bool result)
+						self->async("logic", "logout", "", 500, MSTuple{userID}, [=](bool result)
 						{
 							self->call<void>("client", "onLogout", "", 0, MSTuple{result});
 
@@ -93,7 +93,7 @@ void GatewayServer::onInit()
 				{
 					co_return co_await [=](MSAwait<bool> promise)
 					{
-						guestService->async("logic", "signup", "", 500, MSTuple{user, pass}, [=](bool result)
+						self->async("logic", "signup", "", 500, MSTuple{user, pass}, [=](bool result)
 						{
 							self->call<void>("client", "onSignup", "", 0, MSTuple{result});
 

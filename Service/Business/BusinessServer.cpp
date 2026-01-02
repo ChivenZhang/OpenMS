@@ -37,8 +37,8 @@ void BusinessServer::onInit()
 		{
 			MSMutexLock lock(m_UserLock);
 			auto& userInfo = m_UserInfos[userID];
-			userInfo.LastUpdate = 1.0f * ::clock() / CLOCKS_PER_SEC;
 			userInfo.Online = true;
+			userInfo.LastUpdate = 1.0f * ::clock() / CLOCKS_PER_SEC;
 		}
 
 		auto serverService = MSNew<ServerService>();
