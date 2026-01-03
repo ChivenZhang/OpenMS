@@ -68,7 +68,7 @@ void GatewayServer::onInit()
 								MS_INFO("验证失败！ %s", user.c_str());
 							}
 
-							self->call<void>("client", "onLogin", "", 0, MSTuple{userID});
+							// self->call<void>("client", "onLogin", "", 0, MSTuple{userID});
 
 							promise(userID);
 						});
@@ -83,7 +83,7 @@ void GatewayServer::onInit()
 					{
 						self->async("logic", "logout", "", 500, MSTuple{userID}, [=](bool result)
 						{
-							self->call<void>("client", "onLogout", "", 0, MSTuple{result});
+							// self->call<void>("client", "onLogout", "", 0, MSTuple{result});
 
 							promise(result);
 						});
@@ -95,7 +95,7 @@ void GatewayServer::onInit()
 					{
 						self->async("logic", "signup", "", 500, MSTuple{user, pass}, [=](bool result)
 						{
-							self->call<void>("client", "onSignup", "", 0, MSTuple{result});
+							// self->call<void>("client", "onSignup", "", 0, MSTuple{result});
 
 							promise(result);
 						});

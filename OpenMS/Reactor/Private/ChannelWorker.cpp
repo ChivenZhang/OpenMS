@@ -56,7 +56,9 @@ bool ChannelWorker::running() const
 void ChannelWorker::enqueue(MSRef<IChannelEvent> event)
 {
 	if (m_Running == false) return;
-	MSMutexLock lock(m_EventLock);
-	m_EventQueue.push(event);
+	{
+		MSMutexLock lock(m_EventLock);
+		m_EventQueue.push(event);
+	}
 	m_EventUnlock.notify_one();
 }
