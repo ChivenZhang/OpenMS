@@ -24,17 +24,17 @@ MailMan::MailMan(MSRaw<MailHub> context)
 		{
 			MSHnd<IMailBox> element;
 			{
-				MSUniqueLock lock(m_Context->m_MailLock);
+				MSUniqueLock mailboxLock(m_Context->m_MailLock);
 				while (m_Context->m_Running && m_Context->dequeue(element) == false)
 				{
-					m_Context->m_MailUnlock.wait(lock);
+					m_Context->m_MailUnlock.wait(mailboxLock);
 				}
 				if (m_Context->m_Running == false) break;
 			}
 
 			if (auto mailbox = MSCast<MailBox>(element.lock()))
 			{
-				MSMutexLock lock(mailbox->m_MailLock);
+				MSMutexLock mailLock(mailbox->m_MailLock);
 				if (mailbox->m_MailQueue.empty() == false)
 				{
 					auto& mail = mailbox->m_MailQueue.front();
@@ -64,6 +64,7 @@ MailMan::MailMan(MSRaw<MailHub> context)
 				}
 				if (mailbox->m_MailQueue.empty() == false)
 				{
+					MSMutexLock mailboxLock(m_Context->m_MailLock);
 					m_Context->enqueue(mailbox);
 				}
 			}

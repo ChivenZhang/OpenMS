@@ -75,7 +75,7 @@ IMailTask GuestService::read(IMail mail)
 	}
 	else if (mail.Type & OPENMS_MAIL_TYPE_RESPONSE)
 	{
-		MS_INFO("%s\t%u <= %u #%u %s", name().c_str(), mail.To, mail.From, mail.Date, mail.Body.data());
+		MS_INFO("%s\t%u <= %u 会话 %u 长度 %u 内容 %s", name().c_str(), mail.To, mail.From, mail.Date, (uint32_t)mail.Body.size(), mail.Body.data());
 		session_t response;
 		{
 			MSMutexLock lock(m_LockSession);

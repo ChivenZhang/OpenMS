@@ -116,7 +116,7 @@ bool RPCServerBase::call(MSHnd<IChannel> client, MSStringView const& name, uint3
 
 	// Convert request to string
 
-	MSString buffer(sizeof(RPCRequestView) + input.size(), 0);
+	MSString buffer(sizeof(RPCRequestView) + input.size(), '?');
 	auto& request = *(RPCRequestView*)buffer.data();
 	request.Length = (uint32_t)buffer.size();
 	request.Session = (++m_Session) | 0x80000000;
@@ -138,7 +138,7 @@ bool RPCServerBase::call(MSHnd<IChannel> client, MSStringView const& name, uint3
 
 	// Send request to remote server
 
-	MS_INFO("发送:地址 %s 长度 %u 会话 %u 内容 %s", m_Reactor->address().lock()->getString().c_str(), request.Length, request.Session, input.data());
+	MS_INFO("服务发送请求:地址 %s 会话 %u 长度 %u 内容 %s", m_Reactor->address().lock()->getString().c_str(), request.Session, request.Length, input.data());
 	m_Reactor->write(IChannelEvent::New(buffer, client));
 
 	auto status = future.wait_for(std::chrono::milliseconds(timeout));
@@ -160,7 +160,7 @@ bool RPCServerBase::async(MSHnd<IChannel> client, MSStringView const& name, uint
 
 	// Convert request to string
 
-	MSString buffer(sizeof(RPCRequestView) + input.size(), 0);
+	MSString buffer(sizeof(RPCRequestView) + input.size(), '?');
 	auto& request = *(RPCRequestView*)buffer.data();
 	request.Length = (uint32_t)buffer.size();
 	request.Session = (++m_Session) | 0x80000000;
@@ -195,7 +195,7 @@ bool RPCServerBase::async(MSHnd<IChannel> client, MSStringView const& name, uint
 
 	// Send request to remote server
 
-	MS_INFO("发送:地址 %s 长度 %u 会话 %u 内容 %s", m_Reactor->address().lock()->getString().c_str(), request.Length, request.Session, input.data());
+	MS_INFO("服务发送请求:地址 %s 会话 %u 长度 %u 内容 %s", m_Reactor->address().lock()->getString().c_str(), request.Session, request.Length, input.data());
 	m_Reactor->write(IChannelEvent::New(buffer, client));
 	return true;
 }
@@ -212,32 +212,12 @@ bool RPCServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<
 	auto& package = *(RPCRequestBase*)m_Buffer.data();
 	if (sizeof(RPCRequestBase) <= m_Buffer.size() && package.Length <= m_Buffer.size())
 	{
-		// Call from client
-		if ((package.Session & 0X80000000) == 0)
-		{
-			auto& request = *(RPCRequestView*)m_Buffer.data();
-			auto message = MSStringView(request.Buffer, request.Length - sizeof(RPCRequestView));
-			MS_INFO("接收:地址 %s 长度 %u 会话 %u 内容 %s", m_Server->m_Reactor->address().lock()->getString().c_str(), package.Length, package.Session, message.data());
-			if (message.size() <= m_Server->m_Config.Buffers)
-			{
-				MSString output;
-				if (m_Server->invoke(event->Channel, request.Method, message, output))
-				{
-					MSString buffer(sizeof(RPCResponseView) + output.size(), 0);
-					RPCResponseView& response = *(RPCResponseView*)buffer.data();
-					response.Length = (uint32_t)buffer.size();
-					response.Session = request.Session;
-					if (output.empty() == false) ::memcpy(response.Buffer, output.data(), output.size());
-
-					context->write(IChannelEvent::New(buffer));
-				}
-			}
-		}
-		else
+		// Response from client
+		if (package.Session & 0X80000000)
 		{
 			auto& response = *(RPCResponseView*)m_Buffer.data();
 			auto message = MSStringView(response.Buffer, response.Length - sizeof(RPCResponseView));
-			MS_INFO("接收:地址 %s 长度 %u 会话 %u 内容 %s", m_Server->m_Reactor->address().lock()->getString().c_str(), package.Length, package.Session, message.data());
+			MS_INFO("服务接收响应:地址 %s 会话 %u 长度 %u 内容 %s", m_Server->m_Reactor->address().lock()->getString().c_str(), package.Session, package.Length, message.data());
 			if (message.size() <= m_Server->m_Config.Buffers)
 			{
 				decltype(m_Server->m_Sessions)::value_type::second_type callback;
@@ -251,6 +231,27 @@ bool RPCServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<
 					}
 				}
 				if (callback) callback(message);
+			}
+		}
+		// Request from client
+		else
+		{
+			auto& request = *(RPCRequestView*)m_Buffer.data();
+			auto message = MSStringView(request.Buffer, request.Length - sizeof(RPCRequestView));
+			MS_INFO("服务接收请求:地址 %s 会话 %u 长度 %u 内容 %s", m_Server->m_Reactor->address().lock()->getString().c_str(), package.Session, package.Length, message.data());
+			if (message.size() <= m_Server->m_Config.Buffers)
+			{
+				MSString output;
+				if (m_Server->invoke(event->Channel, request.Method, message, output))
+				{
+					MSString buffer(sizeof(RPCResponseView) + output.size(), '?');
+					RPCResponseView& response = *(RPCResponseView*)buffer.data();
+					response.Length = (uint32_t)buffer.size();
+					response.Session = request.Session;
+					if (output.empty() == false) ::memcpy(response.Buffer, output.data(), output.size());
+
+					context->write(IChannelEvent::New(buffer));
+				}
 			}
 		}
 		m_Buffer = m_Buffer.substr(package.Length);

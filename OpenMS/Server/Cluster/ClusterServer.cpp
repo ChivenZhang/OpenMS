@@ -71,7 +71,7 @@ void ClusterServer::onInit()
 		}
 		if (client == nullptr || client->connect() == false) return false;
 
-		MSString request(sizeof(MailView) + mail.Body.size(), 0);
+		MSString request(sizeof(MailView) + mail.Body.size(), '?');
 		auto& mailView = *(MailView*)request.data();
 		mailView.From = mail.From;
 		mailView.To = mail.To;

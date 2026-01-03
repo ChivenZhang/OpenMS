@@ -99,18 +99,18 @@ void BusinessServer::onInit()
 
 	mailHub->create("logic", logicService);
 
-	startTimer(0, 2000, [=, this](uint32_t handle)
-	{
-		MSMutexLock lock(m_UserLock);
-		auto now = 1.0f * ::clock() / CLOCKS_PER_SEC;
-		for (auto& userInfo : m_UserInfos)
-		{
-			if (userInfo.second.Online && userInfo.second.LastUpdate + 10.0f <= now)
-			{
-				logicService->call<bool>("logic", "logout", "", 0, MSTuple{ userInfo.first });
-			}
-		}
-	});
+	// startTimer(0, 5000, [=, this](uint32_t handle)
+	// {
+	// 	MSMutexLock lock(m_UserLock);
+	// 	auto now = 1.0f * ::clock() / CLOCKS_PER_SEC;
+	// 	for (auto& userInfo : m_UserInfos)
+	// 	{
+	// 		if (userInfo.second.Online && userInfo.second.LastUpdate + 10.0f <= now)
+	// 		{
+	// 			logicService->call<bool>("logic", "logout", "", 0, MSTuple{ userInfo.first });
+	// 		}
+	// 	}
+	// });
 }
 
 void BusinessServer::onExit()
