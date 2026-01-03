@@ -50,7 +50,7 @@
 			"generator": "Ninja",
 			"binaryDir": "${sourceDir}/Output/${presetName}",
 			"cacheVariables": {
-				"CMAKE_BUILD_TYPE": "Debug",
+				"CMAKE_BUILD_TYPE": "Release",
 				"CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_HOME}/scripts/buildsystems/vcpkg.cmake",
 
 				"OPENMS_ENABLE_CONFIG": "ON",
@@ -64,9 +64,9 @@
 				"OPENMS_ENABLE_REDIS": "OFF"
 			},
 			"environment": {
-				"VCPKG_HOME1": "F:/Library/Windows/vcpkg-static",
+				"VCPKG_HOME": "F:/Library/Windows/vcpkg-static",
 				"VCPKG_HOME2": "D:/ChivenZhang/GitProject/Library/Window/vcpkg",
-				"VCPKG_HOME": "/Users/apple/CLionProjects/vcpkg"
+				"VCPKG_HOME3": "/Users/apple/CLionProjects/vcpkg"
 			}
 		}
 	]
