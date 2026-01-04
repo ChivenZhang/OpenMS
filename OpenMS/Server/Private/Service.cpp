@@ -144,7 +144,6 @@ IMailTask Service::read(IMail mail)
 	}
 	else if (mail.Type & OPENMS_MAIL_TYPE_REQUEST)
 	{
-		MS_INFO("%s\t%u => %u #%u %s", name().c_str(), mail.From, mail.To, mail.Date, mail.Body.substr(sizeof(uint32_t)).data());
 		if (sizeof(request_t) <= mail.Body.size())
 		{
 			auto& request = *(request_t*)mail.Body.data();
@@ -171,7 +170,6 @@ IMailTask Service::read(IMail mail)
 	}
 	else if (mail.Type & OPENMS_MAIL_TYPE_RESPONSE)
 	{
-		MS_INFO("%s\t%u <= %u #%u %s", name().c_str(), mail.To, mail.From, mail.Date, mail.Body.data());
 		session_t response;
 		{
 			MSMutexLock lock(m_LockSession);

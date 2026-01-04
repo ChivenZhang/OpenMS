@@ -29,12 +29,10 @@ IMailTask ProxyService::read(IMail mail)
 		{
 			if (mail.Type & OPENMS_MAIL_TYPE_REQUEST)
 			{
-				MS_INFO("%s\t%u => %u #%u %s", name().c_str(), mail.From, mail.To, mail.Date, mail.Body.substr(sizeof(uint32_t)).data());
 				send(mail);
 			}
 			else if (mail.Type & OPENMS_MAIL_TYPE_RESPONSE)
 			{
-				MS_INFO("%s\t%u <= %u #%u %s", name().c_str(), mail.To, mail.From, mail.Date, mail.Body.data());
 				if (auto client = m_ClientChannel.lock())
 				{
 					MSString buffer(sizeof(MailView) + mail.Body.size(), 0);
@@ -53,7 +51,6 @@ IMailTask ProxyService::read(IMail mail)
 		{
 			if (mail.Type & OPENMS_MAIL_TYPE_REQUEST)
 			{
-				MS_INFO("%s\t%u => %u #%u %s", name().c_str(), mail.From, mail.To, mail.Date, mail.Body.substr(sizeof(uint32_t)).data());
 				if (auto client = m_ClientChannel.lock())
 				{
 					MSString buffer(sizeof(MailView) + mail.Body.size(), 0);
@@ -67,9 +64,8 @@ IMailTask ProxyService::read(IMail mail)
 					client->writeChannel(IChannelEvent::New(buffer));
 				}
 			}
-			if (mail.Type & OPENMS_MAIL_TYPE_RESPONSE)
+			else if (mail.Type & OPENMS_MAIL_TYPE_RESPONSE)
 			{
-				MS_INFO("%s\t%u <= %u #%u %s", name().c_str(), mail.To, mail.From, mail.Date, mail.Body.data());
 				send(mail);
 			}
 		}

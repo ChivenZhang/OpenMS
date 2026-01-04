@@ -92,7 +92,7 @@ void TCPServerReactor::startup()
 					auto buffer = client->getBuffer();
 					socket->async_read_some(asio::buffer(buffer.data(), buffer.size()), [=, &read_func](asio::error_code error, size_t length)
 					{
-						MS_INFO("tcp async read: %s 长度 %u 状态 %d", channel.lock()->getRemote().lock()->getString().c_str(), length, error.value());
+						MS_DEBUG("tcp async read: %s 长度 %u 状态 %d", channel.lock()->getRemote().lock()->getString().c_str(), (uint32_t)length, error.value());
 						if (error)
 						{
 							MS_ERROR("can't read from socket: %s", error.message().c_str());
@@ -103,11 +103,8 @@ void TCPServerReactor::startup()
 							auto event = MSNew<IChannelEvent>();
 							event->Message = MSString(buffer.data(), length);
 							event->Channel = channel;
-							MS_INFO("read_func 0");
 							reactor->onInbound(event);
-							MS_INFO("read_func 1");
 							read_func(channel);
-							MS_INFO("read_func 2");
 						}
 					});
 				}
@@ -120,7 +117,7 @@ void TCPServerReactor::startup()
 					auto socket = client->getSocket();
 					socket->async_write_some(asio::buffer(event->Message), [=, &write_func](asio::error_code error, size_t length) mutable
 					{
-						MS_INFO("tcp async write: %s 长度 %u 状态 %d", channel.lock()->getRemote().lock()->getString().c_str(), length, error.value());
+						MS_DEBUG("tcp async write: %s 长度 %u 状态 %d", channel.lock()->getRemote().lock()->getString().c_str(), (uint32_t)length, error.value());
 						if (error)
 						{
 							if (event->Promise) event->Promise->set_value(false);
