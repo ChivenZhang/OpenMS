@@ -29,7 +29,7 @@ void TCPServerReactor::startup()
 	MSPromise<void> promise;
 	auto future = promise.get_future();
 
-	m_EventThread = MSThread([=, &promise, this]()
+	m_EventThread = MSThread([=, this, &promise]()
 	{
 		asio::io_context loop;
 		using namespace asio::ip;

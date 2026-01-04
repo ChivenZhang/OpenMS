@@ -78,8 +78,6 @@ void FrontendClient::onInit()
 		mailView.Type = mail.Type;
 		if (mail.Body.empty() == false) ::memcpy(mailView.Body, mail.Body.data(), mail.Body.size());
 		m_TCPChannel->writeChannel(IChannelEvent::New(request));
-
-		MS_INFO("客户请求：%u => %u", mailView.From, mailView.To);
 		return true;
 	});
 
@@ -141,17 +139,17 @@ void FrontendClient::onInit()
 					channel->getContext()->userdata() = userID;
 
 					auto playerService = MSNew<Service>();
-					playerService->bind("onStartBattle", [=, _this = playerService.get()]()->MSAsync<void>
+					playerService->bind("onStartBattle", [=, self = playerService.get()]()->MSAsync<void>
 					{
 						MS_INFO("开始游戏");
 
 						MS_INFO("尝试攻击...");
-						_this->async("player:" + std::to_string(userID), "attack", "proxy:" + std::to_string(userID), 100, MSTuple{}, [=](bool result)
+						self->async("player:" + std::to_string(userID), "attack", "proxy:" + std::to_string(userID), 100, MSTuple{}, [=](bool result)
 						{
 							MS_INFO("攻击结果：%d", result);
 
 							MS_INFO("尝试登出...");
-							_this->async("guest", "logout", "", 1000, MSTuple{userID}, [=](bool result2)
+							self->async("guest", "logout", "", 1000, MSTuple{userID}, [=](bool result2)
 							{
 								MS_INFO("登出结果：%d", result2);
 							});

@@ -38,11 +38,11 @@ void BusinessServer::onInit()
 			MSMutexLock lock(m_UserLock);
 			auto& userInfo = m_UserInfos[userID];
 			userInfo.Online = true;
-			userInfo.LastUpdate = 1.0f * ::clock() / CLOCKS_PER_SEC;
+			userInfo.LastUpdate = ::clock() * 1.0f / CLOCKS_PER_SEC;
 		}
 
 		auto serverService = MSNew<ServerService>();
-		serverService->bind("readyBattle", [=](uint32_t gameID)->MSAsync<bool>
+		serverService->bind("readyBattle", [=, self = logicService.get()](uint32_t gameID)->MSAsync<bool>
 		{
 			MS_INFO("服务端：READY BATTLE!!!");
 
@@ -50,7 +50,7 @@ void BusinessServer::onInit()
 			mailHub->create("player:" + std::to_string(userID), playerService);
 
 			// Match battle
-			// self->call<bool>("player:" + std::to_string(userID), "startBattle", "", 0, MSTuple{});
+			self->call<bool>("logic", "matchBattle", "", 0, MSTuple{userID});
 
 			co_return true;
 		});
@@ -61,7 +61,7 @@ void BusinessServer::onInit()
 			if (result != m_UserInfos.end() && result->second.Online)
 			{
 				auto& userInfo = result->second;
-				userInfo.LastUpdate = 1.0f * ::clock() / CLOCKS_PER_SEC;
+				userInfo.LastUpdate = ::clock() * 1.0f / CLOCKS_PER_SEC;
 			}
 			co_return;
 		});
@@ -90,27 +90,29 @@ void BusinessServer::onInit()
 
 	// Match Module
 
-	logicService->bind("matchBattle", [_this = logicService.get()](uint32_t userID)->MSAsync<uint32_t>
+	logicService->bind("matchBattle", [self = logicService.get()](uint32_t userID)->MSAsync<uint32_t>
 	{
 		MS_INFO("服务端：START BATTLE!!!");	// Assume battle ready
-		_this->call<bool>("player:" + std::to_string(userID), "startBattle", "", 0, MSTuple{});
+		self->call<bool>("player:" + std::to_string(userID), "startBattle", "", 0, MSTuple{});
 		co_return 0;
 	});
 
 	mailHub->create("logic", logicService);
 
-	// startTimer(0, 5000, [=, this](uint32_t handle)
-	// {
-	// 	MSMutexLock lock(m_UserLock);
-	// 	auto now = 1.0f * ::clock() / CLOCKS_PER_SEC;
-	// 	for (auto& userInfo : m_UserInfos)
-	// 	{
-	// 		if (userInfo.second.Online && userInfo.second.LastUpdate + 10.0f <= now)
-	// 		{
-	// 			logicService->call<bool>("logic", "logout", "", 0, MSTuple{ userInfo.first });
-	// 		}
-	// 	}
-	// });
+	// Users logout
+
+	startTimer(0, 5000, [=, this, self = logicService.get()](uint32_t handle)
+	{
+		MSMutexLock lock(m_UserLock);
+		auto now = ::clock() * 1.0f / CLOCKS_PER_SEC;
+		for (auto& userInfo : m_UserInfos)
+		{
+			if (userInfo.second.Online && userInfo.second.LastUpdate + 10.0f <= now)
+			{
+				self->call<bool>("logic", "logout", "", 0, MSTuple{ userInfo.first });
+			}
+		}
+	});
 }
 
 void BusinessServer::onExit()

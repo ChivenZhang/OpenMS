@@ -10,6 +10,7 @@
 *
 * =================================================*/
 #include <OpenMS/Server/Cluster/ClusterServer.h>
+#include <Server/Private/Service.h>
 
 class ClusterDemo1 : public ClusterServer
 {
@@ -19,6 +20,12 @@ public:
 protected:
 	void onInit() override;
 	void onExit() override;
+};
+
+class AuthorService : public Service
+{
+public:
+	AuthorService();
 };
 
 OPENMS_RUN(ClusterDemo1)

@@ -11,36 +11,43 @@
 #include "ClusterDemo2.h"
 #include "Server/Private/Service.h"
 
-class AuthorService : public Service
-{
-public:
-	AuthorService()
-	{
-		this->bind("verify", [](MSString user, MSString pass)->MSAsync<MSString>
-		{
-			MS_DEBUG("success %s %s", user.c_str(), pass.c_str());
-			co_return "SUCCESS";
-		});
-	}
-};
-
-// ========================================================================================
-
 MSString ClusterDemo2::identity() const
 {
-	// Use config in APPLICATION.json
-	return "cluster2";
+	return "cluster2";	// Config in APPLICATION.json
 }
 
 void ClusterDemo2::onInit()
 {
 	ClusterServer::onInit();
-
 	auto mailHub = AUTOWIRE(IMailHub)::bean();
-	mailHub->create("author", MSNew<AuthorService>());
+
+	auto loginService = MSNew<LoginService>();
+	mailHub->create("loginService", loginService);
+
+	// Invoke remote call...
+
+	auto result = loginService->call<MSString>("loginService", "login", "", 1000, MSTuple{"admin", "123456"});
+	MS_INFO("登录结果（Result）: %s", result.first.c_str());
 }
 
 void ClusterDemo2::onExit()
 {
 	ClusterServer::onExit();
+}
+
+LoginService::LoginService()
+{
+	// Define remote call...
+
+	this->bind("login", [this](MSString user, MSString pass)->MSAsync<MSString>
+	{
+		auto result = co_await [=, this](MSAwait<MSString> promise)
+		{
+			this->async("authorService", "verify", "", 1000, MSTuple{user, pass}, [=](MSString response)
+			{
+				promise(MSString(response));
+			});
+		};
+		co_return result;
+	});
 }

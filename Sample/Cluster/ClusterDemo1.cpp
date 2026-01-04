@@ -10,51 +10,32 @@
 * =================================================*/
 #include "ClusterDemo1.h"
 #include "Server/Private/Service.h"
-#include "Utility/QuickQPS.h"
-
-class LoginService : public Service
-{
-public:
-	LoginService()
-	{
-		this->bind("login", [this](MSString user, MSString pass)->MSAsync<MSString>
-		{
-			auto output = co_await [=](MSAwait<MSString> promise)
-			{
-				this->async("author", "verify", "", 1000, MSTuple{user, pass}, [=](MSString response)
-				{
-					promise(MSString(response));
-				});
-			};
-			co_return output;
-		});
-	}
-};
-
-// ========================================================================================
 
 MSString ClusterDemo1::identity() const
 {
-	// Use config in APPLICATION.json
-	return "cluster1";
+	return "cluster1";	// Config in APPLICATION.json
 }
 
 void ClusterDemo1::onInit()
 {
 	ClusterServer::onInit();
-
 	auto mailHub = AUTOWIRE(IMailHub)::bean();
-	auto loginService = MSNew<LoginService>();
-	mailHub->create("login", loginService);
 
-	// RPC
-	// login.login() => author.verify()
-
-	auto response = loginService->call<MSString>("login", "login", "", 1000, MSTuple{"admin", "123456"});
-	MS_INFO("Login result: %s", response.first.c_str());
+	mailHub->create("authorService", MSNew<AuthorService>());
 }
 
 void ClusterDemo1::onExit()
 {
 	ClusterServer::onExit();
+}
+
+AuthorService::AuthorService()
+{
+	// Define remote call...
+
+	this->bind("verify", [](MSString user, MSString pass)->MSAsync<MSString>
+	{
+		MS_INFO("验证登录（VERIFY） %s %s", user.c_str(), pass.c_str());
+		co_return "登录成功（SUCCESS）";
+	});
 }
