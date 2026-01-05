@@ -97,6 +97,12 @@ void BusinessServer::onInit()
 		co_return 0;
 	});
 
+	logicService->bind("createSpace", [self = logicService.get()](uint32_t userID)->MSAsync<bool>
+	{
+		MS_INFO("服务端：CREATE SPACE!!!");
+		co_return true;
+	});
+
 	mailHub->create("logic", logicService);
 
 	// Users logout
