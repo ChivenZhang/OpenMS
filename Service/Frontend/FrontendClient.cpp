@@ -25,6 +25,7 @@ MSString FrontendClient::identity() const
 void FrontendClient::onInit()
 {
 	auto mailHub = m_MailHub = MSNew<MailHub>();
+
 	auto clientService = MSNew<Service>();
 	clientService->bind("onLogin", [=](uint32_t userID)->MSAsync<void>
 	{

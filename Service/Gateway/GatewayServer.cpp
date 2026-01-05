@@ -26,7 +26,6 @@ MSString GatewayServer::identity() const
 void GatewayServer::onInit()
 {
 	ClusterServer::onInit();
-
 	auto mailHub = AUTOWIRE(IMailHub)::bean();
 
 	m_TCPServer = MSNew<TCPServer>(TCPServer::config_t{

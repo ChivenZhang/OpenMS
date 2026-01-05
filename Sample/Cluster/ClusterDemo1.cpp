@@ -9,7 +9,6 @@
 *
 * =================================================*/
 #include "ClusterDemo1.h"
-#include "Server/Private/Service.h"
 
 MSString ClusterDemo1::identity() const
 {
