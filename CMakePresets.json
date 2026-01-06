@@ -11,6 +11,7 @@
 
 				"OPENMS_ENABLE_CONFIG": "ON",
 				"OPENMS_ENABLE_DISCOVERY": "ON",
+				"OPENMS_ENABLE_DAEMON": "ON",
 				"OPENMS_ENABLE_GATEWAY": "ON",
 				"OPENMS_ENABLE_BUSINESS": "ON",
 				"OPENMS_ENABLE_FRONTEND": "ON",
@@ -33,6 +34,7 @@
 
 				"OPENMS_ENABLE_CONFIG": "ON",
 				"OPENMS_ENABLE_DISCOVERY": "ON",
+				"OPENMS_ENABLE_DAEMON": "ON",
 				"OPENMS_ENABLE_GATEWAY": "ON",
 				"OPENMS_ENABLE_BUSINESS": "ON",
 				"OPENMS_ENABLE_FRONTEND": "ON",
@@ -50,11 +52,12 @@
 			"generator": "Ninja",
 			"binaryDir": "${sourceDir}/Output/${presetName}",
 			"cacheVariables": {
-				"CMAKE_BUILD_TYPE": "Release",
+				"CMAKE_BUILD_TYPE": "RelWithDebInfo",
 				"CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_HOME}/scripts/buildsystems/vcpkg.cmake",
 
 				"OPENMS_ENABLE_CONFIG": "ON",
 				"OPENMS_ENABLE_DISCOVERY": "ON",
+				"OPENMS_ENABLE_DAEMON": "ON",
 				"OPENMS_ENABLE_GATEWAY": "ON",
 				"OPENMS_ENABLE_BUSINESS": "ON",
 				"OPENMS_ENABLE_FRONTEND": "ON",

@@ -9,10 +9,9 @@
 *
 * =================================================*/
 #include "ClusterServer.h"
-
-#include <utility>
-
 #include "Mailbox/Private/Mail.h"
+#include <utility>
+#include <random>
 
 MSString ClusterServer::identity() const
 {
@@ -28,6 +27,8 @@ void ClusterServer::onInit()
 
 	mailHub->failed([this](IMail mail)->bool
 	{
+		static thread_local std::mt19937 gen(std::random_device{}());
+
 		// Select remote address to send
 
 		MSString address;
@@ -38,7 +39,10 @@ void ClusterServer::onInit()
 			auto result = m_MailRouteMap.find(toName);
 			if (result == m_MailRouteMap.end()) break;
 			auto& routes = result->second;
-			address = routes.front();
+			if (routes.empty()) break;
+			std::uniform_int_distribution<size_t> dis(0U, routes.size() - 1);
+			auto index = dis(gen);
+			address = routes[index];
 		} while (false);
 		if (address.empty())
 		{

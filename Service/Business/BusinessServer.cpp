@@ -11,8 +11,8 @@
 #include "BusinessServer.h"
 #include "PlayerService.h"
 #include "ServerService.h"
-#include "Mailbox/Private/Mail.h"
-#include "Server/Private/Service.h"
+#include <OpenMS/Mailbox/Private/Mail.h>
+#include <OpenMS/Server/Private/Service.h>
 
 MSString BusinessServer::identity() const
 {
@@ -37,6 +37,7 @@ void BusinessServer::onInit()
 		{
 			MSMutexLock lock(m_UserLock);
 			auto& userInfo = m_UserInfos[userID];
+			userInfo.SpaceID = 0;
 			userInfo.Online = true;
 			userInfo.LastUpdate = ::clock() * 1.0f / CLOCKS_PER_SEC;
 		}
@@ -90,11 +91,26 @@ void BusinessServer::onInit()
 
 	// Match Module
 
-	logicService->bind("matchBattle", [self = logicService.get()](uint32_t userID)->MSAsync<uint32_t>
+	logicService->bind("matchBattle", [this, self = logicService.get()](uint32_t userID)->MSAsync<uint32_t>
 	{
 		MS_INFO("服务端：START BATTLE!!!");	// Assume battle ready
-		self->call<bool>("player:" + std::to_string(userID), "startBattle", "", 0, MSTuple{});
-		co_return 0;
+
+		auto spaceID = ++m_SpaceID;
+		co_await [=](MSAwait<void> promise)
+		{
+			self->async("daemon", "createSpace", "", 100, MSTuple{ spaceID }, [=, &promise](bool result)
+			{
+				if (result)
+				{
+					MSMutexLock lock(m_UserLock);
+					auto& userInfo = m_UserInfos[userID];
+					userInfo.SpaceID = spaceID;
+					self->call<bool>("player:" + std::to_string(userID), "startBattle", "", 0, MSTuple{});
+				}
+				promise();
+			});
+		};
+		co_return spaceID;
 	});
 
 	logicService->bind("createSpace", [self = logicService.get()](uint32_t userID)->MSAsync<bool>

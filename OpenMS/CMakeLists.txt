@@ -18,8 +18,7 @@ set(REDIS_SOURCES
 		Endpoint/Redis/RedisPool.h
 )
 else()
-set(REDIS_SOURCES
-		Utility/TraitsUtility.h)
+set(REDIS_SOURCES)
 endif()
 
 add_library(OpenMS STATIC
@@ -126,6 +125,7 @@ add_library(OpenMS STATIC
 		Utility/QuickQPS.h
 		Utility/Timer.cpp
 		Utility/Timer.h
+		Utility/TraitsUtility.h
         Server/Private/Service.cpp
         Server/Private/Service.h
 )

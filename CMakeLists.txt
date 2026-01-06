@@ -20,6 +20,10 @@ if(OPENMS_ENABLE_DISCOVERY)
 add_subdirectory(${OPENMS_SOURCE_DIR}/Service/Discovery)
 endif()
 
+if(OPENMS_ENABLE_DAEMON)
+    add_subdirectory(${OPENMS_SOURCE_DIR}/Service/Daemon)
+endif()
+
 if(OPENMS_ENABLE_GATEWAY)
 add_subdirectory(${OPENMS_SOURCE_DIR}/Service/Gateway)
 endif()

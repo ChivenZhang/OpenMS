@@ -12,7 +12,7 @@
 #include <OpenMS/Server/Cluster/ClusterServer.h>
 #include <OpenMS/Endpoint/TCP/TCPClient.h>
 
-class BusinessServer : public ClusterServer
+class DaemonServer : public ClusterServer
 {
 public:
 	MSString identity() const override;
@@ -20,19 +20,6 @@ public:
 protected:
 	void onInit() override;
 	void onExit() override;
-
-protected:
-	MSMutex m_UserLock;
-	MSMutex m_BattleLock;
-	struct userinfo_t
-	{
-		bool Online;
-		uint32_t SpaceID;
-		float LastUpdate;
-	};
-	uint32_t m_SpaceID = 0;
-	MSQueue<uint32_t> m_MatchQueue;
-	MSMap<uint32_t, userinfo_t> m_UserInfos;
 };
 
-OPENMS_RUN(BusinessServer)
+OPENMS_RUN(DaemonServer)
