@@ -40,6 +40,10 @@ if(OPENMS_ENABLE_BUSINESS)
 add_subdirectory(${OPENMS_SOURCE_DIR}/Service/Business)
 endif()
 
+if(OPENMS_ENABLE_BACKEND)
+add_subdirectory(${OPENMS_SOURCE_DIR}/Service/Backend)
+endif()
+
 if(OPENMS_ENABLE_FRONTEND)
 add_subdirectory(${OPENMS_SOURCE_DIR}/Service/Frontend)
 endif()

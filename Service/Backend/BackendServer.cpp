@@ -8,31 +8,22 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "DaemonServer.h"
+#include "BackendServer.h"
 #include <OpenMS/Mailbox/Private/Mail.h>
 #include <OpenMS/Server/Private/Service.h>
 
-MSString DaemonServer::identity() const
+MSString BackendServer::identity() const
 {
-	return "daemon";
+	return "backend";
 }
 
-void DaemonServer::onInit()
+void BackendServer::onInit()
 {
 	ClusterServer::onInit();
 	auto mailHub = AUTOWIRE(IMailHub)::bean();
-
-	auto daemonService = MSNew<Service>();
-	daemonService->bind("createSpace", [=](uint32_t spaceID)->MSAsync<bool>
-	{
-		MS_INFO("守护进程：CREATE SPACE!!!");
-		auto result = system(("start BackendServer.exe --space=" + std::to_string(spaceID)).c_str());
-		co_return result == 0;
-	});
-	mailHub->create("daemon", daemonService);
 }
 
-void DaemonServer::onExit()
+void BackendServer::onExit()
 {
 	ClusterServer::onExit();
 }

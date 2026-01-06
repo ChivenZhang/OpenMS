@@ -98,7 +98,7 @@ void BusinessServer::onInit()
 		auto spaceID = ++m_SpaceID;
 		co_await [=](MSAwait<void> promise)
 		{
-			self->async("daemon", "createSpace", "", 100, MSTuple{ spaceID }, [=, &promise](bool result)
+			self->async("daemon", "createSpace", "", 100, MSTuple{ spaceID }, [=](bool result)
 			{
 				if (result)
 				{
@@ -112,12 +112,11 @@ void BusinessServer::onInit()
 		};
 		co_return spaceID;
 	});
-
-	logicService->bind("createSpace", [self = logicService.get()](uint32_t userID)->MSAsync<bool>
+	logicService->bind("onCreateSpace", [self = logicService.get()](uint32_t spaceID)->MSAsync<void>
 	{
-		MS_INFO("服务端：CREATE SPACE!!!");
-		co_return true;
+		co_return;
 	});
+
 
 	mailHub->create("logic", logicService);
 
