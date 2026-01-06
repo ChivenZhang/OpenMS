@@ -9,7 +9,6 @@
 *
 * =================================================*/
 #include "BusinessServer.h"
-#include "PlayerService.h"
 #include "ServerService.h"
 #include <OpenMS/Mailbox/Private/Mail.h>
 #include <OpenMS/Server/Private/Service.h>
@@ -46,9 +45,6 @@ void BusinessServer::onInit()
 		serverService->bind("readyBattle", [=, self = logicService.get()](uint32_t gameID)->MSAsync<bool>
 		{
 			MS_INFO("服务端：READY BATTLE!!!");
-
-			auto playerService = MSNew<PlayerService>(userID);
-			mailHub->create("player:" + std::to_string(userID), playerService);
 
 			// Match battle
 			self->call<bool>("logic", "matchBattle", "", 0, MSTuple{userID});

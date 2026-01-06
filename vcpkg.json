@@ -32,5 +32,8 @@
   }, {
     "name" : "libuv",
     "version>=" : "1.51.0"
+  }, {
+    "name" : "gflags",
+    "version>=" : "2.3.0"
   } ]
 }

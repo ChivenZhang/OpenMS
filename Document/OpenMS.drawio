@@ -1,6 +1,6 @@
-<mxfile host="drawio-plugin" modified="2026-01-06T02:09:11.103Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36" etag="q45iCUryxuWJIDuZMEoE" version="22.1.22" type="embed" pages="4">
+<mxfile host="drawio-plugin" modified="2026-01-06T09:21:25.082Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36" etag="I4JG7_xPcIN4HMfIkavN" version="22.1.22" type="embed" pages="4">
   <diagram id="23iRSUPoRavnBvh4doch" name="功能结构">
-    <mxGraphModel dx="1140" dy="631" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="796" dy="631" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -310,7 +310,7 @@
     </mxGraphModel>
   </diagram>
   <diagram id="wecLJcGoRKFd2JLpvbMf" name="调用流程">
-    <mxGraphModel dx="1140" dy="-469" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="967" dy="-334" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -388,7 +388,7 @@
             <mxPoint x="215" y="1400" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="q4g6-qDVqc_h9_TjQzKk-17" value="server:?" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" parent="1" vertex="1">
+        <mxCell id="q4g6-qDVqc_h9_TjQzKk-17" value="proxy:?" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" parent="1" vertex="1">
           <mxGeometry x="430" y="1240" width="100" height="500" as="geometry" />
         </mxCell>
         <mxCell id="q4g6-qDVqc_h9_TjQzKk-18" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" parent="q4g6-qDVqc_h9_TjQzKk-17" vertex="1">
@@ -573,36 +573,42 @@
             <mxPoint x="825" y="1400" as="targetPoint" />
           </mxGeometry>
         </mxCell>
+        <mxCell id="3DOzlq_FyklHmRLHSPsO-1" value="onCreateSpace()" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="845" y="1420" as="sourcePoint" />
+            <mxPoint x="610" y="1420" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
   <diagram id="_siVbPElvHfAtVW1M2G2" name="数据流程">
-    <mxGraphModel dx="668" dy="370" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="677" dy="536" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="-ELVPrA2aBoGSFUBVGpE-3" value="请求加入游戏" style="shape=ellipse;html=1;dashed=0;whiteSpace=wrap;aspect=fixed;perimeter=ellipsePerimeter;" vertex="1" parent="1">
+        <mxCell id="-ELVPrA2aBoGSFUBVGpE-3" value="请求加入游戏" style="shape=ellipse;html=1;dashed=0;whiteSpace=wrap;aspect=fixed;perimeter=ellipsePerimeter;" parent="1" vertex="1">
           <mxGeometry x="200" y="115" width="60" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="-ELVPrA2aBoGSFUBVGpE-5" value="客户端" style="html=1;dashed=0;whiteSpace=wrap;" vertex="1" parent="1">
+        <mxCell id="-ELVPrA2aBoGSFUBVGpE-5" value="客户端" style="html=1;dashed=0;whiteSpace=wrap;" parent="1" vertex="1">
           <mxGeometry x="40" y="120" width="100" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="-ELVPrA2aBoGSFUBVGpE-6" value="逻辑服务" style="html=1;dashed=0;whiteSpace=wrap;" vertex="1" parent="1">
+        <mxCell id="-ELVPrA2aBoGSFUBVGpE-6" value="逻辑服务" style="html=1;dashed=0;whiteSpace=wrap;" parent="1" vertex="1">
           <mxGeometry x="320" y="120" width="100" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="-ELVPrA2aBoGSFUBVGpE-8" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="-ELVPrA2aBoGSFUBVGpE-5" target="-ELVPrA2aBoGSFUBVGpE-3">
+        <mxCell id="-ELVPrA2aBoGSFUBVGpE-8" value="" style="endArrow=classic;html=1;rounded=0;" parent="1" source="-ELVPrA2aBoGSFUBVGpE-5" target="-ELVPrA2aBoGSFUBVGpE-3" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
             <mxPoint x="220" y="90" as="sourcePoint" />
             <mxPoint x="270" y="40" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="-ELVPrA2aBoGSFUBVGpE-9" value="" style="endArrow=classic;html=1;rounded=0;" edge="1" parent="1" source="-ELVPrA2aBoGSFUBVGpE-3" target="-ELVPrA2aBoGSFUBVGpE-6">
+        <mxCell id="-ELVPrA2aBoGSFUBVGpE-9" value="" style="endArrow=classic;html=1;rounded=0;" parent="1" source="-ELVPrA2aBoGSFUBVGpE-3" target="-ELVPrA2aBoGSFUBVGpE-6" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
             <mxPoint x="200" y="260" as="sourcePoint" />
             <mxPoint x="250" y="210" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="-ELVPrA2aBoGSFUBVGpE-10" value="" style="html=1;dashed=0;whiteSpace=wrap;" vertex="1" parent="1">
+        <mxCell id="-ELVPrA2aBoGSFUBVGpE-10" value="" style="html=1;dashed=0;whiteSpace=wrap;" parent="1" vertex="1">
           <mxGeometry x="320" y="240" width="100" height="50" as="geometry" />
         </mxCell>
       </root>
