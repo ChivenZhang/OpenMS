@@ -84,11 +84,10 @@ IMailTask GuestService::read(IMail mail)
 					auto result = m_MethodMap.find(request.Method);
 					if (result != m_MethodMap.end()) method = result->second;
 				}
-				MSString response;
 				if (method)
 				{
 					auto input = MSStringView(request.Buffer, mail.Body.size() - sizeof(request_t));
-					response = co_await method(input);
+					auto response = co_await method(input);
 
 					std::swap(mail.From, mail.To);
 					mail.Type &= ~OPENMS_MAIL_TYPE_REQUEST;
@@ -129,6 +128,10 @@ IMailTask GuestService::read(IMail mail)
 					response = result->second;
 					m_SessionMap.erase(result);
 				}
+			}
+			for (auto c : MSString(mail.Body.data(), mail.Body.size()))
+			{
+				MS_INFO("new body char: %u", c);
 			}
 			if (response) response(mail.Body);
 		}

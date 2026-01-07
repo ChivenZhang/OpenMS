@@ -78,7 +78,7 @@ uint32_t MailHub::send(IMail mail)
 	{
 		MSMutexLock lock(toMailbox->m_MailLock);
 		auto idle = toMailbox->m_MailQueue.empty();
-		MSString mailData(sizeof(MailView) + mail.Body.size(), 0);
+		MSList<uint8_t> mailData(sizeof(MailView) + mail.Body.size(), 0);
 		auto& mailView = *(MailView*)mailData.data();
 		mailView.From = mail.From;
 		mailView.To = mail.To;
@@ -94,6 +94,10 @@ uint32_t MailHub::send(IMail mail)
 		newMail.Date = mailView.Date;
 		newMail.Type = mailView.Type;
 		newMail.Body = MSStringView(mailView.Body, mail.Body.size());
+		for (auto c : MSString(newMail.Body.data(), newMail.Body.size()))
+		{
+			MS_INFO("old body char: %u", c);
+		}
 		toMailbox->m_MailQueue.push({ .Mail = std::move(mailData), .Task = toMailbox->read(newMail), });
 		if (idle) enqueue(toMailbox);
 		return mail.Date;
