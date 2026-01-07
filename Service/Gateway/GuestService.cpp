@@ -129,10 +129,6 @@ IMailTask GuestService::read(IMail mail)
 					m_SessionMap.erase(result);
 				}
 			}
-			for (auto c : MSString(mail.Body.data(), mail.Body.size()))
-			{
-				MS_INFO("new body char: %u", c);
-			}
 			if (response) response(mail.Body);
 		}
 	}

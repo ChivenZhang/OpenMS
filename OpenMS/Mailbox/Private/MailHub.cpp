@@ -94,10 +94,6 @@ uint32_t MailHub::send(IMail mail)
 		newMail.Date = mailView.Date;
 		newMail.Type = mailView.Type;
 		newMail.Body = MSStringView(mailView.Body, mail.Body.size());
-		for (auto c : MSString(newMail.Body.data(), newMail.Body.size()))
-		{
-			MS_INFO("old body char: %u", c);
-		}
 		toMailbox->m_MailQueue.push({ .Mail = std::move(mailData), .Task = toMailbox->read(newMail), });
 		if (idle) enqueue(toMailbox);
 		return mail.Date;
