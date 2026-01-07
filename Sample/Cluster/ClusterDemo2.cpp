@@ -40,13 +40,6 @@ LoginService::LoginService()
 
 	this->bind("login", [this](MSString user, MSString pass)->MSAsync<MSString>
 	{
-		auto result = co_await [=, this](MSAwait<MSString> promise)
-		{
-			this->async("authorService", "verify", "", 1000, MSTuple{user, pass}, [=](MSString response)
-			{
-				promise(MSString(response));
-			});
-		};
-		co_return result;
+		co_return co_await this->async<MSString>("authorService", "verify", "", 1000, MSTuple{user, pass});
 	});
 }

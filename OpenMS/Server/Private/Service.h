@@ -29,11 +29,13 @@ public:
 	bool bind(uint32_t method, method_t&& callback);
 	bool call(uint32_t service, uint32_t method, uint32_t forward, uint32_t timeout, MSStringView request, MSString& response);
 	bool async(uint32_t service, uint32_t method, uint32_t forward, uint32_t timeout, MSStringView request, MSLambda<void(MSStringView)>&& callback);
+	MSAsync<MSString> async(uint32_t service, uint32_t method, uint32_t forward, uint32_t timeout, MSStringView request);
 
 	bool unbind(MSStringView method);
 	bool bind(MSStringView method, method_t&& callback);
 	bool call(MSStringView service, MSStringView method, MSStringView forward, uint32_t timeout, MSStringView request, MSString& response);
 	bool async(MSStringView service, MSStringView method, MSStringView forward, uint32_t timeout, MSStringView request, MSLambda<void(MSStringView)>&& callback);
+	MSAsync<MSString> async(MSStringView service, MSStringView method, MSStringView forward, uint32_t timeout, MSStringView request);
 
 	template<class F, std::enable_if_t<!std::is_same_v<typename TTraits<F>::return_data, TTraits<method_t>::return_data> || !std::is_same_v<typename TTraits<F>::argument_datas, TTraits<method_t>::argument_datas>, int> = 0>
 	bool bind(MSStringView method, F&& callback)
@@ -105,6 +107,31 @@ public:
 			if constexpr (TTraits<F>::argument_count) MSTypeC(response, std::get<0>(result));
 			std::apply(callback, result);
 		});
+	}
+
+	template<class T, class...Args>
+	MSAsync<T> async(MSStringView service, MSStringView method, MSStringView forward, uint32_t timeout, MSTuple<Args...>&& args)
+	{
+		if constexpr (std::is_void_v<T>)
+		{
+			co_return co_await [=, this](MSAwait<void> const& promise) mutable
+			{
+				this->async(service, method, forward, timeout, std::forward<MSTuple<Args...>>(args), [promise]()
+				{
+					promise();
+				});
+			};
+		}
+		else
+		{
+			co_return co_await [=, this](MSAwait<T> const& promise) mutable
+			{
+				this->async(service, method, forward, timeout, std::forward<MSTuple<Args...>>(args), [promise](T result)
+				{
+					promise(result);
+				});
+			};
+		}
 	}
 
 protected:

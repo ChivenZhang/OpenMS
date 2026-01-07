@@ -92,20 +92,13 @@ void BusinessServer::onInit()
 		MS_INFO("服务端：START BATTLE!!!");	// Assume battle ready
 
 		auto spaceID = ++m_SpaceID;
-		co_await [=](MSAwait<void> promise)
+		if (co_await self->async<bool>("daemon", "createSpace", "", 100, MSTuple{ spaceID }))
 		{
-			self->async("daemon", "createSpace", "", 100, MSTuple{ spaceID }, [=](bool result)
-			{
-				if (result)
-				{
-					MSMutexLock lock(m_UserLock);
-					auto& userInfo = m_UserInfos[userID];
-					userInfo.SpaceID = spaceID;
-					self->call<bool>("player:" + std::to_string(userID), "startBattle", "", 0, MSTuple{});
-				}
-				promise();
-			});
-		};
+			MSMutexLock lock(m_UserLock);
+			auto& userInfo = m_UserInfos[userID];
+			userInfo.SpaceID = spaceID;
+			self->call<bool>("player:" + std::to_string(userID), "startBattle", "", 0, MSTuple{});
+		}
 		co_return spaceID;
 	});
 	logicService->bind("onCreateSpace", [self = logicService.get()](uint32_t spaceID)->MSAsync<void>

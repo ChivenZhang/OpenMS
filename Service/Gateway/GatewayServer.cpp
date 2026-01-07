@@ -48,57 +48,37 @@ void GatewayServer::onInit()
 				{
 					if (auto userID = channel->getContext()->userdata()) co_return userID;
 
-					co_return co_await [=](MSAwait<uint32_t> promise)
+					auto userID = co_await self->async<uint32_t>("logic", "login", "", 1000, MSTuple{user, pass});
+					if (userID)
 					{
-						MS_INFO("服务端验证：%s", user.c_str());
+						auto serviceName = "proxy:" + std::to_string(userID);
+						auto proxyService = MSNew<ProxyService>(channel, userID);
+						mailHub->create(serviceName, proxyService);
+						channel->getContext()->userdata() = userID;
+						MS_INFO("验证成功！ %s", user.c_str());
+					}
+					else
+					{
+						MS_INFO("验证失败！ %s", user.c_str());
+					}
 
-						self->async("logic", "login", "", 1000, MSTuple{user, pass}, [=](uint32_t userID)
-						{
-							if (userID)
-							{
-								auto serviceName = "proxy:" + std::to_string(userID);
-								auto proxyService = MSNew<ProxyService>(channel, userID);
-								mailHub->create(serviceName, proxyService);
-								channel->getContext()->userdata() = userID;
-								MS_INFO("验证成功！ %s", user.c_str());
-							}
-							else
-							{
-								MS_INFO("验证失败！ %s", user.c_str());
-							}
-
-							self->call<void>("client", "onLogin", self->name(), 0, MSTuple{userID});
-
-							promise(userID);
-						});
-					};
+					self->call<void>("client", "onLogin", self->name(), 0, MSTuple{userID});
+					co_return userID;
 				});
 				guestService->bind("logout", [=, self = guestService.get()]()-> MSAsync<bool>
 				{
 					auto userID = channel->getContext()->userdata();
 					if (userID == 0) co_return false;
 
-					co_return co_await [=](MSAwait<bool> promise)
-					{
-						self->async("logic", "logout", "", 500, MSTuple{userID}, [=](bool result)
-						{
-							self->call<void>("client", "onLogout", self->name(), 0, MSTuple{result});
-
-							promise(result);
-						});
-					};
+					auto result = co_await self->async<bool>("logic", "logout", "", 500, MSTuple{userID});
+					self->call<void>("client", "onLogout", self->name(), 0, MSTuple{result});
+					co_return result;
 				});
 				guestService->bind("signup", [=, self = guestService.get()](MSString user, MSString pass)-> MSAsync<bool>
 				{
-					co_return co_await [=](MSAwait<bool> promise)
-					{
-						self->async("logic", "signup", "", 500, MSTuple{user, pass}, [=](bool result)
-						{
-							self->call<void>("client", "onSignup", self->name(), 0, MSTuple{result});
-
-							promise(result);
-						});
-					};
+					auto result = co_await self->async<bool>("logic", "signup", "", 500, MSTuple{user, pass});
+					self->call<void>("client", "onSignup", self->name(), 0, MSTuple{result});
+					co_return result;
 				});
 
 				mailHub->create("guest:" + std::to_string(guestID), guestService);

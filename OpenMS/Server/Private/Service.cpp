@@ -115,6 +115,17 @@ bool Service::async(uint32_t service, uint32_t method, uint32_t forward, uint32_
 	return true;
 }
 
+MSAsync<MSString> Service::async(uint32_t service, uint32_t method, uint32_t forward, uint32_t timeout, MSStringView request)
+{
+	co_return co_await [&](MSAwait<MSString> const& promise)
+	{
+		this->async(service, method, forward, timeout, request, [promise](MSStringView result)
+		{
+			promise(MSString(result));
+		});
+	};
+}
+
 bool Service::unbind(MSStringView method)
 {
 	return unbind(MSHash(method));
@@ -133,6 +144,17 @@ bool Service::call(MSStringView service, MSStringView method, MSStringView forwa
 bool Service::async(MSStringView service, MSStringView method, MSStringView forward, uint32_t timeout, MSStringView request, MSLambda<void(MSStringView)>&& callback)
 {
 	return async(MSHash(service), MSHash(method), MSHash(forward), timeout, request, std::move(callback));
+}
+
+MSAsync<MSString> Service::async(MSStringView service, MSStringView method, MSStringView forward, uint32_t timeout, MSStringView request)
+{
+	co_return co_await [&](MSAwait<MSString> const& promise)
+	{
+		this->async(service, method, forward, timeout, request, [promise](MSStringView result)
+		{
+			promise(MSString(result));
+		});
+	};
 }
 
 IMailTask Service::read(IMail mail)
