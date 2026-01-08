@@ -26,7 +26,7 @@ public:
 
 protected:
 	void onConnect(MSRef<Channel> channel) override;
-	void onDisconnect(MSRef<Channel> channel) override;
+	virtual void onDisconnect(MSRef<Channel> channel) override;
 	void onOutbound(MSRef<IChannelEvent> event, bool flush) override;
 
 protected:

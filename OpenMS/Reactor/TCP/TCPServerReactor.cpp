@@ -84,7 +84,7 @@ void TCPServerReactor::startup()
 			MSLambda<void(MSHnd<TCPChannel> channel)> read_func;
 			MSLambda<void(MSHnd<TCPChannel> channel, MSRef<IChannelEvent> event)> write_func;
 
-			read_func = [&](MSHnd<TCPChannel> channel)
+			read_func = [=, &read_func](MSHnd<TCPChannel> channel)
 			{
 				if (auto client = channel.lock())
 				{
@@ -110,7 +110,7 @@ void TCPServerReactor::startup()
 				}
 			};
 
-			write_func = [&](MSHnd<TCPChannel> channel, MSRef<IChannelEvent> event)
+			write_func = [=, &write_func](MSHnd<TCPChannel> channel, MSRef<IChannelEvent> event)
 			{
 				if (auto client = channel.lock())
 				{

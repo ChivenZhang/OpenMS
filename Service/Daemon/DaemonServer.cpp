@@ -26,7 +26,7 @@ void DaemonServer::onInit()
 	daemonService->bind("createSpace", [=](uint32_t spaceID)->MSAsync<bool>
 	{
 		MS_INFO("守护进程：CREATE SPACE!!!");
-		auto result = system(("start BackendServer.exe --space=" + std::to_string(spaceID)).c_str());
+		auto result = system(("open BackendServer --space=" + std::to_string(spaceID)).c_str());
 		co_return result == 0;
 	});
 	mailHub->create("daemon", daemonService);

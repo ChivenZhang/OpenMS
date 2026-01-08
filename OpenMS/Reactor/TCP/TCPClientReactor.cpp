@@ -89,17 +89,12 @@ void TCPClientReactor::startup()
 			MSLambda<void(MSHnd<TCPChannel> channel)> read_func;
 			MSLambda<void(MSHnd<TCPChannel> channel, MSRef<IChannelEvent> event)> write_func;
 
-			read_func = [&](MSHnd<TCPChannel> channel)
+			read_func = [=, &read_func](MSHnd<TCPChannel> channel)
 			{
 				if (auto _channel = channel.lock())
 				{
 					auto socket = _channel->getSocket();
 					auto buffer = _channel->getBuffer();
-					if (socket->is_open() == false)
-					{
-						MS_INFO("closed");
-						return;
-					}
 					socket->async_read_some(asio::buffer(buffer.data(), buffer.size()), [=, &read_func](asio::error_code error, size_t length)
 					{
 						MS_DEBUG("tcp async read: %s 长度 %u 状态 %d", channel.lock()->getRemote().lock()->getString().c_str(), (uint32_t)length, error.value());
@@ -120,7 +115,7 @@ void TCPClientReactor::startup()
 				}
 			};
 
-			write_func = [&](MSHnd<TCPChannel> channel, MSRef<IChannelEvent> event)
+			write_func = [=, &write_func](MSHnd<TCPChannel> channel, MSRef<IChannelEvent> event)
 			{
 				if (auto _channel = channel.lock())
 				{
@@ -245,7 +240,7 @@ void TCPClientReactor::onConnect(MSRef<Channel> channel)
 
 void TCPClientReactor::onDisconnect(MSRef<Channel> channel)
 {
-	MS_DEBUG("rejected from %s", channel->getRemote().lock()->getString().c_str());
+	MS_INFO("rejected from %s", channel->getRemote().lock()->getString().c_str());
 
 	m_Connect = false;
 	m_Channel = nullptr;
