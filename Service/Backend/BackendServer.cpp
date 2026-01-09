@@ -30,7 +30,7 @@ void BackendServer::onInit()
 	auto argv = IStartup::Argv;
 	google::ParseCommandLineFlags(&argc, &argv, true);
 	auto spaceID = FLAGS_space;
-	if (spaceID == 0) ::exit(-1);
+	if (spaceID == 0) this->shutdown();
 
 	auto spaceService = MSNew<SpaceService>(spaceID);
 	spaceService->bind("enterSpace", [=](uint32_t userID)->MSAsync<bool>

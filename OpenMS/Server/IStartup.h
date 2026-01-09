@@ -24,9 +24,15 @@ public:
 		auto service = AUTOWIRE_DATA(IServer);
 		signal(SIGINT, [](int) { AUTOWIRE_DATA(IServer)->shutdown(); });
 		signal(SIGTERM, [](int) { AUTOWIRE_DATA(IServer)->shutdown(); });
+#if defined(OPENMS_PLATFORM_APPLE) or defined(OPENMS_PLATFORM_LINUX)
+		signal(SIGABRT, [](int) { AUTOWIRE_DATA(IServer)->shutdown(); });
+#endif
 		auto result = service->startup();
 		signal(SIGINT, nullptr);
 		signal(SIGTERM, nullptr);
+#if defined(OPENMS_PLATFORM_APPLE) or defined(OPENMS_PLATFORM_LINUX)
+		signal(SIGABRT, nullptr);
+#endif
 		IStartup::Argc = 0;
 		IStartup::Argv = nullptr;
 		return result;
