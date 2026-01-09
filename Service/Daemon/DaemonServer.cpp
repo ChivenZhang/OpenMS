@@ -29,9 +29,9 @@ void DaemonServer::onInit()
 
 #ifdef OPENMS_PLATFORM_WINDOWS
 		auto result = system(("start BackendServer.exe --space=" + std::to_string(spaceID)).c_str());
-#elifdef OPENMS_PLATFORM_APPLE
+#elif defined(OPENMS_PLATFORM_APPLE)
 		auto result = system(("open BackendServer --args space=" + std::to_string(spaceID)).c_str());
-#elifdef OPENMS_PLATFORM_LINUX
+#elif defined(OPENMS_PLATFORM_LINUX)
 		auto result = system(("BackendServer --space=" + std::to_string(spaceID) + " &").c_str());
 #else
 		auto result = -1;
