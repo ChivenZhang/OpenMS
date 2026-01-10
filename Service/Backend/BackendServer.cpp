@@ -46,6 +46,10 @@ void BackendServer::onInit()
 		mailHub->cancel("player:" + std::to_string(userID));
 		co_return true;
 	});
+	spaceService->bind("syncStatus", [=](uint32_t userID)->MSAsync<void>
+	{
+		co_return;
+	});
 	mailHub->create("space:" + std::to_string(spaceID), spaceService);
 }
 

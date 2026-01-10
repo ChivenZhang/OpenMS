@@ -1,6 +1,6 @@
-<mxfile host="drawio-plugin" modified="2026-01-06T09:21:25.082Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36" etag="I4JG7_xPcIN4HMfIkavN" version="22.1.22" type="embed" pages="4">
+<mxfile host="drawio-plugin" modified="2026-01-10T05:06:36.023Z" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36" etag="GLrs8EJJ3s2KQORa8cB2" version="22.1.22" type="embed" pages="4">
   <diagram id="23iRSUPoRavnBvh4doch" name="功能结构">
-    <mxGraphModel dx="796" dy="631" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="874" dy="515" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -310,7 +310,7 @@
     </mxGraphModel>
   </diagram>
   <diagram id="wecLJcGoRKFd2JLpvbMf" name="调用流程">
-    <mxGraphModel dx="967" dy="-334" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="874" dy="-486" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -406,13 +406,13 @@
             <mxPoint x="475" y="1500.5" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="q4g6-qDVqc_h9_TjQzKk-21" value="createPlayer()" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;entryX=0;entryY=0;entryDx=0;entryDy=5;entryPerimeter=0;" parent="1" source="q4g6-qDVqc_h9_TjQzKk-9" edge="1">
+        <mxCell id="q4g6-qDVqc_h9_TjQzKk-21" value="createPlayer()" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" parent="1" edge="1">
           <mxGeometry width="80" relative="1" as="geometry">
             <mxPoint x="610" y="1440" as="sourcePoint" />
-            <mxPoint x="715" y="1440" as="targetPoint" />
+            <mxPoint x="725" y="1440" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="q4g6-qDVqc_h9_TjQzKk-22" value="attack()" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" parent="1" edge="1">
+        <mxCell id="q4g6-qDVqc_h9_TjQzKk-22" value="attack()" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" parent="1" edge="1" target="q4g6-qDVqc_h9_TjQzKk-7">
           <mxGeometry width="80" relative="1" as="geometry">
             <mxPoint x="485" y="1501" as="sourcePoint" />
             <mxPoint x="715" y="1501" as="targetPoint" />
@@ -464,7 +464,7 @@
             <mxPoint x="475" y="1700" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="q4g6-qDVqc_h9_TjQzKk-31" value="deletePlayer()" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;exitX=1;exitY=1;exitDx=0;exitDy=-5;exitPerimeter=0;entryX=0;entryY=1;entryDx=0;entryDy=-5;entryPerimeter=0;" parent="1" edge="1">
+        <mxCell id="q4g6-qDVqc_h9_TjQzKk-31" value="deletePlayer()" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;exitX=1;exitY=1;exitDx=0;exitDy=-5;exitPerimeter=0;" parent="1" edge="1" target="q4g6-qDVqc_h9_TjQzKk-7">
           <mxGeometry width="80" relative="1" as="geometry">
             <mxPoint x="610" y="1581" as="sourcePoint" />
             <mxPoint x="715" y="1581" as="targetPoint" />
@@ -498,7 +498,7 @@
             <mxPoint x="225" y="1478" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="q4g6-qDVqc_h9_TjQzKk-36" value="onStartBattle()" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" parent="1" edge="1">
+        <mxCell id="q4g6-qDVqc_h9_TjQzKk-36" value="onStartBattle()" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" parent="1" edge="1" source="q4g6-qDVqc_h9_TjQzKk-7">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="715" y="1478" as="sourcePoint" />
             <mxPoint x="485" y="1478" as="targetPoint" />
@@ -518,14 +518,14 @@
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="q4g6-qDVqc_h9_TjQzKk-39" value="startBattle()" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" parent="1" edge="1">
+        <mxCell id="q4g6-qDVqc_h9_TjQzKk-39" value="startBattle()" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" parent="1" edge="1" target="q4g6-qDVqc_h9_TjQzKk-7">
           <mxGeometry x="-0.0016" width="80" relative="1" as="geometry">
             <mxPoint x="610" y="1462.66" as="sourcePoint" />
             <mxPoint x="715" y="1462.66" as="targetPoint" />
             <mxPoint as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="q4g6-qDVqc_h9_TjQzKk-40" value="stopBattle()" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" parent="1" edge="1">
+        <mxCell id="q4g6-qDVqc_h9_TjQzKk-40" value="stopBattle()" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" parent="1" edge="1" target="q4g6-qDVqc_h9_TjQzKk-7">
           <mxGeometry width="80" relative="1" as="geometry">
             <mxPoint x="610" y="1540" as="sourcePoint" />
             <mxPoint x="715" y="1540" as="targetPoint" />
@@ -567,13 +567,23 @@
         <mxCell id="q4g6-qDVqc_h9_TjQzKk-47" value="" style="html=1;points=[[0,0,0,0,5],[0,1,0,0,-5],[1,0,0,0,5],[1,1,0,0,-5]];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;curved&quot;:0,&quot;rounded&quot;:0};" parent="q4g6-qDVqc_h9_TjQzKk-46" vertex="1">
           <mxGeometry x="45" y="110" width="10" height="240" as="geometry" />
         </mxCell>
+        <mxCell id="-l7OfRemtH7zouThUYZQ-1" value="syncStatus()" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;exitX=1;exitY=0;exitDx=0;exitDy=5;exitPerimeter=0;entryX=1;entryY=1;entryDx=0;entryDy=-5;entryPerimeter=0;" edge="1" parent="q4g6-qDVqc_h9_TjQzKk-46" source="q4g6-qDVqc_h9_TjQzKk-47" target="q4g6-qDVqc_h9_TjQzKk-47">
+          <mxGeometry width="80" relative="1" as="geometry">
+            <mxPoint x="85" y="202.99999999999991" as="sourcePoint" />
+            <mxPoint x="79" y="343.92" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="86" y="115" />
+              <mxPoint x="86" y="345" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
         <mxCell id="q4g6-qDVqc_h9_TjQzKk-50" value="createSpace()" style="html=1;verticalAlign=bottom;endArrow=block;curved=0;rounded=0;" parent="1" target="q4g6-qDVqc_h9_TjQzKk-47" edge="1">
           <mxGeometry width="80" relative="1" as="geometry">
             <mxPoint x="610" y="1400" as="sourcePoint" />
             <mxPoint x="825" y="1400" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="3DOzlq_FyklHmRLHSPsO-1" value="onCreateSpace()" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" edge="1" parent="1">
+        <mxCell id="3DOzlq_FyklHmRLHSPsO-1" value="onCreateSpace()" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;curved=0;rounded=0;" parent="1" edge="1">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="845" y="1420" as="sourcePoint" />
             <mxPoint x="610" y="1420" as="targetPoint" />
@@ -583,7 +593,7 @@
     </mxGraphModel>
   </diagram>
   <diagram id="_siVbPElvHfAtVW1M2G2" name="数据流程">
-    <mxGraphModel dx="677" dy="536" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="874" dy="515" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
