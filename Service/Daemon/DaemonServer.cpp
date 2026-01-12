@@ -23,16 +23,14 @@ void DaemonServer::onInit()
 	auto mailHub = AUTOWIRE(IMailHub)::bean();
 
 	auto daemonService = MSNew<Service>();
-	daemonService->bind("createSpace", [=](uint32_t spaceID)->MSAsync<bool>
+	daemonService->bind("createSpace", [=](MSString caller, uint32_t spaceID)->MSAsync<bool>
 	{
 		MS_INFO("守护进程：CREATE SPACE!!!");
 
 #ifdef OPENMS_PLATFORM_WINDOWS
-		auto result = system(("start BackendServer.exe --space=" + std::to_string(spaceID)).c_str());
-#elif defined(OPENMS_PLATFORM_APPLE)
-		auto result = system(("open BackendServer --args space=" + std::to_string(spaceID)).c_str());
-#elif defined(OPENMS_PLATFORM_LINUX)
-		auto result = system(("BackendServer --space=" + std::to_string(spaceID) + " &").c_str());
+		auto result = system(("start BackendServer.exe" " --space=" + std::to_string(spaceID) + " --caller=" + caller).c_str());
+#elif defined(OPENMS_PLATFORM_APPLE) or defined(OPENMS_PLATFORM_LINUX)
+		auto result = system(("./BackendServer" " --space=" + std::to_string(spaceID) + " --caller=" + caller + " &").c_str());
 #else
 		auto result = -1;
 #endif

@@ -24,10 +24,10 @@ PlayerService::PlayerService(uint32_t userID)
 		this->call<void>("client:" + std::to_string(userID), "onStopBattle", "proxy:" + std::to_string(userID), 0, MSTuple{});
 		co_return true;
 	});
-	this->bind("attack", [=, this]()->MSAsync<bool>
+	this->bind("attack", [=, this]()->MSAsync<void>
 	{
 		MS_INFO("用户 %u 发动攻击", userID);
 		this->call<void>("client:" + std::to_string(userID), "onAttack", "proxy:" + std::to_string(userID), 0, MSTuple{});
-		co_return true;
+		co_return;
 	});
 }

@@ -18,6 +18,7 @@ public:
 	static int Run(int argc, char* argv[])
 	{
 		printf(OPENMS_LOGO);
+		for (auto i = 0; i < argc; i++) MS_INFO("argv[%d]: %s", i, argv[i]);
 		IStartup::Argc = argc;
 		IStartup::Argv = argv;
 		RESOURCE2_DATA(T, IServer);

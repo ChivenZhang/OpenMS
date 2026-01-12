@@ -116,7 +116,7 @@ void FrontendClient::onInit()
 					mailHub->create("client:" + std::to_string(userID), playerService);
 
 					MS_INFO("尝试开局...");
-					playerService->async("server:" + std::to_string(userID), "readyBattle", "proxy:" + std::to_string(userID), 30000, MSTuple{ 0U }, [=](bool result)
+					playerService->async("server:" + std::to_string(userID), "readyBattle", "proxy:" + std::to_string(userID), 5000, MSTuple{ 0U }, [=](bool result)
 					{
 						MS_INFO("开局结果：%d", result);
 					});

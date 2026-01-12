@@ -15,6 +15,7 @@
 #include <OpenMS/Server/Private/Service.h>
 #include <gflags/gflags.h>
 DEFINE_uint32(space, 0, "空间ID");
+DEFINE_string(caller, "null", "调用者");
 
 MSString BackendServer::identity() const
 {
@@ -30,7 +31,13 @@ void BackendServer::onInit()
 	auto argv = IStartup::Argv;
 	google::ParseCommandLineFlags(&argc, &argv, true);
 	auto spaceID = FLAGS_space;
-	if (spaceID == 0) this->shutdown();
+	auto caller = FLAGS_caller;
+	if (spaceID == 0)
+	{
+		MS_ERROR("invalid space id");
+		this->shutdown();
+		return;
+	}
 
 	auto spaceService = MSNew<SpaceService>(spaceID);
 	spaceService->bind("enterSpace", [=](uint32_t userID)->MSAsync<bool>
@@ -51,6 +58,8 @@ void BackendServer::onInit()
 		co_return;
 	});
 	mailHub->create("space:" + std::to_string(spaceID), spaceService);
+
+	spaceService->call<void>(caller, "onSpaceCreate", "", 0, MSTuple{spaceID});
 }
 
 void BackendServer::onExit()

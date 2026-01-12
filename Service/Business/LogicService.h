@@ -16,15 +16,23 @@ class LogicService : public Service
 public:
 	LogicService();
 
-	virtual MSAsync<uint32_t> onLoginRequest(MSStringView username, MSStringView password);
+	virtual MSAsync<MSString> globalData(MSStringView name) final;
+	virtual MSAsync<void> globalData(MSStringView name, MSStringView value) final;
+	virtual MSAsync<void> onGlobalData(MSStringView name, MSStringView value) final;
 
-	virtual MSAsync<uint32_t> onCreateSpace();
+	virtual MSAsync<uint32_t> onLoginRequest(MSString username, MSString password);
+	virtual MSAsync<void> onClientLogin(uint32_t userID, uint32_t code, MSString error);
 
-	virtual MSAsync<bool> onDeleteSpace(uint32_t spaceID);
+	virtual MSAsync<uint32_t> onSignupRequest(MSString username, MSString password);
+	virtual MSAsync<void> onClientSignup(uint32_t userID, uint32_t code, MSString error);
+
+	virtual MSAsync<uint32_t> createSpace();
+	virtual MSAsync<bool> deleteSpace(uint32_t spaceID);
+	virtual MSAsync<void> onSpaceCreate(uint32_t spaceID);
+	virtual MSAsync<void> onSpaceDelete(uint32_t spaceID);
 
 protected:
 	MSMutex m_UserLock;
-	MSMutex m_BattleLock;
 	struct userinfo_t
 	{
 		bool Online;

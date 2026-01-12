@@ -16,7 +16,8 @@ MailBox::~MailBox()
 	while (m_MailQueue.empty() == false)
 	{
 		auto& handle = m_MailQueue.front().Task;
-		while (handle && handle.done() == false) std::this_thread::yield();
+		// while (handle && handle.done() == false) std::this_thread::yield();
+		while (handle && handle.done() == false) handle.destroy();
 		m_MailQueue.pop();
 	}
 }

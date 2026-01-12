@@ -13,6 +13,8 @@
 #include <OpenMS/Mailbox/Private/Mail.h>
 #include <OpenMS/Server/Private/Service.h>
 
+#include "LoginService.h"
+
 MSString BusinessServer::identity() const
 {
 	return "business";
@@ -37,6 +39,9 @@ void BusinessServer::onInit()
 	// 		}
 	// 	}
 	// });
+
+	auto loginService = MSNew<LoginService>();
+	mailHub->create("login", loginService);
 
 	auto logicService = MSNew<LogicService>();
 	mailHub->create("logic", logicService);

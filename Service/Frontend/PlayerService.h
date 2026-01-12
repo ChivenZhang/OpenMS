@@ -28,7 +28,7 @@ public:
 		co_return co_await this->async<T>("player:" + std::to_string(m_UserID), method, "proxy:" + std::to_string(m_UserID), timeout, std::forward<MSTuple<Args...>>(args));
 	}
 
-	virtual MSAsync<void> onStartBattle(uint32_t spaceID);
+	virtual MSAsync<void> onStartBattle();
 
 	virtual MSAsync<void> onStopBattle();
 

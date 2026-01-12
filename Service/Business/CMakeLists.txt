@@ -6,6 +6,8 @@ add_executable(BusinessServer
         ServerService.h
         LogicService.cpp
         LogicService.h
+        LoginService.cpp
+        LoginService.h
 )
 add_dependencies(BusinessServer OpenMS)
 target_include_directories(BusinessServer PUBLIC ${OPENMS_SOURCE_DIR})
