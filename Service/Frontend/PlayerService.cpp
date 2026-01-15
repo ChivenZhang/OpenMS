@@ -16,8 +16,6 @@ PlayerService::PlayerService(uint32_t userID)
 {
 	this->bind("onStartBattle", [=, this]()->MSAsync<void>
 	{
-		co_await this->callPlayer<bool>("attack", 100, MSTuple{});
-
 		co_return co_await this->onStartBattle();
 	});
 	this->bind("onStopBattle", [=, this]()->MSAsync<void>

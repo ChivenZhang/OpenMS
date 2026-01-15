@@ -65,7 +65,7 @@ uint32_t MailHub::send(IMail mail)
 	MSRef<MailBox> toMailbox;
 	if (mail.Date == 0) mail.Date = m_Session++;
 	{
-		MSMutexLock lock(m_MailboxLock);
+		MSMutexLock mailboxLock(m_MailboxLock);
 		auto toName = (mail.Type & OPENMS_MAIL_TYPE_FORWARD) ? mail.Copy : mail.To;
 		auto result = m_MailboxMap.find(toName);
 		if (result == m_MailboxMap.end() || result->second == nullptr)
@@ -76,8 +76,8 @@ uint32_t MailHub::send(IMail mail)
 		toMailbox = result->second;
 	}
 	{
-		MSMutexLock lock(toMailbox->m_MailLock);
-		auto idle = toMailbox->m_MailQueue.empty();
+		MSMutexLock mailLock(toMailbox->m_MailLock);
+		auto isIdle = toMailbox->m_MailQueue.empty();
 		MSList<uint8_t> mailData(sizeof(MailView) + mail.Body.size(), 0);
 		auto& mailView = *(MailView*)mailData.data();
 		mailView.From = mail.From;
@@ -95,9 +95,13 @@ uint32_t MailHub::send(IMail mail)
 		newMail.Type = mailView.Type;
 		newMail.Body = MSStringView(mailView.Body, mail.Body.size());
 		toMailbox->m_MailQueue.push({ .Mail = std::move(mailData), .Task = toMailbox->read(newMail), });
-		if (idle) enqueue(toMailbox);
-		return mail.Date;
+		if (isIdle)
+		{
+			MSMutexLock mailboxLock(m_MailboxLock);
+			enqueue(toMailbox);
+		}
 	}
+	return mail.Date;
 }
 
 void MailHub::list(MSList<uint32_t>& result)
