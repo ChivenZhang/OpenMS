@@ -15,7 +15,7 @@ class ChannelReactor;
 class ChannelWorker : public IChannelWorker
 {
 public:
-	ChannelWorker(MSRaw<ChannelReactor> reactor);
+	explicit ChannelWorker(MSRaw<ChannelReactor> reactor);
 	void startup() override;
 	void shutdown() override;
 	bool running() const override;

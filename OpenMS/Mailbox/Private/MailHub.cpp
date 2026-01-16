@@ -26,7 +26,7 @@ MailHub::MailHub(uint32_t overload)
 MailHub::~MailHub()
 {
 	m_Running = false;
-	m_MailUnlock.notify_all();
+	m_MailboxUnlock.notify_all();
 	m_Delivers.clear();
 }
 
@@ -76,29 +76,33 @@ uint32_t MailHub::send(IMail mail)
 		toMailbox = result->second;
 	}
 	{
-		MSMutexLock mailLock(toMailbox->m_MailLock);
-		auto isIdle = toMailbox->m_MailQueue.empty();
-		MSList<uint8_t> mailData(sizeof(MailView) + mail.Body.size(), 0);
-		auto& mailView = *(MailView*)mailData.data();
-		mailView.From = mail.From;
-		mailView.To = mail.To;
-		mailView.Copy = mail.Copy;
-		mailView.Date = mail.Date;
-		mailView.Type = mail.Type;
-		if (mail.Body.empty() == false) ::memcpy(mailView.Body, mail.Body.data(), mail.Body.size());
+		bool isIdle = false;
+		{
+			MSMutexLock mailLock(toMailbox->m_MailLock);
+			isIdle = toMailbox->m_MailQueue.empty();
+			MSList<uint8_t> mailData(sizeof(MailView) + mail.Body.size(), 0);
+			auto& mailView = *(MailView*)mailData.data();
+			mailView.From = mail.From;
+			mailView.To = mail.To;
+			mailView.Copy = mail.Copy;
+			mailView.Date = mail.Date;
+			mailView.Type = mail.Type;
+			if (mail.Body.empty() == false) ::memcpy(mailView.Body, mail.Body.data(), mail.Body.size());
 
-		IMail newMail = {};
-		newMail.From = mailView.From;
-		newMail.To = mailView.To;
-		newMail.Copy = mailView.Copy;
-		newMail.Date = mailView.Date;
-		newMail.Type = mailView.Type;
-		newMail.Body = MSStringView(mailView.Body, mail.Body.size());
-		toMailbox->m_MailQueue.push({ .Mail = std::move(mailData), .Task = toMailbox->read(newMail), });
+			IMail newMail = {};
+			newMail.From = mailView.From;
+			newMail.To = mailView.To;
+			newMail.Copy = mailView.Copy;
+			newMail.Date = mailView.Date;
+			newMail.Type = mailView.Type;
+			newMail.Body = MSStringView(mailView.Body, mail.Body.size());
+			toMailbox->m_MailQueue.push_back({ .Mail = std::move(mailData), .Task = toMailbox->read(newMail), });
+		}
 		if (isIdle)
 		{
 			MSMutexLock mailboxLock(m_MailboxLock);
-			enqueue(toMailbox);
+			m_MailboxQueue.push(toMailbox);
+			m_MailboxUnlock.notify_one();
 		}
 	}
 	return mail.Date;
@@ -124,20 +128,5 @@ bool MailHub::change(MSLambda<void(MSString address)> callback)
 {
 	if (m_OnChange) return false;
 	m_OnChange = callback;
-	return true;
-}
-
-bool MailHub::enqueue(MSHnd<IMailBox> mailbox)
-{
-	m_MailboxQueue.push(mailbox.lock());
-	m_MailUnlock.notify_all();
-	return true;
-}
-
-bool MailHub::dequeue(MSHnd<IMailBox>& mailbox)
-{
-	if (m_MailboxQueue.empty()) return false;
-	mailbox = m_MailboxQueue.front();
-	m_MailboxQueue.pop();
 	return true;
 }

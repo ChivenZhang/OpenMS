@@ -22,50 +22,61 @@ MailMan::MailMan(MSRaw<MailHub> context)
 	{
 		while (m_Context->m_Running)
 		{
-			MSHnd<IMailBox> element;
+			MSRef<IMailBox> element;
 			{
-				MSUniqueLock mailboxLock(m_Context->m_MailLock);
-				while (m_Context->m_Running && m_Context->dequeue(element) == false)
+				MSUniqueLock mailboxLock(m_Context->m_MailboxLock);
+				m_Context->m_MailboxUnlock.wait(mailboxLock, [this]()
 				{
-					m_Context->m_MailUnlock.wait(mailboxLock);
-				}
+					return m_Context->m_Running == false || m_Context->m_MailboxQueue.empty() == false;
+				});
 				if (m_Context->m_Running == false) break;
+				element = m_Context->m_MailboxQueue.front();
+				m_Context->m_MailboxQueue.pop();
 			}
 
-			if (auto mailbox = MSCast<MailBox>(element.lock()))
+			if (auto mailbox = MSCast<MailBox>(element))
 			{
-				MSMutexLock mailLock(mailbox->m_MailLock);
-				if (mailbox->m_MailQueue.empty() == false)
+				MailBox::mail_t mail;
 				{
-					auto& mail = mailbox->m_MailQueue.front();
-					if (bool(mail.Task) == true && mail.Task.done() == false)
+					MSMutexLock mailLock(mailbox->m_MailLock);
+					if (mailbox->m_MailQueue.empty()) continue;
+					mail = std::move(mailbox->m_MailQueue.front());
+					mailbox->m_MailQueue.pop_front();
+				}
+				if (mail.Task && !mail.Task.done())
+				{
+					if (mail.Task.state() == MSAsyncState::NONE || mail.Task.state() == MSAsyncState::YIELD)
 					{
-						if (mail.Task.state() == MSAsyncState::NONE || mail.Task.state() == MSAsyncState::YIELD)
-						{
-							mail.Task.resume();
-						}
-						else if(mail.Task.state() == MSAsyncState::AWAIT)
-						{
-							mailbox->m_MailQueue.push(std::move(mail));
-						}
-					}
-					if (bool(mail.Task) == false || mail.Task.done() == true)
-					{
-						try
-						{
-							if (mail.Task) mail.Task.value();
-						}
-						catch(MSError& ex)
-						{
-							MSPrintError(ex);
-						}
-						mailbox->m_MailQueue.pop();
+						mail.Task.resume();
 					}
 				}
-				if (mailbox->m_MailQueue.empty() == false)
+				try
 				{
-					MSMutexLock mailboxLock(m_Context->m_MailLock);
-					m_Context->enqueue(mailbox);
+					if (mail.Task)
+					{
+						if (mail.Task.done()) mail.Task.value();
+						else
+						{
+							MSMutexLock mailLock(mailbox->m_MailLock);
+							mailbox->m_MailQueue.push_back(std::move(mail));
+						}
+					}
+				}
+				catch(MSError& ex)
+				{
+					MSPrintError(ex);
+				}
+				{
+					auto isEmpty = false;
+					{
+						MSMutexLock mailLock(mailbox->m_MailLock);
+						isEmpty = mailbox->m_MailQueue.empty();
+					}
+					if (!isEmpty)
+					{
+						MSMutexLock mailboxLock(m_Context->m_MailboxLock);
+						m_Context->m_MailboxQueue.push(mailbox);
+					}
 				}
 			}
 		}

@@ -451,7 +451,7 @@ public:
 
 	void destroy()
 	{
-		m_ThisHandle.destroy();
+		if(m_ThisHandle) m_ThisHandle.destroy();
 	}
 
 	TAsyncState state() const

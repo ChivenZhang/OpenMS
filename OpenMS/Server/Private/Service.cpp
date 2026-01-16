@@ -90,9 +90,9 @@ bool Service::async(uint32_t service, uint32_t method, uint32_t forward, uint32_
 
 	{
 		MSMutexLock lock(m_LockSession);
-		m_SessionMap.emplace(mail.Date, [callback](MSStringView output)
+		m_SessionMap.emplace(mail.Date, [call = std::move(callback)](MSStringView output)
 		{
-			if (callback) callback(output);
+			if (call) call(output);
 		});
 	}
 

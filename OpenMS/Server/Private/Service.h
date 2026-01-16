@@ -114,9 +114,9 @@ public:
 	{
 		if constexpr (std::is_void_v<T>)
 		{
-			co_return co_await [=, this](MSAwait<void> const& promise) mutable
+			co_return co_await [=, this, argv = std::move(args)](MSAwait<void> const& promise) mutable
 			{
-				this->async(service, method, forward, timeout, std::forward<MSTuple<Args...>>(args), [promise]()
+				this->async(service, method, forward, timeout, std::forward<MSTuple<Args...>>(argv), [promise]()
 				{
 					promise();
 				});
@@ -124,9 +124,9 @@ public:
 		}
 		else
 		{
-			co_return co_await [=, this](MSAwait<T> const& promise) mutable
+			co_return co_await [=, this, argv = std::move(args)](MSAwait<T> const& promise) mutable
 			{
-				this->async(service, method, forward, timeout, std::forward<MSTuple<Args...>>(args), [promise](T result)
+				this->async(service, method, forward, timeout, std::forward<MSTuple<Args...>>(argv), [promise](T result)
 				{
 					promise(result);
 				});

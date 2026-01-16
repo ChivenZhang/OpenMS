@@ -149,7 +149,7 @@ MSAsync<void> LogicService::onSpaceCreate(uint32_t spaceID)
 {
 	if (spaceID)
 	{
-		MSMutexLock lock(m_UserLock);
+		m_UserLock.lock();
 		while (m_MatchQueue.empty() == false)
 		{
 			auto userID = m_MatchQueue.front();
@@ -158,11 +158,14 @@ MSAsync<void> LogicService::onSpaceCreate(uint32_t spaceID)
 			auto& userInfo = m_UserInfos[userID];
 			userInfo.SpaceID = spaceID;
 
+			m_UserLock.unlock();
 			if (co_await this->async<bool>("space:" + std::to_string(spaceID), "enterSpace", "", 100, MSTuple{userID}))
 			{
 				co_await this->async<bool>("player:" + std::to_string(userID), "startBattle", "", 0, MSTuple{});
 			}
+			m_UserLock.lock();
 		}
+		m_UserLock.unlock();
 	}
 	co_return;
 }

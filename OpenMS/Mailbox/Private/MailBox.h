@@ -41,5 +41,5 @@ private:
 	MSMutex m_MailLock;
 	MSAtomic<uint32_t> m_Session;
 	struct mail_t { MSList<uint8_t> Mail; IMailTask Task; };
-	MSQueue<mail_t> m_MailQueue;
+	MSDeque<mail_t> m_MailQueue;
 };

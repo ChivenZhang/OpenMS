@@ -27,14 +27,8 @@ public:
 	bool failed(MSLambda<bool(IMail mail)> callback) override;
 	bool change(MSLambda<void(MSString address)> callback) override;
 
-private:
-	friend class MailMan;
-	bool enqueue(MSHnd<IMailBox> mailbox);
-	bool dequeue(MSHnd<IMailBox>& mailbox);
-
 protected:
-	MSMutex m_MailLock;
-	MSMutexUnlock m_MailUnlock;
+	friend class MailMan;
 	MSMutex m_MailboxLock;
 	MSMutexUnlock m_MailboxUnlock;
 	MSAtomic<bool> m_Running;
