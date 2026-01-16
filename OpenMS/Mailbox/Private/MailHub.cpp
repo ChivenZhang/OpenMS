@@ -26,7 +26,7 @@ MailHub::MailHub(uint32_t overload)
 MailHub::~MailHub()
 {
 	m_Running = false;
-	m_MailboxUnlock.notify_all();
+	m_MailTaskUnlock.notify_all();
 	m_Delivers.clear();
 }
 
@@ -100,9 +100,9 @@ uint32_t MailHub::send(IMail mail)
 		}
 		if (isIdle)
 		{
-			MSMutexLock mailboxLock(m_MailboxLock);
-			m_MailboxQueue.push(toMailbox);
-			m_MailboxUnlock.notify_one();
+			MSMutexLock mailboxLock(m_MailTaskLock);
+			m_MailTaskQueue.push(toMailbox);
+			m_MailTaskUnlock.notify_one();
 		}
 	}
 	return mail.Date;

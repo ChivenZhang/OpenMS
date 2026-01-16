@@ -24,14 +24,14 @@ MailMan::MailMan(MSRaw<MailHub> context)
 		{
 			MSRef<IMailBox> element;
 			{
-				MSUniqueLock mailboxLock(m_Context->m_MailboxLock);
-				m_Context->m_MailboxUnlock.wait(mailboxLock, [this]()
+				MSUniqueLock mailboxLock(m_Context->m_MailTaskLock);
+				m_Context->m_MailTaskUnlock.wait(mailboxLock, [this]()
 				{
-					return m_Context->m_Running == false || m_Context->m_MailboxQueue.empty() == false;
+					return m_Context->m_Running == false || m_Context->m_MailTaskQueue.empty() == false;
 				});
 				if (m_Context->m_Running == false) break;
-				element = m_Context->m_MailboxQueue.front();
-				m_Context->m_MailboxQueue.pop();
+				element = m_Context->m_MailTaskQueue.front();
+				m_Context->m_MailTaskQueue.pop();
 			}
 
 			if (auto mailbox = MSCast<MailBox>(element))
@@ -74,8 +74,8 @@ MailMan::MailMan(MSRaw<MailHub> context)
 					}
 					if (!isEmpty)
 					{
-						MSMutexLock mailboxLock(m_Context->m_MailboxLock);
-						m_Context->m_MailboxQueue.push(mailbox);
+						MSMutexLock mailboxLock(m_Context->m_MailTaskLock);
+						m_Context->m_MailTaskQueue.push(mailbox);
 					}
 				}
 			}
