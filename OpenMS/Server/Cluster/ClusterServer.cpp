@@ -106,7 +106,7 @@ void ClusterServer::onInit()
 			AUTOWIRE(IMailHub)::bean()->list(mailList);
 			MSString address = m_ServiceServer->address().lock()->getString();
 			MSMutexLock lock(m_MailRouteLock);
-			auto result = m_ClusterClient->call<MSMap<uint32_t, MSStringList>>("push", 100, address, mailList);
+			auto result = m_ClusterClient->call<MSMap<uint32_t, MSStringList>>("push", 200, address, mailList);
 			if (result.second)
 			{
 				m_MailRouteMap = result.first;

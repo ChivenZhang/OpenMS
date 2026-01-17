@@ -13,16 +13,16 @@
 
 MailBox::~MailBox()
 {
-	MS_INFO("deleting mailbox %s", m_TextName.c_str());
+	MS_INFO("deleting mailbox: %s", m_TextName.c_str());
 	while (true)
 	{
 		MSMutexLock mailLock(m_MailLock);
 		if (m_MailQueue.empty()) break;
 		auto& handle = m_MailQueue.front().Task;
-		if (handle && !handle.done()) handle.destroy();
+		if (handle && handle.done() == false) handle.destroy();
 		m_MailQueue.pop_front();
 	}
-	MS_INFO("deleted mailbox %s", m_TextName.c_str());
+	MS_INFO("deleted mailbox: %s", m_TextName.c_str());
 }
 
 MSString MailBox::name() const

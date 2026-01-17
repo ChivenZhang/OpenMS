@@ -29,14 +29,17 @@ public:
 
 protected:
 	friend class MailMan;
-	MSMutex m_MailboxLock;
-	MSMutex m_MailTaskLock;
-	MSMutexUnlock m_MailTaskUnlock;
+
 	MSAtomic<bool> m_Running;
 	MSLambda<bool(IMail mail)> m_OnFailed;
 	MSLambda<void(MSString address)> m_OnChange;
-	MSAtomic<uint32_t> m_Session;
-	MSList<MSRef<MailMan>> m_Delivers;
+
+	MSMutex m_MailboxLock;
+	MSAtomic<uint32_t> m_MailSession;
+	MSList<MSRef<MailMan>> m_MailDelivers;
 	MSMap<uint32_t, MSRef<MailBox>> m_MailboxMap;
+
+	MSMutex m_MailTaskLock;
+	MSMutexUnlock m_MailTaskUnlock;
 	MSQueue<MSRef<IMailBox>> m_MailTaskQueue;
 };

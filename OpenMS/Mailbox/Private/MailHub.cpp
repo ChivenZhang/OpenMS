@@ -13,11 +13,11 @@
 
 MailHub::MailHub(uint32_t overload)
 	:
-	m_Delivers(std::max(1U, overload))
+	m_MailDelivers(std::max(1U, overload))
 {
-	m_Session = 1;
 	m_Running = true;
-	for (auto& deliver : m_Delivers)
+	m_MailSession = 1;
+	for (auto& deliver : m_MailDelivers)
 	{
 		deliver = MSNew<MailMan>(this);
 	}
@@ -27,7 +27,7 @@ MailHub::~MailHub()
 {
 	m_Running = false;
 	m_MailTaskUnlock.notify_all();
-	m_Delivers.clear();
+	m_MailDelivers.clear();
 }
 
 bool MailHub::create(MSString address, MSRef<IMailBox> value)
@@ -63,7 +63,7 @@ bool MailHub::exist(MSString address)
 uint32_t MailHub::send(IMail mail)
 {
 	MSRef<MailBox> toMailbox;
-	if (mail.Date == 0) mail.Date = m_Session++;
+	if (mail.Date == 0) mail.Date = m_MailSession++;
 	{
 		MSMutexLock mailboxLock(m_MailboxLock);
 		auto toName = (mail.Type & OPENMS_MAIL_TYPE_FORWARD) ? mail.Copy : mail.To;

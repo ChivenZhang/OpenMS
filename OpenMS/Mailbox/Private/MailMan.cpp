@@ -22,6 +22,8 @@ MailMan::MailMan(MSRaw<MailHub> context)
 	{
 		while (m_Context->m_Running)
 		{
+			// Get mailbox from task queue
+
 			MSRef<IMailBox> element;
 			{
 				MSUniqueLock mailboxLock(m_Context->m_MailTaskLock);
@@ -34,8 +36,12 @@ MailMan::MailMan(MSRaw<MailHub> context)
 				m_Context->m_MailTaskQueue.pop();
 			}
 
+			// Process mailbox mail
+
 			if (auto mailbox = MSCast<MailBox>(element))
 			{
+				// Dequeue mail from mailbox
+
 				MailBox::mail_t mail;
 				{
 					MSMutexLock mailLock(mailbox->m_MailLock);
@@ -43,40 +49,63 @@ MailMan::MailMan(MSRaw<MailHub> context)
 					mail = std::move(mailbox->m_MailQueue.front());
 					mailbox->m_MailQueue.pop_front();
 				}
-				if (mail.Task && !mail.Task.done())
+
+				// Resume mail task
+
+				if (mail.Task && mail.Task.done() == false)
 				{
-					if (mail.Task.state() == MSAsyncState::NONE || mail.Task.state() == MSAsyncState::YIELD)
+					switch (mail.Task.state())
 					{
-						mail.Task.resume();
+					case MSAsyncState::NONE:
+						{
+							mail.Task.resume();
+						} break;
+					case MSAsyncState::YIELD:
+						{
+							mail.Task.resume();
+
+							MSMutexLock mailLock(mailbox->m_MailLock);
+							mailbox->m_MailQueue.push_front(std::move(mail));
+						} break;
+					default: break;
 					}
 				}
-				try
+
+				if (mail.Task)
 				{
-					if (mail.Task)
+					if (mail.Task.done())
 					{
-						if (mail.Task.done()) mail.Task.value();
-						else
+						// Handle completed mail task
+
+						try
 						{
-							MSMutexLock mailLock(mailbox->m_MailLock);
-							mailbox->m_MailQueue.push_back(std::move(mail));
+							mail.Task.value();
+						}
+						catch(MSError& ex)
+						{
+							MSPrintError(ex);
 						}
 					}
-				}
-				catch(MSError& ex)
-				{
-					MSPrintError(ex);
-				}
-				{
-					auto isEmpty = false;
+					else
 					{
+						// Re-enqueue pending mail task
+
 						MSMutexLock mailLock(mailbox->m_MailLock);
-						isEmpty = mailbox->m_MailQueue.empty();
+						mailbox->m_MailQueue.push_back(std::move(mail));
 					}
-					if (!isEmpty)
-					{
-						MSMutexLock mailboxLock(m_Context->m_MailTaskLock);
-						m_Context->m_MailTaskQueue.push(mailbox);
-					}
+				}
+
+				// Re-enqueue mailbox if it still has mails
+
+				auto isEmpty = false;
+				{
+					MSMutexLock mailLock(mailbox->m_MailLock);
+					isEmpty = mailbox->m_MailQueue.empty();
+				}
+				if (isEmpty == false)
+				{
+					MSMutexLock mailboxLock(m_Context->m_MailTaskLock);
+					m_Context->m_MailTaskQueue.push(mailbox);
 				}
 			}
 		}
