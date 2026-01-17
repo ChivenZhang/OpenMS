@@ -21,9 +21,19 @@ else()
 set(REDIS_SOURCES)
 endif()
 
+if(OPENMS_ENABLE_SQLITE)
+	set(SQLITE_SOURCES
+			Endpoint/SQLite/SQLiteClient.cpp
+			Endpoint/SQLite/SQLiteClient.h
+	)
+else()
+	set(SQLITE_SOURCES)
+endif()
+
 add_library(OpenMS STATIC
 		${MYSQL_SOURCES}
 		${REDIS_SOURCES}
+		${SQLITE_SOURCES}
 		Endpoint/HTTP/HTTPClient.cpp
 		Endpoint/HTTP/HTTPClient.h
 		Endpoint/HTTP/HTTPProtocol.h
@@ -140,6 +150,11 @@ if(OPENMS_ENABLE_REDIS)
 # this is heuristically generated, and may not be correct
 find_package(hiredis CONFIG REQUIRED)
 target_link_libraries(OpenMS PUBLIC hiredis::hiredis)
+endif()
+
+if(OPENMS_ENABLE_SQLITE)
+find_package(unofficial-sqlite3 CONFIG REQUIRED)
+target_link_libraries(OpenMS PRIVATE unofficial::sqlite3::sqlite3)
 endif()
 
 find_package(asio CONFIG REQUIRED)

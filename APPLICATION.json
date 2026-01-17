@@ -76,6 +76,19 @@
 			"port": 8080
 		}
 	},
+	"storage":{
+		"server": {
+			"ip": "127.0.0.1",
+			"port": 0
+		},
+		"master": {
+			"ip": "127.0.0.1",
+			"port": 8080
+		},
+		"sqlite": {
+			"database": "storage.db"
+		}
+	},
 	"mysql":{
 		"server": {
 			"ip": "127.0.0.1",
@@ -111,6 +124,19 @@
 			"password": "",
 			"instance": 1,
 			"reconnect": 1
+		}
+	},
+	"sqlite":{
+		"server": {
+			"ip": "127.0.0.1",
+			"port": 0
+		},
+		"master": {
+			"ip": "127.0.0.1",
+			"port": 8080
+		},
+		"sqlite": {
+			"database": "sqlite3.db"
 		}
 	},
 	"webserver":{

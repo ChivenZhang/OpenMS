@@ -10,8 +10,8 @@
 * =================================================*/
 #include "MySQLPool.h"
 #include "Reactor/Private/ChannelAddress.h"
-#include <format>
 #include <mysql/jdbc.h>
+#include <format>
 
 MySQLPool::MySQLPool(config_t const& config)
 	:
@@ -37,7 +37,7 @@ void MySQLPool::startup()
 	m_ThreadList.resize(config.Instance);
 	for (size_t t = 0; t < m_ThreadList.size(); ++t)
 	{
-		MSThread thread([=]()
+		MSThread thread([=, this]()
 		{
 			MSRef<sql::Connection> context;
 
@@ -83,7 +83,7 @@ void MySQLPool::startup()
 					m_ExecuteQueue.pop();
 				}
 				auto& sql = execute.Command;
-				auto& vars = execute.Variables;
+				auto& params = execute.Params;
 				auto& callback = execute.Callback;
 
 				// Execute sql command
@@ -92,7 +92,7 @@ void MySQLPool::startup()
 				MSStringList output;
 				try
 				{
-					if (vars.empty())
+					if (params.empty())
 					{
 						MSRef<sql::Statement> statement(context->createStatement());
 						if (statement->execute(sql))
@@ -118,11 +118,11 @@ void MySQLPool::startup()
 					{
 						MSRef<sql::PreparedStatement> statement(context->prepareStatement(sql));
 						size_t paramCount = statement->getParameterMetaData()->getParameterCount();
-						for (size_t i = 0; paramCount && i + paramCount <= vars.size(); i += paramCount)
+						for (size_t i = 0; paramCount && i + paramCount <= params.size(); i += paramCount)
 						{
 							for (size_t k = 0; k < paramCount; ++k)
 							{
-								statement->setString(k + 1, vars[i + k]);
+								statement->setString(k + 1, params[i + k]);
 							}
 							if (statement->execute() == false) break;
 
@@ -146,7 +146,7 @@ void MySQLPool::startup()
 				}
 				catch (MSError& ex)
 				{
-					MS_ERROR("%s", ex.what());
+					MS_ERROR("cannot execute statement: %s as %s", sql.c_str(), ex.what());
 
 					updateNum = -1;
 					output.clear();
@@ -181,7 +181,7 @@ void MySQLPool::shutdown()
 	for (auto& thread : m_ThreadList) if (thread.joinable()) thread.join();
 	m_ThreadList.clear();
 
-	while (m_ExecuteQueue.size())
+	while (!m_ExecuteQueue.empty())
 	{
 		auto execute = m_ExecuteQueue.front();
 		m_ExecuteQueue.pop();
@@ -199,7 +199,7 @@ bool MySQLPool::running() const
 
 bool MySQLPool::connect() const
 {
-	return m_Running && m_ThreadList.size();
+	return m_Running && !m_ThreadList.empty();
 }
 
 MSHnd<IChannelAddress> MySQLPool::address() const
@@ -218,12 +218,12 @@ bool MySQLPool::execute(MSString const& sql, MSLambda<void(uint64_t update, MSSt
 	return true;
 }
 
-bool MySQLPool::prepare(MSString const& sql, MSStringList const& vars, MSLambda<void(uint64_t update, MSStringList const& data)> result)
+bool MySQLPool::prepare(MSString const& sql, MSStringList const& params, MSLambda<void(uint64_t update, MSStringList const& data)> result)
 {
 	if (connect() == false) return false;
 	{
 		MSMutexLock lock(m_MutexLock);
-		m_ExecuteQueue.emplace(sql, vars, result);
+		m_ExecuteQueue.emplace(sql, params, result);
 	}
 	m_MutexUnlock.notify_one();
 	return true;

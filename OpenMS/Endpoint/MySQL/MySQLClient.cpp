@@ -91,12 +91,12 @@ uint64_t MySQLClient::execute(MSString const &sql, MSStringList &output)
 	}
 	catch (MSError& ex)
 	{
-		MS_ERROR("%s", ex.what());
+		MS_ERROR("cannot execute statement: %s as %s", sql.c_str(), ex.what());
 	}
 	return -1;
 }
 
-uint64_t MySQLClient::prepare(MSString const &sql, MSStringList const& vars, MSStringList& output)
+uint64_t MySQLClient::prepare(MSString const &sql, MSStringList const& params, MSStringList& output)
 {
 	try
 	{
@@ -104,11 +104,11 @@ uint64_t MySQLClient::prepare(MSString const &sql, MSStringList const& vars, MSS
 		MSRef<sql::PreparedStatement> statement(m_Context->prepareStatement(sql));
 		uint64_t result = 0;
 		size_t paramCount = statement->getParameterMetaData()->getParameterCount();
-		for (size_t i = 0; paramCount && i + paramCount <= vars.size(); i += paramCount)
+		for (size_t i = 0; paramCount && i + paramCount <= params.size(); i += paramCount)
 		{
 			for (size_t k = 0; k < paramCount; ++k)
 			{
-				statement->setString(k + 1, vars[i + k]);
+				statement->setString(k + 1, params[i + k]);
 			}
 			if (statement->execute() == false) break;
 
@@ -135,7 +135,7 @@ uint64_t MySQLClient::prepare(MSString const &sql, MSStringList const& vars, MSS
 	}
 	catch (MSError& ex)
 	{
-		MS_ERROR("%s", ex.what());
+		MS_ERROR("cannot execute statement: %s as %s", sql.c_str(), ex.what());
 	}
 	return -1;
 }

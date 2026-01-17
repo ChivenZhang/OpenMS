@@ -28,7 +28,7 @@ if(OPENMS_ENABLE_GATEWAY)
 add_subdirectory(${OPENMS_SOURCE_DIR}/Service/Gateway)
 endif()
 
-if(OPENMS_ENABLE_MYSQL OR OPENMS_ENABLE_REDIS)
+if(OPENMS_ENABLE_MYSQL OR OPENMS_ENABLE_REDIS OR OPENMS_ENABLE_SQLITE)
 add_subdirectory(${OPENMS_SOURCE_DIR}/Service/Database)
 endif()
 
@@ -42,6 +42,10 @@ endif()
 
 if(OPENMS_ENABLE_BACKEND)
 add_subdirectory(${OPENMS_SOURCE_DIR}/Service/Backend)
+endif()
+
+if(OPENMS_ENABLE_STORAGE)
+    add_subdirectory(${OPENMS_SOURCE_DIR}/Service/Storage)
 endif()
 
 if(OPENMS_ENABLE_FRONTEND)

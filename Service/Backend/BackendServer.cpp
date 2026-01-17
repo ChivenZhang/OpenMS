@@ -40,23 +40,6 @@ void BackendServer::onInit()
 	}
 
 	auto spaceService = MSNew<SpaceService>(spaceID);
-	spaceService->bind("enterSpace", [=](uint32_t userID)->MSAsync<bool>
-	{
-		MS_INFO("用户 %u 加入空间", userID);
-		auto playerService = MSNew<PlayerService>(userID);
-		mailHub->create("player:" + std::to_string(userID), playerService);
-		co_return true;
-	});
-	spaceService->bind("leaveSpace", [=](uint32_t userID)->MSAsync<bool>
-	{
-		MS_INFO("用户 %u 离开空间", userID);
-		mailHub->cancel("player:" + std::to_string(userID));
-		co_return true;
-	});
-	spaceService->bind("syncStatus", [=](uint32_t userID)->MSAsync<void>
-	{
-		co_return;
-	});
 	mailHub->create("space:" + std::to_string(spaceID), spaceService);
 
 	spaceService->call<void>(caller, "onSpaceCreate", "", 0, MSTuple{spaceID});

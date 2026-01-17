@@ -35,7 +35,7 @@ public:
 	MSHnd<IChannelAddress> address() const override;
 
 	bool execute(MSString const& sql, MSLambda<void(uint64_t update, MSStringList const& data)> result);
-	bool prepare(MSString const& sql, MSStringList const& vars, MSLambda<void(uint64_t update, MSStringList const& data)> result);
+	bool prepare(MSString const& sql, MSStringList const& params, MSLambda<void(uint64_t update, MSStringList const& data)> result);
 
 protected:
 	const config_t m_Config;
@@ -48,7 +48,7 @@ protected:
 	struct execute_t
 	{
 		MSString Command;
-		MSStringList Variables;
+		MSStringList Params;
 		MSLambda<void(uint64_t update, MSStringList const& data)> Callback;
 	};
 	MSQueue<execute_t> m_ExecuteQueue;

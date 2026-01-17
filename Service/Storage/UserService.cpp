@@ -1,6 +1,5 @@
-#pragma once
 /*=================================================
-* Copyright © 2020-2025 ChivenZhang.
+* Copyright © 2020-2026 ChivenZhang.
 * All Rights Reserved.
 * =====================Note=========================
 *
@@ -9,13 +8,8 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include <Server/Private/Service.h>
+#include "UserService.h"
 
-class SpaceService : public Service
+UserService::UserService()
 {
-public:
-	explicit SpaceService(uint32_t spaceID);
-
-protected:
-	const uint32_t m_SpaceID;
-};
+}

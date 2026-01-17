@@ -35,5 +35,8 @@
   }, {
     "name" : "gflags",
     "version>=" : "2.3.0"
+  }, {
+    "name" : "sqlite3",
+    "version>=" : "3.51.1"
   } ]
 }

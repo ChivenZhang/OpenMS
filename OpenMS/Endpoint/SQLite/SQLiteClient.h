@@ -10,27 +10,19 @@
 * 
 * =================================================*/
 #include "Endpoint/IEndpoint.h"
+struct sqlite3;
 
-namespace sql
-{
-	class Connection;
-}
-
-/// @brief MySQL Client Endpoint
-class MySQLClient : public IEndpoint
+/// @brief SQLite Client Endpoint
+class SQLiteClient : public IEndpoint
 {
 public:
 	struct config_t
 	{
-		MSString IP;
-		uint16_t PortNum = 3306;
-		MSString UserName;
-		MSString Password;
 		MSString Database;
 	};
 
 public:
-	explicit MySQLClient(config_t const& config);
+	explicit SQLiteClient(config_t const& config);
 	void startup() override;
 	void shutdown() override;
 	bool running() const override;
@@ -42,6 +34,5 @@ public:
 
 protected:
 	const config_t m_Config;
-	MSRef<ISocketAddress> m_Address;
-	MSRef<sql::Connection> m_Context;
+	MSRaw<sqlite3> m_Context;
 };

@@ -11,23 +11,25 @@
 #include "PlayerService.h"
 
 PlayerService::PlayerService(uint32_t userID)
+	:
+	m_UserID(userID)
 {
-	this->bind("startBattle", [=, this]()->MSAsync<bool>
+	this->bind("startBattle", [=, this]()->MSAsync<void>
 	{
 		MS_INFO("用户 %u 开始游戏", userID);
-		this->call<void>("client:" + std::to_string(userID), "onStartBattle", "proxy:" + std::to_string(userID), 0, MSTuple{});
-		co_return true;
+		co_await this->callClient<void>("onStartBattle", 0, MSTuple{});
+		co_return;
 	});
-	this->bind("stopBattle", [=, this]()->MSAsync<bool>
+	this->bind("stopBattle", [=, this]()->MSAsync<void>
 	{
 		MS_INFO("用户 %u 结束游戏", userID);
-		this->call<void>("client:" + std::to_string(userID), "onStopBattle", "proxy:" + std::to_string(userID), 0, MSTuple{});
-		co_return true;
+		co_await this->callClient<void>("onStopBattle", 0, MSTuple{});
+		co_return;
 	});
 	this->bind("attack", [=, this]()->MSAsync<void>
 	{
 		MS_INFO("用户 %u 发动攻击", userID);
-		this->call<void>("client:" + std::to_string(userID), "onAttack", "proxy:" + std::to_string(userID), 0, MSTuple{});
+		co_await this->callClient<void>("onAttack", 0, MSTuple{});
 		co_return;
 	});
 }

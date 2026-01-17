@@ -9,12 +9,11 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include <OpenMS/Service/Cluster/ClusterServer.h>
+#include <OpenMS/Server/Cluster/ClusterServer.h>
 #include <OpenMS/Endpoint/MySQL/MySQLClient.h>
 #include <OpenMS/Endpoint/MySQL/MySQLPool.h>
-#include "MySQLConfig.h"
 
-class MySQLServer : public ClusterServer, public MySQLConfig
+class MySQLServer : public ClusterServer
 {
 public:
 	MSString identity() const override;

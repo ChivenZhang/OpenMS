@@ -9,12 +9,11 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include <OpenMS/Service/Cluster/ClusterServer.h>
+#include <OpenMS/Server/Cluster/ClusterServer.h>
 #include <OpenMS/Endpoint/Redis/RedisClient.h>
 #include <OpenMS/Endpoint/Redis/RedisPool.h>
-#include "RedisConfig.h"
 
-class RedisServer : public ClusterServer, public RedisConfig
+class RedisServer : public ClusterServer
 {
 public:
 	MSString identity() const override;

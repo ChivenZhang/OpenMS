@@ -30,6 +30,8 @@ public:
 	virtual MSAsync<bool> deleteSpace(uint32_t spaceID);
 	virtual MSAsync<void> onSpaceCreate(uint32_t spaceID);
 	virtual MSAsync<void> onSpaceDelete(uint32_t spaceID);
+	virtual MSAsync<void> onSpaceEnter(uint32_t spaceID, uint32_t userID);
+	virtual MSAsync<void> onSpaceLeave(uint32_t spaceID, uint32_t userID);
 
 protected:
 	MSMutex m_UserLock;

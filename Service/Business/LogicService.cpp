@@ -64,6 +64,18 @@ LogicService::LogicService()
 		MS_INFO("空间回调 %u", spaceID);
 		co_return co_await this->onSpaceCreate(spaceID);
 	});
+
+	this->bind("onSpaceEnter", [this](uint32_t spaceID, uint32_t userID)->MSAsync<void>
+	{
+		MS_INFO("空间进入回调 %u", spaceID);
+		co_return co_await this->onSpaceEnter(spaceID, userID);
+	});
+
+	this->bind("onSpaceLeave", [this](uint32_t spaceID, uint32_t userID)->MSAsync<void>
+	{
+		MS_INFO("空间离开回调 %u", spaceID);
+		co_return co_await this->onSpaceLeave(spaceID, userID);
+	});
 }
 
 MSAsync<MSString> LogicService::globalData(MSStringView name)
@@ -88,7 +100,7 @@ MSAsync<uint32_t> LogicService::onLoginRequest(MSString username, MSString passw
 
 MSAsync<void> LogicService::onClientLogin(uint32_t userID, uint32_t code, MSString error)
 {
-	auto serverService = MSNew<ServerService>();
+	auto serverService = MSNew<ServerService>(userID);
 	serverService->bind("readyBattle", [=, this](uint32_t gameID)->MSAsync<bool>
 	{
 		MS_INFO("服务端：READY BATTLE!!!");
@@ -147,30 +159,36 @@ MSAsync<bool> LogicService::deleteSpace(uint32_t spaceID)
 
 MSAsync<void> LogicService::onSpaceCreate(uint32_t spaceID)
 {
-	if (spaceID)
+	// Try to match game
+
+	m_UserLock.lock();
+	while (m_MatchQueue.empty() == false)
 	{
-		m_UserLock.lock();
-		while (m_MatchQueue.empty() == false)
-		{
-			auto userID = m_MatchQueue.front();
-			m_MatchQueue.pop();
+		auto userID = m_MatchQueue.front();
+		m_MatchQueue.pop();
 
-			auto& userInfo = m_UserInfos[userID];
-			userInfo.SpaceID = spaceID;
+		auto& userInfo = m_UserInfos[userID];
+		userInfo.SpaceID = spaceID;
 
-			m_UserLock.unlock();
-			if (co_await this->async<bool>("space:" + std::to_string(spaceID), "enterSpace", "", 100, MSTuple{userID}))
-			{
-				co_await this->async<bool>("player:" + std::to_string(userID), "startBattle", "", 0, MSTuple{});
-			}
-			m_UserLock.lock();
-		}
 		m_UserLock.unlock();
+		co_await this->async<bool>("space:" + std::to_string(spaceID), "enterSpace", "", 100, MSTuple{userID});
+		m_UserLock.lock();
 	}
+	m_UserLock.unlock();
 	co_return;
 }
 
 MSAsync<void> LogicService::onSpaceDelete(uint32_t spaceID)
+{
+	co_return;
+}
+
+MSAsync<void> LogicService::onSpaceEnter(uint32_t spaceID, uint32_t userID)
+{
+	co_return co_await this->async<void>("player:" + std::to_string(userID), "startBattle", "", 0, MSTuple{});
+}
+
+MSAsync<void> LogicService::onSpaceLeave(uint32_t spaceID, uint32_t userID)
 {
 	co_return;
 }

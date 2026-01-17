@@ -9,9 +9,20 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include <OpenMS/Service/Private/Property.h>
+#include <OpenMS/Server/Cluster/ClusterServer.h>
+#include <OpenMS/Endpoint/SQLite/SQLiteClient.h>
 
-/// @brief
-class RedisConfig : RESOURCE2(Property, IProperty)
+class SQLiteServer : public ClusterServer
 {
+public:
+	MSString identity() const override;
+
+protected:
+	void onInit() override;
+	void onExit() override;
+
+protected:
+	MSRef<SQLiteClient> m_SQLiteClient;
 };
+
+OPENMS_RUN(SQLiteServer)

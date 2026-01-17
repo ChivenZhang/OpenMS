@@ -9,3 +9,9 @@
 *
 * =================================================*/
 #include "ServerService.h"
+
+ServerService::ServerService(uint32_t userID)
+	:
+	m_UserID(userID)
+{
+}

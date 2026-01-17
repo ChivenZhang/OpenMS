@@ -11,8 +11,7 @@
 * =================================================*/
 #include <Server/Private/Server.h>
 #include <Endpoint/TCP/TCPClient.h>
-
-#include "Mailbox/Private/MailHub.h"
+#include <Mailbox/Private/MailHub.h>
 
 class FrontendClient : public Server
 {

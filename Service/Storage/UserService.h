@@ -1,6 +1,6 @@
 #pragma once
 /*=================================================
-* Copyright © 2020-2025 ChivenZhang.
+* Copyright © 2020-2026 ChivenZhang.
 * All Rights Reserved.
 * =====================Note=========================
 *
@@ -11,11 +11,8 @@
 * =================================================*/
 #include <Server/Private/Service.h>
 
-class SpaceService : public Service
+class UserService : public Service
 {
 public:
-	explicit SpaceService(uint32_t spaceID);
-
-protected:
-	const uint32_t m_SpaceID;
+	UserService();
 };
