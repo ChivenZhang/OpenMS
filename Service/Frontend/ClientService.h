@@ -16,6 +16,12 @@ class ClientService : public Service
 public:
 	ClientService();
 
+	template<class F, class...Args>
+	bool callGuest(MSStringView method, uint32_t timeout, MSTuple<Args...>&& args, F&& callback)
+	{
+		return this->async("guest", method, "", timeout, std::forward<MSTuple<Args...>>(args), std::forward<F>(callback));
+	}
+
 	template<class T, class... Args>
 	MSAsync<T> callGuest(MSStringView method, uint32_t timeout, MSTuple<Args...>&& args)
 	{
@@ -25,4 +31,6 @@ public:
 	virtual MSAsync<void> onLogin(uint32_t userID);
 
 	virtual MSAsync<void> onLogout(bool result);
+
+	virtual MSAsync<void> onSignup(bool result);
 };

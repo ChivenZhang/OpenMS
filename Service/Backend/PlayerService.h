@@ -16,6 +16,18 @@ class PlayerService : public Service
 public:
 	explicit PlayerService(uint32_t userID);
 
+	template<class F, class...Args>
+	bool callClient(MSStringView method, uint32_t timeout, MSTuple<Args...>&& args, F&& callback)
+	{
+		return this->async("client:" + std::to_string(m_UserID), method, "proxy:" + std::to_string(m_UserID), timeout, std::forward<MSTuple<Args...>>(args), std::forward<F>(callback));
+	}
+
+	template<class F, class...Args>
+	bool callServer(MSStringView method, uint32_t timeout, MSTuple<Args...>&& args, F&& callback)
+	{
+		return this->async("server:" + std::to_string(m_UserID), method, "proxy:" + std::to_string(m_UserID), timeout, std::forward<MSTuple<Args...>>(args), std::forward<F>(callback));
+	}
+
 	template<class T, class... Args>
 	MSAsync<T> callClient(MSStringView method, uint32_t timeout, MSTuple<Args...>&& args)
 	{

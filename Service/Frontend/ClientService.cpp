@@ -22,10 +22,10 @@ ClientService::ClientService()
 		MS_INFO("注销回调");
 		co_return co_await this->onLogout(result);
 	});
-	this->bind("onSignup", [=](bool result)->MSAsync<void>
+	this->bind("onSignup", [=, this](bool result)->MSAsync<void>
 	{
 		MS_INFO("注册回调");
-		co_return;
+		co_return co_await this->onSignup(result);
 	});
 	this->bind("onCreateClient", [=](uint32_t userID)->MSAsync<void>
 	{
@@ -50,6 +50,11 @@ MSAsync<void> ClientService::onLogin(uint32_t userID)
 }
 
 MSAsync<void> ClientService::onLogout(bool result)
+{
+	co_return;
+}
+
+MSAsync<void> ClientService::onSignup(bool result)
 {
 	co_return;
 }

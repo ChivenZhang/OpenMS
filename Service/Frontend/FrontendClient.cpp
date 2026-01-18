@@ -103,22 +103,26 @@ void FrontendClient::onInit()
 					},
 				});
 
-				MS_INFO("尝试登录...");
-				clientService->async("guest", "login", "", 5000, R"(["openms","123456"])", [=](MSStringView&& response)
+				MS_INFO("尝试注册...");
+				clientService->callGuest("signup", 2000, MSTuple{"openms", "123456"}, [=](bool result)
 				{
-					MS_INFO("登录结果：%s", response.data());
-					if (response.empty()) return;
-					auto userID = std::stoul(response.data());
-					if (userID == 0) return;
-					channel->getContext()->userdata() = userID;
+					MS_INFO("注册结果：%d", result);
 
-					auto playerService = MSNew<PlayerService>(userID);
-					mailHub->create("client:" + std::to_string(userID), playerService);
-
-					MS_INFO("尝试开局...");
-					playerService->async("server:" + std::to_string(userID), "readyBattle", "proxy:" + std::to_string(userID), 5000, MSTuple{ 0U }, [=](bool result)
+					MS_INFO("尝试登录...");
+					clientService->callGuest("login", 2000, MSTuple{"openms", "123456"}, [=](uint32_t userID)
 					{
-						MS_INFO("开局结果：%d", result);
+						MS_INFO("登录结果：%u", userID);
+						if (userID == 0) return;
+						channel->getContext()->userdata() = userID;
+
+						auto playerService = MSNew<PlayerService>(userID);
+						mailHub->create("client:" + std::to_string(userID), playerService);
+
+						MS_INFO("尝试开局...");
+						playerService->callServer( "readyBattle", 5000, MSTuple{ 0U }, [=](bool result)
+						{
+							MS_INFO("开局结果：%d", result);
+						});
 					});
 				});
 			},
