@@ -91,7 +91,7 @@ uint64_t MySQLClient::execute(MSString const &sql, MSStringList &output)
 	}
 	catch (MSError& ex)
 	{
-		MS_ERROR("cannot execute statement: %s as %s", sql.c_str(), ex.what());
+		MS_ERROR("%s: %s", sql.c_str(), ex.what());
 	}
 	return -1;
 }
@@ -135,7 +135,7 @@ uint64_t MySQLClient::prepare(MSString const &sql, MSStringList const& params, M
 	}
 	catch (MSError& ex)
 	{
-		MS_ERROR("cannot execute statement: %s as %s", sql.c_str(), ex.what());
+		MS_ERROR("%s: %s", sql.c_str(), ex.what());
 	}
 	return -1;
 }

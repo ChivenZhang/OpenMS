@@ -104,7 +104,7 @@ void FrontendClient::onInit()
 				});
 
 				MS_INFO("尝试登录...");
-				clientService->async("guest", "login", "", 5000, R"(["admin","123456"])", [=](MSStringView&& response)
+				clientService->async("guest", "login", "", 5000, R"(["openms","123456"])", [=](MSStringView&& response)
 				{
 					MS_INFO("登录结果：%s", response.data());
 					if (response.empty()) return;

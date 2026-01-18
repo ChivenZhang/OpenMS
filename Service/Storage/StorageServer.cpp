@@ -31,8 +31,12 @@ void StorageServer::onInit()
 	// ========================================================================================
 	{
 		MSStringList result;
-		m_SQLiteClient->execute("create table if not exists user(id integer primary key autoincrement, username text unique, password text, created_at datetime default current_timestamp);", result);
-		m_SQLiteClient->execute("insert into user(username, password) values('admin', '123456')", result);
+		auto rows = m_SQLiteClient->execute("create table user(id integer primary key autoincrement, username text unique, password text, created_at datetime default current_timestamp);", result);
+		if (rows == 0)
+		{
+			m_SQLiteClient->execute("insert into user(username, password) values('admin', '123456')", result);
+			m_SQLiteClient->execute("insert into user(username, password) values('openms', '123456')", result);
+		}
 	}
 	// ========================================================================================
 
@@ -42,8 +46,8 @@ void StorageServer::onInit()
 		MS_INFO("查询用户：%s", username.data());
 
 		MSStringList result;
-		auto rowNum = m_SQLiteClient->prepare("select id from user where username = ? and password = ? limit 1;", { username, password }, result);
-		if (rowNum != -1 && rowNum > 0) co_return std::stoul(result[0]);
+		auto rows = m_SQLiteClient->prepare("select id from user where username = ? and password = ? limit 1;", { username, password }, result);
+		if (rows != -1 && rows > 0) co_return std::stoul(result[0]);
 		co_return 0U;
 	});
 	mailHub->create("userdb", userService);

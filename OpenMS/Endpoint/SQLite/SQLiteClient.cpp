@@ -73,14 +73,15 @@ uint64_t SQLiteClient::execute(MSString const &sql, MSStringList &output)
 		}
 		if (state == SQLITE_DONE)
 		{
+			result += sqlite3_changes(m_Context);
 			sqlite3_finalize(stmt);
 			return result;
 		}
 		sqlite3_finalize(stmt);
-		MS_ERROR("cannot execute statement: %s as %s", sql.c_str(), sqlite3_errmsg(m_Context));
+		MS_ERROR("%s: %s", sql.c_str(), sqlite3_errmsg(m_Context));
 		return -1;
 	}
-	MS_ERROR("cannot prepare statement: %s", sqlite3_errmsg(m_Context));
+	MS_ERROR("%s: %s", sql.c_str(), sqlite3_errmsg(m_Context));
 	return -1;
 }
 
@@ -109,13 +110,14 @@ uint64_t SQLiteClient::prepare(MSString const &sql, MSStringList const& params, 
 		}
 		if (state == SQLITE_DONE)
 		{
+			result += sqlite3_changes(m_Context);
 			sqlite3_finalize(stmt);
 			return result;
 		}
 		sqlite3_finalize(stmt);
-		MS_ERROR("cannot execute statement: %s as %s", sql.c_str(), sqlite3_errmsg(m_Context));
+		MS_ERROR("%s: %s", sql.c_str(), sqlite3_errmsg(m_Context));
 		return -1;
 	}
-	MS_ERROR("cannot prepare statement: %s", sqlite3_errmsg(m_Context));
+	MS_ERROR("%s: %s", sql.c_str(), sqlite3_errmsg(m_Context));
 	return -1;
 }

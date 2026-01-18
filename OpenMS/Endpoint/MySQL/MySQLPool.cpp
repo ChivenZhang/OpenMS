@@ -146,7 +146,7 @@ void MySQLPool::startup()
 				}
 				catch (MSError& ex)
 				{
-					MS_ERROR("cannot execute statement: %s as %s", sql.c_str(), ex.what());
+					MS_ERROR("%s: %s", sql.c_str(), ex.what());
 
 					updateNum = -1;
 					output.clear();

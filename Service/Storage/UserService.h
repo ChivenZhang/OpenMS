@@ -13,6 +13,4 @@
 
 class UserService : public Service
 {
-public:
-	UserService();
 };
