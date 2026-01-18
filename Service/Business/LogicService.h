@@ -26,8 +26,9 @@ public:
 	virtual MSAsync<uint32_t> onSignupRequest(MSString username, MSString password);
 	virtual MSAsync<void> onClientSignup(uint32_t userID, uint32_t code, MSString error);
 
-	virtual MSAsync<uint32_t> createSpace();
-	virtual MSAsync<bool> deleteSpace(uint32_t spaceID);
+	virtual MSAsync<void> onBattleMatch(uint32_t gameID, MSList<uint32_t> userIDs);
+
+	virtual MSAsync<uint32_t> onSpaceRequest(uint32_t gameID);
 	virtual MSAsync<void> onSpaceCreate(uint32_t spaceID);
 	virtual MSAsync<void> onSpaceDelete(uint32_t spaceID);
 	virtual MSAsync<void> onSpaceEnter(uint32_t spaceID, uint32_t userID);
@@ -35,13 +36,21 @@ public:
 
 protected:
 	MSMutex m_UserLock;
-	struct userinfo_t
+	struct user_t
 	{
 		bool Online;
+		bool InGame;
 		uint32_t SpaceID;
 		float LastUpdate;
 	};
 	uint32_t m_SpaceID = 0;
-	MSQueue<uint32_t> m_MatchQueue;
-	MSMap<uint32_t, userinfo_t> m_UserInfos;
+	MSMap<uint32_t, user_t> m_UserInfos;
+
+	struct space_t
+	{
+		bool InGame;
+		uint32_t GameID;
+		MSList<uint32_t> UserIDs;
+	};
+	MSMap<uint32_t, space_t> m_SpaceInfos;
 };

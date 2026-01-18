@@ -14,6 +14,7 @@
 #include <OpenMS/Server/Private/Service.h>
 
 #include "LoginService.h"
+#include "MatchService.h"
 
 MSString BusinessServer::identity() const
 {
@@ -25,26 +26,21 @@ void BusinessServer::onInit()
 	ClusterServer::onInit();
 	auto mailHub = AUTOWIRE(IMailHub)::bean();
 
-	// Timeout & Disconnect
-
-	// startTimer(0, 5000, [=, this, self = logicService.get()](uint32_t handle)
-	// {
-	// 	MSMutexLock lock(m_UserLock);
-	// 	auto now = ::clock() * 1.0f / CLOCKS_PER_SEC;
-	// 	for (auto& userInfo : m_UserInfos)
-	// 	{
-	// 		if (userInfo.second.Online && userInfo.second.LastUpdate + 10.0f <= now)
-	// 		{
-	// 			self->call<bool>("logic", "logout", "", 0, MSTuple{ userInfo.first });
-	// 		}
-	// 	}
-	// });
-
 	auto loginService = MSNew<LoginService>();
 	mailHub->create("login", loginService);
 
 	auto logicService = MSNew<LogicService>();
 	mailHub->create("logic", logicService);
+
+	auto matchService = MSNew<MatchService>();
+	mailHub->create("match", matchService);
+
+	this->startTimer(0, 1000, [=, self = logicService.get()](uint32_t handle)
+	{
+		self->call<void>("match", "updateMatch", "", 0, MSTuple{self->name()});
+
+		self->call<void>(self->name(), "updateMatch", "", 0, MSTuple{});
+	});
 }
 
 void BusinessServer::onExit()

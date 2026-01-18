@@ -118,10 +118,10 @@ void FrontendClient::onInit()
 						auto playerService = MSNew<PlayerService>(userID);
 						mailHub->create("client:" + std::to_string(userID), playerService);
 
-						MS_INFO("尝试开局...");
-						playerService->callServer( "readyBattle", 5000, MSTuple{ 0U }, [=](bool result)
+						MS_INFO("尝试匹配...");	auto gameID = 0;
+						playerService->callServer("matchBattle", 5000, MSTuple{ gameID }, [=](bool result)
 						{
-							MS_INFO("开局结果：%d", result);
+							MS_INFO("开局匹配：%d", result);
 						});
 					});
 				});

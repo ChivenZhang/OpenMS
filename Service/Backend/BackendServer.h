@@ -11,6 +11,7 @@
 * =================================================*/
 #include <OpenMS/Server/Cluster/ClusterServer.h>
 #include <OpenMS/Endpoint/TCP/TCPClient.h>
+class Service;
 
 class BackendServer : public ClusterServer
 {
@@ -20,6 +21,8 @@ public:
 protected:
 	void onInit() override;
 	void onExit() override;
+
+	virtual MSRef<Service> onSpaceCreate(uint32_t spaceID, uint32_t gameID);
 };
 
 OPENMS_RUN(BackendServer)
