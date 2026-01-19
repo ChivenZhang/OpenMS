@@ -104,12 +104,12 @@ void FrontendClient::onInit()
 				});
 
 				MS_INFO("尝试注册...");
-				clientService->callGuest("signup", 2000, MSTuple{"openms", "123456"}, [=](bool result)
+				clientService->callGuest("signup", 5000, MSTuple{"openms", "123456"}, [=](bool result)
 				{
 					MS_INFO("注册结果：%d", result);
 
 					MS_INFO("尝试登录...");
-					clientService->callGuest("login", 2000, MSTuple{"openms", "123456"}, [=](uint32_t userID)
+					clientService->callGuest("login", 5000, MSTuple{"openms", "123456"}, [=](uint32_t userID)
 					{
 						MS_INFO("登录结果：%u", userID);
 						if (userID == 0) return;
@@ -142,5 +142,3 @@ void FrontendClient::onExit()
 void FrontendClient::onUpdate(float time)
 {
 }
-
-OPENMS_RUN(FrontendClient);

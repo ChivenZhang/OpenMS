@@ -9,6 +9,7 @@
 *
 * =================================================*/
 #include "PlayerService.h"
+#include <OpenMS/Server/IServer.h>
 
 PlayerService::PlayerService(uint32_t userID)
 	:
@@ -20,7 +21,6 @@ PlayerService::PlayerService(uint32_t userID)
 	});
 	this->bind("onStopBattle", [=, this]()->MSAsync<void>
 	{
-		MS_INFO("结束游戏");
 		co_return co_await this->onStopBattle();
 	});
 	this->bind("onAttack", [=]()->MSAsync<void>
@@ -39,5 +39,6 @@ MSAsync<void> PlayerService::onStartBattle()
 MSAsync<void> PlayerService::onStopBattle()
 {
 	MS_INFO("结束游戏");
+	AUTOWIRE_DATA(IServer)->shutdown();
 	co_return;
 }

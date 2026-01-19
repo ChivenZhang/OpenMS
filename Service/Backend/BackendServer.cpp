@@ -44,6 +44,12 @@ void BackendServer::onInit()
 	mailHub->create("space:" + std::to_string(spaceID), spaceService);
 
 	spaceService->call<void>(spaceService->name(), "onCreateRequest", "", 0, MSTuple{caller,});
+
+	this->startTimer(10000, 0, [this, self = spaceService.get()](uint32_t handle)
+	{
+		self->call<void>(self->name(), "endPlay", "", 5000, MSTuple{});
+		this->shutdown();
+	});
 }
 
 void BackendServer::onExit()

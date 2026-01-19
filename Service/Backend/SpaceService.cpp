@@ -48,6 +48,15 @@ SpaceService::SpaceService(uint32_t spaceID, uint32_t gameID)
 		}
 		co_return;
 	});
+	this->bind("endPlay", [=, this]()->MSAsync<void>
+	{
+		for (auto& user : m_UserInfos)
+		{
+			auto userID = user.second.UserID;
+			co_await this->async<void>("player:" + std::to_string(userID), "stopBattle", "", 0, MSTuple{});
+		}
+		co_return;
+	});
 	this->bind("keepAlive", [=](uint32_t userID)->MSAsync<void>
 	{
 		co_return;

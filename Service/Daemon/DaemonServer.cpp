@@ -28,8 +28,10 @@ void DaemonServer::onInit()
 		MS_INFO("守护进程：CREATE SPACE!!!");
 #ifdef OPENMS_PLATFORM_WINDOWS
 		auto result = system(("start BackendServer.exe" " --space=" + std::to_string(spaceID) + " --game=" + std::to_string(gameID) + " --caller=" + caller).c_str());
-#elif defined(OPENMS_PLATFORM_APPLE) or defined(OPENMS_PLATFORM_LINUX)
-		auto result = system(("./BackendServer" " --space=" + std::to_string(spaceID) + " --game=" + std::to_string(gameID) + " --caller=" + caller + " &").c_str());
+#elif defined(OPENMS_PLATFORM_APPLE)
+		auto result = system(("nohup ./BackendServer" " --space=" + std::to_string(spaceID) + " --game=" + std::to_string(gameID) + " --caller=" + caller + " >> " + std::to_string(spaceID) + ".log &").c_str());
+#elif defined(OPENMS_PLATFORM_LINUX)
+		auto result = system(("nohup ./BackendServer" " --space=" + std::to_string(spaceID) + " --game=" + std::to_string(gameID) + " --caller=" + caller + " >> " + std::to_string(spaceID) + ".log &").c_str());
 #else
 		auto result = -1;
 #endif

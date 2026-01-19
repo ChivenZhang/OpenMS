@@ -28,3 +28,5 @@ protected:
 	MSRef<TCPClient> m_TCPClient;
 	MSRef<IChannel> m_TCPChannel;
 };
+
+OPENMS_RUN(FrontendClient);
