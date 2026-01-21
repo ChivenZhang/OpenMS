@@ -140,6 +140,12 @@ add_library(OpenMS STATIC
         Server/Private/Service.h
 )
 
+if(OPENMS_ENABLE_SPDLOG)
+add_definitions(-DOPENMS_ENABLE_SPDLOG)
+find_package(spdlog CONFIG REQUIRED)
+target_link_libraries(OpenMS PUBLIC spdlog::spdlog)
+endif()
+
 if(OPENMS_ENABLE_MYSQL)
 target_include_directories(OpenMS PUBLIC $ENV{MYSQL_CLIENT_CUSTOM}/include)
 target_link_directories(OpenMS PUBLIC $ENV{MYSQL_CLIENT_CUSTOM}/lib64/vs14)

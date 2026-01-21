@@ -27,8 +27,6 @@ void ClusterServer::onInit()
 
 	mailHub->failed([this](IMail mail)->bool
 	{
-		static thread_local std::mt19937 gen(std::random_device{}());
-
 		// Select remote address to send
 
 		MSString address;
@@ -40,13 +38,11 @@ void ClusterServer::onInit()
 			if (result == m_MailRouteMap.end()) break;
 			auto& routes = result->second;
 			if (routes.empty()) break;
-			std::uniform_int_distribution<size_t> dis(0U, routes.size() - 1);
-			auto index = dis(gen);
-			address = routes[index];
+			address = routes[0];
 		} while (false);
 		if (address.empty())
 		{
-			MS_ERROR("send %u => %u failed", mail.From, mail.To);
+			MS_ERROR("send %u=>%u via %u #%u failed", mail.From, mail.To, mail.Copy, mail.Date);
 			return false;
 		}
 

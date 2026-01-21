@@ -88,6 +88,8 @@ bool Service::async(uint32_t service, uint32_t method, uint32_t forward, uint32_
 	mail.Type = OPENMS_MAIL_TYPE_REQUEST;
 	if (forward != MSHash(nullptr)) mail.Type |= OPENMS_MAIL_TYPE_FORWARD;
 
+	MS_INFO("async %u=>%u via %u #%u", mail.From, mail.To, mail.Copy, mail.Date);
+
 	{
 		MSMutexLock lock(m_LockSession);
 		m_SessionMap.emplace(mail.Date, [call = std::move(callback)](MSStringView output)

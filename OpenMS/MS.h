@@ -130,6 +130,20 @@
 #include <cstdio>
 #include <ctime>
 #include <thread>
+
+#ifdef OPENMS_ENABLE_SPDLOG
+#ifndef SPDLOG_FMT_EXTERNAL
+#define SPDLOG_FMT_EXTERNAL
+#endif
+#include <fmt/printf.h>
+#include <spdlog/spdlog.h>
+#define MS_DEBUG(FORMAT, ...) SPDLOG_DEBUG(fmt::sprintf(FORMAT, ##__VA_ARGS__))
+#define MS_INFO(FORMAT, ...) SPDLOG_INFO(fmt::sprintf(FORMAT, ##__VA_ARGS__))
+#define MS_WARN(FORMAT, ...) SPDLOG_WARN(fmt::sprintf(FORMAT, ##__VA_ARGS__))
+#define MS_ERROR(FORMAT, ...) SPDLOG_ERROR(fmt::sprintf(FORMAT, ##__VA_ARGS__))
+#define MS_FATAL(FORMAT, ...) do{ SPDLOG_CRITICAL(fmt::sprintf(FORMAT, ##__VA_ARGS__)); std::abort(); } while(0)
+#endif
+
 #define MS_FORMAT(TARGET, FORMAT, LEVEL, ...) \
 do { \
 char __DATETIME__[32]; auto __NOWTIME__ = std::time(nullptr); \
@@ -147,12 +161,12 @@ std::fflush(TARGET); \
 #endif
 #endif
 
-#ifndef MS_WARN
-#	define MS_WARN(FORMAT, ...) MS_FORMAT(stdout, FORMAT, WARN, ##__VA_ARGS__)
-#endif
-
 #ifndef MS_INFO
 #	define MS_INFO(FORMAT, ...) MS_FORMAT(stdout, FORMAT, INFO, ##__VA_ARGS__)
+#endif
+
+#ifndef MS_WARN
+#	define MS_WARN(FORMAT, ...) MS_FORMAT(stdout, FORMAT, WARN, ##__VA_ARGS__)
 #endif
 
 #ifndef MS_ERROR

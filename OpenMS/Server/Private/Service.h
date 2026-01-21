@@ -94,6 +94,22 @@ public:
 	}
 
 	template<class F, class...Args>
+	bool async(uint32_t service, uint32_t method, uint32_t forward, uint32_t timeout, MSTuple<Args...>&& args, F&& callback)
+	{
+		MSString request;
+		if constexpr (sizeof...(Args) != 0)
+		{
+			if (MSTypeC(args, request) == false) return false;
+		}
+		return this->async(service, method, forward, timeout, request, [callback](MSStringView response)
+		{
+			typename TTraits<F>::argument_datas result;
+			if constexpr (TTraits<F>::argument_count) MSTypeC(response, std::get<0>(result));
+			std::apply(callback, result);
+		});
+	}
+
+	template<class F, class...Args>
 	bool async(MSStringView service, MSStringView method, MSStringView forward, uint32_t timeout, MSTuple<Args...>&& args, F&& callback)
 	{
 		MSString request;
@@ -112,11 +128,12 @@ public:
 	template<class T, class...Args>
 	MSAsync<T> async(MSStringView service, MSStringView method, MSStringView forward, uint32_t timeout, MSTuple<Args...>&& args)
 	{
+		auto _service = MSHash(service), _method = MSHash(method), _forward = MSHash(forward);
 		if constexpr (std::is_void_v<T>)
 		{
 			co_return co_await [=, this, argv = std::move(args)](MSAwait<void> const& promise) mutable
 			{
-				this->async(service, method, forward, timeout, std::forward<MSTuple<Args...>>(argv), [promise]()
+				this->async(_service, _method, _forward, timeout, std::forward<MSTuple<Args...>>(argv), [promise]()
 				{
 					promise();
 				});
@@ -126,7 +143,7 @@ public:
 		{
 			co_return co_await [=, this, argv = std::move(args)](MSAwait<T> const& promise) mutable
 			{
-				this->async(service, method, forward, timeout, std::forward<MSTuple<Args...>>(argv), [promise](T result)
+				this->async(_service, _method, _forward, timeout, std::forward<MSTuple<Args...>>(argv), [promise](T result)
 				{
 					promise(result);
 				});

@@ -40,6 +40,6 @@ private:
 	MSRaw<IMailHub> m_Context = nullptr;
 	MSMutex m_MailLock;
 	MSAtomic<uint32_t> m_Session;
-	struct mail_t { MSList<uint8_t> Mail; IMailTask Task; };
+	struct mail_t { MSList<uint8_t> Data; IMail Mail; IMailTask Task;};
 	MSDeque<mail_t> m_MailQueue;
 };

@@ -21,7 +21,7 @@ Timer::Timer()
 	MSPromise<void> promise;
 	auto future = promise.get_future();
 
-	m_Thread = MSThread([=, &promise]()
+	m_Thread = MSThread([=, this, &promise]()
 	{
 		uv_loop_t loop;
 		uv_async_t asyncExit, asyncStart, asyncStop;

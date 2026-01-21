@@ -30,6 +30,4 @@ struct IMail
 	uint32_t Type;
 	// 消息体
 	MSStringView Body;
-
-	OPENMS_TYPE(IMail, From, To, Copy, Date, Type);
 };

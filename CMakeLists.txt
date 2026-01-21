@@ -12,6 +12,10 @@ include_directories(${OPENMS_SOURCE_DIR})
 add_subdirectory(${OPENMS_SOURCE_DIR}/OpenMS)
 add_subdirectory(${OPENMS_SOURCE_DIR}/External/iocpp)
 
+if(OPENMS_ENABLE_SPDLOG)
+add_definitions(-DOPENMS_ENABLE_SPDLOG)
+endif()
+
 if(OPENMS_ENABLE_SAMPLE)
 add_subdirectory(${OPENMS_SOURCE_DIR}/Sample)
 endif()
@@ -21,7 +25,7 @@ add_subdirectory(${OPENMS_SOURCE_DIR}/Service/Discovery)
 endif()
 
 if(OPENMS_ENABLE_DAEMON)
-    add_subdirectory(${OPENMS_SOURCE_DIR}/Service/Daemon)
+add_subdirectory(${OPENMS_SOURCE_DIR}/Service/Daemon)
 endif()
 
 if(OPENMS_ENABLE_GATEWAY)
@@ -45,7 +49,7 @@ add_subdirectory(${OPENMS_SOURCE_DIR}/Service/Backend)
 endif()
 
 if(OPENMS_ENABLE_STORAGE)
-    add_subdirectory(${OPENMS_SOURCE_DIR}/Service/Storage)
+add_subdirectory(${OPENMS_SOURCE_DIR}/Service/Storage)
 endif()
 
 if(OPENMS_ENABLE_FRONTEND)

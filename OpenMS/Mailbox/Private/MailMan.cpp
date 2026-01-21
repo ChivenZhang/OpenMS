@@ -48,6 +48,8 @@ MailMan::MailMan(MSRaw<MailHub> context)
 					if (mailbox->m_MailQueue.empty()) continue;
 					mail = std::move(mailbox->m_MailQueue.front());
 					mailbox->m_MailQueue.pop_front();
+
+					MS_INFO("pop %u=>%u via %u #%u", mail.Mail.From, mail.Mail.To, mail.Mail.Copy, mail.Mail.Date);
 				}
 
 				// Resume mail task
@@ -85,6 +87,7 @@ MailMan::MailMan(MSRaw<MailHub> context)
 						{
 							MSPrintError(ex);
 						}
+						MS_INFO("done %u=>%u via %u #%u", mail.Mail.From, mail.Mail.To, mail.Mail.Copy, mail.Mail.Date);
 					}
 					else
 					{

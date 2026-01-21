@@ -33,14 +33,19 @@ MailHub::~MailHub()
 bool MailHub::create(MSString address, MSRef<IMailBox> value)
 {
 	MSMutexLock lock(m_MailboxLock);
-	auto result = m_MailboxMap.emplace(MSHash(address), nullptr);
-	if (result.second == false) return false;
 	auto mailbox = MSCast<MailBox>(value);
 	if (mailbox == nullptr) return false;
+	mailbox->m_TextName = address;
+	mailbox->m_HashName = MSHash(address);
+	MS_INFO("create mailbox %s, %u", address.c_str(), MSHash(address));
+	auto result = m_MailboxMap.emplace(mailbox->m_HashName, nullptr);
+	if (result.second == false)
+	{
+		MS_ERROR("repeated create %s, %u", mailbox->name().c_str(), mailbox->hash());
+		return false;
+	}
 	result.first->second = mailbox;
 	mailbox->m_Context = this;
-	mailbox->m_HashName = MSHash(address);
-	mailbox->m_TextName = address;
 	if (m_OnChange) m_OnChange(address);
 	return true;
 }
@@ -48,6 +53,7 @@ bool MailHub::create(MSString address, MSRef<IMailBox> value)
 bool MailHub::cancel(MSString address)
 {
 	MSMutexLock lock(m_MailboxLock);
+	MS_INFO("delete mailbox %s, %u", address.c_str(), MSHash(address));
 	auto result = m_MailboxMap.erase(MSHash(address));
 	if (result && m_OnChange) m_OnChange(address);
 	return result;
@@ -76,28 +82,19 @@ uint32_t MailHub::send(IMail mail)
 		toMailbox = result->second;
 	}
 	{
-		bool isIdle = false;
-		{
-			MSMutexLock mailLock(toMailbox->m_MailLock);
-			isIdle = toMailbox->m_MailQueue.empty();
-			MSList<uint8_t> mailData(sizeof(MailView) + mail.Body.size(), 0);
-			auto& mailView = *(MailView*)mailData.data();
-			mailView.From = mail.From;
-			mailView.To = mail.To;
-			mailView.Copy = mail.Copy;
-			mailView.Date = mail.Date;
-			mailView.Type = mail.Type;
-			if (mail.Body.empty() == false) ::memcpy(mailView.Body, mail.Body.data(), mail.Body.size());
+		MSMutexLock mailLock(toMailbox->m_MailLock);
+		auto isIdle = toMailbox->m_MailQueue.empty();
+		auto& newMail = toMailbox->m_MailQueue.emplace_back();
+		newMail.Data.assign((uint8_t*)mail.Body.data(), (uint8_t*)mail.Body.data() + mail.Body.size());
+		newMail.Mail.From = mail.From;
+		newMail.Mail.To = mail.To;
+		newMail.Mail.Copy = mail.Copy;
+		newMail.Mail.Date = mail.Date;
+		newMail.Mail.Type = mail.Type;
+		newMail.Mail.Body = MSStringView((char*)newMail.Data.data(), newMail.Data.size());
+		newMail.Task = toMailbox->read(newMail.Mail);
+		MS_INFO("push %u=>%u via %u #%u", mail.From, mail.To, mail.Copy, mail.Date);
 
-			IMail newMail = {};
-			newMail.From = mailView.From;
-			newMail.To = mailView.To;
-			newMail.Copy = mailView.Copy;
-			newMail.Date = mailView.Date;
-			newMail.Type = mailView.Type;
-			newMail.Body = MSStringView(mailView.Body, mail.Body.size());
-			toMailbox->m_MailQueue.push_back({ .Mail = std::move(mailData), .Task = toMailbox->read(newMail), });
-		}
 		if (isIdle)
 		{
 			MSMutexLock mailboxLock(m_MailTaskLock);
