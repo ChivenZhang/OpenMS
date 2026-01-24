@@ -8,13 +8,13 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY  ${CMAKE_BINARY_DIR})
 set(OPENMS_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
-include_directories(${OPENMS_SOURCE_DIR})
-add_subdirectory(${OPENMS_SOURCE_DIR}/OpenMS)
-add_subdirectory(${OPENMS_SOURCE_DIR}/External/iocpp)
-
 if(OPENMS_ENABLE_SPDLOG)
 add_definitions(-DOPENMS_ENABLE_SPDLOG)
 endif()
+
+include_directories(${OPENMS_SOURCE_DIR})
+add_subdirectory(${OPENMS_SOURCE_DIR}/OpenMS)
+add_subdirectory(${OPENMS_SOURCE_DIR}/External/iocpp)
 
 if(OPENMS_ENABLE_SAMPLE)
 add_subdirectory(${OPENMS_SOURCE_DIR}/Sample)

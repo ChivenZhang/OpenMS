@@ -1,6 +1,4 @@
-﻿#include "Service.h"
-#include "Service.h"
-/*=================================================
+﻿/*=================================================
 * Copyright © 2020-2025 ChivenZhang.
 * All Rights Reserved.
 * =====================Note=========================
@@ -45,7 +43,7 @@ bool Service::call(uint32_t service, uint32_t method, uint32_t forward, uint32_t
 	mail.Body = input;
 	mail.Date = ++m_SessionID;
 	mail.Type = OPENMS_MAIL_TYPE_REQUEST;
-	if (forward != MSHash(nullptr)) mail.Type |= OPENMS_MAIL_TYPE_FORWARD;
+	if (forward != MSHash(nullptr)) mail.Type |= OPENMS_MAIL_TYPE_DOMAIN;
 
 	MSPromise<MSString> promise;
 	auto future = promise.get_future();
@@ -86,9 +84,9 @@ bool Service::async(uint32_t service, uint32_t method, uint32_t forward, uint32_
 	mail.Body = input;
 	mail.Date = ++m_SessionID;
 	mail.Type = OPENMS_MAIL_TYPE_REQUEST;
-	if (forward != MSHash(nullptr)) mail.Type |= OPENMS_MAIL_TYPE_FORWARD;
+	if (forward != MSHash(nullptr)) mail.Type |= OPENMS_MAIL_TYPE_DOMAIN;
 
-	MS_INFO("async %u=>%u via %u #%u", mail.From, mail.To, mail.Copy, mail.Date);
+	MS_INFO("async %u=>%u via %u #%u @%u", mail.From, mail.To, mail.Copy, mail.Date, mail.Type);
 
 	{
 		MSMutexLock lock(m_LockSession);
@@ -117,11 +115,11 @@ bool Service::async(uint32_t service, uint32_t method, uint32_t forward, uint32_
 	return true;
 }
 
-MSAsync<MSString> Service::async(uint32_t service, uint32_t method, uint32_t forward, uint32_t timeout, MSStringView request)
+MSAsync<MSString> Service::async(uint32_t service, uint32_t method, uint32_t domain, uint32_t timeout, MSStringView request)
 {
 	co_return co_await [&](MSAwait<MSString> const& promise)
 	{
-		this->async(service, method, forward, timeout, request, [promise](MSStringView result)
+		this->async(service, method, domain, timeout, request, [promise](MSStringView result)
 		{
 			promise(MSString(result));
 		});
@@ -138,21 +136,21 @@ bool Service::bind(MSStringView method, method_t && callback)
 	return bind(MSHash(method), std::move(callback));
 }
 
-bool Service::call(MSStringView service, MSStringView method, MSStringView forward, uint32_t timeout, MSStringView request, MSString& response)
+bool Service::call(MSStringView service, MSStringView method, MSStringView domain, uint32_t timeout, MSStringView request, MSString& response)
 {
-	return call(MSHash(service), MSHash(method), MSHash(forward), timeout, request, response);
+	return call(MSHash(service), MSHash(method), MSHash(domain), timeout, request, response);
 }
 
-bool Service::async(MSStringView service, MSStringView method, MSStringView forward, uint32_t timeout, MSStringView request, MSLambda<void(MSStringView)>&& callback)
+bool Service::async(MSStringView service, MSStringView method, MSStringView domain, uint32_t timeout, MSStringView request, MSLambda<void(MSStringView)>&& callback)
 {
-	return async(MSHash(service), MSHash(method), MSHash(forward), timeout, request, std::move(callback));
+	return async(MSHash(service), MSHash(method), MSHash(domain), timeout, request, std::move(callback));
 }
 
-MSAsync<MSString> Service::async(MSStringView service, MSStringView method, MSStringView forward, uint32_t timeout, MSStringView request)
+MSAsync<MSString> Service::async(MSStringView service, MSStringView method, MSStringView domain, uint32_t timeout, MSStringView request)
 {
 	co_return co_await [&](MSAwait<MSString> const& promise)
 	{
-		this->async(service, method, forward, timeout, request, [promise](MSStringView result)
+		this->async(service, method, domain, timeout, request, [promise](MSStringView result)
 		{
 			promise(MSString(result));
 		});
@@ -161,9 +159,9 @@ MSAsync<MSString> Service::async(MSStringView service, MSStringView method, MSSt
 
 IMailTask Service::read(IMail mail)
 {
-	if (mail.Type & OPENMS_MAIL_TYPE_FORWARD)
+	if (mail.Type & OPENMS_MAIL_TYPE_DOMAIN)
 	{
-		mail.Type &= ~OPENMS_MAIL_TYPE_FORWARD;
+		mail.Type &= ~OPENMS_MAIL_TYPE_DOMAIN;
 		send(mail);
 	}
 	else if (mail.Type & OPENMS_MAIL_TYPE_REQUEST)
@@ -186,7 +184,7 @@ IMailTask Service::read(IMail mail)
 				mail.Type &= ~OPENMS_MAIL_TYPE_REQUEST;
 				mail.Type |= OPENMS_MAIL_TYPE_RESPONSE;
 				mail.Body = response;
-				if (mail.Copy != MSHash(nullptr)) mail.Type |= OPENMS_MAIL_TYPE_FORWARD;
+				if (mail.Copy != MSHash(nullptr)) mail.Type |= OPENMS_MAIL_TYPE_DOMAIN;
 				send(mail);
 			}
 		}

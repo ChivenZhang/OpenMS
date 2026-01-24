@@ -16,7 +16,7 @@
 class MailHub : public IMailHub
 {
 public:
-	explicit MailHub(uint32_t overload = MSThread::hardware_concurrency());
+	explicit MailHub(uint32_t overload = 1);
 	~MailHub() override;
 	using IMailHub::create;
 	bool create(MSString address, MSRef<IMailBox> value) override;
@@ -26,6 +26,7 @@ public:
 	void list(MSList<uint32_t>& result) override;
 	bool failed(MSLambda<bool(IMail mail)> callback) override;
 	bool change(MSLambda<void(MSString address)> callback) override;
+	void balance(MSDeque<MSRef<IMailBox>>& result) const;
 
 protected:
 	friend class MailMan;
@@ -35,11 +36,6 @@ protected:
 	MSLambda<void(MSString address)> m_OnChange;
 
 	MSMutex m_MailboxLock;
-	MSAtomic<uint32_t> m_MailSession;
-	MSList<MSRef<MailMan>> m_MailDelivers;
+	MSList<MSRef<MailMan>> m_MailWorkers;
 	MSMap<uint32_t, MSRef<MailBox>> m_MailboxMap;
-
-	MSMutex m_MailTaskLock;
-	MSMutexUnlock m_MailTaskUnlock;
-	MSQueue<MSRef<IMailBox>> m_MailTaskQueue;
 };

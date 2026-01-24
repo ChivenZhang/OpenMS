@@ -48,7 +48,6 @@ void BackendServer::onInit()
 	this->startTimer(10000, 0, [this, self = spaceService.get()](uint32_t handle)
 	{
 		self->call<void>(self->name(), "endPlay", "", 5000, MSTuple{});
-		this->shutdown();
 	});
 }
 

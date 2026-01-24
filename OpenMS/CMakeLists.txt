@@ -141,9 +141,8 @@ add_library(OpenMS STATIC
 )
 
 if(OPENMS_ENABLE_SPDLOG)
-add_definitions(-DOPENMS_ENABLE_SPDLOG)
 find_package(spdlog CONFIG REQUIRED)
-target_link_libraries(OpenMS PUBLIC spdlog::spdlog)
+target_link_libraries(OpenMS PRIVATE spdlog::spdlog_header_only)
 endif()
 
 if(OPENMS_ENABLE_MYSQL)

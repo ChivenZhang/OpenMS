@@ -78,14 +78,16 @@ void FrontendClient::onInit()
 						if (sizeof(MailView) <= event->Message.size())
 						{
 							auto& mailView = *(MailView*)event->Message.data();
-							IMail newMail = {};
-							newMail.From = mailView.From;
-							newMail.To = mailView.To;
-							newMail.Copy = mailView.Copy;
-							newMail.Date = mailView.Date;
-							newMail.Type = mailView.Type;
-							newMail.Body = MSStringView(mailView.Body, event->Message.size() - sizeof(MailView));
-							mailHub->send(newMail);
+							IMail mail = {};
+							mail.From = mailView.From;
+							mail.To = mailView.To;
+							mail.Copy = mailView.Copy;
+							mail.Date = mailView.Date;
+							mail.Type = mailView.Type;
+							mail.Body = MSStringView(mailView.Body, event->Message.size() - sizeof(MailView));
+
+							MS_INFO("gate %u=>%u via %u #%u @%u", mail.From, mail.To, mail.Copy, mail.Date, mail.Type);
+							mailHub->send(mail);
 						}
 						return false;
 					},
@@ -103,25 +105,32 @@ void FrontendClient::onInit()
 					},
 				});
 
-				MS_INFO("尝试注册...");
-				clientService->callGuest("signup", 5000, MSTuple{"openms", "123456"}, [=](bool result)
+				clientService->async("guest", "guest", "", 5000, MSTuple{}, [=](uint32_t guestID)
 				{
-					MS_INFO("注册结果：%d", result);
+					if (guestID == 0) return;
+					auto guestName = "guest:" + std::to_string(guestID);
 
-					MS_INFO("尝试登录...");
-					clientService->callGuest("login", 5000, MSTuple{"openms", "123456"}, [=](uint32_t userID)
+					MS_INFO("尝试注册...");
+
+					clientService->async(guestName, "signup", "", 5000, MSTuple{"openms", "123456"}, [=](bool result)
 					{
-						MS_INFO("登录结果：%u", userID);
-						if (userID == 0) return;
-						channel->getContext()->userdata() = userID;
+						MS_INFO("注册结果：%d", result);
 
-						auto playerService = MSNew<PlayerService>(userID);
-						mailHub->create("client:" + std::to_string(userID), playerService);
-
-						MS_INFO("尝试匹配...");	auto gameID = 0;
-						playerService->callServer("matchBattle", 5000, MSTuple{ gameID }, [=](bool result)
+						MS_INFO("尝试登录...");
+						clientService->async(guestName, "login", "", 5000, MSTuple{"openms", "123456"}, [=](uint32_t userID)
 						{
-							MS_INFO("开局匹配：%d", result);
+							MS_INFO("登录结果：%u", userID);
+							if (userID == 0) return;
+							channel->getContext()->userdata() = userID;
+
+							auto playerService = MSNew<PlayerService>(userID);
+							mailHub->create("client:" + std::to_string(userID), playerService);
+
+							MS_INFO("尝试匹配...");	auto gameID = 0;
+							playerService->callServer("matchBattle", 5000, MSTuple{ gameID }, [=](bool result)
+							{
+								MS_INFO("开局匹配：%d", result);
+							});
 						});
 					});
 				});

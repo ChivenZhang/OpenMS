@@ -19,8 +19,10 @@ public:
 	template <class T, OPENMS_BASE_OF(IServer, T)>
 	static int Run(int argc, char* argv[])
 	{
-		printf(OPENMS_LOGO);
-		spdlog::set_pattern("%@\n%Y-%m-%d %H:%M:%S.%e %L %t --- %^%v%$");
+		std::printf(OPENMS_LOGO);
+#ifdef OPENMS_ENABLE_SPDLOG
+		spdlog::set_pattern("%@:%!()\n%Y-%m-%d %H:%M:%S.%e %L [%t] --- %^%v%$");
+#endif
 		for (auto i = 0; i < argc; i++) MS_INFO("argv[%d]: %s", i, argv[i]);
 		IStartup::Argc = argc;
 		IStartup::Argv = argv;

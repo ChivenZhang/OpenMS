@@ -178,7 +178,7 @@ void TCPClientReactor::startup()
 			MSLambda<void()> timer_func;
 			timer_func = [&]()
 			{
-				timer.expires_after(std::chrono::milliseconds(1000));
+				timer.expires_after(std::chrono::milliseconds(500));
 				timer.async_wait([&](asio::error_code)
 				{
 					if (m_Running == false) loop.stop();

@@ -18,8 +18,15 @@ class MailMan
 public:
 	explicit MailMan(MSRaw<MailHub> context);
 	~MailMan();
+	void enqueue(MSRef<IMailBox> mailBox);
+	size_t countTask() const;
+	void balance(MSDeque<MSRef<IMailBox>>& result);
 
 protected:
 	MSThread m_MailThread;
 	MSRaw<MailHub> m_Context;
+	MSMutex m_TaskLock;
+	MSMutexUnlock m_TaskUnlock;
+	MSAtomic<uint32_t> m_TaskCount;
+	MSDeque<MSRef<IMailBox>> m_TaskQueue;
 };

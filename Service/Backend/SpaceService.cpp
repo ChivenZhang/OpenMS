@@ -9,7 +9,10 @@
 *
 * =================================================*/
 #include "SpaceService.h"
+
+#include "iocpp.h"
 #include "PlayerService.h"
+#include "Server/IServer.h"
 
 SpaceService::SpaceService(uint32_t spaceID, uint32_t gameID)
 	:
@@ -55,6 +58,7 @@ SpaceService::SpaceService(uint32_t spaceID, uint32_t gameID)
 			auto userID = user.second.UserID;
 			co_await this->async<void>("player:" + std::to_string(userID), "stopBattle", "", 0, MSTuple{});
 		}
+		AUTOWIRE_DATA(IServer)->shutdown();
 		co_return;
 	});
 	this->bind("keepAlive", [=](uint32_t userID)->MSAsync<void>

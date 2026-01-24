@@ -22,93 +22,80 @@ MailMan::MailMan(MSRaw<MailHub> context)
 	{
 		while (m_Context->m_Running)
 		{
-			// Get mailbox from task queue
+			// Pop mailbox from task queue
 
-			MSRef<IMailBox> element;
+			MSRef<MailBox> mailbox;
 			{
-				MSUniqueLock mailboxLock(m_Context->m_MailTaskLock);
-				m_Context->m_MailTaskUnlock.wait(mailboxLock, [this]()
+				MSUniqueLock mailboxLock(m_TaskLock);
+				while (m_Context->m_Running && m_TaskQueue.empty())
 				{
-					return m_Context->m_Running == false || m_Context->m_MailTaskQueue.empty() == false;
-				});
+					m_Context->balance(m_TaskQueue);
+					if (m_TaskQueue.size()) MS_INFO("steal %u", (uint32_t)m_TaskQueue.size());
+					if (m_TaskQueue.empty() == false) break;
+					m_TaskUnlock.wait(mailboxLock);
+				}
 				if (m_Context->m_Running == false) break;
-				element = m_Context->m_MailTaskQueue.front();
-				m_Context->m_MailTaskQueue.pop();
+				mailbox = MSCast<MailBox>(m_TaskQueue.front());
+				m_TaskQueue.pop_front();
+				if (mailbox == nullptr) continue;
 			}
 
-			// Process mailbox mail
+			// Pop mail from mailbox
 
-			if (auto mailbox = MSCast<MailBox>(element))
+			MailBox::mail_t mail;
 			{
-				// Dequeue mail from mailbox
+				MSMutexLock mailLock(mailbox->m_MailLock);
+				if (mailbox->m_MailQueue.empty()) continue;
+				mail = std::move(mailbox->m_MailQueue.front());
+				mailbox->m_MailQueue.pop_front();
 
-				MailBox::mail_t mail;
+				// MS_INFO("pop %u=>%u via %u #%u", mail.Mail.From, mail.Mail.To, mail.Mail.Copy, mail.Mail.Date);
+			}
+
+			// Resume mail task
+
+			if (mail.Task && mail.Task.done() == false)
+			{
+				switch (mail.Task.state())
 				{
-					MSMutexLock mailLock(mailbox->m_MailLock);
-					if (mailbox->m_MailQueue.empty()) continue;
-					mail = std::move(mailbox->m_MailQueue.front());
-					mailbox->m_MailQueue.pop_front();
-
-					MS_INFO("pop %u=>%u via %u #%u", mail.Mail.From, mail.Mail.To, mail.Mail.Copy, mail.Mail.Date);
+				case MSAsyncState::NONE: mail.Task.resume(); break;
+				case MSAsyncState::YIELD: mail.Task.resume(); break;
+				default: break;
 				}
+			}
 
-				// Resume mail task
-
-				if (mail.Task && mail.Task.done() == false)
+			if (mail.Task)
+			{
+				if (mail.Task.done())
 				{
+					// Handle completed mail task
+
+					try
+					{
+						mail.Task.value();
+					}
+					catch(MSError& ex)
+					{
+						MSPrintError(ex);
+					}
+					MS_INFO("done %u=>%u via %u #%u @%u", mail.Mail.From, mail.Mail.To, mail.Mail.Copy, mail.Mail.Date, mail.Mail.Type);
+				}
+				else
+				{
+					// Re-enqueue pending mail task
+
+					MSMutexLock mailLock(mailbox->m_MailLock);
 					switch (mail.Task.state())
 					{
-					case MSAsyncState::NONE:
-						{
-							mail.Task.resume();
-						} break;
-					case MSAsyncState::YIELD:
-						{
-							mail.Task.resume();
-
-							MSMutexLock mailLock(mailbox->m_MailLock);
-							mailbox->m_MailQueue.push_front(std::move(mail));
-						} break;
-					default: break;
+					case MSAsyncState::AWAIT: mailbox->m_MailQueue.push_back(std::move(mail)); break;
+					case MSAsyncState::YIELD: mailbox->m_MailQueue.push_front(std::move(mail)); break;
+					default: MS_INFO("state %u", (uint32_t)mail.Task.state()); break;
 					}
-				}
-
-				if (mail.Task)
-				{
-					if (mail.Task.done())
+					if (mailbox->m_MailQueue.size() == 1)
 					{
-						// Handle completed mail task
-
-						try
-						{
-							mail.Task.value();
-						}
-						catch(MSError& ex)
-						{
-							MSPrintError(ex);
-						}
-						MS_INFO("done %u=>%u via %u #%u", mail.Mail.From, mail.Mail.To, mail.Mail.Copy, mail.Mail.Date);
+						MSMutexLock mailboxLock(m_TaskLock);
+						m_TaskQueue.push_back(mailbox);
 					}
-					else
-					{
-						// Re-enqueue pending mail task
-
-						MSMutexLock mailLock(mailbox->m_MailLock);
-						mailbox->m_MailQueue.push_back(std::move(mail));
-					}
-				}
-
-				// Re-enqueue mailbox if it still has mails
-
-				auto isEmpty = false;
-				{
-					MSMutexLock mailLock(mailbox->m_MailLock);
-					isEmpty = mailbox->m_MailQueue.empty();
-				}
-				if (isEmpty == false)
-				{
-					MSMutexLock mailboxLock(m_Context->m_MailTaskLock);
-					m_Context->m_MailTaskQueue.push(mailbox);
 				}
 			}
 		}
@@ -117,6 +104,32 @@ MailMan::MailMan(MSRaw<MailHub> context)
 
 MailMan::~MailMan()
 {
+	m_TaskUnlock.notify_one();
 	if (m_MailThread.joinable()) m_MailThread.join();
 	m_Context = nullptr;
+}
+
+void MailMan::enqueue(MSRef<IMailBox> mailBox)
+{
+	MSMutexLock lock(m_TaskLock);
+	m_TaskQueue.push_back(mailBox);
+	m_TaskUnlock.notify_one();
+}
+
+size_t MailMan::countTask() const
+{
+	return m_TaskCount;
+}
+
+void MailMan::balance(MSDeque<MSRef<IMailBox>>& result)
+{
+	if (m_TaskCount == 0) return;
+	MSMutexLock lock(m_TaskLock);
+	size_t half = m_TaskQueue.size() >> 1;
+	for (size_t i=0; i<half; ++i)
+	{
+		result.push_back(m_TaskQueue.back());
+		m_TaskQueue.pop_back();
+		m_TaskCount -= 1;
+	}
 }

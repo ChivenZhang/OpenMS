@@ -18,6 +18,51 @@ GuestService::GuestService(MSHnd<IChannel> client, uint32_t guestID)
 	m_GuestID(guestID),
 	m_ClientChannel(client)
 {
+	this->bind("login", [=, this](MSString username, MSString password)-> MSAsync<uint32_t>
+	{
+		MS_INFO("登录请求： %s", username.c_str());
+
+		auto channel = m_ClientChannel.lock();
+		if (channel == nullptr) co_return 0U;
+		if (auto userID = channel->getContext()->userdata()) co_return userID;
+		auto userID = co_await this->async<uint32_t>("logic", "login", "", 1000, MSTuple{username, password});
+		if (userID)
+		{
+			auto proxyService = MSNew<ProxyService>(channel, userID);
+			this->create("proxy:" + std::to_string(userID), proxyService);
+			channel->getContext()->userdata() = userID;
+			MS_INFO("验证成功！ %s", username.c_str());
+		}
+		else
+		{
+			MS_INFO("验证失败！ %s", username.c_str());
+		}
+
+		co_await this->async<void>("client", "onLogin", this->name(), 0, MSTuple{userID});
+		co_return userID;
+	});
+	this->bind("logout", [=, this]()-> MSAsync<bool>
+	{
+		MS_INFO("注销请求");
+
+		auto channel = m_ClientChannel.lock();
+		if (channel == nullptr) co_return false;
+		auto userID = channel->getContext()->userdata();
+		if (userID == 0) co_return false;
+		auto result = co_await this->async<bool>("logic", "logout", "", 1000, MSTuple{userID});
+
+		co_await this->async<void>("client", "onLogout", this->name(), 0, MSTuple{result});
+		co_return result;
+	});
+	this->bind("signup", [=, this](MSString username, MSString password)-> MSAsync<bool>
+	{
+		MS_INFO("注册请求： %s", username.c_str());
+
+		auto userID = co_await this->async<uint32_t>("logic", "signup", "", 1000, MSTuple{username, password});
+
+		co_await this->async<void>("client", "onSignup", this->name(), 0, MSTuple{userID});
+		co_return userID;
+	});
 }
 
 IMailTask GuestService::read(IMail mail)

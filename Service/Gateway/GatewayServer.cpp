@@ -38,50 +38,12 @@ void GatewayServer::onInit()
 			.OnOpen = [=, this](MSRef<IChannel> channel)
 			{
 				channel->getContext()->userdata() = 0;
-				auto guestID = m_ClientCount.fetch_add(1) + 1;
+				const auto guestID = m_GuestID.fetch_add(1) + 1;
 				channel->getContext()->attribs()["guestID"] = guestID;
 
 				// Create Guest Service
 
 				auto guestService = MSNew<GuestService>(channel, guestID);
-				guestService->bind("login", [=, self = guestService.get()](MSString username, MSString password)-> MSAsync<uint32_t>
-				{
-					if (auto userID = channel->getContext()->userdata()) co_return userID;
-
-					auto userID = co_await self->async<uint32_t>("logic", "login", "", 1000, MSTuple{username, password});
-					if (userID)
-					{
-						auto serviceName = "proxy:" + std::to_string(userID);
-						auto proxyService = MSNew<ProxyService>(channel, userID);
-						mailHub->create(serviceName, proxyService);
-						channel->getContext()->userdata() = userID;
-						MS_INFO("验证成功！ %s", username.c_str());
-					}
-					else
-					{
-						MS_INFO("验证失败！ %s", username.c_str());
-					}
-
-					co_await self->async<void>("client", "onLogin", self->name(), 0, MSTuple{userID});
-					co_return userID;
-				});
-				guestService->bind("logout", [=, self = guestService.get()]()-> MSAsync<bool>
-				{
-					auto userID = channel->getContext()->userdata();
-					if (userID == 0) co_return false;
-					auto result = co_await self->async<bool>("logic", "logout", "", 1000, MSTuple{userID});
-
-					co_await self->async<void>("client", "onLogout", self->name(), 0, MSTuple{result});
-					co_return result;
-				});
-				guestService->bind("signup", [=, self = guestService.get()](MSString username, MSString password)-> MSAsync<bool>
-				{
-					auto userID = co_await self->async<uint32_t>("logic", "signup", "", 1000, MSTuple{username, password});
-
-					co_await self->async<void>("client", "onSignup", self->name(), 0, MSTuple{userID});
-					co_return userID;
-				});
-
 				mailHub->create("guest:" + std::to_string(guestID), guestService);
 
 				// Create Client Channel
@@ -92,36 +54,55 @@ void GatewayServer::onInit()
 				}));
 				channel->getPipeline()->addLast("input", IChannelPipeline::handler_in
 				{
-					.OnHandle = [=](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)->bool
+					.OnHandle = [=, guestHash = MSHash("guest:" + std::to_string(guestID))](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)->bool
 					{
-						// TODO: 检查接口访问权限
 						if (event->Message.size() < sizeof(MailView)) return false;
 						auto& mailView = *(MailView*)event->Message.data();
 						if (mailView.To == MSHash("guest"))
 						{
-							IMail newMail = {};
-							newMail.From = mailView.From;
-							newMail.To = MSHash("guest:" + std::to_string(guestID));
-							newMail.Copy = MSHash(nullptr);
-							newMail.Date = mailView.Date;
-							newMail.Type = mailView.Type | OPENMS_MAIL_TYPE_CLIENT;
-							newMail.Body = MSStringView(mailView.Body, event->Message.size() - sizeof(MailView));
-							mailHub->send(newMail);
+							auto body = std::to_string(guestID);
+							MSString buffer(sizeof(MailView) + body.size(), '?');
+							auto& mailView = *(MailView*)buffer.data();
+							mailView.From = mailView.From;
+							mailView.To = mailView.To;
+							mailView.Copy = mailView.Copy;
+							mailView.Date = mailView.Date;
+							mailView.Type = mailView.Type;
+							if (body.empty() == false) ::memcpy(mailView.Body, body.data(), body.size());
+							std::swap(mailView.From, mailView.To);
+							mailView.Type &= ~OPENMS_MAIL_TYPE_REQUEST;
+							mailView.Type |= OPENMS_MAIL_TYPE_RESPONSE;
+							channel->writeChannel(IChannelEvent::New(buffer));
+						}
+						else if (mailView.To == guestHash)
+						{
+							IMail mail = {};
+							mail.From = mailView.From;
+							mail.To = mailView.To;
+							mail.Copy = MSHash(nullptr);
+							mail.Date = mailView.Date;
+							mail.Type = mailView.Type | OPENMS_MAIL_TYPE_CLIENT;
+							mail.Body = MSStringView(mailView.Body, event->Message.size() - sizeof(MailView));
+
+							MS_INFO("client %u=>%u via %u #%u @%u", mail.From, mail.To, mail.Copy, mail.Date, mail.Type);
+							mailHub->send(mail);
 						}
 						else
 						{
 							auto userID = (uint32_t)channel->getContext()->userdata();
 							if (userID == 0) return false;
-							IMail newMail = {};
-							newMail.From = mailView.From;
-							newMail.To = mailView.To;
-							newMail.Copy = MSHash("proxy:" + std::to_string(userID));
-							newMail.Date = mailView.Date;
-							newMail.Type = mailView.Type | OPENMS_MAIL_TYPE_FORWARD;
-							newMail.Body = MSStringView(mailView.Body, event->Message.size() - sizeof(MailView));
-							if (newMail.Type & OPENMS_MAIL_TYPE_REQUEST) newMail.Type |= OPENMS_MAIL_TYPE_CLIENT;
-							if (newMail.Type & OPENMS_MAIL_TYPE_RESPONSE) newMail.Type &= ~OPENMS_MAIL_TYPE_CLIENT;
-							mailHub->send(newMail);
+							IMail mail = {};
+							mail.From = mailView.From;
+							mail.To = mailView.To;
+							mail.Copy = MSHash("proxy:" + std::to_string(userID));
+							mail.Date = mailView.Date;
+							mail.Type = mailView.Type | OPENMS_MAIL_TYPE_DOMAIN;
+							mail.Body = MSStringView(mailView.Body, event->Message.size() - sizeof(MailView));
+							if (mail.Type & OPENMS_MAIL_TYPE_REQUEST) mail.Type |= OPENMS_MAIL_TYPE_CLIENT;
+							if (mail.Type & OPENMS_MAIL_TYPE_RESPONSE) mail.Type &= ~OPENMS_MAIL_TYPE_CLIENT;
+
+							MS_INFO("client %u=>%u via %u #%u @%u", mail.From, mail.To, mail.Copy, mail.Date, mail.Type);
+							mailHub->send(mail);
 						}
 						return false;
 					},

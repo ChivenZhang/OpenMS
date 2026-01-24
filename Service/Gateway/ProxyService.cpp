@@ -21,12 +21,17 @@ ProxyService::ProxyService(MSHnd<IChannel> client, uint32_t userID)
 
 IMailTask ProxyService::read(IMail mail)
 {
-	if (mail.Type & OPENMS_MAIL_TYPE_FORWARD)
+	if (mail.Type & OPENMS_MAIL_TYPE_DOMAIN)
 	{
-		mail.Type &= ~OPENMS_MAIL_TYPE_FORWARD;
+		mail.Type &= ~OPENMS_MAIL_TYPE_DOMAIN;
 
 		if (mail.Type & OPENMS_MAIL_TYPE_CLIENT)
 		{
+			if (mail.From != MSHash("client:" + std::to_string(m_UserID)))
+			{
+				MS_WARN("p2p message from user %u", m_UserID);
+				co_return;
+			}
 			if (mail.Type & OPENMS_MAIL_TYPE_REQUEST)
 			{
 				send(mail);

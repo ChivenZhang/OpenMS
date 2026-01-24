@@ -29,13 +29,13 @@ public:
 	bool bind(uint32_t method, method_t&& callback);
 	bool call(uint32_t service, uint32_t method, uint32_t forward, uint32_t timeout, MSStringView request, MSString& response);
 	bool async(uint32_t service, uint32_t method, uint32_t forward, uint32_t timeout, MSStringView request, MSLambda<void(MSStringView)>&& callback);
-	MSAsync<MSString> async(uint32_t service, uint32_t method, uint32_t forward, uint32_t timeout, MSStringView request);
+	MSAsync<MSString> async(uint32_t service, uint32_t method, uint32_t domain, uint32_t timeout, MSStringView request);
 
 	bool unbind(MSStringView method);
 	bool bind(MSStringView method, method_t&& callback);
-	bool call(MSStringView service, MSStringView method, MSStringView forward, uint32_t timeout, MSStringView request, MSString& response);
-	bool async(MSStringView service, MSStringView method, MSStringView forward, uint32_t timeout, MSStringView request, MSLambda<void(MSStringView)>&& callback);
-	MSAsync<MSString> async(MSStringView service, MSStringView method, MSStringView forward, uint32_t timeout, MSStringView request);
+	bool call(MSStringView service, MSStringView method, MSStringView domain, uint32_t timeout, MSStringView request, MSString& response);
+	bool async(MSStringView service, MSStringView method, MSStringView domain, uint32_t timeout, MSStringView request, MSLambda<void(MSStringView)>&& callback);
+	MSAsync<MSString> async(MSStringView service, MSStringView method, MSStringView domain, uint32_t timeout, MSStringView request);
 
 	template<class F, std::enable_if_t<!std::is_same_v<typename TTraits<F>::return_data, TTraits<method_t>::return_data> || !std::is_same_v<typename TTraits<F>::argument_datas, TTraits<method_t>::argument_datas>, int> = 0>
 	bool bind(MSStringView method, F&& callback)
@@ -63,7 +63,7 @@ public:
 	}
 
 	template<class T, class...Args>
-	auto call(MSStringView service, MSStringView method, MSStringView forward, uint32_t timeout, MSTuple<Args...>&& args)
+	auto call(MSStringView service, MSStringView method, MSStringView domain, uint32_t timeout, MSTuple<Args...>&& args)
 	{
 		if constexpr (std::is_void_v<T>)
 		{
@@ -73,7 +73,7 @@ public:
 				if (MSTypeC(args, request) == false) return false;
 			}
 			MSString response;
-			return this->call(service, method, forward, timeout, request, response);
+			return this->call(service, method, domain, timeout, request, response);
 		}
 		else
 		{
@@ -83,7 +83,7 @@ public:
 				if (MSTypeC(args, request) == false) return MSBinary{T(), false};
 			}
 			MSString response;
-			if (this->call(service, method, forward, timeout, request, response) == false)
+			if (this->call(service, method, domain, timeout, request, response) == false)
 			{
 				return MSBinary{T(), false};
 			}
@@ -94,14 +94,14 @@ public:
 	}
 
 	template<class F, class...Args>
-	bool async(uint32_t service, uint32_t method, uint32_t forward, uint32_t timeout, MSTuple<Args...>&& args, F&& callback)
+	bool async(uint32_t service, uint32_t method, uint32_t domain, uint32_t timeout, MSTuple<Args...>&& args, F&& callback)
 	{
 		MSString request;
 		if constexpr (sizeof...(Args) != 0)
 		{
 			if (MSTypeC(args, request) == false) return false;
 		}
-		return this->async(service, method, forward, timeout, request, [callback](MSStringView response)
+		return this->async(service, method, domain, timeout, request, [callback](MSStringView response)
 		{
 			typename TTraits<F>::argument_datas result;
 			if constexpr (TTraits<F>::argument_count) MSTypeC(response, std::get<0>(result));
@@ -110,14 +110,14 @@ public:
 	}
 
 	template<class F, class...Args>
-	bool async(MSStringView service, MSStringView method, MSStringView forward, uint32_t timeout, MSTuple<Args...>&& args, F&& callback)
+	bool async(MSStringView service, MSStringView method, MSStringView domain, uint32_t timeout, MSTuple<Args...>&& args, F&& callback)
 	{
 		MSString request;
 		if constexpr (sizeof...(Args) != 0)
 		{
 			if (MSTypeC(args, request) == false) return false;
 		}
-		return this->async(service, method, forward, timeout, request, [callback](MSStringView response)
+		return this->async(service, method, domain, timeout, request, [callback](MSStringView response)
 		{
 			typename TTraits<F>::argument_datas result;
 			if constexpr (TTraits<F>::argument_count) MSTypeC(response, std::get<0>(result));
@@ -126,14 +126,14 @@ public:
 	}
 
 	template<class T, class...Args>
-	MSAsync<T> async(MSStringView service, MSStringView method, MSStringView forward, uint32_t timeout, MSTuple<Args...>&& args)
+	MSAsync<T> async(MSStringView service, MSStringView method, MSStringView domain, uint32_t timeout, MSTuple<Args...>&& args)
 	{
-		auto _service = MSHash(service), _method = MSHash(method), _forward = MSHash(forward);
 		if constexpr (std::is_void_v<T>)
 		{
-			co_return co_await [=, this, argv = std::move(args)](MSAwait<void> const& promise) mutable
+			auto _service = MSHash(service), _method = MSHash(method), _domain = MSHash(domain);
+			co_return co_await [=, this, argv = std::forward<MSTuple<Args...>>(args)](MSAwait<void> promise) mutable
 			{
-				this->async(_service, _method, _forward, timeout, std::forward<MSTuple<Args...>>(argv), [promise]()
+				this->async(_service, _method, _domain, timeout, std::forward<MSTuple<Args...>>(argv), [promise]()
 				{
 					promise();
 				});
@@ -141,9 +141,10 @@ public:
 		}
 		else
 		{
-			co_return co_await [=, this, argv = std::move(args)](MSAwait<T> const& promise) mutable
+			auto _service = MSHash(service), _method = MSHash(method), _domain = MSHash(domain);
+			co_return co_await [=, this, argv = std::forward<MSTuple<Args...>>(args)](MSAwait<T> promise) mutable
 			{
-				this->async(_service, _method, _forward, timeout, std::forward<MSTuple<Args...>>(argv), [promise](T result)
+				this->async(_service, _method, _domain, timeout, std::forward<MSTuple<Args...>>(argv), [promise](T result)
 				{
 					promise(result);
 				});
