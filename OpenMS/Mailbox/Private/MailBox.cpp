@@ -19,7 +19,7 @@ MailBox::~MailBox()
 		MSMutexLock mailLock(m_MailLock);
 		if (m_MailQueue.empty()) break;
 		auto& handle = m_MailQueue.front().Task;
-		if (handle && handle.done() == false) handle.destroy();
+		while (handle && handle.done() == false) std::this_thread::yield();
 		m_MailQueue.pop_front();
 	}
 	MS_INFO("deleted mailbox: %s", m_TextName.c_str());

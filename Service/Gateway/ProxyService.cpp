@@ -21,9 +21,9 @@ ProxyService::ProxyService(MSHnd<IChannel> client, uint32_t userID)
 
 IMailTask ProxyService::read(IMail mail)
 {
-	if (mail.Type & OPENMS_MAIL_TYPE_DOMAIN)
+	if (mail.Type & OPENMS_MAIL_TYPE_FORWARD)
 	{
-		mail.Type &= ~OPENMS_MAIL_TYPE_DOMAIN;
+		mail.Type &= ~OPENMS_MAIL_TYPE_FORWARD;
 
 		if (mail.Type & OPENMS_MAIL_TYPE_CLIENT)
 		{

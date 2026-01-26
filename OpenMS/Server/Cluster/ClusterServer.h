@@ -23,6 +23,7 @@ public:
 protected:
 	void onInit() override;
 	void onExit() override;
+	virtual bool onFail(IMail mail);
 
 protected:
 	uint32_t m_Heartbeat = 0;

@@ -33,7 +33,7 @@ void ClusterServer::onInit()
 		do
 		{
 			MSMutexLock lock(m_MailRouteLock);
-			auto toName = (mail.Type & OPENMS_MAIL_TYPE_DOMAIN) ? mail.Copy : mail.To;
+			auto toName = (mail.Type & OPENMS_MAIL_TYPE_FORWARD) ? mail.Copy : mail.To;
 			auto result = m_MailRouteMap.find(toName);
 			if (result == m_MailRouteMap.end()) break;
 			auto& routes = result->second;
@@ -42,7 +42,7 @@ void ClusterServer::onInit()
 		} while (false);
 		if (address.empty())
 		{
-			MS_ERROR("send %u=>%u via %u #%u t %u failed", mail.From, mail.To, mail.Copy, mail.Date, mail.Type);
+			this->onFail(mail);
 			return false;
 		}
 
@@ -174,4 +174,10 @@ void ClusterServer::onExit()
 	for (auto& client : m_MailClientMap) client.second->shutdown();
 	m_MailRouteMap.clear();
 	m_MailClientMap.clear();
+}
+
+bool ClusterServer::onFail(IMail mail)
+{
+	MS_ERROR("fail %u=>%u via %u #%u @%u", mail.From, mail.To, mail.Copy, mail.Date, mail.Type);
+	return false;
 }

@@ -54,7 +54,7 @@ void GatewayServer::onInit()
 				}));
 				channel->getPipeline()->addLast("input", IChannelPipeline::handler_in
 				{
-					.OnHandle = [=, guestHash = MSHash("guest:" + std::to_string(guestID))](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)->bool
+					.OnHandle = [=, guestName = MSHash("guest:" + std::to_string(guestID))](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)->bool
 					{
 						if (event->Message.size() < sizeof(MailView)) return false;
 						auto& mailView = *(MailView*)event->Message.data();
@@ -62,19 +62,19 @@ void GatewayServer::onInit()
 						{
 							auto body = std::to_string(guestID);
 							MSString buffer(sizeof(MailView) + body.size(), '?');
-							auto& mailView = *(MailView*)buffer.data();
-							mailView.From = mailView.From;
-							mailView.To = mailView.To;
-							mailView.Copy = mailView.Copy;
-							mailView.Date = mailView.Date;
-							mailView.Type = mailView.Type;
-							if (body.empty() == false) ::memcpy(mailView.Body, body.data(), body.size());
-							std::swap(mailView.From, mailView.To);
-							mailView.Type &= ~OPENMS_MAIL_TYPE_REQUEST;
-							mailView.Type |= OPENMS_MAIL_TYPE_RESPONSE;
+							auto& mail = *(MailView*)buffer.data();
+							mail.From = mailView.From;
+							mail.To = mailView.To;
+							mail.Copy = mailView.Copy;
+							mail.Date = mailView.Date;
+							mail.Type = mailView.Type;
+							if (body.empty() == false) ::memcpy(mail.Body, body.data(), body.size());
+							std::swap(mail.From, mail.To);
+							mail.Type &= ~OPENMS_MAIL_TYPE_REQUEST;
+							mail.Type |= OPENMS_MAIL_TYPE_RESPONSE;
 							channel->writeChannel(IChannelEvent::New(buffer));
 						}
-						else if (mailView.To == guestHash)
+						else if (mailView.To == guestName)
 						{
 							IMail mail = {};
 							mail.From = mailView.From;
@@ -96,7 +96,7 @@ void GatewayServer::onInit()
 							mail.To = mailView.To;
 							mail.Copy = MSHash("proxy:" + std::to_string(userID));
 							mail.Date = mailView.Date;
-							mail.Type = mailView.Type | OPENMS_MAIL_TYPE_DOMAIN;
+							mail.Type = mailView.Type | OPENMS_MAIL_TYPE_FORWARD;
 							mail.Body = MSStringView(mailView.Body, event->Message.size() - sizeof(MailView));
 							if (mail.Type & OPENMS_MAIL_TYPE_REQUEST) mail.Type |= OPENMS_MAIL_TYPE_CLIENT;
 							if (mail.Type & OPENMS_MAIL_TYPE_RESPONSE) mail.Type &= ~OPENMS_MAIL_TYPE_CLIENT;
@@ -157,4 +157,11 @@ void GatewayServer::onExit()
 	m_TCPServer = nullptr;
 
 	ClusterServer::onExit();
+}
+
+bool GatewayServer::onFail(IMail mail)
+{
+	// Try to send to other domain.
+
+	return false;
 }

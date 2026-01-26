@@ -19,6 +19,7 @@ public:
 protected:
 	void onInit() override;
 	void onExit() override;
+	bool onFail(IMail mail) override;
 
 protected:
 	uint32_t m_KeepAlive = 0;	// For reconnect

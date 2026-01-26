@@ -75,7 +75,7 @@ uint32_t MailHub::send(IMail mail)
 	MSRef<MailBox> toMailbox;
 	{
 		m_MailboxLock.lock();
-		auto toName = (mail.Type & OPENMS_MAIL_TYPE_DOMAIN) ? mail.Copy : mail.To;
+		auto toName = (mail.Type & OPENMS_MAIL_TYPE_FORWARD) ? mail.Copy : mail.To;
 		auto result = m_MailboxMap.find(toName);
 		if (result == m_MailboxMap.end() || result->second == nullptr)
 		{

@@ -43,7 +43,7 @@ void FrontendClient::onInit()
 			client->startup();
 		}
 		if (client == nullptr || client->connect() == false) return false;
-		MSString request(sizeof(MailView) + mail.Body.size(), 0);
+		MSString request(sizeof(MailView) + mail.Body.size(), '?');
 		auto& mailView = *(MailView*)request.data();
 		mailView.From = mail.From;
 		mailView.To = mail.To;
@@ -85,7 +85,7 @@ void FrontendClient::onInit()
 							mail.Date = mailView.Date;
 							mail.Type = mailView.Type;
 							mail.Body = MSStringView(mailView.Body, event->Message.size() - sizeof(MailView));
-
+							mail.Type &= ~OPENMS_MAIL_TYPE_FORWARD;
 							MS_INFO("gate %u=>%u via %u #%u @%u", mail.From, mail.To, mail.Copy, mail.Date, mail.Type);
 							mailHub->send(mail);
 						}
@@ -127,10 +127,7 @@ void FrontendClient::onInit()
 							mailHub->create("client:" + std::to_string(userID), playerService);
 
 							MS_INFO("尝试匹配...");	auto gameID = 0;
-							playerService->callServer("matchBattle", 5000, MSTuple{ gameID }, [=](bool result)
-							{
-								MS_INFO("开局匹配：%d", result);
-							});
+							playerService->callServer("matchBattle", 5000, MSTuple{ gameID }, [=]() {});
 						});
 					});
 				});

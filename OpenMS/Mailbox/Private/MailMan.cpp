@@ -20,6 +20,7 @@ MailMan::MailMan(MSRaw<MailHub> context)
 {
 	m_MailThread = MSThread([this]()
 	{
+		MS_INFO("mail worker started");
 		while (m_Context->m_Running)
 		{
 			// Pop mailbox from task queue
@@ -30,8 +31,8 @@ MailMan::MailMan(MSRaw<MailHub> context)
 				while (m_Context->m_Running && m_TaskQueue.empty())
 				{
 					m_Context->balance(m_TaskQueue);
-					if (m_TaskQueue.size()) MS_INFO("steal %u", (uint32_t)m_TaskQueue.size());
-					if (m_TaskQueue.empty() == false) break;
+					if (!m_TaskQueue.empty()) MS_INFO("steal %u", (uint32_t)m_TaskQueue.size());
+					if (!m_TaskQueue.empty()) break;
 					m_TaskUnlock.wait(mailboxLock);
 				}
 				if (m_Context->m_Running == false) break;
@@ -87,18 +88,20 @@ MailMan::MailMan(MSRaw<MailHub> context)
 					MSMutexLock mailLock(mailbox->m_MailLock);
 					switch (mail.Task.state())
 					{
-					case MSAsyncState::AWAIT: mailbox->m_MailQueue.push_back(std::move(mail)); break;
 					case MSAsyncState::YIELD: mailbox->m_MailQueue.push_front(std::move(mail)); break;
-					default: MS_INFO("state %u", (uint32_t)mail.Task.state()); break;
-					}
-					if (mailbox->m_MailQueue.size() == 1)
-					{
-						MSMutexLock mailboxLock(m_TaskLock);
-						m_TaskQueue.push_back(mailbox);
+					default: mailbox->m_MailQueue.push_back(std::move(mail)); break;
 					}
 				}
 			}
+
+			MSMutexLock mailLock(mailbox->m_MailLock);
+			if (!mailbox->m_MailQueue.empty())
+			{
+				MSMutexLock mailboxLock(m_TaskLock);
+				m_TaskQueue.push_back(mailbox);
+			}
 		}
+		MS_INFO("mail worker stopped");
 	});
 }
 
