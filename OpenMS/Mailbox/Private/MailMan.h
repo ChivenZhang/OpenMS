@@ -19,8 +19,8 @@ public:
 	explicit MailMan(MSRaw<MailHub> context);
 	~MailMan();
 	void enqueue(MSRef<IMailBox> mailBox);
-	size_t countTask() const;
-	void balance(MSDeque<MSRef<IMailBox>>& result);
+	size_t overload() const;
+	void balance(MSDeque<MSRef<IMailBox>>& output);
 
 protected:
 	MSThread m_MailThread;

@@ -16,7 +16,7 @@
 class MailHub : public IMailHub
 {
 public:
-	explicit MailHub(uint32_t overload = 1);
+	explicit MailHub(uint32_t overload = std::thread::hardware_concurrency() >> 1);
 	~MailHub() override;
 	using IMailHub::create;
 	bool create(MSString address, MSRef<IMailBox> value) override;
@@ -31,7 +31,7 @@ public:
 protected:
 	friend class MailMan;
 
-	MSAtomic<bool> m_Running;
+	MSAtomic<bool> m_Running, m_Working;
 	MSLambda<bool(IMail mail)> m_OnFailed;
 	MSLambda<void(MSString address)> m_OnChange;
 

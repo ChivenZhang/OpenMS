@@ -43,7 +43,7 @@ bool Service::call(uint32_t service, uint32_t method, uint32_t forward, uint32_t
 	mail.Body = input;
 	mail.Date = ++m_SessionID;
 	mail.Type = OPENMS_MAIL_TYPE_REQUEST;
-	if (forward != MSHash(nullptr)) mail.Type |= OPENMS_MAIL_TYPE_FORWARD;
+	if (forward != OPENMS_NULL_MAILBOX) mail.Type |= OPENMS_MAIL_TYPE_FORWARD;
 
 	MSPromise<MSString> promise;
 	auto future = promise.get_future();
@@ -84,7 +84,7 @@ bool Service::async(uint32_t service, uint32_t method, uint32_t forward, uint32_
 	mail.Body = input;
 	mail.Date = ++m_SessionID;
 	mail.Type = OPENMS_MAIL_TYPE_REQUEST;
-	if (forward != MSHash(nullptr)) mail.Type |= OPENMS_MAIL_TYPE_FORWARD;
+	if (forward != OPENMS_NULL_MAILBOX) mail.Type |= OPENMS_MAIL_TYPE_FORWARD;
 
 	MS_INFO("async %u=>%u via %u #%u @%u", mail.From, mail.To, mail.Copy, mail.Date, mail.Type);
 
@@ -161,56 +161,49 @@ IMailTask Service::read(IMail mail)
 {
 	if (mail.Type & OPENMS_MAIL_TYPE_FORWARD)
 	{
-		if (mail.Copy == hash())
-		{
-			mail.Type &= ~OPENMS_MAIL_TYPE_FORWARD;
-			send(mail);
-		}
+		mail.Type &= ~OPENMS_MAIL_TYPE_FORWARD;
+		send(mail);
 	}
 	else
 	{
-
-		if (mail.To == hash())
+		if (mail.Type & OPENMS_MAIL_TYPE_REQUEST)
 		{
-			if (mail.Type & OPENMS_MAIL_TYPE_REQUEST)
+			if (sizeof(request_t) <= mail.Body.size())
 			{
-				if (sizeof(request_t) <= mail.Body.size())
+				auto& request = *(request_t*)mail.Body.data();
+				method_t method;
 				{
-					auto& request = *(request_t*)mail.Body.data();
-					method_t method;
-					{
-						MSMutexLock lock(m_LockMethod);
-						auto result = m_MethodMap.find(request.Method);
-						if (result != m_MethodMap.end()) method = result->second;
-					}
-					if (method)
-					{
-						auto input = MSStringView(request.Buffer, mail.Body.size() - sizeof(request_t));
-						auto response = co_await method(input);
+					MSMutexLock lock(m_LockMethod);
+					auto result = m_MethodMap.find(request.Method);
+					if (result != m_MethodMap.end()) method = result->second;
+				}
+				if (method)
+				{
+					auto input = MSStringView(request.Buffer, mail.Body.size() - sizeof(request_t));
+					auto response = co_await method(input);
 
-						std::swap(mail.From, mail.To);
-						mail.Type &= ~OPENMS_MAIL_TYPE_REQUEST;
-						mail.Type |= OPENMS_MAIL_TYPE_RESPONSE;
-						mail.Body = response;
-						if (mail.Copy != MSHash(nullptr)) mail.Type |= OPENMS_MAIL_TYPE_FORWARD;
-						send(mail);
-					}
+					std::swap(mail.From, mail.To);
+					mail.Type &= ~OPENMS_MAIL_TYPE_REQUEST;
+					mail.Type |= OPENMS_MAIL_TYPE_RESPONSE;
+					mail.Body = response;
+					if (mail.Copy != OPENMS_NULL_MAILBOX) mail.Type |= OPENMS_MAIL_TYPE_FORWARD;
+					send(mail);
 				}
 			}
-			else if (mail.Type & OPENMS_MAIL_TYPE_RESPONSE)
+		}
+		else if (mail.Type & OPENMS_MAIL_TYPE_RESPONSE)
+		{
+			session_t response;
 			{
-				session_t response;
+				MSMutexLock lock(m_LockSession);
+				auto result = m_SessionMap.find(mail.Date);
+				if (result != m_SessionMap.end())
 				{
-					MSMutexLock lock(m_LockSession);
-					auto result = m_SessionMap.find(mail.Date);
-					if (result != m_SessionMap.end())
-					{
-						response = result->second;
-						m_SessionMap.erase(result);
-					}
+					response = result->second;
+					m_SessionMap.erase(result);
 				}
-				if (response) response(mail.Body);
 			}
+			if (response) response(mail.Body);
 		}
 	}
 	co_return;

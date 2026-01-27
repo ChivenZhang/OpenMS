@@ -30,14 +30,16 @@ MailMan::MailMan(MSRaw<MailHub> context)
 				MSUniqueLock mailboxLock(m_TaskLock);
 				while (m_Context->m_Running && m_TaskQueue.empty())
 				{
-					m_Context->balance(m_TaskQueue);
-					if (!m_TaskQueue.empty()) MS_INFO("steal %u", (uint32_t)m_TaskQueue.size());
-					if (!m_TaskQueue.empty()) break;
-					m_TaskUnlock.wait(mailboxLock);
+					// m_Context->balance(m_TaskQueue);
+					// if (!m_TaskQueue.empty()) MS_INFO("steal %u", (uint32_t)m_TaskQueue.size());
+					// if (!m_TaskQueue.empty()) break;
+					// m_TaskCount += m_TaskQueue.size();
+					m_TaskUnlock.wait_for(mailboxLock, std::chrono::seconds(1));
 				}
 				if (m_Context->m_Running == false) break;
 				mailbox = MSCast<MailBox>(m_TaskQueue.front());
 				m_TaskQueue.pop_front();
+				m_TaskCount -= 1;
 				if (mailbox == nullptr) continue;
 			}
 
@@ -79,7 +81,7 @@ MailMan::MailMan(MSRaw<MailHub> context)
 					{
 						MSPrintError(ex);
 					}
-					MS_INFO("done %u=>%u via %u #%u @%u", mail.Mail.From, mail.Mail.To, mail.Mail.Copy, mail.Mail.Date, mail.Mail.Type);
+					MS_DEBUG("done %u=>%u via %u #%u @%u", mail.Mail.From, mail.Mail.To, mail.Mail.Copy, mail.Mail.Date, mail.Mail.Type);
 				}
 				else
 				{
@@ -99,6 +101,7 @@ MailMan::MailMan(MSRaw<MailHub> context)
 			{
 				MSMutexLock mailboxLock(m_TaskLock);
 				m_TaskQueue.push_back(mailbox);
+				m_TaskCount += 1;
 			}
 		}
 		MS_INFO("mail worker stopped");
@@ -114,25 +117,30 @@ MailMan::~MailMan()
 
 void MailMan::enqueue(MSRef<IMailBox> mailBox)
 {
-	MSMutexLock lock(m_TaskLock);
-	m_TaskQueue.push_back(mailBox);
+	{
+		MSMutexLock lock(m_TaskLock);
+		m_TaskQueue.push_back(mailBox);
+		m_TaskCount += 1;
+	}
 	m_TaskUnlock.notify_one();
 }
 
-size_t MailMan::countTask() const
+size_t MailMan::overload() const
 {
 	return m_TaskCount;
 }
 
 void MailMan::balance(MSDeque<MSRef<IMailBox>>& result)
 {
-	if (m_TaskCount == 0) return;
-	MSMutexLock lock(m_TaskLock);
-	size_t half = m_TaskQueue.size() >> 1;
-	for (size_t i=0; i<half; ++i)
+	if (m_TaskCount.load())
 	{
-		result.push_back(m_TaskQueue.back());
-		m_TaskQueue.pop_back();
-		m_TaskCount -= 1;
+		MSMutexLock lock(m_TaskLock);
+		size_t half = m_TaskQueue.size() >> 1;
+		for (size_t i=0; i<half; ++i)
+		{
+			result.push_back(m_TaskQueue.back());
+			m_TaskQueue.pop_back();
+			m_TaskCount -= 1;
+		}
 	}
 }

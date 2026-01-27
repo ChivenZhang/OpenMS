@@ -85,7 +85,6 @@ void FrontendClient::onInit()
 							mail.Date = mailView.Date;
 							mail.Type = mailView.Type;
 							mail.Body = MSStringView(mailView.Body, event->Message.size() - sizeof(MailView));
-							mail.Type &= ~OPENMS_MAIL_TYPE_FORWARD;
 							MS_INFO("gate %u=>%u via %u #%u @%u", mail.From, mail.To, mail.Copy, mail.Date, mail.Type);
 							mailHub->send(mail);
 						}

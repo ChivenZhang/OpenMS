@@ -14,6 +14,7 @@
 #define OPENMS_MAIL_TYPE_RESPONSE 0x00000002
 #define OPENMS_MAIL_TYPE_FORWARD 0x00000004
 #define OPENMS_MAIL_TYPE_CLIENT 0x00000008
+constexpr auto OPENMS_NULL_MAILBOX = MSHash(nullptr);
 
 /// @brief Interface for mail
 struct IMail

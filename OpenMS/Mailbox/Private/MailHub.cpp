@@ -17,15 +17,18 @@ MailHub::MailHub(uint32_t overload)
 	m_MailWorkers(std::max(1U, overload))
 {
 	m_Running = true;
+	m_Working = false;
 	for (auto& deliver : m_MailWorkers)
 	{
 		deliver = MSNew<MailMan>(this);
 	}
+	m_Working = true;
 }
 
 MailHub::~MailHub()
 {
 	m_Running = false;
+	m_Working = false;
 	m_MailWorkers.clear();
 }
 
@@ -80,7 +83,7 @@ uint32_t MailHub::send(IMail mail)
 		if (result == m_MailboxMap.end() || result->second == nullptr)
 		{
 			m_MailboxLock.unlock();
-			MS_INFO("send %u=>%u via %u #%u @%u", mail.From, mail.To, mail.Copy, mail.Date, mail.Type);
+			MS_DEBUG("send %u=>%u via %u #%u @%u", mail.From, mail.To, mail.Copy, mail.Date, mail.Type);
 			if (m_OnFailed && m_OnFailed(mail)) return mail.Date;
 			return 0;
 		}
@@ -101,12 +104,11 @@ uint32_t MailHub::send(IMail mail)
 		newMail.Mail.Type = mail.Type;
 		newMail.Mail.Body = MSStringView((char*)newMail.Data.data(), newMail.Data.size());
 		newMail.Task = toMailbox->read(newMail.Mail);
-		MS_INFO("push %u=>%u via %u #%u @%u", mail.From, mail.To, mail.Copy, mail.Date, mail.Type);
-		MS_INFO("size %u", (uint32_t)toMailbox->m_MailQueue.size());
+		MS_DEBUG("push %u=>%u via %u #%u @%u", mail.From, mail.To, mail.Copy, mail.Date, mail.Type);
 
 		if (toMailbox->m_MailQueue.size() == 1)
 		{
-			MS_INFO("join %u=>%u via %u #%u @%u", mail.From, mail.To, mail.Copy, mail.Date, mail.Type);
+			// MS_DEBUG("join %u=>%u via %u #%u @%u", mail.From, mail.To, mail.Copy, mail.Date, mail.Type);
 			thread_local std::mt19937 gen(std::random_device{}());
 			std::uniform_int_distribution<size_t> dist(0, m_MailWorkers.size() - 1);
 			auto index = dist(gen);
@@ -139,10 +141,14 @@ bool MailHub::change(MSLambda<void(MSString address)> callback)
 	return true;
 }
 
-void MailHub::balance(MSDeque<MSRef<IMailBox>>& result) const
+void MailHub::balance(MSDeque<MSRef<IMailBox>>& output) const
 {
-	thread_local std::mt19937 gen(std::random_device{}());
-	std::uniform_int_distribution<size_t> dist(0, m_MailWorkers.size() - 1);
-	auto index = dist(gen);
-	if (m_MailWorkers[index]) m_MailWorkers[index]->balance(result);
+	if (m_Working == false) return;
+	auto result = std::max_element(m_MailWorkers.begin(), m_MailWorkers.end(), [](auto& a, auto& b)->bool
+	{
+		return a->overload() < b->overload();
+	});
+	if (result == m_MailWorkers.end()) return;
+	auto index = std::distance(m_MailWorkers.begin(), result);
+	m_MailWorkers[index]->balance(output);
 }

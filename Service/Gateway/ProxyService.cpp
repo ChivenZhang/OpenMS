@@ -27,13 +27,13 @@ IMailTask ProxyService::read(IMail mail)
 
 		if (mail.Type & OPENMS_MAIL_TYPE_CLIENT)
 		{
-			if (mail.From != MSHash("client:" + std::to_string(m_UserID)))
-			{
-				MS_WARN("p2p message from user %u", m_UserID);
-				co_return;
-			}
 			if (mail.Type & OPENMS_MAIL_TYPE_REQUEST)
 			{
+				if (mail.From != MSHash("client:" + std::to_string(m_UserID)))
+				{
+					MS_WARN("p2p message from user %u", m_UserID);
+					co_return;
+				}
 				send(mail);
 			}
 			else if (mail.Type & OPENMS_MAIL_TYPE_RESPONSE)
