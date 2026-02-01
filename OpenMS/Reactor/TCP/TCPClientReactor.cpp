@@ -199,7 +199,7 @@ void TCPClientReactor::startup()
 				m_Channel = nullptr;
 			}
 
-			MS_PRINT("closed client");
+			MS_INFO("closed client");
 			return;
 
 		} while (false);

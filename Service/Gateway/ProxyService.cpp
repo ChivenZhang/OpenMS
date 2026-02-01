@@ -31,7 +31,7 @@ IMailTask ProxyService::read(IMail mail)
 			{
 				if (mail.From != MSHash("client:" + std::to_string(m_UserID)))
 				{
-					MS_WARN("p2p message from user %u", m_UserID);
+					MS_ERROR("invalid %u=>%u via %u #%u @%u", mail.From, mail.To, mail.Copy, mail.Date, mail.Type);
 					co_return;
 				}
 				send(mail);

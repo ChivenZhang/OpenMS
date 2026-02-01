@@ -135,15 +135,12 @@ add_library(OpenMS STATIC
 		Utility/QuickQPS.h
 		Utility/Timer.cpp
 		Utility/Timer.h
+		Utility/TimerUtility.cpp
+		Utility/TimerUtility.h
 		Utility/TraitsUtility.h
         Server/Private/Service.cpp
         Server/Private/Service.h
 )
-
-if(OPENMS_ENABLE_SPDLOG)
-find_package(spdlog CONFIG REQUIRED)
-target_link_libraries(OpenMS PRIVATE spdlog::spdlog_header_only)
-endif()
 
 if(OPENMS_ENABLE_MYSQL)
 target_include_directories(OpenMS PUBLIC $ENV{MYSQL_CLIENT_CUSTOM}/include)
@@ -179,6 +176,8 @@ find_package(nlohmann_json CONFIG REQUIRED)
 target_link_libraries(OpenMS PUBLIC nlohmann_json::nlohmann_json)
 find_package(cpptrace CONFIG REQUIRED)
 target_link_libraries(OpenMS PUBLIC cpptrace::cpptrace)
+find_package(spdlog CONFIG REQUIRED)
+target_link_libraries(OpenMS PRIVATE spdlog::spdlog_header_only)
 # this is heuristically generated, and may not be correct
 find_package(unofficial-breakpad CONFIG REQUIRED)
 target_link_libraries(OpenMS PUBLIC unofficial::breakpad::libbreakpad unofficial::breakpad::libbreakpad_client)

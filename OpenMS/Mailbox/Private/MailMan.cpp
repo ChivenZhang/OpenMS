@@ -33,13 +33,11 @@ MailMan::MailMan(MSRaw<MailHub> context)
 					// m_Context->balance(m_TaskQueue);
 					// if (!m_TaskQueue.empty()) MS_INFO("steal %u", (uint32_t)m_TaskQueue.size());
 					// if (!m_TaskQueue.empty()) break;
-					// m_TaskCount += m_TaskQueue.size();
-					m_TaskUnlock.wait_for(mailboxLock, std::chrono::seconds(1));
+					m_TaskUnlock.wait(mailboxLock);
 				}
 				if (m_Context->m_Running == false) break;
 				mailbox = MSCast<MailBox>(m_TaskQueue.front());
 				m_TaskQueue.pop_front();
-				m_TaskCount -= 1;
 				if (mailbox == nullptr) continue;
 			}
 
@@ -101,7 +99,6 @@ MailMan::MailMan(MSRaw<MailHub> context)
 			{
 				MSMutexLock mailboxLock(m_TaskLock);
 				m_TaskQueue.push_back(mailbox);
-				m_TaskCount += 1;
 			}
 		}
 		MS_INFO("mail worker stopped");
@@ -110,7 +107,7 @@ MailMan::MailMan(MSRaw<MailHub> context)
 
 MailMan::~MailMan()
 {
-	m_TaskUnlock.notify_one();
+	m_TaskUnlock.notify_all();
 	if (m_MailThread.joinable()) m_MailThread.join();
 	m_Context = nullptr;
 }
@@ -120,27 +117,22 @@ void MailMan::enqueue(MSRef<IMailBox> mailBox)
 	{
 		MSMutexLock lock(m_TaskLock);
 		m_TaskQueue.push_back(mailBox);
-		m_TaskCount += 1;
 	}
-	m_TaskUnlock.notify_one();
+	m_TaskUnlock.notify_all();
 }
 
 size_t MailMan::overload() const
 {
-	return m_TaskCount;
+	return 0;
 }
 
 void MailMan::balance(MSDeque<MSRef<IMailBox>>& result)
 {
-	if (m_TaskCount.load())
+	MSMutexLock lock(m_TaskLock);
+	size_t half = m_TaskQueue.size() >> 1;
+	for (size_t i=0; i<half; ++i)
 	{
-		MSMutexLock lock(m_TaskLock);
-		size_t half = m_TaskQueue.size() >> 1;
-		for (size_t i=0; i<half; ++i)
-		{
-			result.push_back(m_TaskQueue.back());
-			m_TaskQueue.pop_back();
-			m_TaskCount -= 1;
-		}
+		result.push_back(m_TaskQueue.back());
+		m_TaskQueue.pop_back();
 	}
 }

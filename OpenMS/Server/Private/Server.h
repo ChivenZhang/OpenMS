@@ -11,7 +11,6 @@
 * =================================================*/
 #include "Server/IServer.h"
 #include "Server/IProperty.h"
-#include "Utility/Timer.h"
 #ifndef OPENMS_HEARTBEAT
 #define OPENMS_HEARTBEAT 10 /*second*/
 #endif
@@ -25,8 +24,8 @@ public:
 	void postEvent(MSLambda<void()>&& event) final;
 	using IServer::property;
 	MSString property(MSString const& name) const final;
-	uint32_t startTimer(uint64_t timeout, uint64_t repeat, MSLambda<void(uint32_t handle)>&& task) final;
-	bool stopTimer(uint32_t handle) final;
+	timer_t startTimer(uint64_t timeout, uint64_t repeat, MSLambda<void()>&& task) final;
+	void stopTimer(timer_t handle) final;
 
 protected:
 	virtual void onInit();
@@ -36,7 +35,7 @@ protected:
 	virtual void onError(MSError&& error);
 
 protected:
-	Timer m_Timer;
+	TimerUtility m_Timer;
 	MSMutex m_Lock;
 	MSAtomic<bool> m_Running;
 	MSAtomic<bool> m_Working;

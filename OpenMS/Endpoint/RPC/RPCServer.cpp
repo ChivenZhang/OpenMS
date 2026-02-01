@@ -178,7 +178,7 @@ bool RPCServerBase::async(MSHnd<IChannel> client, MSStringView const& name, uint
 		};
 	}
 
-	m_Timer.start(timeout, 0, [sessionID = request.Session, this](uint32_t handle)
+	m_Timer.start(timeout, 0, [sessionID = request.Session, this]()
 	{
 		decltype(m_Sessions)::value_type::second_type callback;
 		{

@@ -22,7 +22,7 @@ protected:
 	bool onFail(IMail mail) override;
 
 protected:
-	uint32_t m_KeepAlive = 0;	// For reconnect
+	timer_t m_KeepAlive;	// For reconnect
 	MSRef<IEndpoint> m_TCPServer;
 	MSAtomic<uint32_t> m_GuestID;
 	MSMap<uint32_t, MSRef<IChannel>> m_ClientChannels;

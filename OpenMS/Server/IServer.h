@@ -11,6 +11,7 @@
 * =================================================*/
 #include "MS.h"
 #include <iocpp.h>
+#include "Utility/TimerUtility.h"
 
 #define OPENMS_LOGO \
 (R"(
@@ -29,6 +30,9 @@
 class OPENMS_API IServer
 {
 public:
+	using timer_t = TimerUtility::TimerId;
+
+public:
 	virtual ~IServer() = default;
 
 	virtual int startup() = 0;
@@ -41,9 +45,9 @@ public:
 
 	virtual MSString property(MSString const& name) const = 0;
 
-	virtual uint32_t startTimer(uint64_t timeout, uint64_t repeat, MSLambda<void(uint32_t handle)>&& task) = 0;
+	virtual timer_t startTimer(uint64_t timeout, uint64_t repeat, MSLambda<void()>&& task) = 0;
 
-	virtual bool stopTimer(uint32_t handle) = 0;
+	virtual void stopTimer(timer_t handle) = 0;
 
 	template <class T>
 	T property(MSString const& name, T const& value = T()) const

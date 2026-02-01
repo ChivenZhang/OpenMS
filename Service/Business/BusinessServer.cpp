@@ -35,7 +35,7 @@ void BusinessServer::onInit()
 	auto matchService = MSNew<MatchService>();
 	mailHub->create("match", matchService);
 
-	this->startTimer(0, 2000, [=, self = logicService.get()](uint32_t handle)
+	this->startTimer(0, 2000, [=, self = logicService.get()]()
 	{
 		self->call<void>("match", "updateMatch", "", 0, MSTuple{self->name()});
 

@@ -239,7 +239,7 @@ void KCPClientReactor::startup()
 			}
 
 			if (loop.stopped() == false) loop.stop();
-			MS_PRINT("closed client");
+			MS_INFO("closed client");
 			return;
 
 		} while (false);

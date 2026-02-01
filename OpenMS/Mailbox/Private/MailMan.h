@@ -27,6 +27,5 @@ protected:
 	MSRaw<MailHub> m_Context;
 	MSMutex m_TaskLock;
 	MSMutexUnlock m_TaskUnlock;
-	MSAtomic<uint32_t> m_TaskCount;
 	MSDeque<MSRef<IMailBox>> m_TaskQueue;
 };

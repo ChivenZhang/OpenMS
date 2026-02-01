@@ -26,7 +26,7 @@ protected:
 	virtual bool onFail(IMail mail);
 
 protected:
-	uint32_t m_Heartbeat = 0;
+	timer_t m_Heartbeat;
 	MSMutex m_MailRouteLock;
 	MSMutex m_MailClientLock;
 	MSRef<RPCServer> m_ServiceServer;

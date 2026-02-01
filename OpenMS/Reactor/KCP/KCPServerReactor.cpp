@@ -261,7 +261,7 @@ void KCPServerReactor::startup()
 			}
 
 			if (loop.stopped() == false) loop.stop();
-			MS_PRINT("closed server");
+			MS_INFO("closed server");
 			return;
 
 		} while (false);

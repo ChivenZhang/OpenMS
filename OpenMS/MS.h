@@ -122,63 +122,23 @@
 
 // ============================================
 
-#include <assert.h>
+#include <cassert>
 #define MSAssert(...) assert(__VA_ARGS__)
 
 // ============================================
 
-#include <cstdio>
-#include <ctime>
-#include <thread>
-
-#ifdef OPENMS_ENABLE_SPDLOG
 #ifndef SPDLOG_FMT_EXTERNAL
 #define SPDLOG_FMT_EXTERNAL
 #endif
 #include <fmt/printf.h>
 #include <spdlog/spdlog.h>
-#define MS_DEBUG(FORMAT, ...) SPDLOG_DEBUG(fmt::sprintf(FORMAT, ##__VA_ARGS__))
-#define MS_INFO(FORMAT, ...) SPDLOG_INFO(fmt::sprintf(FORMAT, ##__VA_ARGS__))
-#define MS_WARN(FORMAT, ...) SPDLOG_WARN(fmt::sprintf(FORMAT, ##__VA_ARGS__))
-#define MS_ERROR(FORMAT, ...) SPDLOG_ERROR(fmt::sprintf(FORMAT, ##__VA_ARGS__))
-#define MS_FATAL(FORMAT, ...) do{ SPDLOG_CRITICAL(fmt::sprintf(FORMAT, ##__VA_ARGS__)); std::abort(); } while(0)
-#endif
-
-#define MS_FORMAT(TARGET, FORMAT, LEVEL, ...) \
-do { \
-char __DATETIME__[32]; auto __NOWTIME__ = std::time(nullptr); \
-std::strftime(__DATETIME__, sizeof(__DATETIME__), "%Y-%m-%d %H:%M:%S", std::localtime(&__NOWTIME__)); \
-auto __THREAD__ = []()->uint32_t { std::stringstream ss; ss << std::this_thread::get_id(); return std::stoul(ss.str()); }(); \
-std::fprintf(TARGET, "%s:%d\n" "%s " #LEVEL " [%u] --- " FORMAT "\n\n", __FILE__, __LINE__, __DATETIME__, __THREAD__, ##__VA_ARGS__); \
-std::fflush(TARGET); \
-} while (0)
-
-#ifndef MS_DEBUG
-#ifdef OPENMS_DEBUG_MODE
-#	define MS_DEBUG(FORMAT, ...) MS_FORMAT(stdout, FORMAT, DEBUG, ##__VA_ARGS__)
-#else
-#	define MS_DEBUG(FORMAT, ...)
-#endif
-#endif
-
-#ifndef MS_INFO
-#	define MS_INFO(FORMAT, ...) MS_FORMAT(stdout, FORMAT, INFO, ##__VA_ARGS__)
-#endif
-
-#ifndef MS_WARN
-#	define MS_WARN(FORMAT, ...) MS_FORMAT(stdout, FORMAT, WARN, ##__VA_ARGS__)
-#endif
-
-#ifndef MS_ERROR
-#	define MS_ERROR(FORMAT, ...) MS_FORMAT(stderr, FORMAT, ERROR, ##__VA_ARGS__)
-#endif
-
-#ifndef MS_FATAL
-#	define MS_FATAL(FORMAT, ...) do{ MS_FORMAT(stderr, FORMAT, FATAL, ##__VA_ARGS__); std::abort(); } while(0)
-#endif
-
+#define MS_DEBUG(...) SPDLOG_DEBUG(fmt::sprintf(__VA_ARGS__))
+#define MS_INFO(...) SPDLOG_INFO(fmt::sprintf(__VA_ARGS__))
+#define MS_WARN(...) SPDLOG_WARN(fmt::sprintf(__VA_ARGS__))
+#define MS_ERROR(...) SPDLOG_ERROR(fmt::sprintf(__VA_ARGS__))
+#define MS_FATAL(...) do{ SPDLOG_CRITICAL(fmt::sprintf(__VA_ARGS__)); std::abort(); } while(0)
 #ifndef MS_PRINT
-#	define MS_PRINT(FORMAT, ...) MS_INFO(FORMAT, ##__VA_ARGS__)
+#define MS_PRINT(...) MS_INFO(__VA_ARGS__)
 #endif
 
 // ============================================

@@ -9,7 +9,6 @@
 				"CMAKE_BUILD_TYPE": "Debug",
 				"CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_HOME}/scripts/buildsystems/vcpkg.cmake",
 
-				"OPENMS_ENABLE_SPDLOG": "ON",
 				"OPENMS_ENABLE_CONFIG": "ON",
 				"OPENMS_ENABLE_DISCOVERY": "ON",
 				"OPENMS_ENABLE_DAEMON": "ON",
@@ -36,7 +35,6 @@
 				"CMAKE_BUILD_TYPE": "RelWithDebInfo",
 				"CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_HOME}/scripts/buildsystems/vcpkg.cmake",
 
-				"OPENMS_ENABLE_SPDLOG": "ON",
 				"OPENMS_ENABLE_CONFIG": "ON",
 				"OPENMS_ENABLE_DISCOVERY": "ON",
 				"OPENMS_ENABLE_DAEMON": "ON",
@@ -63,7 +61,6 @@
 				"CMAKE_BUILD_TYPE": "Debug",
 				"CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_HOME}/scripts/buildsystems/vcpkg.cmake",
 
-				"OPENMS_ENABLE_SPDLOG": "ON",
 				"OPENMS_ENABLE_CONFIG": "ON",
 				"OPENMS_ENABLE_DISCOVERY": "ON",
 				"OPENMS_ENABLE_DAEMON": "ON",
@@ -79,9 +76,9 @@
 				"OPENMS_ENABLE_SQLITE": "ON"
 			},
 			"environment": {
-				"VCPKG_HOME1": "F:/Library/Windows/vcpkg-static",
+				"VCPKG_HOME": "F:/Library/Windows/vcpkg-static",
 				"VCPKG_HOME2": "D:/ChivenZhang/GitProject/Library/Window/vcpkg",
-				"VCPKG_HOME": "/Users/apple/CLionProjects/vcpkg"
+				"VCPKG_HOME3": "/Users/apple/CLionProjects/vcpkg"
 			}
 		}
 	]

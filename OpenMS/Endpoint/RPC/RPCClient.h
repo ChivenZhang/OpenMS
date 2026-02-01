@@ -12,7 +12,7 @@
 #include "Endpoint/IEndpoint.h"
 #include "Endpoint/RPC/RPCProtocol.h"
 #include "Reactor/TCP/TCPClientReactor.h"
-#include "Utility/Timer.h"
+#include "Utility/TimerUtility.h"
 #include "Utility/TraitsUtility.h"
 class RPCClientInboundHandler;
 
@@ -48,7 +48,7 @@ public:
 protected:
 	friend class RPCClientInboundHandler;
 	const config_t m_Config;
-	Timer m_Timer;
+	TimerUtility m_Timer;
 	MSMutex m_LockMethod;
 	MSMutex m_LockSession;
 	MSAtomic<uint32_t> m_Session;

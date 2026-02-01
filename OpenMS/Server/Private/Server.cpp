@@ -118,17 +118,17 @@ MSString Server::property(MSString const& name) const
 	return source->property(name);
 }
 
-uint32_t Server::startTimer(uint64_t timeout, uint64_t repeat, MSLambda<void(uint32_t handle)>&& task)
+IServer::timer_t Server::startTimer(uint64_t timeout, uint64_t repeat, MSLambda<void()>&& task)
 {
-	return m_Timer.start(timeout, repeat, [=, this](uint32_t handle)
+	return m_Timer.start(timeout, repeat, [=, this]()
 	{
-		postEvent([=]() { task(handle); });
+		postEvent([=]() { task(); });
 	});
 }
 
-bool Server::stopTimer(uint32_t handle)
+void Server::stopTimer(timer_t handle)
 {
-	return m_Timer.stop(handle);
+	m_Timer.stop(handle);
 }
 
 void Server::onInit()

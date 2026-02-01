@@ -162,8 +162,8 @@ void ClusterServer::onExit()
 {
 	if (AUTOWIRE(IProperty)::bean()->property(identity() + ".master").empty()) return;
 
-	if (m_Heartbeat) stopTimer(m_Heartbeat);
-	m_Heartbeat = 0;
+	if (!m_Heartbeat.expired()) stopTimer(m_Heartbeat);
+	m_Heartbeat.reset();
 
 	if (m_ServiceServer) m_ServiceServer->shutdown();
 	m_ServiceServer = nullptr;

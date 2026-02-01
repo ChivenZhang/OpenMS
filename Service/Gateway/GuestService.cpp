@@ -29,16 +29,18 @@ GuestService::GuestService(MSHnd<IChannel> client, uint32_t guestID)
 		if (userID)
 		{
 			auto proxyService = MSNew<ProxyService>(channel, userID);
-			this->create("proxy:" + std::to_string(userID), proxyService);
+			auto result = this->create("proxy:" + std::to_string(userID), proxyService);
+			if (result == false) co_return 0U;
+
 			channel->getContext()->userdata() = userID;
 			MS_INFO("验证成功！ %s", username.c_str());
+			co_await this->async<void>("client", "onLogin", proxyService->name(), 0, MSTuple{ userID });
 		}
 		else
 		{
 			MS_INFO("验证失败！ %s", username.c_str());
 		}
 
-		co_await this->async<void>("client", "onLogin", this->name(), 0, MSTuple{userID});
 		co_return userID;
 	});
 	this->bind("logout", [=, this]()-> MSAsync<bool>

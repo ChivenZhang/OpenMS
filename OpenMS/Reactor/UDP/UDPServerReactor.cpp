@@ -250,7 +250,7 @@ void UDPServerReactor::startup()
 				m_ChannelMap.clear();
 			}
 
-			MS_PRINT("closed server");
+			MS_INFO("closed server");
 			return;
 
 		} while (false);
