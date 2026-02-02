@@ -28,4 +28,5 @@ protected:
 	MSMutex m_TaskLock;
 	MSMutexUnlock m_TaskUnlock;
 	MSDeque<MSRef<IMailBox>> m_TaskQueue;
+	MSDeque<MSRef<IMailBox>> m_TempQueue;
 };

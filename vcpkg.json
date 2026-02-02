@@ -27,9 +27,6 @@
     "name" : "breakpad",
     "version>=" : "2024-02-16"
   }, {
-    "name" : "libuv",
-    "version>=" : "1.51.0"
-  }, {
     "name" : "gflags",
     "version>=" : "2.3.0"
   }, {

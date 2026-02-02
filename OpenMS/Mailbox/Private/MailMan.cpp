@@ -27,17 +27,34 @@ MailMan::MailMan(MSRaw<MailHub> context)
 
 			MSRef<MailBox> mailbox;
 			{
-				MSUniqueLock mailboxLock(m_TaskLock);
-				while (m_Context->m_Running && m_TaskQueue.empty())
+				m_TaskLock.lock();
+				if (m_TaskQueue.empty())
 				{
-					// m_Context->balance(m_TaskQueue);
-					// if (!m_TaskQueue.empty()) MS_INFO("steal %u", (uint32_t)m_TaskQueue.size());
-					// if (!m_TaskQueue.empty()) break;
-					m_TaskUnlock.wait(mailboxLock);
+					m_TaskLock.unlock();
+					m_Context->balance(m_TempQueue);
+					if (m_TempQueue.empty())
+					{
+						MSUniqueLock mailboxLock(m_TaskLock);
+						m_TaskUnlock.wait_for(mailboxLock, std::chrono::milliseconds(1000));
+						continue;
+					}
+					m_TaskLock.lock();
+					while (!m_TempQueue.empty())
+					{
+						m_TaskQueue.push_back(std::move(m_TempQueue.front()));
+						m_TempQueue.pop_front();
+					}
+					mailbox = MSCast<MailBox>(m_TaskQueue.front());
+					m_TaskQueue.pop_front();
+					m_TaskLock.unlock();
 				}
-				if (m_Context->m_Running == false) break;
-				mailbox = MSCast<MailBox>(m_TaskQueue.front());
-				m_TaskQueue.pop_front();
+				else
+				{
+					mailbox = MSCast<MailBox>(m_TaskQueue.front());
+					m_TaskQueue.pop_front();
+					m_TaskLock.unlock();
+				}
+
 				if (mailbox == nullptr) continue;
 			}
 
@@ -132,7 +149,7 @@ void MailMan::balance(MSDeque<MSRef<IMailBox>>& result)
 	size_t half = m_TaskQueue.size() >> 1;
 	for (size_t i=0; i<half; ++i)
 	{
-		result.push_back(m_TaskQueue.back());
+		result.push_front(m_TaskQueue.back());
 		m_TaskQueue.pop_back();
 	}
 }

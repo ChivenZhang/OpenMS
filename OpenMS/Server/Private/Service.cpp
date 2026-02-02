@@ -98,7 +98,7 @@ bool Service::async(uint32_t service, uint32_t method, uint32_t forward, uint32_
 
 	send(mail);
 
-	m_Timer.start(timeout, 0, [session = mail.Date, this](uint32_t)
+	m_Timer.start(timeout, 0, [session = mail.Date, this]()
 	{
 		session_t response;
 		{

@@ -10,7 +10,7 @@
 *
 * =================================================*/
 #include "Mailbox/Private/MailBox.h"
-#include "Utility/Timer.h"
+#include "Utility/TimerUtility.h"
 
 class Service : public MailBox
 {
@@ -156,7 +156,7 @@ protected:
 	IMailTask read(IMail mail) override;
 
 protected:
-	Timer m_Timer;
+	TimerUtility m_Timer;
 	MSMutex m_LockMethod;
 	MSMutex m_LockSession;
 	MSAtomic<uint32_t> m_SessionID;
