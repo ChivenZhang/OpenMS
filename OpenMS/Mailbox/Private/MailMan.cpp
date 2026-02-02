@@ -35,13 +35,14 @@ MailMan::MailMan(MSRaw<MailHub> context)
 					if (m_TempQueue.empty())
 					{
 						MSUniqueLock mailboxLock(m_TaskLock);
-						m_TaskUnlock.wait_for(mailboxLock, std::chrono::milliseconds(1000));
+						m_TaskUnlock.wait_for(mailboxLock, std::chrono::milliseconds(500));
 						continue;
 					}
+					MS_INFO("steal %u", (uint32_t)m_TempQueue.size());
 					m_TaskLock.lock();
 					while (!m_TempQueue.empty())
 					{
-						m_TaskQueue.push_back(std::move(m_TempQueue.front()));
+						m_TaskQueue.push_back(m_TempQueue.front());
 						m_TempQueue.pop_front();
 					}
 					mailbox = MSCast<MailBox>(m_TaskQueue.front());
@@ -66,8 +67,6 @@ MailMan::MailMan(MSRaw<MailHub> context)
 				if (mailbox->m_MailQueue.empty()) continue;
 				mail = std::move(mailbox->m_MailQueue.front());
 				mailbox->m_MailQueue.pop_front();
-
-				// MS_INFO("pop %u=>%u via %u #%u", mail.Mail.From, mail.Mail.To, mail.Mail.Copy, mail.Mail.Date);
 			}
 
 			// Resume mail task

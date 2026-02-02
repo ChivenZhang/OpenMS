@@ -233,7 +233,7 @@ using MSPromise = std::promise<T>;
 template <class T>
 using MSAtomic = std::atomic<T>;
 using MSMutex = std::recursive_mutex;
-using MSMutexLock = std::lock_guard<MSMutex>;
+using MSMutexLock = std::scoped_lock<MSMutex>;
 using MSUniqueLock = std::unique_lock<MSMutex>;
 using MSMutexUnlock = std::condition_variable_any;
 using MSStringList = MSList<MSString>;

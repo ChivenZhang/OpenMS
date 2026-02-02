@@ -45,7 +45,7 @@ void BackendServer::onInit()
 
 	spaceService->call<void>(spaceService->name(), "onCreateRequest", "", 0, MSTuple{caller,});
 
-	this->startTimer(10000, 0, [this, self = spaceService.get()]()
+	this->startTimer(5000, 0, [this, self = spaceService.get()]()
 	{
 		self->call<void>(self->name(), "endPlay", "", 5000, MSTuple{});
 	});
