@@ -144,11 +144,8 @@ bool MailHub::change(MSLambda<void(MSString address)> callback)
 void MailHub::balance(MSDeque<MSRef<IMailBox>>& output) const
 {
 	if (m_Working == false) return;
-	auto result = std::max_element(m_MailWorkers.begin(), m_MailWorkers.end(), [](auto& a, auto& b)->bool
-	{
-		return a->overload() < b->overload();
-	});
-	if (result == m_MailWorkers.end()) return;
-	auto index = std::distance(m_MailWorkers.begin(), result);
+	static std::mt19937 gen(std::random_device{}());
+	std::uniform_int_distribution<size_t> dist(0, m_MailWorkers.size() - 1);
+	auto index = dist(gen);
 	m_MailWorkers[index]->balance(output);
 }

@@ -57,8 +57,11 @@ public:
 
     ~TimerUtility()
     {
-        asio::error_code ec;
-        timer_.cancel(ec);
+        // 1. 先取消定时器，触发 async_wait 的回调链断裂，确保 run() 能尽快退出
+        asio::post(io_, [this]() {
+            asio::error_code ec;
+            timer_.cancel(ec);
+        });
 
         // 2. 必须先 Join，确保 manager_thread_ 不再访问任何成员变量
         if (manager_thread_.joinable())

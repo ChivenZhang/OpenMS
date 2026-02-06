@@ -39,7 +39,7 @@ MailMan::MailMan(MSRaw<MailHub> context)
 						continue;
 					}
 					MS_INFO("steal %u", (uint32_t)m_TempQueue.size());
-					m_TaskLock.lock();
+					MSMutexLock lock(m_TaskLock);
 					while (!m_TempQueue.empty())
 					{
 						m_TaskQueue.push_back(m_TempQueue.front());
@@ -47,7 +47,6 @@ MailMan::MailMan(MSRaw<MailHub> context)
 					}
 					mailbox = MSCast<MailBox>(m_TaskQueue.front());
 					m_TaskQueue.pop_front();
-					m_TaskLock.unlock();
 				}
 				else
 				{
@@ -137,18 +136,11 @@ void MailMan::enqueue(MSRef<IMailBox> mailBox)
 	m_TaskUnlock.notify_all();
 }
 
-size_t MailMan::overload() const
-{
-	return 0;
-}
-
 void MailMan::balance(MSDeque<MSRef<IMailBox>>& result)
 {
 	MSMutexLock lock(m_TaskLock);
-	size_t half = m_TaskQueue.size() >> 1;
-	for (size_t i=0; i<half; ++i)
-	{
-		result.push_front(m_TaskQueue.back());
-		m_TaskQueue.pop_back();
-	}
+	if (m_TaskQueue.empty()) return;
+	auto middle = m_TaskQueue.begin() + (long long)m_TaskQueue.size();
+	result.insert(result.end(), std::make_move_iterator(middle), std::make_move_iterator(m_TaskQueue.end()));
+	m_TaskQueue.erase(middle, m_TaskQueue.end());
 }
