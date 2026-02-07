@@ -19,14 +19,18 @@ public:
     // 将任务内部状态封装，以便在 TimerId 和时间轮之间共享
     struct TaskState
     {
+        std::function<void()> callback;
         std::chrono::steady_clock::time_point next_expiry;
         uint64_t repeat_ms;
-        std::function<void()> callback;
-        int rotation;        // 补全：记录任务还需要轮转多少圈
+        int32_t rotation;        // 补全：记录任务还需要轮转多少圈
         bool cancelled = false;
 
         TaskState(std::chrono::steady_clock::time_point first, uint64_t rep, std::function<void()> cb)
-            : next_expiry(first), repeat_ms(rep), callback(std::move(cb)), rotation(0)
+            : 
+            next_expiry(first), 
+            repeat_ms(rep), 
+            callback(std::move(cb)), 
+            rotation(0)
         {
         }
     };
@@ -108,7 +112,7 @@ private:
         int64_t total_ticks = duration.count() / (interval_ms_ * 1000000);
 
         size_t index = total_ticks % slots_;
-        state->rotation = (total_ticks - current_tick_count_) / (int)slots_;
+        state->rotation = (int32_t)((total_ticks - current_tick_count_) / (int64_t)slots_);
         if (state->rotation < 0) state->rotation = 0;
 
         wheel_[index].push_back(state);
@@ -157,7 +161,7 @@ private:
 
 private:
     asio::io_context io_;           // 最先构造，最后析构
-    uint64_t interval_ms_;
+    int64_t interval_ms_;
     size_t slots_;
     size_t current_pos_;
     int64_t current_tick_count_;
