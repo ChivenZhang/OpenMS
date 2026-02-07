@@ -133,7 +133,7 @@ bool Service::unbind(MSStringView method)
 
 bool Service::bind(MSStringView method, method_t && callback)
 {
-	return bind(MSHash(method), std::move(callback));
+	return bind(MSHash(method), std::forward<method_t>(callback));
 }
 
 bool Service::call(MSStringView service, MSStringView method, MSStringView domain, uint32_t timeout, MSStringView request, MSString& response)
@@ -143,7 +143,7 @@ bool Service::call(MSStringView service, MSStringView method, MSStringView domai
 
 bool Service::async(MSStringView service, MSStringView method, MSStringView domain, uint32_t timeout, MSStringView request, MSLambda<void(MSStringView)>&& callback)
 {
-	return async(MSHash(service), MSHash(method), MSHash(domain), timeout, request, std::move(callback));
+	return async(MSHash(service), MSHash(method), MSHash(domain), timeout, request, std::forward<MSLambda<void(MSStringView)>>(callback));
 }
 
 MSAsync<MSString> Service::async(MSStringView service, MSStringView method, MSStringView domain, uint32_t timeout, MSStringView request)

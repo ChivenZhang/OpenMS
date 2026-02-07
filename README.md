@@ -31,7 +31,7 @@ The Distributed Network Framework based on Microservice Theory.
 
 ```c++
 // Master service instance
-class Master : public MasterService
+class Master : public MasterServer
 {
 protected:
 	void onInit() override;
@@ -40,8 +40,8 @@ protected:
 OPENMS_RUN(Master)
 ```
 ```c++
-// First cluster instance joined to master
-class Cluster1 : public ClusterService
+// One cluster instance joined to master
+class Cluster1 : public ClusterServer
 {
 protected:
 	void onInit() override;
@@ -50,8 +50,8 @@ protected:
 OPENMS_RUN(Cluster1)
 ```
 ```c++
-// Second cluster instance joined to master
-class Cluster2 : public ClusterService
+// Another cluster instance joined to master
+class Cluster2 : public ClusterServer
 {
 protected:
 	void onInit() override;
