@@ -69,14 +69,24 @@ SpaceService::SpaceService(uint32_t spaceID, uint32_t gameID)
 	{
 		co_return;
 	});
-	this->bind("syncStatus", [=](uint32_t userID)->MSAsync<void>
+	this->bind("syncState", [=](uint32_t userID)->MSAsync<void>
 	{
+		// TODO: A thousand years later
 		co_return;
 	});
 	this->bind("onCreateRequest", [=, this](MSString caller)->MSAsync<void>
 	{
 		MS_INFO("创建游戏：%u", gameID);
 		co_return co_await this->onCreateRequest(caller);
+	});
+
+	m_Timer.start(1000, 1000, [=, this]()
+	{
+		for (auto& user : m_UserInfos)
+		{
+			auto userID = user.second.UserID;
+			this->call<void>("client:" + std::to_string(userID), "onStateChange", "proxy:" + std::to_string(userID), 0, MSTuple{"{name:value}"});
+		}
 	});
 }
 

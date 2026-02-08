@@ -9,12 +9,11 @@
 *
 * =================================================*/
 #include "FrontendClient.h"
-
 #include "ClientService.h"
+#include "PlayerService.h"
 #include "Handler/AES/AESHandler.h"
 #include "Mailbox/Private/Mail.h"
 #include "Server/Private/Service.h"
-#include "Service/Backend/PlayerService.h"
 
 #define GATEWAY_ADDR "127.0.0.1"
 #define GATEWAY_PORT 9090

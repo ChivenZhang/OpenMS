@@ -40,16 +40,18 @@ if(OPENMS_ENABLE_BUSINESS)
 add_subdirectory(${OPENMS_SOURCE_DIR}/Service/Business)
 endif()
 
-if(OPENMS_ENABLE_BACKEND)
-add_subdirectory(${OPENMS_SOURCE_DIR}/Service/Backend)
+if(OPENMS_ENABLE_SYNC_STATE)
+add_subdirectory(${OPENMS_SOURCE_DIR}/Service/SyncState/Backend)
+add_subdirectory(${OPENMS_SOURCE_DIR}/Service/SyncState/Frontend)
+endif()
+
+if(OPENMS_ENABLE_SYNC_FRAME)
+add_subdirectory(${OPENMS_SOURCE_DIR}/Service/SyncFrame/Backend)
+add_subdirectory(${OPENMS_SOURCE_DIR}/Service/SyncFrame/Frontend)
 endif()
 
 if(OPENMS_ENABLE_STORAGE)
 add_subdirectory(${OPENMS_SOURCE_DIR}/Service/Storage)
-endif()
-
-if(OPENMS_ENABLE_FRONTEND)
-add_subdirectory(${OPENMS_SOURCE_DIR}/Service/Frontend)
 endif()
 
 if(OPENMS_ENABLE_CONFIG)
