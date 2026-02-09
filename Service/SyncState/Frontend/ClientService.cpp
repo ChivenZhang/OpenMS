@@ -44,17 +44,68 @@ ClientService::ClientService()
 	});
 }
 
+bool ClientService::signup(MSString username, MSString password, uint32_t timeout)
+{
+	return this->async("guest", "guest", "", 100, MSTuple{}, [=, this](uint32_t guestID)
+	{
+		if (guestID == 0) return;
+		auto guestName = "guest:" + std::to_string(guestID);
+
+		MS_INFO("正在注册...");
+
+		this->async(guestName, "signup", "", timeout, MSTuple{username, password}, [](bool result)
+		{
+			MS_INFO("注册结果：%s", result ? "true" : "false");
+		});
+	});
+}
+
+bool ClientService::login(MSString username, MSString password, uint32_t timeout)
+{
+	return this->async("guest", "guest", "", 100, MSTuple{}, [=, this](uint32_t guestID)
+	{
+		if (guestID == 0) return;
+		auto guestName = "guest:" + std::to_string(guestID);
+
+		MS_INFO("正在登录...");
+
+		this->async(guestName, "login", "", timeout, MSTuple{username, password}, [](uint32_t userID)
+		{
+			MS_INFO("登录结果：%d", userID);
+		});
+	});
+}
+
+bool ClientService::logout(uint32_t timeout)
+{
+	return this->async("guest", "guest", "", 100, MSTuple{}, [=, this](uint32_t guestID)
+	{
+		if (guestID == 0) return;
+		auto guestName = "guest:" + std::to_string(guestID);
+
+		MS_INFO("正在注销...");
+
+		this->async(guestName, "logout", "", timeout, MSTuple{}, [](bool result)
+		{
+			MS_INFO("注销结果：%d", result ? "true" : "false");
+		});
+	});
+}
+
 MSAsync<void> ClientService::onLogin(uint32_t userID)
 {
+	MS_INFO("登录回调：%u", userID);
 	co_return;
 }
 
 MSAsync<void> ClientService::onLogout(bool result)
 {
+	MS_INFO("注销回调：%s", result ? "true" : "false");
 	co_return;
 }
 
 MSAsync<void> ClientService::onSignup(bool result)
 {
+	MS_INFO("注册回调：%s", result ? "true" : "false");
 	co_return;
 }

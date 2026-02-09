@@ -16,6 +16,12 @@ class ClientService : public Service
 public:
 	ClientService();
 
+	virtual bool signup(MSString username, MSString password, uint32_t timeout = 5000/*ms*/);
+
+	virtual bool login(MSString username, MSString password, uint32_t timeout = 5000/*ms*/);
+
+	virtual bool logout(uint32_t timeout = 5000/*ms*/);
+
 	virtual MSAsync<void> onLogin(uint32_t userID);
 
 	virtual MSAsync<void> onLogout(bool result);

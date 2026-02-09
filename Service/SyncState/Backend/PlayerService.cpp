@@ -32,4 +32,6 @@ PlayerService::PlayerService(uint32_t userID)
 		co_await this->callClient<void>("onAttack", 0, MSTuple{});
 		co_return;
 	});
+
+	this->call<void>("logic", "onCreatePlayer", "", 0, MSTuple{userID});
 }
