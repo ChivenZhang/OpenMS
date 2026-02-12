@@ -40,23 +40,33 @@ void BackendServer::onInit()
 		return;
 	}
 
-	auto spaceService = this->onSpaceCreate(spaceID, gameID);
-	mailHub->create("space:" + std::to_string(spaceID), spaceService);
-
-	spaceService->call<void>(spaceService->name(), "onCreateRequest", "", 0, MSTuple{caller,});
-
-	this->startTimer(5000, 0, [this, self = spaceService.get()]()
+	auto spaceService = this->onCreateRequest(spaceID, gameID);
+	if (mailHub->create("space:" + std::to_string(spaceID), spaceService))
 	{
-		self->call<void>(self->name(), "endPlay", "", 5000, MSTuple{});
-	});
+		spaceService->call<void>(caller, "onCreateSpace", "", 0, MSTuple{spaceID,});
+
+		this->startTimer(5000, 0, [self = spaceService.get()]()
+		{
+			self->call<void>(self->name(), "endPlay", "", 5000, MSTuple{});
+		});
+	}
 }
 
 void BackendServer::onExit()
 {
+	auto mailHub = AUTOWIRE(IMailHub)::bean();
+	if (auto spaceService = m_SpaceService.lock())
+	{
+		auto caller = FLAGS_caller;
+		auto spaceID = FLAGS_space;
+		spaceService->call<void>(caller, "onDeleteSpace", "", 0, MSTuple{spaceID,});
+		mailHub->cancel("space:" + std::to_string(spaceID));
+	}
+
 	ClusterServer::onExit();
 }
 
-MSRef<Service> BackendServer::onSpaceCreate(uint32_t spaceID, uint32_t gameID)
+MSRef<Service> BackendServer::onCreateRequest(uint32_t spaceID, uint32_t gameID)
 {
 	return MSNew<SpaceService>(spaceID, gameID);
 }

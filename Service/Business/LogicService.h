@@ -20,19 +20,19 @@ public:
 	virtual MSAsync<void> globalData(MSStringView name, MSStringView value) final;
 	virtual MSAsync<void> onGlobalData(MSStringView name, MSStringView value) final;
 
-	virtual MSAsync<uint32_t> onLoginRequest(MSString username, MSString password);
+	virtual MSAsync<uint32_t> onRequestLogin(MSString username, MSString password);
 	virtual MSAsync<void> onClientLogin(uint32_t userID, uint32_t code, MSString error);
 
 	virtual MSAsync<uint32_t> onSignupRequest(MSString username, MSString password);
 	virtual MSAsync<void> onClientSignup(uint32_t userID, uint32_t code, MSString error);
 
-	virtual MSAsync<void> onBattleMatch(uint32_t gameID, MSList<uint32_t> userIDs);
+	virtual MSAsync<void> onMatchBattle(uint32_t gameID, MSList<uint32_t> userIDs);
 
-	virtual MSAsync<uint32_t> onSpaceRequest(uint32_t gameID);
-	virtual MSAsync<void> onSpaceCreate(uint32_t spaceID);
-	virtual MSAsync<void> onSpaceDelete(uint32_t spaceID);
-	virtual MSAsync<void> onSpaceEnter(uint32_t spaceID, uint32_t userID);
-	virtual MSAsync<void> onSpaceLeave(uint32_t spaceID, uint32_t userID);
+	virtual MSAsync<uint32_t> onRequestSpace(uint32_t gameID);
+	virtual MSAsync<void> onCreateSpace(uint32_t spaceID);
+	virtual MSAsync<void> onDeleteSpace(uint32_t spaceID);
+	virtual MSAsync<void> onEnterSpace(uint32_t spaceID, uint32_t userID);
+	virtual MSAsync<void> onLeaveSpace(uint32_t spaceID, uint32_t userID);
 
 protected:
 	MSMutex m_UserLock;

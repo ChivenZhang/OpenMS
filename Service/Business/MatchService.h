@@ -28,7 +28,7 @@ public:
 
 	virtual MSAsync<void> onMatchRequest(uint32_t gameID, MSList<player_t>& candidates, MSSet<uint32_t>& result);
 
-	virtual MSAsync<void> onMatchComplete(MSString caller, uint32_t gameID, MSSet<uint32_t>& participates);
+	virtual MSAsync<void> onMatchComplete(MSString caller, uint32_t gameID, MSSet<uint32_t>& userIDs);
 
 protected:
 	MSMap<user_t, game_t> m_UserMatches;

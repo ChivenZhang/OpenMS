@@ -55,8 +55,8 @@ MSAsync<void> MatchService::onMatchRequest(uint32_t gameID, MSList<player_t>& ca
 	co_return;
 }
 
-MSAsync<void> MatchService::onMatchComplete(MSString caller, uint32_t gameID, MSSet<uint32_t>& participates)
+MSAsync<void> MatchService::onMatchComplete(MSString caller, uint32_t gameID, MSSet<uint32_t>& userIDs)
 {
-	if (participates.empty()) co_return;
-	co_return co_await this->async<void>(caller, "onBattleMatch", "", 0, MSTuple{gameID, participates});
+	if (userIDs.empty()) co_return;
+	co_return co_await this->async<void>(caller, "onMatchBattle", "", 0, MSTuple{gameID, userIDs});
 }

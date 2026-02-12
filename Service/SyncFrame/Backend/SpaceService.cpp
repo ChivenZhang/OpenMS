@@ -74,16 +74,4 @@ SpaceService::SpaceService(uint32_t spaceID, uint32_t gameID)
 		// TODO: A thousand years later
 		co_return;
 	});
-	this->bind("onCreateRequest", [=, this](MSString caller)->MSAsync<void>
-	{
-		MS_INFO("创建游戏：%u", gameID);
-		co_return co_await this->onCreateRequest(caller);
-	});
-}
-
-MSAsync<void> SpaceService::onCreateRequest(MSString caller)
-{
-	// TODO: A thousand years later
-	co_await this->async<void>(caller, "onSpaceCreate", "", 0, MSTuple{m_SpaceID});
-	co_return;
 }

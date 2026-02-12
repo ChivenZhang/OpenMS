@@ -24,23 +24,15 @@ ClientService::ClientService()
 	});
 	this->bind("onSignup", [=, this](bool result)->MSAsync<void>
 	{
-		MS_INFO("注册回调");
 		co_return co_await this->onSignup(result);
 	});
-	this->bind("onCreateClient", [=](uint32_t userID)->MSAsync<void>
+	this->bind("onEnterSpace", [=, this](uint32_t spaceID, uint32_t userID)->MSAsync<void>
 	{
-		MS_INFO("创建角色");
-		co_return;
+		co_return co_await this->onEnterSpace(spaceID, userID);
 	});
-	this->bind("onCreateGhost", [=](uint32_t userID)->MSAsync<void>
+	this->bind("onLeaveSpace", [=, this](uint32_t spaceID, uint32_t userID)->MSAsync<void>
 	{
-		MS_INFO("创建代理");
-		co_return;
-	});
-	this->bind("onDeleteGhost", [=](uint32_t userID)->MSAsync<void>
-	{
-		MS_INFO("删除角色/代理");
-		co_return;
+		co_return co_await this->onLeaveSpace(spaceID, userID);
 	});
 }
 
@@ -107,5 +99,15 @@ MSAsync<void> ClientService::onLogout(bool result)
 MSAsync<void> ClientService::onSignup(bool result)
 {
 	MS_INFO("注册回调：%s", result ? "true" : "false");
+	co_return;
+}
+
+MSAsync<void> ClientService::onEnterSpace(uint32_t spaceID, uint32_t userID)
+{
+	co_return;
+}
+
+MSAsync<void> ClientService::onLeaveSpace(uint32_t spaceID, uint32_t userID)
+{
 	co_return;
 }

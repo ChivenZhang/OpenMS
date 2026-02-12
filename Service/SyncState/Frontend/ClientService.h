@@ -27,4 +27,8 @@ public:
 	virtual MSAsync<void> onLogout(bool result);
 
 	virtual MSAsync<void> onSignup(bool result);
+
+	virtual MSAsync<void> onEnterSpace(uint32_t spaceID, uint32_t userID);
+
+	virtual MSAsync<void> onLeaveSpace(uint32_t spaceID, uint32_t userID);
 };

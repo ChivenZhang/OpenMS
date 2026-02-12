@@ -16,8 +16,6 @@ class SpaceService : public Service
 public:
 	explicit SpaceService(uint32_t spaceID, uint32_t gameID);
 
-	virtual MSAsync<void> onCreateRequest(MSString caller);
-
 protected:
 	const uint32_t m_SpaceID;
 	const uint32_t m_GameID;
