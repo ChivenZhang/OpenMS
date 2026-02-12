@@ -1,5 +1,6 @@
 if(OPENMS_ENABLE_SYNC_STATE)
-add_executable(StateFrontend
+project(StateFrontend)
+add_library(${PROJECT_NAME}SDK STATIC
         FrontendClient.cpp
         FrontendClient.h
         ClientService.cpp
@@ -7,7 +8,14 @@ add_executable(StateFrontend
         PlayerService.cpp
         PlayerService.h
 )
-add_dependencies(StateFrontend OpenMS)
-target_include_directories(StateFrontend PUBLIC ${OPENMS_SOURCE_DIR})
-target_link_libraries(StateFrontend PRIVATE OpenMS)
+
+add_dependencies(${PROJECT_NAME}SDK OpenMS)
+target_include_directories(${PROJECT_NAME}SDK PUBLIC ${OPENMS_SOURCE_DIR})
+target_link_libraries(${PROJECT_NAME}SDK PUBLIC OpenMS)
+
+add_executable(${PROJECT_NAME}
+        StateFrontend.cpp
+)
+add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}SDK)
+target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}SDK)
 endif()

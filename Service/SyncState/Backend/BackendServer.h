@@ -26,5 +26,3 @@ protected:
 protected:
 	MSHnd<Service> m_SpaceService;
 };
-
-OPENMS_RUN(BackendServer)

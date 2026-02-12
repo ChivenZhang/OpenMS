@@ -50,16 +50,18 @@ void BackendServer::onInit()
 			self->call<void>(self->name(), "endPlay", "", 5000, MSTuple{});
 		});
 	}
+	m_SpaceService = spaceService;
 }
 
 void BackendServer::onExit()
 {
-	auto mailHub = AUTOWIRE(IMailHub)::bean();
 	if (auto spaceService = m_SpaceService.lock())
 	{
 		auto caller = FLAGS_caller;
 		auto spaceID = FLAGS_space;
 		spaceService->call<void>(caller, "onDeleteSpace", "", 0, MSTuple{spaceID,});
+
+		auto mailHub = AUTOWIRE(IMailHub)::bean();
 		mailHub->cancel("space:" + std::to_string(spaceID));
 	}
 
