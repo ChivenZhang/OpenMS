@@ -50,6 +50,22 @@ SpaceService::SpaceService(uint32_t spaceID, uint32_t gameID)
 		}
 		co_return;
 	});
+	this->bind("reenterSpace", [=, this](MSString caller, uint32_t userID)->MSAsync<void>
+	{
+		MS_INFO("用户 %u 重新加入空间", userID);
+
+		if (this->exists("player:" + std::to_string(userID)))
+		{
+			auto& user = m_UserInfos[userID];
+			user.UserID = userID;
+			co_await this->async<void>(caller, "onEnterSpace", "", 0, MSTuple{m_SpaceID, userID });
+
+			// Entail synchronization of game state
+
+			co_await this->async<void>(this->name(), "syncWhole", "", 0, MSTuple{userID});
+		}
+		co_return;
+	});
 	this->bind("leaveSpace", [=, this](uint32_t userID)->MSAsync<void>
 	{
 		MS_INFO("用户 %u 离开空间", userID);
@@ -70,6 +86,11 @@ SpaceService::SpaceService(uint32_t spaceID, uint32_t gameID)
 		co_return;
 	});
 	this->bind("syncState", [=](uint32_t userID)->MSAsync<void>
+	{
+		// TODO: A thousand years later
+		co_return;
+	});
+	this->bind("syncWhole", [=](uint32_t userID)->MSAsync<void>
 	{
 		// TODO: A thousand years later
 		co_return;

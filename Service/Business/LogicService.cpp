@@ -186,12 +186,38 @@ MSAsync<void> LogicService::onClientLogin(uint32_t userID, uint32_t code, MSStri
 
 	// Update record
 
-	MSMutexLock lock(m_UserLock);
-	auto& userInfo = m_UserInfos[userID];
-	userInfo.SpaceID = 0;
-	userInfo.Online = true;
-	userInfo.InGame = false;
-	userInfo.LastUpdate = ::clock() * 1.0f / CLOCKS_PER_SEC;
+	m_UserLock.lock();
+	auto result = m_UserInfos.emplace(userID, UserInfo{});
+	if(result.second)
+	{
+		// New user, initialize info
+		auto& userInfo = result.first;
+		userInfo.SpaceID = 0;
+		userInfo.Online = true;
+		userInfo.InGame = false;
+		userInfo.LastUpdate = ::clock() * 1.0f / CLOCKS_PER_SEC;
+		m_UserLock.unlock();
+	}
+	else
+	{
+		// Existing user, update info
+		auto& userInfo = result.first;
+		userInfo.Online = true;
+		userInfo.LastUpdate = ::clock() * 1.0f / CLOCKS_PER_SEC;
+		if(userInfo.InGame && userInfo.SpaceID)
+		{
+			auto spaceID = userInfo.SpaceID;
+			m_UserLock.unlock();
+			co_await this->async<void>("space:" + std::to_string(spaceID), "reenterSpace", "", 0, MSTuple{this->name(), userID});
+		}
+		else
+		{
+			// Not in game, treat as normal login
+			userInfo.SpaceID = 0;
+			userInfo.InGame = false;
+			m_UserLock.unlock();
+		}
+	}
 	co_return;
 }
 
