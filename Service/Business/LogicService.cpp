@@ -187,11 +187,11 @@ MSAsync<void> LogicService::onClientLogin(uint32_t userID, uint32_t code, MSStri
 	// Update record
 
 	m_UserLock.lock();
-	auto result = m_UserInfos.emplace(userID, UserInfo{});
+	auto result = m_UserInfos.emplace(userID, user_t{});
 	if(result.second)
 	{
 		// New user, initialize info
-		auto& userInfo = result.first;
+		auto& userInfo = result.first->second;
 		userInfo.SpaceID = 0;
 		userInfo.Online = true;
 		userInfo.InGame = false;
@@ -201,7 +201,7 @@ MSAsync<void> LogicService::onClientLogin(uint32_t userID, uint32_t code, MSStri
 	else
 	{
 		// Existing user, update info
-		auto& userInfo = result.first;
+		auto& userInfo = result.first->second;
 		userInfo.Online = true;
 		userInfo.LastUpdate = ::clock() * 1.0f / CLOCKS_PER_SEC;
 		if(userInfo.InGame && userInfo.SpaceID)

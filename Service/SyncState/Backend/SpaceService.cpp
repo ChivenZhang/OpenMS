@@ -54,7 +54,7 @@ SpaceService::SpaceService(uint32_t spaceID, uint32_t gameID)
 	{
 		MS_INFO("用户 %u 重新加入空间", userID);
 
-		if (this->exists("player:" + std::to_string(userID)))
+		if (this->exist("player:" + std::to_string(userID)))
 		{
 			auto& user = m_UserInfos[userID];
 			user.UserID = userID;

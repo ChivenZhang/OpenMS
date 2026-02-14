@@ -178,6 +178,7 @@ void ClusterServer::onExit()
 
 bool ClusterServer::onFail(IMail mail)
 {
+	system("pause");
 	MS_ERROR("fail %u=>%u via %u #%u @%u", mail.From, mail.To, mail.Copy, mail.Date, mail.Type);
 	return false;
 }
