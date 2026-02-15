@@ -76,7 +76,8 @@
 				"OPENMS_ENABLE_SQLITE": "ON"
 			},
 			"environment": {
-				"VCPKG_HOME": "F:/Library/Windows/vcpkg-static",
+				"VCPKG_HOME": "../vcpkg",
+				"VCPKG_HOME1": "F:/Library/Windows/vcpkg-static",
 				"VCPKG_HOME2": "D:/ChivenZhang/GitProject/Library/Window/vcpkg",
 				"VCPKG_HOME3": "/Users/apple/CLionProjects/vcpkg"
 			}
