@@ -17,10 +17,10 @@ ClientService::ClientService()
 		MS_INFO("登录回调");
 		co_return co_await this->onLogin(userID);
 	});
-	this->bind("onLogout", [=, this](bool result)->MSAsync<void>
+	this->bind("onLogout", [=, this](uint32_t userID, bool result)->MSAsync<void>
 	{
 		MS_INFO("注销回调");
-		co_return co_await this->onLogout(result);
+		co_return co_await this->onLogout(userID, result);
 	});
 	this->bind("onSignup", [=, this](bool result)->MSAsync<void>
 	{
@@ -87,12 +87,23 @@ bool ClientService::logout(uint32_t timeout)
 MSAsync<void> ClientService::onLogin(uint32_t userID)
 {
 	MS_INFO("登录回调：%u", userID);
+	
+	auto playerService = this->onCreatingPlayer(userID);
+	if(this->create("client:" + std::to_string(userID), playerService))
+	{
+		MS_INFO("用户 %u 登录成功", userID);
+	}
 	co_return;
 }
 
-MSAsync<void> ClientService::onLogout(bool result)
+MSAsync<void> ClientService::onLogout(uint32_t userID, bool result)
 {
 	MS_INFO("注销回调：%s", result ? "true" : "false");
+
+	if(this->cancel("client:" + std::to_string(userID)))
+	{
+		MS_INFO("用户 %u 注销成功", userID);
+	}
 	co_return;
 }
 
@@ -110,4 +121,9 @@ MSAsync<void> ClientService::onEnterSpace(uint32_t spaceID, uint32_t userID)
 MSAsync<void> ClientService::onLeaveSpace(uint32_t spaceID, uint32_t userID)
 {
 	co_return;
+}
+
+MSRef<PlayerService> ClientService::onCreatingPlayer(uint32_t userID)
+{
+    return MSNew<PlayerService>(userID);
 }

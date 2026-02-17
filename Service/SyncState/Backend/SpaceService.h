@@ -17,6 +17,9 @@ public:
 	explicit SpaceService(uint32_t spaceID, uint32_t gameID);
 
 protected:
+	virtual MSRef<Service> onCreatingPlayer(uint32_t userID);
+
+protected:
 	const uint32_t m_SpaceID;
 	const uint32_t m_GameID;
 	enum state_t

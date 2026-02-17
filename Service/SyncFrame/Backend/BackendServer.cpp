@@ -40,10 +40,10 @@ void BackendServer::onInit()
 		return;
 	}
 
-	auto spaceService = this->onCreateRequest(spaceID, gameID);
+	auto spaceService = this->onCreatingSpace(spaceID, gameID);
 	mailHub->create("space:" + std::to_string(spaceID), spaceService);
 
-	spaceService->call<void>(spaceService->name(), "onCreateRequest", "", 0, MSTuple{caller,});
+	spaceService->call<void>(spaceService->name(), "onCreatingSpace", "", 0, MSTuple{caller,});
 
 	this->startTimer(5000, 0, [this, self = spaceService.get()]()
 	{
@@ -56,7 +56,7 @@ void BackendServer::onExit()
 	ClusterServer::onExit();
 }
 
-MSRef<Service> BackendServer::onCreateRequest(uint32_t spaceID, uint32_t gameID)
+MSRef<Service> BackendServer::onCreatingSpace(uint32_t spaceID, uint32_t gameID)
 {
 	return MSNew<SpaceService>(spaceID, gameID);
 }

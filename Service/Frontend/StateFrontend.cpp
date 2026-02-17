@@ -8,6 +8,6 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "FrontendClient.h"
+#include <Service/SyncState/Frontend/FrontendClient.h>
 
 OPENMS_RUN(FrontendClient)

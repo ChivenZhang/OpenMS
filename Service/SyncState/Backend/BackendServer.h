@@ -21,7 +21,7 @@ public:
 protected:
 	void onInit() override;
 	void onExit() override;
-	virtual MSRef<Service> onCreateRequest(uint32_t spaceID, uint32_t gameID);
+	virtual MSRef<Service> onCreatingSpace(uint32_t spaceID, uint32_t gameID);
 
 protected:
 	MSHnd<Service> m_SpaceService;
