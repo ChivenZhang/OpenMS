@@ -15,9 +15,7 @@
 class MyPlayerService : public PlayerService
 {
 public:
-    explicit MyPlayerService(uint32_t userID)
-        :
-        PlayerService(userID)
+    explicit MyPlayerService(uint32_t userID) : PlayerService(userID)
     {
         this->bind("onAttack", [=]()->MSAsync<void>
         {
@@ -29,7 +27,6 @@ public:
 protected:
     MSAsync<void> onCreatePlayer() override
     {
-        MS_INFO("尝试匹配...");
         co_await this->callServer<void>("matchBattle", 5000, MSTuple{ 0U });
         co_return;
     }
@@ -43,7 +40,7 @@ protected:
     MSAsync<void> onStopBattle() override
     {
         MS_INFO("玩家 %u 结束战斗", m_UserID);
-
+        // TODO:
         co_return co_await PlayerService::onStopBattle();
     }
 
@@ -57,9 +54,6 @@ protected:
 
 class MyClientService : public ClientService
 {
-public:
-    using ClientService::ClientService;
-
 protected:
     MSRef<PlayerService> onCreatingPlayer(uint32_t userID) override
     {
@@ -69,13 +63,7 @@ protected:
 
 class MyFrontClient : public FrontendClient
 {
-public:
-
 protected:
-    MSRef<ClientService> onCreatingClient() override
-    {
-        return MSNew<MyClientService>();
-    }
     void onInit() override
     {
         FrontendClient::onInit();
@@ -84,6 +72,12 @@ protected:
         {
             clientService->login("admin", "123456");
         }
+
+        // TODO: Reconnect when disconnect.
+    }
+    MSRef<ClientService> onCreatingClient() override
+    {
+        return MSNew<MyClientService>();
     }
 };
 
