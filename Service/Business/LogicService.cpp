@@ -36,16 +36,8 @@ LogicService::LogicService()
 	this->bind("logout", [=, this](uint32_t userID)->MSAsync<bool>
 	{
 		MS_INFO("注销请求");	// TODO: 心跳超时，自动登出
-		auto result = false;
-		result |= this->cancel("server:" + std::to_string(userID));
-		result |= this->cancel("player:" + std::to_string(userID));
 
-		if (result)
-		{
-			MSMutexLock lock(m_UserLock);
-			auto& userInfo = m_UserInfos[userID];
-			userInfo.Online = false;
-		}
+		co_await this->onClientLogout(userID, true, {});
 		co_return true;
 	});
 
@@ -184,15 +176,56 @@ MSAsync<void> LogicService::onClientLogin(uint32_t userID, uint32_t code, MSStri
 	});
 	this->create("server:" + std::to_string(userID), serverService);
 
+	co_await this->async<void>("client", "onLogin", "proxy:" + std::to_string(userID), 0, MSTuple{userID});
+
 	// Update record
 
-	MSMutexLock lock(m_UserLock);
-	auto& userInfo = m_UserInfos[userID];
-	userInfo.SpaceID = 0;
-	userInfo.Online = true;
-	userInfo.InGame = false;
-	userInfo.LastUpdate = ::clock() * 1.0f / CLOCKS_PER_SEC;
+	m_UserLock.lock();
+	auto result = m_UserInfos.emplace(userID, user_t{});
+	if(result.second)
+	{
+		// New user, initialize info
+		auto& userInfo = result.first->second;
+		userInfo.SpaceID = 0;
+		userInfo.Online = true;
+		userInfo.InGame = false;
+		userInfo.LastUpdate = ::clock() * 1.0f / CLOCKS_PER_SEC;
+		m_UserLock.unlock();
+	}
+	else
+	{
+		// Existing user, update info
+		auto& userInfo = result.first->second;
+		userInfo.Online = true;
+		userInfo.LastUpdate = ::clock() * 1.0f / CLOCKS_PER_SEC;
+		if(userInfo.InGame && userInfo.SpaceID)
+		{
+			auto spaceID = userInfo.SpaceID;
+			m_UserLock.unlock();
+			co_await this->async<void>("space:" + std::to_string(spaceID), "reenterSpace", "", 0, MSTuple{this->name(), userID});
+		}
+		else
+		{
+			// Not in game, treat as normal login
+			userInfo.SpaceID = 0;
+			userInfo.InGame = false;
+			m_UserLock.unlock();
+		}
+	}
 	co_return;
+}
+
+MSAsync<void> LogicService::onClientLogout(uint32_t userID, uint32_t code, MSString error)
+{
+	m_UserLock.lock();
+	auto& userInfo = m_UserInfos[userID];
+	userInfo.Online = false;
+	m_UserLock.unlock();
+
+	co_return co_await this->async<void>("client", "onLogout", "proxy:" + std::to_string(userID), 0, MSTuple{userID, code});
+	
+	this->cancel("server:" + std::to_string(userID));
+	this->cancel("player:" + std::to_string(userID));
 }
 
 MSAsync<uint32_t> LogicService::onSignupRequest(MSString username, MSString password)
@@ -202,7 +235,7 @@ MSAsync<uint32_t> LogicService::onSignupRequest(MSString username, MSString pass
 
 MSAsync<void> LogicService::onClientSignup(uint32_t userID, uint32_t code, MSString error)
 {
-	co_return;
+	co_return co_await this->async<void>("client", "onSignup", "proxy:" + std::to_string(userID), 0, MSTuple{code});
 }
 
 MSAsync<void> LogicService::onMatchBattle(uint32_t gameID, MSList<uint32_t> userIDs)

@@ -9,7 +9,6 @@
 *
 * =================================================*/
 #include "SpaceService.h"
-
 #include "iocpp.h"
 #include "PlayerService.h"
 #include "Server/IServer.h"
@@ -42,11 +41,28 @@ SpaceService::SpaceService(uint32_t spaceID, uint32_t gameID)
 	{
 		MS_INFO("用户 %u 加入空间", userID);
 
-		if (this->create("player:" + std::to_string(userID), MSNew<PlayerService>(userID)))
+		auto playerService = this->onCreatingPlayer(userID);
+		if (this->create("player:" + std::to_string(userID), playerService))
 		{
 			auto& user = m_UserInfos[userID];
 			user.UserID = userID;
 			co_await this->async<void>(caller, "onEnterSpace", "", 0, MSTuple{m_SpaceID, userID });
+		}
+		co_return;
+	});
+	this->bind("reenterSpace", [=, this](MSString caller, uint32_t userID)->MSAsync<void>
+	{
+		MS_INFO("用户 %u 重新加入空间", userID);
+
+		if (this->exist("player:" + std::to_string(userID)))
+		{
+			auto& user = m_UserInfos[userID];
+			user.UserID = userID;
+			co_await this->async<void>(caller, "onEnterSpace", "", 0, MSTuple{m_SpaceID, userID });
+
+			// Entail synchronization of game state
+
+			co_await this->async<void>(this->name(), "syncWhole", "", 0, MSTuple{userID});
 		}
 		co_return;
 	});
@@ -74,6 +90,11 @@ SpaceService::SpaceService(uint32_t spaceID, uint32_t gameID)
 		// TODO: A thousand years later
 		co_return;
 	});
+	this->bind("syncWhole", [=](uint32_t userID)->MSAsync<void>
+	{
+		// TODO: A thousand years later
+		co_return;
+	});
 
 	m_Timer.start(1000, 1000, [=, this]()
 	{
@@ -83,4 +104,9 @@ SpaceService::SpaceService(uint32_t spaceID, uint32_t gameID)
 			this->call<void>("client:" + std::to_string(userID), "onStateChange", "proxy:" + std::to_string(userID), 0, MSTuple{"{name:value}"});
 		}
 	});
+}
+
+MSRef<Service> SpaceService::onCreatingPlayer(uint32_t userID)
+{
+	return MSNew<PlayerService>(userID);
 }

@@ -10,6 +10,7 @@
 *
 * =================================================*/
 #include <Server/Private/Service.h>
+#include "PlayerService.h"
 
 class ClientService : public Service
 {
@@ -22,13 +23,16 @@ public:
 
 	virtual bool logout(uint32_t timeout = 5000/*ms*/);
 
+protected:
 	virtual MSAsync<void> onLogin(uint32_t userID);
 
-	virtual MSAsync<void> onLogout(bool result);
+	virtual MSAsync<void> onLogout(uint32_t userID, bool result);
 
 	virtual MSAsync<void> onSignup(bool result);
 
 	virtual MSAsync<void> onEnterSpace(uint32_t spaceID, uint32_t userID);
 
 	virtual MSAsync<void> onLeaveSpace(uint32_t spaceID, uint32_t userID);
+
+	virtual MSRef<PlayerService> onCreatingPlayer(uint32_t userID);
 };

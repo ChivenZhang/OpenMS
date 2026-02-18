@@ -50,6 +50,11 @@ add_subdirectory(${OPENMS_SOURCE_DIR}/Service/SyncFrame/Backend)
 add_subdirectory(${OPENMS_SOURCE_DIR}/Service/SyncFrame/Frontend)
 endif()
 
+if(OPENMS_ENABLE_SYNC_STATE OR OPENMS_ENABLE_SYNC_FRAME)
+add_subdirectory(${OPENMS_SOURCE_DIR}/Service/Backend)
+add_subdirectory(${OPENMS_SOURCE_DIR}/Service/Frontend)
+endif()
+
 if(OPENMS_ENABLE_STORAGE)
 add_subdirectory(${OPENMS_SOURCE_DIR}/Service/Storage)
 endif()
