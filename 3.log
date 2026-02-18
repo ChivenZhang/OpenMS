@@ -1,0 +1,249 @@
+
+  ___                   __  __ ____  
+ / _ \ _ __   ___ _ __ |  \/  / ___| 
+| | | | '_ \ / _ \ '_ \| |\/| \___ \ 
+| |_| | |_) |  __/ | | | |  | |___) |
+ \___/| .__/ \___|_| |_|_|  |_|____/ 
+======|_|============================
+
+:: OpenMS ::                (v1.0.0)
+
+/workspaces/OpenMS/OpenMS/Server/IStartup.h:24:Run()
+2026-02-18 19:38:00.534 I [92288] --- argv[0]: /workspaces/OpenMS/./Output/x64-Develop/BackendServer
+/workspaces/OpenMS/OpenMS/Server/IStartup.h:24:Run()
+2026-02-18 19:38:00.534 I [92288] --- argv[1]: --space=3
+/workspaces/OpenMS/OpenMS/Server/IStartup.h:24:Run()
+2026-02-18 19:38:00.535 I [92288] --- argv[2]: --game=0
+/workspaces/OpenMS/OpenMS/Server/IStartup.h:24:Run()
+2026-02-18 19:38:00.535 I [92288] --- argv[3]: --caller=logic
+/workspaces/OpenMS/OpenMS/Server/Private/Server.cpp:24:startup()
+2026-02-18 19:38:00.543 I [92288] --- starting backend...
+/workspaces/OpenMS/OpenMS/Mailbox/Private/MailMan.cpp:23:operator()()
+2026-02-18 19:38:00.543 I [92293] --- mail worker started
+/workspaces/OpenMS/OpenMS/Reactor/TCP/TCPServerReactor.cpp:79:operator()()
+2026-02-18 19:38:00.555 I [92296] --- listening on 127.0.0.1:40743
+/workspaces/OpenMS/OpenMS/Reactor/TCP/TCPClientReactor.cpp:85:operator()()
+2026-02-18 19:38:00.558 I [92299] --- listening on 127.0.0.1:51808
+/workspaces/OpenMS/OpenMS/Mailbox/Private/MailHub.cpp:43:create()
+2026-02-18 19:38:00.559 I [92288] --- create mailbox space:3, 3925143226
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCClient.cpp:137:call()
+2026-02-18 19:38:00.560 I [92288] --- 客户发送请求:地址 127.0.0.1:51808 会话 1 长度 44 内容 ["127.0.0.1:40743",[3925143226]]
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCClient.cpp:236:channelRead()
+2026-02-18 19:38:00.574 I [92298] --- 客户接收响应:地址 127.0.0.1:51808 会话 1 长度 301 内容 [[4229798,["127.0.0.1:48073"]],[228488896,["127.0.0.1:34705"]],[953308085,["127.0.0.1:37457"]],[1492494891,["127.0.0.1:45651"]],[2116038550,["127.0.0.1:45651"]],[3380555570,["127.0.0.1:45651"]],[3464443665,["127.0.0.1:45651"]],[3596999821,["127.0.0.1:48073"]],[3925143226,["127.0.0.1:40743"]]]
+/workspaces/OpenMS/OpenMS/Server/Cluster/ClusterServer.cpp:109:operator()()
+2026-02-18 19:38:00.574 I [92288] --- validate 127.0.0.1:40743, count 9
+/workspaces/OpenMS/OpenMS/Reactor/TCP/TCPClientReactor.cpp:85:operator()()
+2026-02-18 19:38:00.577 I [92304] --- listening on 127.0.0.1:49656
+/workspaces/OpenMS/OpenMS/Server/Cluster/ClusterServer.cpp:82:operator()()
+2026-02-18 19:38:00.577 I [92288] --- 远程调用: 3925143226 => 3464443665
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCClient.cpp:137:call()
+2026-02-18 19:38:00.577 I [92288] --- 客户发送请求:地址 127.0.0.1:49656 会话 1 长度 39 内容 ����7�ŝ�
+/workspaces/OpenMS/OpenMS/Server/Private/Server.cpp:41:startup()
+2026-02-18 19:38:00.578 I [92288] --- started backend
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCClient.cpp:236:channelRead()
+2026-02-18 19:38:00.585 I [92303] --- 客户接收响应:地址 127.0.0.1:49656 会话 1 长度 8 内容 
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCServer.cpp:241:channelRead()
+2026-02-18 19:38:00.588 I [92295] --- 服务接收请求:地址 127.0.0.1:40743 会话 1 长度 47 内容 7κ���ŝ��
+/workspaces/OpenMS/OpenMS/Server/Cluster/ClusterServer.cpp:138:operator()()
+2026-02-18 19:38:00.589 I [92295] --- 被远程调用: 3464443665 => 3925143226
+/workspaces/OpenMS/Service/SyncState/Backend/SpaceService.cpp:42:operator()()
+2026-02-18 19:38:00.589 I [92293] --- 用户 1 加入空间
+/workspaces/OpenMS/OpenMS/Mailbox/Private/MailHub.cpp:43:create()
+2026-02-18 19:38:00.589 I [92293] --- create mailbox player:1, 3851355117
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCClient.cpp:137:call()
+2026-02-18 19:38:00.590 I [92293] --- 客户发送请求:地址 127.0.0.1:51808 会话 2 长度 55 内容 ["127.0.0.1:40743",[3851355117,3925143226]]
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCServer.cpp:241:channelRead()
+2026-02-18 19:38:00.595 I [92295] --- 服务接收请求:地址 127.0.0.1:40743 会话 2 长度 32 内容 7κ���ŝ�
+/workspaces/OpenMS/OpenMS/Server/Cluster/ClusterServer.cpp:138:operator()()
+2026-02-18 19:38:00.595 I [92295] --- 被远程调用: 3464443665 => 3925143226
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCClient.cpp:236:channelRead()
+2026-02-18 19:38:00.597 I [92298] --- 客户接收响应:地址 127.0.0.1:51808 会话 2 长度 334 内容 [[4229798,["127.0.0.1:48073"]],[228488896,["127.0.0.1:34705"]],[953308085,["127.0.0.1:37457"]],[1492494891,["127.0.0.1:45651"]],[2116038550,["127.0.0.1:45651"]],[3380555570,["127.0.0.1:45651"]],[3464443665,["127.0.0.1:45651"]],[3596999821,["127.0.0.1:48073"]],[3851355117,["127.0.0.1:40743"]],[3925143226,["127.0.0.1:40743"]]]
+/workspaces/OpenMS/OpenMS/Server/Cluster/ClusterServer.cpp:109:operator()()
+2026-02-18 19:38:00.597 I [92293] --- validate 127.0.0.1:40743, count 10
+/workspaces/OpenMS/OpenMS/Server/Private/Service.cpp:89:async()
+2026-02-18 19:38:00.597 I [92293] --- async 3925143226=>3464443665 via 2166136261 #2 @1
+/workspaces/OpenMS/OpenMS/Server/Cluster/ClusterServer.cpp:82:operator()()
+2026-02-18 19:38:00.597 I [92293] --- 远程调用: 3925143226 => 3464443665
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCClient.cpp:137:call()
+2026-02-18 19:38:00.597 I [92293] --- 客户发送请求:地址 127.0.0.1:49656 会话 2 长度 41 内容 ����7�ŝ�
+/workspaces/OpenMS/OpenMS/Server/Cluster/ClusterServer.cpp:82:operator()()
+2026-02-18 19:38:00.598 I [92300] --- 远程调用: 3925143226 => 3464443665
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCClient.cpp:137:call()
+2026-02-18 19:38:00.599 I [92300] --- 客户发送请求:地址 127.0.0.1:49656 会话 3 长度 32 内容 ����7�ŝ��
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCClient.cpp:236:channelRead()
+2026-02-18 19:38:00.601 I [92303] --- 客户接收响应:地址 127.0.0.1:49656 会话 2 长度 8 内容 
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCClient.cpp:236:channelRead()
+2026-02-18 19:38:00.602 I [92303] --- 客户接收响应:地址 127.0.0.1:49656 会话 3 长度 8 内容 
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCServer.cpp:241:channelRead()
+2026-02-18 19:38:00.602 I [92295] --- 服务接收请求:地址 127.0.0.1:40743 会话 3 长度 32 内容 7κ���ŝ�
+/workspaces/OpenMS/OpenMS/Server/Cluster/ClusterServer.cpp:138:operator()()
+2026-02-18 19:38:00.602 I [92295] --- 被远程调用: 3464443665 => 3925143226
+/workspaces/OpenMS/OpenMS/Reactor/TCP/TCPClientReactor.cpp:85:operator()()
+2026-02-18 19:38:01.570 I [92348] --- listening on 127.0.0.1:45180
+/workspaces/OpenMS/OpenMS/Server/Cluster/ClusterServer.cpp:82:operator()()
+2026-02-18 19:38:01.571 I [92301] --- 远程调用: 3925143226 => 1121131303
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCClient.cpp:137:call()
+2026-02-18 19:38:01.571 I [92301] --- 客户发送请求:地址 127.0.0.1:45180 会话 1 长度 52 内容 ����'�B��@
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCClient.cpp:236:channelRead()
+2026-02-18 19:38:01.576 I [92347] --- 客户接收响应:地址 127.0.0.1:45180 会话 1 长度 8 内容 
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCServer.cpp:241:channelRead()
+2026-02-18 19:38:01.580 I [92295] --- 服务接收请求:地址 127.0.0.1:40743 会话 1 长度 44 内容 '�B���馊@
+/workspaces/OpenMS/OpenMS/Server/Cluster/ClusterServer.cpp:138:operator()()
+2026-02-18 19:38:01.581 I [92295] --- 被远程调用: 1121131303 => 3925143226
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCServer.cpp:241:channelRead()
+2026-02-18 19:38:02.494 I [92295] --- 服务接收请求:地址 127.0.0.1:40743 会话 4 长度 36 内容 7κ���ŝ��
+/workspaces/OpenMS/OpenMS/Server/Cluster/ClusterServer.cpp:138:operator()()
+2026-02-18 19:38:02.496 I [92295] --- 被远程调用: 3464443665 => 3925143226
+/workspaces/OpenMS/OpenMS/Server/Private/Service.cpp:89:async()
+2026-02-18 19:38:02.496 I [92293] --- async 3925143226=>3851355117 via 2166136261 #4 @1
+/workspaces/OpenMS/Service/SyncState/Backend/PlayerService.cpp:19:operator()()
+2026-02-18 19:38:02.496 I [92293] --- 用户 1 开始游戏
+/workspaces/OpenMS/OpenMS/Server/Private/Service.cpp:89:async()
+2026-02-18 19:38:02.496 I [92293] --- async 3851355117=>1121131303 via 4229798 #1 @5
+/workspaces/OpenMS/OpenMS/Server/Cluster/ClusterServer.cpp:82:operator()()
+2026-02-18 19:38:02.496 I [92293] --- 远程调用: 3851355117 => 1121131303
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCClient.cpp:137:call()
+2026-02-18 19:38:02.496 I [92293] --- 客户发送请求:地址 127.0.0.1:45180 会话 2 长度 36 内容 ���'�B��@
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCClient.cpp:236:channelRead()
+2026-02-18 19:38:02.497 I [92347] --- 客户接收响应:地址 127.0.0.1:45180 会话 2 长度 8 内容 
+/workspaces/OpenMS/OpenMS/Server/Cluster/ClusterServer.cpp:82:operator()()
+2026-02-18 19:38:02.498 I [92300] --- 远程调用: 3925143226 => 3464443665
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCClient.cpp:137:call()
+2026-02-18 19:38:02.499 I [92300] --- 客户发送请求:地址 127.0.0.1:49656 会话 4 长度 32 内容 ����7�ŝ��
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCClient.cpp:236:channelRead()
+2026-02-18 19:38:02.501 I [92303] --- 客户接收响应:地址 127.0.0.1:49656 会话 4 长度 8 内容 
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCServer.cpp:241:channelRead()
+2026-02-18 19:38:02.506 I [92295] --- 服务接收请求:地址 127.0.0.1:40743 会话 2 长度 44 内容 '�B��妊@
+/workspaces/OpenMS/OpenMS/Server/Cluster/ClusterServer.cpp:138:operator()()
+2026-02-18 19:38:02.506 I [92295] --- 被远程调用: 1121131303 => 3851355117
+/workspaces/OpenMS/Service/SyncState/Backend/PlayerService.cpp:31:operator()()
+2026-02-18 19:38:02.506 I [92293] --- 用户 1 发动攻击
+/workspaces/OpenMS/OpenMS/Server/Private/Service.cpp:89:async()
+2026-02-18 19:38:02.506 I [92293] --- async 3851355117=>1121131303 via 4229798 #2 @5
+/workspaces/OpenMS/OpenMS/Server/Cluster/ClusterServer.cpp:82:operator()()
+2026-02-18 19:38:02.507 I [92293] --- 远程调用: 3851355117 => 1121131303
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCClient.cpp:137:call()
+2026-02-18 19:38:02.507 I [92293] --- 客户发送请求:地址 127.0.0.1:45180 会话 3 长度 36 内容 ���'�B��@
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCClient.cpp:236:channelRead()
+2026-02-18 19:38:02.507 I [92347] --- 客户接收响应:地址 127.0.0.1:45180 会话 3 长度 8 内容 
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCServer.cpp:241:channelRead()
+2026-02-18 19:38:02.509 I [92295] --- 服务接收请求:地址 127.0.0.1:40743 会话 3 长度 44 内容 '�B��妊@
+/workspaces/OpenMS/OpenMS/Server/Cluster/ClusterServer.cpp:138:operator()()
+2026-02-18 19:38:02.509 I [92295] --- 被远程调用: 1121131303 => 3851355117
+/workspaces/OpenMS/OpenMS/Server/Cluster/ClusterServer.cpp:82:operator()()
+2026-02-18 19:38:02.511 I [92308] --- 远程调用: 3851355117 => 1121131303
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCClient.cpp:137:call()
+2026-02-18 19:38:02.511 I [92308] --- 客户发送请求:地址 127.0.0.1:45180 会话 4 长度 32 内容 ���'�B��@
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCClient.cpp:236:channelRead()
+2026-02-18 19:38:02.511 I [92347] --- 客户接收响应:地址 127.0.0.1:45180 会话 4 长度 8 内容 
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCServer.cpp:241:channelRead()
+2026-02-18 19:38:02.511 I [92295] --- 服务接收请求:地址 127.0.0.1:40743 会话 4 长度 44 内容 '�B��妊@
+/workspaces/OpenMS/OpenMS/Server/Cluster/ClusterServer.cpp:138:operator()()
+2026-02-18 19:38:02.511 I [92295] --- 被远程调用: 1121131303 => 3851355117
+/workspaces/OpenMS/OpenMS/Server/Cluster/ClusterServer.cpp:82:operator()()
+2026-02-18 19:38:02.569 I [92301] --- 远程调用: 3925143226 => 1121131303
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCClient.cpp:137:call()
+2026-02-18 19:38:02.569 I [92301] --- 客户发送请求:地址 127.0.0.1:45180 会话 5 长度 52 内容 ����'�B��@
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCClient.cpp:236:channelRead()
+2026-02-18 19:38:02.571 I [92347] --- 客户接收响应:地址 127.0.0.1:45180 会话 5 长度 8 内容 
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCServer.cpp:241:channelRead()
+2026-02-18 19:38:02.572 I [92295] --- 服务接收请求:地址 127.0.0.1:40743 会话 5 长度 44 内容 '�B���馊@
+/workspaces/OpenMS/OpenMS/Server/Cluster/ClusterServer.cpp:138:operator()()
+2026-02-18 19:38:02.572 I [92295] --- 被远程调用: 1121131303 => 3925143226
+/workspaces/OpenMS/OpenMS/Server/Cluster/ClusterServer.cpp:82:operator()()
+2026-02-18 19:38:03.569 I [92301] --- 远程调用: 3925143226 => 1121131303
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCClient.cpp:137:call()
+2026-02-18 19:38:03.569 I [92301] --- 客户发送请求:地址 127.0.0.1:45180 会话 6 长度 52 内容 ����'�B��@
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCClient.cpp:236:channelRead()
+2026-02-18 19:38:03.570 I [92347] --- 客户接收响应:地址 127.0.0.1:45180 会话 6 长度 8 内容 
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCServer.cpp:241:channelRead()
+2026-02-18 19:38:03.571 I [92295] --- 服务接收请求:地址 127.0.0.1:40743 会话 6 长度 44 内容 '�B���馊@
+/workspaces/OpenMS/OpenMS/Server/Cluster/ClusterServer.cpp:138:operator()()
+2026-02-18 19:38:03.572 I [92295] --- 被远程调用: 1121131303 => 3925143226
+/workspaces/OpenMS/OpenMS/Server/Cluster/ClusterServer.cpp:82:operator()()
+2026-02-18 19:38:04.569 I [92301] --- 远程调用: 3925143226 => 1121131303
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCClient.cpp:137:call()
+2026-02-18 19:38:04.569 I [92301] --- 客户发送请求:地址 127.0.0.1:45180 会话 7 长度 52 内容 ����'�B��@
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCClient.cpp:236:channelRead()
+2026-02-18 19:38:04.569 I [92347] --- 客户接收响应:地址 127.0.0.1:45180 会话 7 长度 8 内容 
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCServer.cpp:241:channelRead()
+2026-02-18 19:38:04.571 I [92295] --- 服务接收请求:地址 127.0.0.1:40743 会话 7 长度 44 内容 '�B���馊@
+/workspaces/OpenMS/OpenMS/Server/Cluster/ClusterServer.cpp:138:operator()()
+2026-02-18 19:38:04.572 I [92295] --- 被远程调用: 1121131303 => 3925143226
+/workspaces/OpenMS/OpenMS/Server/Cluster/ClusterServer.cpp:82:operator()()
+2026-02-18 19:38:05.569 I [92301] --- 远程调用: 3925143226 => 1121131303
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCClient.cpp:137:call()
+2026-02-18 19:38:05.569 I [92301] --- 客户发送请求:地址 127.0.0.1:45180 会话 8 长度 52 内容 ����'�B��@
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCClient.cpp:236:channelRead()
+2026-02-18 19:38:05.569 I [92347] --- 客户接收响应:地址 127.0.0.1:45180 会话 8 长度 8 内容 
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCServer.cpp:241:channelRead()
+2026-02-18 19:38:05.570 I [92295] --- 服务接收请求:地址 127.0.0.1:40743 会话 8 长度 44 内容 '�B���馊@
+/workspaces/OpenMS/OpenMS/Server/Cluster/ClusterServer.cpp:138:operator()()
+2026-02-18 19:38:05.570 I [92295] --- 被远程调用: 1121131303 => 3925143226
+/workspaces/OpenMS/OpenMS/Server/Private/Service.cpp:89:async()
+2026-02-18 19:38:05.585 I [92293] --- async 3925143226=>3851355117 via 2166136261 #10 @1
+/workspaces/OpenMS/Service/SyncState/Backend/PlayerService.cpp:25:operator()()
+2026-02-18 19:38:05.585 I [92293] --- 用户 1 结束游戏
+/workspaces/OpenMS/OpenMS/Server/Private/Service.cpp:89:async()
+2026-02-18 19:38:05.585 I [92293] --- async 3851355117=>1121131303 via 4229798 #3 @5
+/workspaces/OpenMS/OpenMS/Server/Cluster/ClusterServer.cpp:82:operator()()
+2026-02-18 19:38:05.585 I [92293] --- 远程调用: 3851355117 => 1121131303
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCClient.cpp:137:call()
+2026-02-18 19:38:05.586 I [92293] --- 客户发送请求:地址 127.0.0.1:45180 会话 9 长度 36 内容 ���'�B��@
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCClient.cpp:236:channelRead()
+2026-02-18 19:38:05.586 I [92347] --- 客户接收响应:地址 127.0.0.1:45180 会话 9 长度 8 内容 
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCServer.cpp:241:channelRead()
+2026-02-18 19:38:05.593 I [92295] --- 服务接收请求:地址 127.0.0.1:40743 会话 9 长度 44 内容 '�B��妊@
+/workspaces/OpenMS/OpenMS/Server/Cluster/ClusterServer.cpp:138:operator()()
+2026-02-18 19:38:05.593 I [92295] --- 被远程调用: 1121131303 => 3851355117
+/workspaces/OpenMS/OpenMS/Server/Cluster/ClusterServer.cpp:82:operator()()
+2026-02-18 19:38:05.599 I [92288] --- 远程调用: 3925143226 => 3464443665
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCClient.cpp:137:call()
+2026-02-18 19:38:05.602 I [92288] --- 客户发送请求:地址 127.0.0.1:49656 会话 5 长度 39 内容 ����7�ŝ�
+/workspaces/OpenMS/OpenMS/Mailbox/Private/MailHub.cpp:61:cancel()
+2026-02-18 19:38:05.602 I [92288] --- delete mailbox space:3, 3925143226
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCClient.cpp:137:call()
+2026-02-18 19:38:05.602 I [92288] --- 客户发送请求:地址 127.0.0.1:51808 会话 3 长度 44 内容 ["127.0.0.1:40743",[3851355117]]
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCServer.cpp:241:channelRead()
+2026-02-18 19:38:05.602 I [92295] --- 服务接收请求:地址 127.0.0.1:40743 会话 5 长度 32 内容 7κ���ŝ�
+/workspaces/OpenMS/OpenMS/Server/Cluster/ClusterServer.cpp:138:operator()()
+2026-02-18 19:38:05.602 I [92295] --- 被远程调用: 3464443665 => 3925143226
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCClient.cpp:236:channelRead()
+2026-02-18 19:38:05.602 I [92303] --- 客户接收响应:地址 127.0.0.1:49656 会话 5 长度 8 内容 
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCClient.cpp:236:channelRead()
+2026-02-18 19:38:05.609 I [92298] --- 客户接收响应:地址 127.0.0.1:51808 会话 3 长度 301 内容 [[4229798,["127.0.0.1:48073"]],[228488896,["127.0.0.1:34705"]],[953308085,["127.0.0.1:37457"]],[1492494891,["127.0.0.1:45651"]],[2116038550,["127.0.0.1:45651"]],[3380555570,["127.0.0.1:45651"]],[3464443665,["127.0.0.1:45651"]],[3596999821,["127.0.0.1:48073"]],[3851355117,["127.0.0.1:40743"]]]
+/workspaces/OpenMS/OpenMS/Server/Cluster/ClusterServer.cpp:109:operator()()
+2026-02-18 19:38:05.610 I [92288] --- validate 127.0.0.1:40743, count 9
+sh: 1: pause: not found
+/workspaces/OpenMS/OpenMS/Mailbox/Private/MailBox.cpp:16:~MailBox()
+2026-02-18 19:38:05.616 I [92288] --- deleting mailbox: space:3
+/workspaces/OpenMS/OpenMS/Mailbox/Private/MailBox.cpp:25:~MailBox()
+2026-02-18 19:38:05.617 I [92288] --- deleted mailbox: space:3
+/workspaces/OpenMS/OpenMS/Server/Cluster/ClusterServer.cpp:182:onFail()
+2026-02-18 19:38:05.617 E [92295] --- fail 3464443665=>3925143226 via 2166136261 #11 @2
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCClient.cpp:217:channelRead()
+2026-02-18 19:38:05.900 I [92298] --- 客户接收请求:地址 127.0.0.1:51808 会话 2147483723 长度 274 内容 [[[4229798,["127.0.0.1:48073"]],[228488896,["127.0.0.1:34705"]],[953308085,["127.0.0.1:37457"]],[1492494891,["127.0.0.1:45651"]],[2116038550,["127.0.0.1:45651"]],[3380555570,["127.0.0.1:45651"]],[3464443665,["127.0.0.1:45651"]],[3851355117,["127.0.0.1:40743"]]]]
+/workspaces/OpenMS/OpenMS/Server/Cluster/ClusterServer.cpp:156:operator()()
+2026-02-18 19:38:05.900 I [92298] --- refresh 127.0.0.1:40743, count 8
+/workspaces/OpenMS/OpenMS/Endpoint/RPC/RPCClient.cpp:217:channelRead()
+2026-02-18 19:38:05.909 I [92298] --- 客户接收请求:地址 127.0.0.1:51808 会话 2147483727 长度 244 内容 [[[228488896,["127.0.0.1:34705"]],[953308085,["127.0.0.1:37457"]],[1492494891,["127.0.0.1:45651"]],[2116038550,["127.0.0.1:45651"]],[3380555570,["127.0.0.1:45651"]],[3464443665,["127.0.0.1:45651"]],[3851355117,["127.0.0.1:40743"]]]]
+/workspaces/OpenMS/OpenMS/Server/Cluster/ClusterServer.cpp:156:operator()()
+2026-02-18 19:38:05.909 I [92298] --- refresh 127.0.0.1:40743, count 7
+/workspaces/OpenMS/OpenMS/Reactor/TCP/TCPServerReactor.cpp:238:operator()()
+2026-02-18 19:38:06.056 I [92296] --- closed server
+/workspaces/OpenMS/OpenMS/Reactor/TCP/TCPClientReactor.cpp:243:onDisconnect()
+2026-02-18 19:38:06.060 I [92299] --- rejected from 127.0.0.1:8080
+/workspaces/OpenMS/OpenMS/Reactor/TCP/TCPClientReactor.cpp:202:operator()()
+2026-02-18 19:38:06.061 I [92299] --- closed client
+/workspaces/OpenMS/OpenMS/Reactor/TCP/TCPClientReactor.cpp:243:onDisconnect()
+2026-02-18 19:38:06.080 I [92304] --- rejected from 127.0.0.1:45651
+/workspaces/OpenMS/OpenMS/Reactor/TCP/TCPClientReactor.cpp:202:operator()()
+2026-02-18 19:38:06.080 I [92304] --- closed client
+/workspaces/OpenMS/OpenMS/Reactor/TCP/TCPClientReactor.cpp:243:onDisconnect()
+2026-02-18 19:38:06.571 I [92348] --- rejected from 127.0.0.1:48073
+/workspaces/OpenMS/OpenMS/Reactor/TCP/TCPClientReactor.cpp:202:operator()()
+2026-02-18 19:38:06.571 I [92348] --- closed client
+/workspaces/OpenMS/OpenMS/Server/Private/Server.cpp:92:startup()
+2026-02-18 19:38:06.572 I [92288] --- terminated backend
+/workspaces/OpenMS/OpenMS/Mailbox/Private/MailMan.cpp:119:operator()()
+2026-02-18 19:38:06.572 I [92293] --- mail worker stopped

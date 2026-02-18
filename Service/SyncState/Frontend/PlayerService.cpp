@@ -27,23 +27,24 @@ PlayerService::PlayerService(uint32_t userID)
 	{
 		co_return co_await this->onStateChange(state);
 	});
-	this->bind("onAttack", [=]()->MSAsync<void>
-	{
-		MS_INFO("发动攻击");
-		co_return;
-	});
+}
+
+MSAsync<void> PlayerService::onCreatePlayer()
+{
+	co_return;
 }
 
 MSAsync<void> PlayerService::onStartBattle()
 {
 	MS_INFO("开始游戏");
-	co_return co_await this->callPlayer<void>("attack", 0, MSTuple{});
+	co_return;
 }
 
 MSAsync<void> PlayerService::onStopBattle()
 {
-	MS_INFO("结束游戏");
 	AUTOWIRE_DATA(IServer)->shutdown();
+	
+	MS_INFO("结束游戏");
 	co_return;
 }
 

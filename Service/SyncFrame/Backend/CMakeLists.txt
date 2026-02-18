@@ -1,5 +1,6 @@
 if(OPENMS_ENABLE_SYNC_FRAME)
-add_executable(FrameBackend
+project(FrameBackendSDK)
+add_executable(${PROJECT_NAME}
         BackendServer.cpp
         BackendServer.h
         PlayerService.cpp
@@ -10,9 +11,9 @@ add_executable(FrameBackend
 
 set(GFLAGS_USE_TARGET_NAMESPACE ON)
 find_package(gflags CONFIG REQUIRED)
-target_link_libraries(FrameBackend PRIVATE gflags::gflags)
+target_link_libraries(${PROJECT_NAME} PRIVATE gflags::gflags)
 
-add_dependencies(FrameBackend OpenMS)
-target_include_directories(FrameBackend PUBLIC ${OPENMS_SOURCE_DIR})
-target_link_libraries(FrameBackend PRIVATE OpenMS)
+add_dependencies(${PROJECT_NAME} OpenMS)
+target_include_directories(${PROJECT_NAME} PUBLIC ${OPENMS_SOURCE_DIR})
+target_link_libraries(${PROJECT_NAME} PRIVATE OpenMS)
 endif()

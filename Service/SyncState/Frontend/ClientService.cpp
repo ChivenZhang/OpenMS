@@ -28,10 +28,19 @@ ClientService::ClientService()
 	});
 	this->bind("onEnterSpace", [=, this](uint32_t spaceID, uint32_t userID)->MSAsync<void>
 	{
+		if(this->exist("client:" + std::to_string(userID)) == false)
+		{
+			auto playerService = this->onCreatingPlayer(userID);
+			this->create("client:" + std::to_string(userID), playerService);
+		}
 		co_return co_await this->onEnterSpace(spaceID, userID);
 	});
 	this->bind("onLeaveSpace", [=, this](uint32_t spaceID, uint32_t userID)->MSAsync<void>
 	{
+		if(this->exist("client:" + std::to_string(userID)))
+		{
+			this->cancel("client:" + std::to_string(userID));
+		}
 		co_return co_await this->onLeaveSpace(spaceID, userID);
 	});
 }
@@ -92,6 +101,7 @@ MSAsync<void> ClientService::onLogin(uint32_t userID)
 	if(this->create("client:" + std::to_string(userID), playerService))
 	{
 		MS_INFO("用户 %u 登录成功", userID);
+		co_await playerService->onCreatePlayer();
 	}
 	co_return;
 }
@@ -115,11 +125,13 @@ MSAsync<void> ClientService::onSignup(bool result)
 
 MSAsync<void> ClientService::onEnterSpace(uint32_t spaceID, uint32_t userID)
 {
+	MS_INFO("用户 %u 进入空间 %u", userID, spaceID);
 	co_return;
 }
 
 MSAsync<void> ClientService::onLeaveSpace(uint32_t spaceID, uint32_t userID)
 {
+	MS_INFO("用户 %u 离开空间 %u", userID, spaceID);
 	co_return;
 }
 

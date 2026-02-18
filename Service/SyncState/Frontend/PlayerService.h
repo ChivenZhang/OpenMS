@@ -40,6 +40,9 @@ public:
 		co_return co_await this->async<T>("player:" + std::to_string(m_UserID), method, "proxy:" + std::to_string(m_UserID), timeout, std::forward<MSTuple<Args...>>(args));
 	}
 
+protected:
+	virtual MSAsync<void> onCreatePlayer();
+
 	virtual MSAsync<void> onStartBattle();
 
 	virtual MSAsync<void> onStopBattle();
@@ -47,5 +50,6 @@ public:
 	virtual MSAsync<void> onStateChange(MSStringView state);
 
 protected:
+	friend class ClientService;
 	const uint32_t m_UserID;
 };
