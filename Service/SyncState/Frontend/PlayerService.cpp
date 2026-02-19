@@ -29,6 +29,11 @@ PlayerService::PlayerService(uint32_t userID)
 	});
 }
 
+uint32_t PlayerService::userID() const
+{
+	return m_UserID;
+}
+
 MSAsync<void> PlayerService::onCreatePlayer()
 {
 	co_return;
@@ -42,8 +47,6 @@ MSAsync<void> PlayerService::onStartBattle()
 
 MSAsync<void> PlayerService::onStopBattle()
 {
-	AUTOWIRE_DATA(IServer)->shutdown();
-	
 	MS_INFO("结束游戏");
 	co_return;
 }

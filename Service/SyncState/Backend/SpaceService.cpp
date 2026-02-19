@@ -37,7 +37,7 @@ SpaceService::SpaceService(uint32_t spaceID, uint32_t gameID)
 		AUTOWIRE_DATA(IServer)->shutdown();
 		co_return;
 	});
-	this->bind("enterSpace", [=, this](MSString caller, uint32_t userID)->MSAsync<void>
+	this->bind("enterSpace", [=, this](MSString caller, uint32_t userID)->MSAsync<bool>
 	{
 		MS_INFO("用户 %u 加入空间", userID);
 
@@ -46,11 +46,13 @@ SpaceService::SpaceService(uint32_t spaceID, uint32_t gameID)
 		{
 			auto& user = m_UserInfos[userID];
 			user.UserID = userID;
+			co_await playerService->onCreatePlayer();
 			co_await this->async<void>(caller, "onEnterSpace", "", 0, MSTuple{m_SpaceID, userID });
+			co_return true;
 		}
-		co_return;
+		co_return false;
 	});
-	this->bind("reenterSpace", [=, this](MSString caller, uint32_t userID)->MSAsync<void>
+	this->bind("reenterSpace", [=, this](MSString caller, uint32_t userID)->MSAsync<bool>
 	{
 		MS_INFO("用户 %u 重新加入空间", userID);
 
@@ -59,14 +61,13 @@ SpaceService::SpaceService(uint32_t spaceID, uint32_t gameID)
 			auto& user = m_UserInfos[userID];
 			user.UserID = userID;
 			co_await this->async<void>(caller, "onEnterSpace", "", 0, MSTuple{m_SpaceID, userID });
-
-			// Entail synchronization of game state
-
+			// Whole synchronization of game state
 			co_await this->async<void>(this->name(), "syncWhole", "", 0, MSTuple{userID});
+			co_return true;
 		}
-		co_return;
+		co_return false;
 	});
-	this->bind("leaveSpace", [=, this](uint32_t userID)->MSAsync<void>
+	this->bind("leaveSpace", [=, this](uint32_t userID)->MSAsync<bool>
 	{
 		MS_INFO("用户 %u 离开空间", userID);
 
@@ -75,7 +76,7 @@ SpaceService::SpaceService(uint32_t spaceID, uint32_t gameID)
 			m_UserInfos.erase(userID);
 			co_await this->async<void>("player:" + std::to_string(userID), "onLeaveSpace", "", 0, MSTuple{m_SpaceID, userID});
 		}
-		co_return;
+		co_return false;
 	});
 	this->bind("keepAlive", [=](uint32_t userID)->MSAsync<void>
 	{
@@ -106,7 +107,7 @@ SpaceService::SpaceService(uint32_t spaceID, uint32_t gameID)
 	});
 }
 
-MSRef<Service> SpaceService::onCreatingPlayer(uint32_t userID)
+MSRef<PlayerService> SpaceService::onCreatingPlayer(uint32_t userID)
 {
 	return MSNew<PlayerService>(userID);
 }

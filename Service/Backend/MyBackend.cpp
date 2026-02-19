@@ -10,33 +10,39 @@
 * =================================================*/
 #include <Service/SyncState/Backend/BackendServer.h>
 #include <Service/SyncState/Backend/SpaceService.h>
-#include <Service/SyncState/Backend/PlayerService.h>
 
-class MyPlayerService : public PlayerService
+class MyPlayer : public PlayerService
 {
 public:
-    using PlayerService::PlayerService;
+    MyPlayer(uint32_t userID) : PlayerService(userID) 
+    {
+        this->bind("attack", [=, this]()->MSAsync<void>
+        {
+            MS_INFO("用户 %u 发动攻击", userID);
+            co_await this->callClient<void>("onAttack", 0, MSTuple{});
+        });
+    }
 };
 
-class MySpaceService : public SpaceService
+class MySpace : public SpaceService
 {
 public:
     using SpaceService::SpaceService;
 
 protected:
-    MSRef<Service> onCreatingPlayer(uint32_t userID) override
+    MSRef<PlayerService> onCreatingPlayer(uint32_t userID) override
     {
-        return MSNew<MyPlayerService>(userID);
+        return MSNew<MyPlayer>(userID);
     }
 };
 
-class MyBackendServer : public BackendServer
+class MyBackend : public BackendServer
 {
 public:
     MSRef<Service> onCreatingSpace(uint32_t spaceID, uint32_t gameID) override
     {
-        return MSNew<MySpaceService>(spaceID, gameID);
+        return MSNew<MySpace>(spaceID, gameID);
     }
 };
 
-OPENMS_RUN(MyBackendServer)
+OPENMS_RUN(MyBackend)

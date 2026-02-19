@@ -202,7 +202,7 @@ MSAsync<void> LogicService::onClientLogin(uint32_t userID, uint32_t code, MSStri
 		{
 			auto spaceID = userInfo.SpaceID;
 			m_UserLock.unlock();
-			co_await this->async<void>("space:" + std::to_string(spaceID), "reenterSpace", "", 0, MSTuple{this->name(), userID});
+			co_await this->async<bool>("space:" + std::to_string(spaceID), "reenterSpace", "", 0, MSTuple{this->name(), userID});
 		}
 		else
 		{
@@ -266,7 +266,7 @@ MSAsync<void> LogicService::onCreateSpace(uint32_t spaceID)
 	m_UserLock.unlock();
 	for (auto& userID : space.UserIDs)
 	{
-		co_await this->async<void>("space:" + std::to_string(spaceID), "enterSpace", "", 0, MSTuple{ this->name(), userID});
+		co_await this->async<bool>("space:" + std::to_string(spaceID), "enterSpace", "", 0, MSTuple{ this->name(), userID});
 	}
 	co_return;
 }

@@ -26,10 +26,15 @@ PlayerService::PlayerService(uint32_t userID)
 		co_await this->callClient<void>("onStopBattle", 0, MSTuple{});
 		co_return;
 	});
-	this->bind("attack", [=, this]()->MSAsync<void>
-	{
-		MS_INFO("用户 %u 发动攻击", userID);
-		co_await this->callClient<void>("onAttack", 0, MSTuple{});
-		co_return;
-	});
+}
+
+uint32_t PlayerService::userID() const
+{
+	return m_UserID;
+}
+
+MSAsync<void> PlayerService::onCreatePlayer()
+{
+	MS_INFO("创建玩家 %u", m_UserID);
+	co_return;
 }
