@@ -10,12 +10,11 @@
 * =================================================*/
 #include <Service/SyncState/Frontend/FrontendClient.h>
 #include <Service/SyncState/Frontend/ClientService.h>
-#include <Service/SyncState/Frontend/PlayerService.h>
 
-class MyPlayerService : public PlayerService
+class MyPlayer : public PlayerService
 {
 public:
-    explicit MyPlayerService(uint32_t userID) : PlayerService(userID)
+    explicit MyPlayer(uint32_t userID) : PlayerService(userID)
     {
         this->bind("onAttack", [=]()->MSAsync<void>
         {
@@ -28,6 +27,7 @@ protected:
     MSAsync<void> onCreatePlayer() override
     {
         co_await this->callServer<void>("matchBattle", 5000, MSTuple{ 0U });
+
         co_return;
     }
     MSAsync<void> onStartBattle() override
@@ -39,9 +39,9 @@ protected:
 
     MSAsync<void> onStopBattle() override
     {
-        MS_INFO("玩家 %u 结束战斗", m_UserID);
-        // TODO:
-        co_return co_await PlayerService::onStopBattle();
+        co_await PlayerService::onStopBattle();
+
+	    AUTOWIRE_DATA(IServer)->shutdown();
     }
 
     MSAsync<void> onStateChange(MSStringView state) override
@@ -52,16 +52,16 @@ protected:
     }
 };
 
-class MyClientService : public ClientService
+class MyClient : public ClientService
 {
 protected:
     MSRef<PlayerService> onCreatingPlayer(uint32_t userID) override
     {
-        return MSNew<MyPlayerService>(userID);
+        return MSNew<MyPlayer>(userID);
     }
 };
 
-class MyFrontClient : public FrontendClient
+class MyFrontend : public FrontendClient
 {
 protected:
     void onInit() override
@@ -77,8 +77,8 @@ protected:
     }
     MSRef<ClientService> onCreatingClient() override
     {
-        return MSNew<MyClientService>();
+        return MSNew<MyClient>();
     }
 };
 
-OPENMS_RUN(MyFrontClient)
+OPENMS_RUN(MyFrontend)

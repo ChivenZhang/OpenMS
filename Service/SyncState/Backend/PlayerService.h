@@ -16,6 +16,8 @@ class PlayerService : public Service
 public:
 	explicit PlayerService(uint32_t userID);
 
+	uint32_t userID() const;
+
 	template<class F, class...Args>
 	bool callClient(MSStringView method, uint32_t timeout, MSTuple<Args...>&& args, F&& callback)
 	{
@@ -41,5 +43,9 @@ public:
 	}
 
 protected:
+	virtual MSAsync<void> onCreatePlayer();
+
+protected:
+	friend class SpaceService;
 	const uint32_t m_UserID;
 };

@@ -10,6 +10,7 @@
 *
 * =================================================*/
 #include <Server/Private/Service.h>
+#include "PlayerService.h"
 
 class SpaceService : public Service
 {
@@ -17,7 +18,7 @@ public:
 	explicit SpaceService(uint32_t spaceID, uint32_t gameID);
 
 protected:
-	virtual MSRef<Service> onCreatingPlayer(uint32_t userID);
+	virtual MSRef<PlayerService> onCreatingPlayer(uint32_t userID);
 
 protected:
 	const uint32_t m_SpaceID;
