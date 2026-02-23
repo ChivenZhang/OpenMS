@@ -9,7 +9,7 @@
 *
 * =================================================*/
 #include <Service/SyncState/Frontend/FrontendClient.h>
-#include <Service/SyncState/Frontend/ClientService.h>
+#include <Service/SyncState/Frontend/SpaceService.h>
 
 class MyPlayer : public PlayerService
 {
@@ -26,33 +26,28 @@ public:
 protected:
     MSAsync<void> onCreatePlayer() override
     {
-        co_await this->callServer<void>("matchBattle", 5000, MSTuple{ 0U });
-
         co_return;
     }
+
     MSAsync<void> onStartBattle() override
     {
         co_await PlayerService::onStartBattle();
-
-        co_await this->callPlayer<void>("attack", 0, MSTuple{});
     }
 
     MSAsync<void> onStopBattle() override
     {
         co_await PlayerService::onStopBattle();
-
-	    AUTOWIRE_DATA(IServer)->shutdown();
     }
 
     MSAsync<void> onStateChange(MSStringView state) override
     {
-        MS_INFO("玩家 %u 状态改变：%s", m_UserID, state.data());
+        MS_INFO("玩家 %u 状态改变：%s", this->userID(), state.data());
         // TODO:
         co_return;
     }
 };
 
-class MyClient : public ClientService
+class MySpace : public SpaceService
 {
 protected:
     MSRef<PlayerService> onCreatingPlayer(uint32_t userID) override
@@ -68,16 +63,61 @@ protected:
     {
         FrontendClient::onInit();
 
-        if(auto clientService = m_ClientService.lock())
-        {
-            clientService->login("admin", "123456");
-        }
+        MSThread thread([=, this](){
+
+            MS_INFO("input cmd: [login|logout|match|attack|exit]");
+
+            std::string line;
+            while(std::getline(std::cin, line))
+            {
+                if(line == "login")
+                {
+                    if(auto clientService = this->m_ClientService.lock())
+                    {
+                        clientService->login("admin", "123456");
+                    }
+                }
+                else if(line == "logout")
+                {
+                    if(auto clientService = this->m_ClientService.lock())
+                    {
+                        clientService->logout();
+                    }
+                }
+                else if(line == "match")
+                {
+                    if(auto clientService = this->m_ClientService.lock())
+                    {
+                        if(auto playerService = clientService->player())
+                        {
+                            playerService->callServer<void>("matchBattle", 0, MSTuple{ 0U });
+                        }
+                    }
+                }
+                else if(line == "attack")
+                {
+                    if(auto clientService = this->m_ClientService.lock())
+                    {
+                        if(auto playerService = clientService->player())
+                        {
+                            playerService->callPlayer<void>("attack", 0, MSTuple{ 0U });
+                        }
+                    }
+                }
+                else if(line == "exit")
+                {
+                    AUTOWIRE_DATA(IServer)->shutdown();
+                    break;
+                }
+            }
+        });
+        thread.detach();
 
         // TODO: Reconnect when disconnect.
     }
-    MSRef<ClientService> onCreatingClient() override
+    MSRef<SpaceService> onCreatingSpace() override
     {
-        return MSNew<MyClient>();
+        return MSNew<MySpace>();
     }
 };
 

@@ -12,7 +12,8 @@
 
 PlayerService::PlayerService(uint32_t userID)
 	:
-	m_UserID(userID)
+	m_UserID(userID),
+	m_TickTime(0.0f)
 {
 	this->bind("startBattle", [=, this]()->MSAsync<void>
 	{
@@ -26,11 +27,21 @@ PlayerService::PlayerService(uint32_t userID)
 		co_await this->callClient<void>("onStopBattle", 0, MSTuple{});
 		co_return;
 	});
+	this->bind("keepAlive", [=, this]()->MSAsync<void>
+	{
+		m_TickTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count() * 0.001f;
+		co_return;
+	});
 }
 
 uint32_t PlayerService::userID() const
 {
 	return m_UserID;
+}
+
+float PlayerService::tickTime() const
+{
+	return m_TickTime;
 }
 
 MSAsync<void> PlayerService::onCreatePlayer()

@@ -12,7 +12,7 @@
 #include <Server/Private/Server.h>
 #include <Endpoint/TCP/TCPClient.h>
 #include <Mailbox/Private/MailHub.h>
-#include "ClientService.h"
+#include "SpaceService.h"
 
 class FrontendClient : public Server
 {
@@ -23,11 +23,11 @@ protected:
 	void onInit() override;
 	void onExit() override;
 	void onUpdate(float time) override;
-	virtual MSRef<ClientService> onCreatingClient();
+	virtual MSRef<SpaceService> onCreatingSpace();
 
 protected:
 	MSRef<MailHub> m_MailHub;
 	MSRef<TCPClient> m_TCPClient;
 	MSRef<IChannel> m_TCPChannel;
-	MSHnd<ClientService> m_ClientService;
+	MSHnd<SpaceService> m_ClientService;
 };

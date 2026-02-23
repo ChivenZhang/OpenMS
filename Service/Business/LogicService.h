@@ -24,7 +24,7 @@ public:
 	virtual MSAsync<void> onClientLogin(uint32_t userID, uint32_t code, MSString error);
 	virtual MSAsync<void> onClientLogout(uint32_t userID, uint32_t code, MSString error);
 
-	virtual MSAsync<uint32_t> onSignupRequest(MSString username, MSString password);
+	virtual MSAsync<uint32_t> onRequestSignup(MSString username, MSString password);
 	virtual MSAsync<void> onClientSignup(uint32_t userID, uint32_t code, MSString error);
 
 	virtual MSAsync<void> onMatchBattle(uint32_t gameID, MSList<uint32_t> userIDs);

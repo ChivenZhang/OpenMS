@@ -11,10 +11,10 @@
 * =================================================*/
 #include <Server/Private/Service.h>
 
-class ClientService : public Service
+class SpaceService : public Service
 {
 public:
-	ClientService();
+	SpaceService();
 
 	virtual MSAsync<void> onLogin(uint32_t userID);
 

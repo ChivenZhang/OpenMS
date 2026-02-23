@@ -26,7 +26,7 @@ LogicService::LogicService()
 	this->bind("signup", [this](MSString user, MSString pass)->MSAsync<uint32_t>
 	{
 		MS_INFO("注册请求");
-		co_return co_await this->onSignupRequest(user, pass);
+		co_return co_await this->onRequestSignup(user, pass);
 	});
 	this->bind("onClientSignup", [this](uint32_t userID, uint32_t code, MSString error)->MSAsync<void>
 	{
@@ -228,7 +228,7 @@ MSAsync<void> LogicService::onClientLogout(uint32_t userID, uint32_t code, MSStr
 	this->cancel("player:" + std::to_string(userID));
 }
 
-MSAsync<uint32_t> LogicService::onSignupRequest(MSString username, MSString password)
+MSAsync<uint32_t> LogicService::onRequestSignup(MSString username, MSString password)
 {
 	co_return co_await this->async<uint32_t>("login", "signup", "", 100, MSTuple{this->name(), username, password});
 }

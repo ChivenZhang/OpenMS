@@ -43,7 +43,7 @@ void BackendServer::onInit()
 	auto spaceService = this->onCreatingSpace(spaceID, gameID);
 	if (mailHub->create("space:" + std::to_string(spaceID), spaceService))
 	{
-		spaceService->call<void>(caller, "onCreateSpace", "", 0, MSTuple{spaceID,});
+		spaceService->call<void>(caller, "onCreateSpace", "", 0, MSTuple{ spaceID });
 
 		this->startTimer(5000, 0, [self = spaceService.get()]()
 		{
@@ -59,7 +59,7 @@ void BackendServer::onExit()
 	{
 		auto caller = FLAGS_caller;
 		auto spaceID = FLAGS_space;
-		spaceService->call<void>(caller, "onDeleteSpace", "", 0, MSTuple{spaceID,});
+		spaceService->call<void>(caller, "onDeleteSpace", "", 0, MSTuple{ spaceID });
 
 		auto mailHub = AUTOWIRE(IMailHub)::bean();
 		mailHub->cancel("space:" + std::to_string(spaceID));

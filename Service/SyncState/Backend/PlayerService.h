@@ -18,6 +18,8 @@ public:
 
 	uint32_t userID() const;
 
+	float tickTime() const;
+
 	template<class F, class...Args>
 	bool callClient(MSStringView method, uint32_t timeout, MSTuple<Args...>&& args, F&& callback)
 	{
@@ -27,7 +29,7 @@ public:
 	template<class F, class...Args>
 	bool callServer(MSStringView method, uint32_t timeout, MSTuple<Args...>&& args, F&& callback)
 	{
-		return this->async("server:" + std::to_string(m_UserID), method, "proxy:" + std::to_string(m_UserID), timeout, std::forward<MSTuple<Args...>>(args), std::forward<F>(callback));
+		return this->async("server:" + std::to_string(m_UserID), method, "", timeout, std::forward<MSTuple<Args...>>(args), std::forward<F>(callback));
 	}
 
 	template<class T, class... Args>
@@ -48,4 +50,5 @@ protected:
 protected:
 	friend class SpaceService;
 	const uint32_t m_UserID;
+	float m_TickTime;
 };

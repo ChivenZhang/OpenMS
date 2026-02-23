@@ -12,10 +12,14 @@
 #include <Server/Private/Service.h>
 #include "PlayerService.h"
 
-class ClientService : public Service
+class SpaceService : public Service
 {
 public:
-	ClientService();
+	SpaceService();
+
+	uint32_t userID() const;
+
+	MSRef<PlayerService> player() const;
 
 	virtual bool signup(MSString username, MSString password, uint32_t timeout = 5000/*ms*/);
 
@@ -35,4 +39,8 @@ protected:
 	virtual MSAsync<void> onLeaveSpace(uint32_t spaceID, uint32_t userID);
 
 	virtual MSRef<PlayerService> onCreatingPlayer(uint32_t userID);
+
+protected:
+	uint32_t m_UserID;
+	MSHnd<PlayerService> m_PlayerService;
 };

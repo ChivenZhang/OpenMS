@@ -3,10 +3,10 @@ project(StateFrontendSDK)
 add_library(${PROJECT_NAME} STATIC
         FrontendClient.cpp
         FrontendClient.h
-        ClientService.cpp
-        ClientService.h
         PlayerService.cpp
         PlayerService.h
+        SpaceService.cpp
+        SpaceService.h
 )
 
 add_dependencies(${PROJECT_NAME} OpenMS)

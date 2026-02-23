@@ -10,7 +10,7 @@
 * =================================================*/
 #include "ClientService.h"
 
-ClientService::ClientService()
+SpaceService::SpaceService()
 {
 	this->bind("onLogin", [=, this](uint32_t userID)->MSAsync<void>
 	{
@@ -44,17 +44,17 @@ ClientService::ClientService()
 	});
 }
 
-MSAsync<void> ClientService::onLogin(uint32_t userID)
+MSAsync<void> SpaceService::onLogin(uint32_t userID)
 {
 	co_return;
 }
 
-MSAsync<void> ClientService::onLogout(bool result)
+MSAsync<void> SpaceService::onLogout(bool result)
 {
 	co_return;
 }
 
-MSAsync<void> ClientService::onSignup(bool result)
+MSAsync<void> SpaceService::onSignup(bool result)
 {
 	co_return;
 }
