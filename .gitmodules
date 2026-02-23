@@ -1,3 +1,6 @@
 [submodule "External/iocpp"]
 	path = External/iocpp
 	url = https://github.com/ChivenZhang/iocpp.git
+[submodule "External/websocketpp"]
+	path = External/websocketpp
+	url = https://github.com/zaphoyd/websocketpp.git

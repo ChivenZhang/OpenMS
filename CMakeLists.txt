@@ -11,6 +11,7 @@ set(OPENMS_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${OPENMS_SOURCE_DIR})
 add_subdirectory(${OPENMS_SOURCE_DIR}/OpenMS)
 add_subdirectory(${OPENMS_SOURCE_DIR}/External/iocpp)
+add_subdirectory(${OPENMS_SOURCE_DIR}/External/websocketpp)
 
 if(OPENMS_ENABLE_SAMPLE)
 add_subdirectory(${OPENMS_SOURCE_DIR}/Sample)

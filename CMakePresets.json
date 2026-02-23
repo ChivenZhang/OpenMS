@@ -21,7 +21,8 @@
 				"OPENMS_ENABLE_SAMPLE": "OFF",
 				"OPENMS_ENABLE_MYSQL": "OFF",
 				"OPENMS_ENABLE_REDIS": "OFF",
-				"OPENMS_ENABLE_SQLITE": "ON"
+				"OPENMS_ENABLE_SQLITE": "ON",
+				"OPENMS_ENABLE_WEBRTC": "ON"
 			},
 			"environment": {
 				"VCPKG_HOME": "???"
@@ -47,7 +48,8 @@
 				"OPENMS_ENABLE_SAMPLE": "OFF",
 				"OPENMS_ENABLE_MYSQL": "OFF",
 				"OPENMS_ENABLE_REDIS": "OFF",
-				"OPENMS_ENABLE_SQLITE": "ON"
+				"OPENMS_ENABLE_SQLITE": "ON",
+				"OPENMS_ENABLE_WEBRTC": "ON"
 			},
 			"environment": {
 				"VCPKG_HOME": "???"
@@ -70,14 +72,15 @@
 				"OPENMS_ENABLE_SYNC_STATE": "ON",
 				"OPENMS_ENABLE_SYNC_FRAME": "OFF",
 				"OPENMS_ENABLE_WEBSERVER": "OFF",
-				"OPENMS_ENABLE_SAMPLE": "OFF",
+				"OPENMS_ENABLE_SAMPLE": "ON",
 				"OPENMS_ENABLE_MYSQL": "OFF",
 				"OPENMS_ENABLE_REDIS": "OFF",
-				"OPENMS_ENABLE_SQLITE": "ON"
+				"OPENMS_ENABLE_SQLITE": "ON",
+				"OPENMS_ENABLE_WEBRTC": "ON"
 			},
 			"environment": {
-				"VCPKG_HOME": "../vcpkg",
-				"VCPKG_HOME1": "F:/Library/Windows/vcpkg-static",
+				"VCPKG_HOME0": "../vcpkg",
+				"VCPKG_HOME": "F:/Library/Windows/vcpkg-static",
 				"VCPKG_HOME2": "D:/ChivenZhang/GitProject/Library/Window/vcpkg",
 				"VCPKG_HOME3": "/Users/apple/CLionProjects/vcpkg"
 			}

@@ -25,3 +25,11 @@ add_executable(UDPDemo
 add_dependencies(UDPDemo OpenMS)
 target_include_directories(UDPDemo PUBLIC ${OPENMS_SOURCE_DIR})
 target_link_libraries(UDPDemo PRIVATE OpenMS)
+
+
+add_executable(WSDemo
+        WSDemo.cpp
+)
+add_dependencies(WSDemo OpenMS)
+target_include_directories(WSDemo PUBLIC ${OPENMS_SOURCE_DIR})
+target_link_libraries(WSDemo PRIVATE OpenMS)
