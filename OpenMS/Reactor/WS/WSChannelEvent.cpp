@@ -8,4 +8,13 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "WSClient.h"
+#include "WSChannelEvent.h"
+
+MSRef<WSChannelEvent> WSChannelEvent::New(MSStringView const& message, opcode_t opcode, MSHnd<IChannel> const& channel)
+{
+	auto event = MSNew<WSChannelEvent>();
+	event->Message = message;
+	event->Channel = channel;
+	event->OpCode = opcode;
+	return event;
+}

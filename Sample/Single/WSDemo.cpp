@@ -8,33 +8,63 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include <OpenMS/Endpoint/WS/WSServer.h>
+#include <OpenMS/Reactor/WS/WSServer.h>
+#include <OpenMS/Reactor/WS/WSClient.h>
 
 int main()
 {
-	WSServer server({
+	auto server = MSNew<WSServer>(WSServer::config_t{
 		.IP = "127.0.0.1",
-		.PortNum = 9090,
+		.PortNum = 8080,
+		.Callback = {
+			.OnOpen = [](MSRef<IChannel> channel)
+			{
+				channel->getPipeline()->addFirst("handler", IChannelPipeline::handler_in
+				{
+					.OnHandle = [](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)
+					{
+						qps.hit();
+						auto t = ::clock();
+						if (T + 5000 <= t)
+						{
+							MS_INFO("QPS %f", qps.get());
+							T = t;
+						}
+
+						MS_DEBUG("%s", event->Message.c_str());
+						context->write(IChannelEvent::New("This is server"));
+						return true;
+					}
+				});
+			},
+		},
 	});
-	server.bind_connect([](MSStringView session)
-	{
-		MS_INFO("connect: %.*s", (int)session.size(), session.data());
-	});
-	server.bind_disconnect([](MSStringView session)
-	{
-		MS_INFO("disconnect: %.*s", (int)session.size(), session.data());
-	});
-	server.bind_message([](MSStringView msg, bool end)
-	{
-		MS_INFO("message: %.*s %u", (int)msg.size(), msg.data(), end);
-	});
-	server.bind_binary([](MSStringView msg, bool end)
-	{
-		MS_INFO("binary: %.*s %u", (int)msg.size(), msg.data(), end);
+	auto client = MSNew<WSClient>(WSClient::config_t{
+		.IP = "127.0.0.1",
+		.PortNum = 8080,
+		.Callback = {
+			.OnOpen = [](MSRef<IChannel> channel)
+			{
+				channel->getPipeline()->addFirst("handler", IChannelPipeline::handler_in
+				{
+					.OnHandle = [](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)
+					{
+						MS_DEBUG("%s", event->Message.c_str());
+						context->write(IChannelEvent::New("This is client"));
+						return true;
+					}
+				});
+				channel->write(IChannelEvent::New("Hello, server!"));
+			},
+		},
 	});
 
-	server.startup();
+	server->startup();
+	client->startup();
+
 	system("pause");
-	server.shutdown();
+
+	server->shutdown();
+	client->shutdown();
 	return 0;
 }

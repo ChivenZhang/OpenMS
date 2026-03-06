@@ -230,7 +230,7 @@ void TCPServerReactor::startup()
 				auto channels = m_ChannelMap;
 				for (auto& channel : channels)
 				{
-					if (channel.second) onDisconnect(channel.second);
+					if (channel.second) this->onDisconnect(channel.second);
 				}
 				m_ChannelMap.clear();
 			}
@@ -250,7 +250,6 @@ void TCPServerReactor::shutdown()
 {
 	if (m_Running == false) return;
 	ChannelReactor::shutdown();
-
 	m_ChannelMap.clear();
 }
 

@@ -63,7 +63,7 @@ void ChannelReactor::write(MSRef<IChannelEvent> event)
 
 MSFuture<bool> ChannelReactor::write(MSRef<IChannelEvent> event, MSPromise<bool>&& promise)
 {
-	if (m_Running == false) return MSFuture<bool>();
+	if (m_Running == false) return {};
 	auto result = promise.get_future();
 	event->Promise = &promise;
 	write(event);

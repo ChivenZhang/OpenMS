@@ -1,6 +1,6 @@
 #pragma once
 /*=================================================
-* Copyright © 2020-2025 ChivenZhang.
+* Copyright © 2020-2026 ChivenZhang.
 * All Rights Reserved.
 * =====================Note=========================
 *
@@ -10,15 +10,12 @@
 *
 * =================================================*/
 #include "../Private/ChannelReactor.h"
-#include "../Private/ChannelAddress.h"
+#include <websocketpp/common/connection_hdl.hpp>
 
-class TCPServerReactor : public ChannelReactor
+class WSServerReactor : public ChannelReactor
 {
 public:
-	using callback_tcp_t = callback_t;
-
-public:
-	TCPServerReactor(MSRef<ISocketAddress> address, uint32_t backlog, size_t workerNum, callback_tcp_t callback);
+	WSServerReactor(MSRef<IWebSocketAddress> address, uint32_t backlog, size_t workerNum, const callback_t& callback);
 	void startup() override;
 	void shutdown() override;
 	MSHnd<IChannelAddress> address() const override;
@@ -31,9 +28,8 @@ protected:
 
 protected:
 	const uint32_t m_Backlog;
-	MSAtomic<bool> m_Sending;
-	MSLambda<void()> m_FireAsync;
-	MSRef<ISocketAddress> m_Address;
-	MSRef<ISocketAddress> m_LocalAddress;
-	MSMap<uint32_t, MSRef<Channel>> m_ChannelMap;
+	MSRef<IWebSocketAddress> m_Address;
+	MSRef<IWebSocketAddress> m_LocalAddress;
+	MSLambda<void(MSRef<IChannelEvent>)> m_FireAsync;
+	MSMap<websocketpp::connection_hdl::element_type*, MSRef<Channel>> m_ChannelMap;
 };

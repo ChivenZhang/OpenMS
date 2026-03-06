@@ -1,20 +1,22 @@
 #pragma once
 /*=================================================
-* Copyright © 2020-2025 ChivenZhang.
+* Copyright © 2020-2026 ChivenZhang.
 * All Rights Reserved.
 * =====================Note=========================
-* 
-* 
+*
+*
 * ====================History=======================
 * Created by chivenzhang@gmail.com.
-* 
+*
 * =================================================*/
 #include "../IEndpoint.h"
-#include <websocketpp/config/asio_no_tls_client.hpp>
-#include <websocketpp/client.hpp>
 
 class WSClient : public IEndpoint
 {
 public:
-
+	void startup() override;
+	void shutdown() override;
+	bool running() const override;
+	bool connect() const override;
+	MSHnd<IChannelAddress> address() const override;
 };

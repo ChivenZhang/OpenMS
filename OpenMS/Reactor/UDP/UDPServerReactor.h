@@ -32,7 +32,7 @@ protected:
 protected:
 	bool m_Broadcast;
 	bool m_Multicast;
-	uint32_t m_Backlog;
+	const uint32_t m_Backlog;
 	MSAtomic<bool> m_Sending;
 	MSLambda<void()> m_FireAsync;
 	MSRef<ISocketAddress> m_Address;

@@ -57,10 +57,6 @@ add_library(OpenMS STATIC
 		Endpoint/UDP/UDPClient.h
 		Endpoint/UDP/UDPServer.cpp
 		Endpoint/UDP/UDPServer.h
-		Endpoint/WS/WSClient.cpp
-		Endpoint/WS/WSClient.h
-		Endpoint/WS/WSServer.cpp
-		Endpoint/WS/WSServer.h
 		Handler/AES/AESHandler.cpp
 		Handler/AES/AESHandler.h
 		MS.h
@@ -138,6 +134,20 @@ add_library(OpenMS STATIC
 		Utility/TraitsUtility.h
         Server/Private/Service.cpp
         Server/Private/Service.h
+		Endpoint/WS/WSServer.cpp
+		Endpoint/WS/WSServer.h
+		Endpoint/WS/WSClient.cpp
+		Endpoint/WS/WSClient.h
+		Reactor/WS/WSClientReactor.cpp
+		Reactor/WS/WSClientReactor.h
+		Reactor/WS/WSServerReactor.cpp
+		Reactor/WS/WSServerReactor.h
+		Reactor/WS/WSChannel.cpp
+		Reactor/WS/WSChannel.h
+		Reactor/WS/WSChannelAddress.cpp
+		Reactor/WS/WSChannelAddress.h
+		Reactor/WS/WSChannelEvent.h
+		Reactor/WS/WSChannelEvent.cpp
 )
 
 if(OPENMS_ENABLE_MYSQL)
@@ -155,10 +165,6 @@ endif()
 if(OPENMS_ENABLE_SQLITE)
 find_package(unofficial-sqlite3 CONFIG REQUIRED)
 target_link_libraries(OpenMS PRIVATE unofficial::sqlite3::sqlite3)
-endif()
-
-if(OPENMS_ENABLE_WEBRTC)
-
 endif()
 
 find_package(asio CONFIG REQUIRED)

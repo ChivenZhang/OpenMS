@@ -27,7 +27,7 @@ void ChannelWorker::startup()
 		MSUniqueLock lock(m_EventLock);
 		m_EventUnlock.wait(lock, [this]()
 		{
-			return m_EventQueue.size() || m_Running == false || m_Reactor->running() == false;
+			return m_EventQueue.empty() == false && m_Running != false && m_Reactor->running() != false;
 		});
 
 		while (m_EventQueue.empty() == false && m_Running == true && m_Reactor->running() == true)
