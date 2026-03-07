@@ -136,7 +136,7 @@ void WSServerReactor::startup()
 
 			MS_INFO("listening on %s:%d", m_LocalAddress->getAddress().c_str(), m_LocalAddress->getPort());
 
-			m_FireAsync = [&](MSRef<IChannelEvent> event)
+			m_FireSend = [&](MSRef<IChannelEvent> event)
 			{
 				loop.post([=, &server]()
 				{
@@ -173,7 +173,7 @@ void WSServerReactor::startup()
 			promise.set_value();
 			loop.run();
 			m_Connect = false;
-			m_FireAsync = nullptr;
+			m_FireSend = nullptr;
 
 			{
 				auto channels = m_ChannelMap;
@@ -235,5 +235,5 @@ void WSServerReactor::onDisconnect(MSRef<Channel> channel)
 void WSServerReactor::onOutbound(MSRef<IChannelEvent> event, bool flush)
 {
 	if (event == nullptr || event->Channel.expired()) return;
-	if (m_Connect) m_FireAsync(event);
+	if (m_Connect) m_FireSend(event);
 }

@@ -185,7 +185,7 @@ void TCPServerReactor::startup()
 				});
 			};
 
-			m_FireAsync = [&]()
+			m_FireSend = [&]()
 			{
 				loop.post([=]()
 				{
@@ -222,7 +222,7 @@ void TCPServerReactor::startup()
 			promise.set_value();
 			loop.run();
 			m_Connect = false;
-			m_FireAsync = nullptr;
+			m_FireSend = nullptr;
 
 			// Close all channels
 
@@ -288,5 +288,5 @@ void TCPServerReactor::onDisconnect(MSRef<Channel> channel)
 void TCPServerReactor::onOutbound(MSRef<IChannelEvent> event, bool flush)
 {
 	ChannelReactor::onOutbound(event, flush);
-	if (m_Sending == false) m_FireAsync();
+	if (m_Sending == false) m_FireSend();
 }

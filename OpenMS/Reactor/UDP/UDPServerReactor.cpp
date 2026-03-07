@@ -202,7 +202,7 @@ void UDPServerReactor::startup()
 				}
 			};
 
-			m_FireAsync = [&]()
+			m_FireSend = [&]()
 			{
 				loop.post([&]()
 				{
@@ -236,7 +236,7 @@ void UDPServerReactor::startup()
 			promise.set_value();
 			loop.run();
 			m_Connect = false;
-			m_FireAsync = nullptr;
+			m_FireSend = nullptr;
 
 			// Close all channels
 
@@ -307,5 +307,5 @@ void UDPServerReactor::onDisconnect(MSRef<Channel> channel)
 void UDPServerReactor::onOutbound(MSRef<IChannelEvent> event, bool flush)
 {
 	ChannelReactor::onOutbound(event, flush);
-	if (m_Sending == false) m_FireAsync();
+	if (m_Sending == false) m_FireSend();
 }

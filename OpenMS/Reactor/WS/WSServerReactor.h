@@ -30,6 +30,6 @@ protected:
 	const uint32_t m_Backlog;
 	MSRef<IWebSocketAddress> m_Address;
 	MSRef<IWebSocketAddress> m_LocalAddress;
-	MSLambda<void(MSRef<IChannelEvent>)> m_FireAsync;
+	MSLambda<void(MSRef<IChannelEvent>)> m_FireSend;
 	MSMap<websocketpp::connection_hdl::element_type*, MSRef<Channel>> m_ChannelMap;
 };
