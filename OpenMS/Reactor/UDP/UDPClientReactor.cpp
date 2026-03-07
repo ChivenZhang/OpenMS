@@ -173,7 +173,7 @@ void UDPClientReactor::startup()
 				}
 			};
 
-			m_FireAsync = [&]()
+			m_FireSend = [&]()
 			{
 				loop.post([&]()
 				{
@@ -209,7 +209,7 @@ void UDPClientReactor::startup()
 			promise.set_value();
 			loop.run();
 			m_Connect = false;
-			m_FireAsync = nullptr;
+			m_FireSend = nullptr;
 
 			// Close all channels
 
@@ -254,7 +254,6 @@ void UDPClientReactor::onConnect(MSRef<Channel> channel)
 {
 	MS_DEBUG("accepted from %s", channel->getRemote().lock()->getString().c_str());
 
-	m_Connect = true;
 	m_Channel = channel;
 	ChannelReactor::onConnect(channel);
 }
@@ -263,7 +262,6 @@ void UDPClientReactor::onDisconnect(MSRef<Channel> channel)
 {
 	MS_DEBUG("rejected from %s", channel->getRemote().lock()->getString().c_str());
 
-	m_Connect = false;
 	m_Channel = nullptr;
 	ChannelReactor::onDisconnect(channel);
 }
@@ -271,5 +269,5 @@ void UDPClientReactor::onDisconnect(MSRef<Channel> channel)
 void UDPClientReactor::onOutbound(MSRef<IChannelEvent> event, bool flush)
 {
 	ChannelReactor::onOutbound(event, flush);
-	if (m_Sending == false) m_FireAsync();
+	if (m_Sending == false) m_FireSend();
 }

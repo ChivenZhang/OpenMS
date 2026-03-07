@@ -8,8 +8,9 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include <OpenMS/Reactor/WS/WSServer.h>
-#include <OpenMS/Reactor/WS/WSClient.h>
+#include <OpenMS/Endpoint/WS/WSServer.h>
+#include <OpenMS/Endpoint/WS/WSClient.h>
+#include "Reactor/WS/WSChannelEvent.h"
 
 int main()
 {
@@ -23,16 +24,8 @@ int main()
 				{
 					.OnHandle = [](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)
 					{
-						qps.hit();
-						auto t = ::clock();
-						if (T + 5000 <= t)
-						{
-							MS_INFO("QPS %f", qps.get());
-							T = t;
-						}
-
-						MS_DEBUG("%s", event->Message.c_str());
-						context->write(IChannelEvent::New("This is server"));
+						MS_INFO("%s", event->Message.c_str());
+						context->write(WSChannelEvent::New("This is server", WSChannelEvent::opcode_t::TEXT));
 						return true;
 					}
 				});
@@ -42,6 +35,7 @@ int main()
 	auto client = MSNew<WSClient>(WSClient::config_t{
 		.IP = "127.0.0.1",
 		.PortNum = 8080,
+		.Path = "/client",
 		.Callback = {
 			.OnOpen = [](MSRef<IChannel> channel)
 			{
@@ -49,12 +43,12 @@ int main()
 				{
 					.OnHandle = [](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)
 					{
-						MS_DEBUG("%s", event->Message.c_str());
-						context->write(IChannelEvent::New("This is client"));
+						MS_INFO("%s", event->Message.c_str());
+						context->write(WSChannelEvent::New("This is client", WSChannelEvent::opcode_t::TEXT));
 						return true;
 					}
 				});
-				channel->write(IChannelEvent::New("Hello, server!"));
+				channel->write(WSChannelEvent::New("Hello, server!", WSChannelEvent::opcode_t::TEXT));
 			},
 		},
 	});

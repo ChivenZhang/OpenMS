@@ -180,6 +180,9 @@ target_link_libraries(OpenMS PUBLIC MbedTLS::mbedtls)
 target_link_libraries(OpenMS PUBLIC MbedTLS::mbedx509)
 # cryptographic primitives
 target_link_libraries(OpenMS PUBLIC MbedTLS::mbedcrypto)
+find_package(OpenSSL REQUIRED)
+target_link_libraries(OpenMS PRIVATE OpenSSL::SSL)
+target_link_libraries(OpenMS PRIVATE OpenSSL::Crypto)
 find_package(nlohmann_json CONFIG REQUIRED)
 target_link_libraries(OpenMS PUBLIC nlohmann_json::nlohmann_json)
 find_package(cpptrace CONFIG REQUIRED)
@@ -195,6 +198,7 @@ target_include_directories(OpenMS PUBLIC ${OPENMS_SOURCE_DIR}/External/iocpp)
 target_link_libraries(OpenMS PUBLIC iocpp)
 target_compile_definitions(OpenMS PUBLIC -DASIO_STANDALONE)
 target_include_directories(OpenMS PUBLIC ${OPENMS_SOURCE_DIR}/External/websocketpp)
+
 
 if(MSVC)
 target_compile_options(OpenMS PUBLIC /EHsc)

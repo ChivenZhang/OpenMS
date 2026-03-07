@@ -34,12 +34,11 @@ void WSServerReactor::startup()
 
 	m_EventThread = MSThread([=, this, &promise]()
 	{
-		asio::io_context loop;
 		do
 		{
+			asio::io_context loop;
 			websocketpp::server<websocketpp::config::asio> server;
-			server.set_access_channels(websocketpp::log::alevel::all);
-			server.clear_access_channels(websocketpp::log::alevel::frame_payload);
+			server.clear_access_channels(websocketpp::log::alevel::all);
 
 			websocketpp::lib::error_code error;
 			server.init_asio(&loop, error);
@@ -59,27 +58,25 @@ void WSServerReactor::startup()
 					return;
 				}
 
-				auto& client = connect->get_socket();
 				MSRef<IWebSocketAddress> localAddress, remoteAddress;
 				{
-					auto address = client.local_endpoint().address().to_string();
-					auto portNum = client.local_endpoint().port();
-					auto family = client.local_endpoint().protocol().family();
+					auto address = server.get_local_endpoint(error).address().to_string();
+					auto portNum = server.get_local_endpoint(error).port();
+					auto family = server.get_local_endpoint(error).protocol().family();
 					if (family == AF_INET) localAddress = MSNew<WSIPv4Address>(address, portNum);
 					else if (family == AF_INET6) localAddress = MSNew<WSIPv6Address>(address, portNum);
 					else MS_ERROR("unknown address family: %d", family);
 				}
 				{
-					auto address = client.remote_endpoint().address().to_string();
-					auto portNum = client.remote_endpoint().port();
-					auto family = client.remote_endpoint().protocol().family();
-					if (family == AF_INET) remoteAddress = MSNew<WSIPv4Address>(address, portNum);
-					else if (family == AF_INET6) remoteAddress = MSNew<WSIPv6Address>(address, portNum);
+					auto address = connect->get_raw_socket().remote_endpoint().address().to_string();
+					auto portNum = connect->get_raw_socket().remote_endpoint().port();
+					auto family = connect->get_raw_socket().remote_endpoint().protocol().family();
+					if (family == AF_INET) remoteAddress = MSNew<WSIPv4Address>(address, portNum, connect->get_resource());
+					else if (family == AF_INET6) remoteAddress = MSNew<WSIPv6Address>(address, portNum, connect->get_resource());
 					else MS_ERROR("unknown address family: %d", family);
 				}
 				if (localAddress == nullptr || remoteAddress == nullptr)
 				{
-					client.close();
 					return;
 				}
 
@@ -106,9 +103,11 @@ void WSServerReactor::startup()
 				auto channel = result->second;
 				this->onDisconnect(channel);
 			});
-			server.set_message_handler([this](websocketpp::connection_hdl session, decltype(server)::message_ptr message)
+			server.set_message_handler([this, &server](websocketpp::connection_hdl session, decltype(server)::message_ptr message)
 			{
-				auto event = WSChannelEvent::New(message->get_payload(), (WSChannelEvent::opcode_t)message->get_opcode(), MSHnd<IChannel>());
+				auto result = m_ChannelMap.find(session.lock().get());
+				if (result == m_ChannelMap.end()) return;
+				auto event = WSChannelEvent::New(message->get_payload(), (WSChannelEvent::opcode_t)message->get_opcode(), result->second);
 				this->onInbound(event);
 			});
 
@@ -141,10 +140,10 @@ void WSServerReactor::startup()
 			{
 				loop.post([=, &server]()
 				{
-					auto wsEvent = reinterpret_cast<WSChannelEvent*>(event.get());
-					if (auto channel = MSCast<WSChannel>(wsEvent->Channel.lock()))
+					auto _event = reinterpret_cast<WSChannelEvent*>(event.get());
+					if (auto channel = MSCast<WSChannel>(_event->Channel.lock()))
 					{
-						server.send(channel->getHandle(), wsEvent->Message, (websocketpp::frame::opcode::value)wsEvent->OpCode);
+						server.send(channel->getHandle(), _event->Message, (websocketpp::frame::opcode::value)_event->OpCode);
 					}
 				});
 			};
@@ -220,7 +219,6 @@ void WSServerReactor::onConnect(MSRef<Channel> channel)
 	MS_DEBUG("accepted from %s", channel->getRemote().lock()->getString().c_str());
 
 	auto _channel = MSCast<WSChannel>(channel);
-	auto remote = MSCast<ISocketAddress>(channel->getRemote().lock());
 	m_ChannelMap[_channel->getHandle().lock().get()] = channel;
 	ChannelReactor::onConnect(channel);
 }
@@ -230,7 +228,6 @@ void WSServerReactor::onDisconnect(MSRef<Channel> channel)
 	MS_DEBUG("rejected from %s", channel->getRemote().lock()->getString().c_str());
 
 	auto _channel = MSCast<WSChannel>(channel);
-	auto remote = MSCast<ISocketAddress>(channel->getRemote().lock());
 	m_ChannelMap.erase(_channel->getHandle().lock().get());
 	ChannelReactor::onDisconnect(channel);
 }

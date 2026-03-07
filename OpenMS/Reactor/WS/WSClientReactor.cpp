@@ -9,13 +9,11 @@
 *
 * =================================================*/
 #include "WSClientReactor.h"
-#include "WSChannelAddress.h"
-#include <websocketpp/client.hpp>
-#include <websocketpp/config/asio_no_tls.hpp>
-
 #include "WSChannel.h"
 #include "WSChannelEvent.h"
-#include "websocketpp/config/asio_no_tls_client.hpp"
+#include "WSChannelAddress.h"
+#include <websocketpp/client.hpp>
+#include <websocketpp/config/asio_no_tls_client.hpp>
 
 WSClientReactor::WSClientReactor(MSRef<IWebSocketAddress> address, size_t workerNum, const callback_t& callback)
 	:
@@ -34,15 +32,12 @@ void WSClientReactor::startup()
 	auto future = promise.get_future();
 	m_EventThread = MSThread([=, this, &promise]()
 	{
-		asio::io_context loop;
 
 		do
 		{
-			// Bind and listen to the socket
-
+			asio::io_context loop;
 			websocketpp::client<websocketpp::config::asio_client> client;
-			client.set_access_channels(websocketpp::log::alevel::all);
-			client.clear_access_channels(websocketpp::log::alevel::frame_payload);
+			client.clear_access_channels(websocketpp::log::alevel::all);
 
 			websocketpp::lib::error_code error;
 			client.init_asio(&loop, error);
@@ -51,6 +46,7 @@ void WSClientReactor::startup()
 				MS_ERROR("failed to init_asio: %s", error.message().c_str());
 				break;
 			}
+
 			client.set_open_handler([this, &client](websocketpp::connection_hdl session)
 			{
 				MS_INFO("connected to %s", m_Address->getString().c_str());
@@ -73,14 +69,14 @@ void WSClientReactor::startup()
 						auto address = client.get_local_endpoint(error).address().to_string();
 						auto portNum = client.get_local_endpoint(error).port();
 						auto family = client.get_local_endpoint(error).protocol().family();
-						if (family == AF_INET) localAddress = MSNew<WSIPv4Address>(address, portNum);
-						else if (family == AF_INET6) localAddress = MSNew<WSIPv6Address>(address, portNum);
+						if (family == AF_INET) localAddress = MSNew<WSIPv4Address>(address, portNum, connect->get_resource());
+						else if (family == AF_INET6) localAddress = MSNew<WSIPv6Address>(address, portNum, connect->get_resource());
 						else MS_ERROR("unknown address family: %d", family);
 					}
 					{
-						auto address = connect->get_socket().remote_endpoint().address().to_string();
-						auto portNum = connect->get_socket().remote_endpoint().port();
-						auto family = connect->get_socket().remote_endpoint().protocol().family();
+						auto address = connect->get_raw_socket().remote_endpoint().address().to_string();
+						auto portNum = connect->get_raw_socket().remote_endpoint().port();
+						auto family = connect->get_raw_socket().remote_endpoint().protocol().family();
 						if (family == AF_INET) remoteAddress = MSNew<WSIPv4Address>(address, portNum);
 						else if (family == AF_INET6) remoteAddress = MSNew<WSIPv6Address>(address, portNum);
 						else MS_ERROR("unknown address family: %d", family);
@@ -104,11 +100,11 @@ void WSClientReactor::startup()
 			});
 			client.set_message_handler([this](websocketpp::connection_hdl session, decltype(client)::message_ptr message)
 			{
-				auto event = WSChannelEvent::New(message->get_payload(), (WSChannelEvent::opcode_t)message->get_opcode(), MSHnd<IChannel>());
+				auto event = WSChannelEvent::New(message->get_payload(), (WSChannelEvent::opcode_t)message->get_opcode(), m_Channel);
 				this->onInbound(event);
 			});
 
-			auto connect = client.get_connection(m_Address->getString(), error);
+			auto connect = client.get_connection("ws://" + m_Address->getString(), error);
 			if (error)
 			{
 				MS_ERROR("failed to get_connection: %s", error.message().c_str());
@@ -116,14 +112,14 @@ void WSClientReactor::startup()
 			}
 			client.connect(connect);
 
-			m_FireAsync = [&](MSRef<IChannelEvent> event)
+			m_FireSend = [&](MSRef<IChannelEvent> event)
 			{
 				loop.post([=, &client]()
 				{
-					auto wsEvent = reinterpret_cast<WSChannelEvent*>(event.get());
-					if (auto channel = MSCast<WSChannel>(wsEvent->Channel.lock()))
+					auto _event = reinterpret_cast<WSChannelEvent*>(event.get());
+					if (auto channel = MSCast<WSChannel>(_event->Channel.lock()))
 					{
-						client.send(channel->getHandle(), wsEvent->Message, (websocketpp::frame::opcode::value)wsEvent->OpCode);
+						client.send(channel->getHandle(), _event->Message, (websocketpp::frame::opcode::value)_event->OpCode);
 					}
 				});
 			};
@@ -146,7 +142,7 @@ void WSClientReactor::startup()
 			promise.set_value();
 			loop.run();
 			m_Connect = false;
-			m_FireAsync = nullptr;
+			m_FireSend = nullptr;
 
 			// Close channel
 
@@ -189,7 +185,6 @@ void WSClientReactor::onConnect(MSRef<Channel> channel)
 {
 	MS_DEBUG("accepted from %s", channel->getRemote().lock()->getString().c_str());
 
-	m_Connect = true;
 	m_Channel = channel;
 	ChannelReactor::onConnect(channel);
 }
@@ -198,7 +193,6 @@ void WSClientReactor::onDisconnect(MSRef<Channel> channel)
 {
 	MS_INFO("rejected from %s", channel->getRemote().lock()->getString().c_str());
 
-	m_Connect = false;
 	m_Channel = nullptr;
 	ChannelReactor::onDisconnect(channel);
 }
@@ -206,5 +200,5 @@ void WSClientReactor::onDisconnect(MSRef<Channel> channel)
 void WSClientReactor::onOutbound(MSRef<IChannelEvent> event, bool flush)
 {
 	if (event == nullptr || event->Channel.expired()) return;
-	if (m_Connect) m_FireAsync(event);
+	if (m_Connect) m_FireSend(event);
 }

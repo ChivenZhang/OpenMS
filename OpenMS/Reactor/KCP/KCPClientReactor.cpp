@@ -275,7 +275,6 @@ void KCPClientReactor::onConnect(MSRef<Channel> channel)
 {
 	MS_DEBUG("accepted from %s", channel->getRemote().lock()->getString().c_str());
 
-	m_Connect = true;
 	m_Channel = channel;
 	ChannelReactor::onConnect(channel);
 }
@@ -284,7 +283,6 @@ void KCPClientReactor::onDisconnect(MSRef<Channel> channel)
 {
 	MS_DEBUG("rejected from %s", channel->getRemote().lock()->getString().c_str());
 
-	m_Connect = false;
 	m_Channel = nullptr;
 	m_ChannelRemoved = channel;
 	ChannelReactor::onDisconnect(channel);

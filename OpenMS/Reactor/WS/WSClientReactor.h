@@ -29,5 +29,5 @@ protected:
 	MSRef<Channel> m_Channel;
 	MSRef<IWebSocketAddress> m_Address;
 	MSRef<IWebSocketAddress> m_LocalAddress;
-	MSLambda<void(MSRef<IChannelEvent>)> m_FireAsync;
+	MSLambda<void(MSRef<IChannelEvent>)> m_FireSend;
 };

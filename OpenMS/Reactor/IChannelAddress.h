@@ -37,5 +37,5 @@ public:
 class OPENMS_API IWebSocketAddress : public virtual ISocketAddress
 {
 public:
-	// virtual MSString getOrigin() const = 0;
+	virtual MSString getPath() const = 0;
 };
