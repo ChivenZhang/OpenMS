@@ -11,7 +11,7 @@
 * =================================================*/
 #include "../IChannelAddress.h"
 
-class IPv4Address : public ISocketAddress
+class IPv4Address : public virtual ISocketAddress
 {
 public:
 	static MSRef<IPv4Address> New(MSStringView ip, uint16_t port, MSStringView host = MSStringView());
@@ -29,7 +29,7 @@ protected:
 	MSString m_Address, m_HostName;
 };
 
-class IPv6Address : public ISocketAddress
+class IPv6Address : public virtual ISocketAddress
 {
 public:
 	static MSRef<IPv6Address> New(MSStringView ip, uint16_t port, MSStringView host = MSStringView());

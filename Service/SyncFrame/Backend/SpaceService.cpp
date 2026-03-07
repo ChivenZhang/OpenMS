@@ -61,10 +61,6 @@ SpaceService::SpaceService(uint32_t spaceID, uint32_t gameID)
 		AUTOWIRE_DATA(IServer)->shutdown();
 		co_return;
 	});
-	this->bind("keepAlive", [=](uint32_t userID)->MSAsync<void>
-	{
-		co_return;
-	});
 	this->bind("checkAlive", [=]()->MSAsync<void>
 	{
 		co_return;

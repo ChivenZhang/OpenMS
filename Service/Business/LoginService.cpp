@@ -21,7 +21,7 @@ LoginService::LoginService()
 	this->bind("signup", [this](MSString caller, MSString user, MSString pass)->MSAsync<bool>
 	{
 		MS_INFO("注册请求DB");
-		auto userID = co_await this->onSignupRequest(caller, user, pass);
+		auto userID = co_await this->onRequestSignup(caller, user, pass);
 		co_return userID != 0;
 	});
 }
@@ -38,7 +38,7 @@ MSAsync<void> LoginService::onLoginFromDB(MSString caller, uint32_t userID, uint
 	co_return co_await this->async<void>(caller, "onClientLogin", "", 0, MSTuple{userID, code, error});
 }
 
-MSAsync<uint32_t> LoginService::onSignupRequest(MSString caller, MSString username, MSString password)
+MSAsync<uint32_t> LoginService::onRequestSignup(MSString caller, MSString username, MSString password)
 {
 	auto userID = co_await this->async<uint32_t>("userdb", "signupDB", "", 100, MSTuple{username, password});
 	co_await this->onSignupFromDB(caller, userID, 0, {});

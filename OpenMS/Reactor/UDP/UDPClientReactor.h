@@ -33,7 +33,7 @@ protected:
 	bool m_Broadcast;
 	bool m_Multicast;
 	MSAtomic<bool> m_Sending;
-	MSLambda<void()> m_FireAsync;
+	MSLambda<void()> m_FireSend;
 	MSRef<Channel> m_Channel;
 	MSRef<ISocketAddress> m_Address;
 	MSRef<ISocketAddress> m_LocalAddress;

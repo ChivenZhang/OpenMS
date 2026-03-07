@@ -57,10 +57,6 @@ add_library(OpenMS STATIC
 		Endpoint/UDP/UDPClient.h
 		Endpoint/UDP/UDPServer.cpp
 		Endpoint/UDP/UDPServer.h
-		Endpoint/WS/WSClient.cpp
-		Endpoint/WS/WSClient.h
-		Endpoint/WS/WSServer.cpp
-		Endpoint/WS/WSServer.h
 		Handler/AES/AESHandler.cpp
 		Handler/AES/AESHandler.h
 		MS.h
@@ -138,6 +134,20 @@ add_library(OpenMS STATIC
 		Utility/TraitsUtility.h
         Server/Private/Service.cpp
         Server/Private/Service.h
+		Endpoint/WS/WSServer.cpp
+		Endpoint/WS/WSServer.h
+		Endpoint/WS/WSClient.cpp
+		Endpoint/WS/WSClient.h
+		Reactor/WS/WSClientReactor.cpp
+		Reactor/WS/WSClientReactor.h
+		Reactor/WS/WSServerReactor.cpp
+		Reactor/WS/WSServerReactor.h
+		Reactor/WS/WSChannel.cpp
+		Reactor/WS/WSChannel.h
+		Reactor/WS/WSChannelAddress.cpp
+		Reactor/WS/WSChannelAddress.h
+		Reactor/WS/WSChannelEvent.h
+		Reactor/WS/WSChannelEvent.cpp
 )
 
 if(OPENMS_ENABLE_MYSQL)
@@ -170,6 +180,9 @@ target_link_libraries(OpenMS PUBLIC MbedTLS::mbedtls)
 target_link_libraries(OpenMS PUBLIC MbedTLS::mbedx509)
 # cryptographic primitives
 target_link_libraries(OpenMS PUBLIC MbedTLS::mbedcrypto)
+find_package(OpenSSL REQUIRED)
+target_link_libraries(OpenMS PRIVATE OpenSSL::SSL)
+target_link_libraries(OpenMS PRIVATE OpenSSL::Crypto)
 find_package(nlohmann_json CONFIG REQUIRED)
 target_link_libraries(OpenMS PUBLIC nlohmann_json::nlohmann_json)
 find_package(cpptrace CONFIG REQUIRED)
@@ -183,6 +196,9 @@ target_link_libraries(OpenMS PUBLIC unofficial::breakpad::libbreakpad unofficial
 target_include_directories(OpenMS PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(OpenMS PUBLIC ${OPENMS_SOURCE_DIR}/External/iocpp)
 target_link_libraries(OpenMS PUBLIC iocpp)
+target_compile_definitions(OpenMS PUBLIC -DASIO_STANDALONE)
+target_include_directories(OpenMS PUBLIC ${OPENMS_SOURCE_DIR}/External/websocketpp)
+
 
 if(MSVC)
 target_compile_options(OpenMS PUBLIC /EHsc)

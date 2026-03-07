@@ -52,6 +52,6 @@ protected:
 	virtual MSAsync<void> onStateChange(MSStringView state);
 
 protected:
-	friend class ClientService;
+	friend class SpaceService;
 	const uint32_t m_UserID;
 };

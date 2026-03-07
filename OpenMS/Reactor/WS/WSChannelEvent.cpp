@@ -1,4 +1,3 @@
-#pragma once
 /*=================================================
 * Copyright © 2020-2026 ChivenZhang.
 * All Rights Reserved.
@@ -9,16 +8,13 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include <Server/Private/Service.h>
+#include "WSChannelEvent.h"
 
-class SpaceService : public Service
+MSRef<WSChannelEvent> WSChannelEvent::New(MSStringView const& message, opcode_t opcode, MSHnd<IChannel> const& channel)
 {
-public:
-	SpaceService();
-
-	virtual MSAsync<void> onLogin(uint32_t userID);
-
-	virtual MSAsync<void> onLogout(bool result);
-
-	virtual MSAsync<void> onSignup(bool result);
-};
+	auto event = MSNew<WSChannelEvent>();
+	event->Message = message;
+	event->Channel = channel;
+	event->OpCode = opcode;
+	return event;
+}

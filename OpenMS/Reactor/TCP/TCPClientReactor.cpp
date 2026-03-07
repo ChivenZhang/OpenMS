@@ -151,7 +151,7 @@ void TCPClientReactor::startup()
 				}
 			};
 
-			m_FireAsync = [&]()
+			m_FireSend = [&]()
 			{
 				loop.post([&]()
 				{
@@ -190,7 +190,7 @@ void TCPClientReactor::startup()
 			promise.set_value();
 			loop.run();
 			m_Connect = false;
-			m_FireAsync = nullptr;
+			m_FireSend = nullptr;
 
 			// Close channel
 
@@ -233,7 +233,6 @@ void TCPClientReactor::onConnect(MSRef<Channel> channel)
 {
 	MS_DEBUG("accepted from %s", channel->getRemote().lock()->getString().c_str());
 
-	m_Connect = true;
 	m_Channel = channel;
 	ChannelReactor::onConnect(channel);
 }
@@ -242,7 +241,6 @@ void TCPClientReactor::onDisconnect(MSRef<Channel> channel)
 {
 	MS_INFO("rejected from %s", channel->getRemote().lock()->getString().c_str());
 
-	m_Connect = false;
 	m_Channel = nullptr;
 	ChannelReactor::onDisconnect(channel);
 }
@@ -250,5 +248,5 @@ void TCPClientReactor::onDisconnect(MSRef<Channel> channel)
 void TCPClientReactor::onOutbound(MSRef<IChannelEvent> event, bool flush)
 {
 	ChannelReactor::onOutbound(event, flush);
-	if (m_Sending == false) m_FireAsync();
+	if (m_Sending == false) m_FireSend();
 }

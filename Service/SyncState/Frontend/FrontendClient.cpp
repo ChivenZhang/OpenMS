@@ -27,7 +27,7 @@ void FrontendClient::onInit()
 {
 	auto mailHub = m_MailHub = MSNew<MailHub>();
 
-	auto clientService = (m_ClientService = this->onCreatingClient()).lock();
+	auto clientService = (m_ClientService = this->onCreatingSpace()).lock();
 	mailHub->create("client", clientService);
 
 	// Handle local mail to remote
@@ -119,7 +119,7 @@ void FrontendClient::onUpdate(float time)
 {
 }
 
-MSRef<ClientService> FrontendClient::onCreatingClient()
+MSRef<SpaceService> FrontendClient::onCreatingSpace()
 {
-	return MSNew<ClientService>();
+	return MSNew<SpaceService>();
 }

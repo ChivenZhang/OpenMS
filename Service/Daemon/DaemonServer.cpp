@@ -30,7 +30,7 @@ void DaemonServer::onInit()
 	{
 		MS_INFO("守护进程：CREATE SPACE!!! %u", spaceID);
 #ifdef OPENMS_PLATFORM_WINDOWS
-		auto result = system(("start " + launchPath + ".exe" " --space=" + std::to_string(spaceID) + " --game=" + std::to_string(gameID) + " --caller=" + caller).c_str());
+		auto result = system(("start " + launchPath + ".exe" " --space=" + std::to_string(spaceID) + " --game=" + std::to_string(gameID) + " --caller=" + caller + " >> " + std::to_string(spaceID) + ".log 2>&1").c_str());
 #elif defined(OPENMS_PLATFORM_APPLE)
 		auto result = system(("nohup " + launchPath + " --space=" + std::to_string(spaceID) + " --game=" + std::to_string(gameID) + " --caller=" + caller + " >> " + std::to_string(spaceID) + ".log &").c_str());
 #elif defined(OPENMS_PLATFORM_LINUX)

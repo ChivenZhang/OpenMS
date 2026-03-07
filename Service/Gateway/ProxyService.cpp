@@ -40,7 +40,7 @@ IMailTask ProxyService::read(IMail mail)
 			{
 				if (auto client = m_ClientChannel.lock())
 				{
-					MSString buffer(sizeof(MailView) + mail.Body.size(), 0);
+					MSString buffer(sizeof(MailView) + mail.Body.size(), '?');
 					auto& mailView = *(MailView*)buffer.data();
 					mailView.From = mail.From;
 					mailView.To = mail.To;

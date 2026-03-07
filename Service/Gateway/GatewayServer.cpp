@@ -84,7 +84,7 @@ void GatewayServer::onInit()
 							mail.Type = mailView.Type | OPENMS_MAIL_TYPE_CLIENT;
 							mail.Body = MSStringView(mailView.Body, event->Message.size() - sizeof(MailView));
 
-							MS_INFO("client %u=>%u via %u #%u @%u", mail.From, mail.To, mail.Copy, mail.Date, mail.Type);
+							MS_DEBUG("client %u=>%u via %u #%u @%u", mail.From, mail.To, mail.Copy, mail.Date, mail.Type);
 							mailHub->send(mail);
 						}
 						else

@@ -28,7 +28,7 @@ void FrontendClient::onInit()
 {
 	auto mailHub = m_MailHub = MSNew<MailHub>();
 
-	auto clientService = MSNew<ClientService>();
+	auto clientService = MSNew<SpaceService>();
 	mailHub->create("client", clientService);
 
 	// Handle local mail to remote

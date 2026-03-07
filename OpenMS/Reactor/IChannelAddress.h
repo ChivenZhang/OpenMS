@@ -27,8 +27,15 @@ public:
 };
 
 /// @brief Interface for socket address
-class OPENMS_API ISocketAddress : public IChannelAddress
+class OPENMS_API ISocketAddress : public virtual IChannelAddress
 {
 public:
 	virtual uint16_t getPort() const = 0;
+};
+
+/// @brief Interface for websocket address
+class OPENMS_API IWebSocketAddress : public virtual ISocketAddress
+{
+public:
+	virtual MSString getPath() const = 0;
 };
