@@ -23,9 +23,9 @@ PlayerService::PlayerService(uint32_t userID)
 	{
 		co_return co_await this->onStopBattle();
 	});
-	this->bind("onStateChange", [=, this](MSString state)->MSAsync<void>
+	this->bind("onStateChange", [=, this](MSString state, bool full)->MSAsync<void>
 	{
-		co_return co_await this->onStateChange(state);
+		co_return this->onStateChange(state, full);
 	});
 }
 
@@ -51,8 +51,7 @@ MSAsync<void> PlayerService::onStopBattle()
 	co_return;
 }
 
-MSAsync<void> PlayerService::onStateChange(MSStringView state)
+void PlayerService::onStateChange(MSStringView state, bool full)
 {
 	MS_INFO("状态改变：%s", MSString(state.data(), state.size()).c_str());
-	co_return;
 }

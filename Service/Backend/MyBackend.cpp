@@ -22,6 +22,12 @@ public:
             co_await this->callClient<void>("onAttack", 0, MSTuple{});
         });
     }
+
+protected:
+    void onStateChange(MSString& data, bool full) override
+    {
+        // TODO: 处理状态改变
+    }
 };
 
 class MySpace : public SpaceService

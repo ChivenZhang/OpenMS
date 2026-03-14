@@ -133,9 +133,9 @@ public:
 			auto _service = MSHash(service), _method = MSHash(method), _forward = MSHash(forward);
 			co_return co_await [=, this, argv = std::forward<MSTuple<Args...>>(args)](MSAwait<void> promise) mutable
 			{
-				this->async(_service, _method, _forward, timeout, std::forward<MSTuple<Args...>>(argv), [promise]()
+				this->async(_service, _method, _forward, timeout, std::forward<MSTuple<Args...>>(argv), [_promise = std::move(promise)]()
 				{
-					promise();
+					_promise();
 				});
 			};
 		}
@@ -144,9 +144,9 @@ public:
 			auto _service = MSHash(service), _method = MSHash(method), _forward = MSHash(forward);
 			co_return co_await [=, this, argv = std::forward<MSTuple<Args...>>(args)](MSAwait<T> promise) mutable
 			{
-				this->async(_service, _method, _forward, timeout, std::forward<MSTuple<Args...>>(argv), [promise](T result)
+				this->async(_service, _method, _forward, timeout, std::forward<MSTuple<Args...>>(argv), [_promise = std::move(promise)](T result)
 				{
-					promise(result);
+					_promise(result);
 				});
 			};
 		}

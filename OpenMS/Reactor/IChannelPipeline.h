@@ -39,9 +39,9 @@ public:
 public:
 	virtual ~IChannelPipeline() = default;
 
-	virtual MSArrayView<const inbound_t> getInbounds() const = 0;
+	virtual MSListView<const inbound_t> getInbounds() const = 0;
 
-	virtual MSArrayView<const outbound_t> getOutbounds() const = 0;
+	virtual MSListView<const outbound_t> getOutbounds() const = 0;
 
 	virtual bool addFirst(MSStringView name, MSRef<IChannelInboundHandler> handler) = 0;
 

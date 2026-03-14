@@ -41,6 +41,19 @@ SpaceService::SpaceService()
 		}
 		co_return co_await this->onLeaveSpace(spaceID, userID);
 	});
+	this->bind("onStateChange", [=, this](uint32_t userID, MSString const& state, bool full)->MSAsync<void>
+	{
+		// Route states to any player service
+
+		if (auto result = m_UserInfos.find(userID); result != m_UserInfos.end())
+		{
+			if (auto& user = result->second; auto player = user.Player.lock())
+			{
+				player->onStateChange(state, full);
+			}
+		}
+		co_return;
+	});
 }
 
 uint32_t SpaceService::userID() const
@@ -140,12 +153,28 @@ MSAsync<void> SpaceService::onSignup(bool result)
 MSAsync<void> SpaceService::onEnterSpace(uint32_t spaceID, uint32_t userID)
 {
 	MS_INFO("用户 %u 进入空间 %u", userID, spaceID);
+
+	if (m_UserInfos.contains(userID) == false)
+	{
+		auto playerService = this->onCreatingPlayer(userID);
+		if (this->create("client:" + std::to_string(userID), playerService))
+		{
+			auto& user = m_UserInfos[userID];
+			user.Player = playerService;
+			co_await playerService->onCreatePlayer();
+		}
+	}
 	co_return;
 }
 
 MSAsync<void> SpaceService::onLeaveSpace(uint32_t spaceID, uint32_t userID)
 {
 	MS_INFO("用户 %u 离开空间 %u", userID, spaceID);
+
+	if (this->cancel("player:" + std::to_string(userID)))
+	{
+		m_UserInfos.erase(userID);
+	}
 	co_return;
 }
 

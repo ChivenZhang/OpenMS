@@ -24,7 +24,7 @@ asio::ip::tcp::socket* TCPChannel::getSocket()
 	return &m_Socket;
 }
 
-MSArrayView<char> TCPChannel::getBuffer()
+MSListView<char> TCPChannel::getBuffer()
 {
 	return m_Buffer;
 }

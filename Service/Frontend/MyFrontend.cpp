@@ -39,11 +39,9 @@ protected:
         co_await PlayerService::onStopBattle();
     }
 
-    MSAsync<void> onStateChange(MSStringView state) override
+    void onStateChange(MSStringView state, bool full) override
     {
         MS_INFO("玩家 %u 状态改变：%s", this->userID(), state.data());
-        // TODO:
-        co_return;
     }
 };
 
@@ -109,6 +107,8 @@ protected:
                     AUTOWIRE_DATA(IServer)->shutdown();
                     break;
                 }
+
+                MS_INFO("input cmd: [login|logout|match|attack|exit]");
             }
         });
         thread.detach();

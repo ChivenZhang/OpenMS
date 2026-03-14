@@ -16,7 +16,9 @@ LogicService::LogicService()
 	this->bind("login", [this](MSString user, MSString pass)->MSAsync<uint32_t>
 	{
 		MS_INFO("登录请求");
-		co_return co_await this->onRequestLogin(user, pass);
+		auto userID =  co_await this->onRequestLogin(user, pass);
+		MS_INFO("test1 %u", userID);
+		co_return userID;
 	});
 	this->bind("onClientLogin", [this](uint32_t userID, uint32_t code, MSString error)->MSAsync<void>
 	{
@@ -147,7 +149,9 @@ MSAsync<void> LogicService::onGlobalData(MSStringView name, MSStringView value)
 
 MSAsync<uint32_t> LogicService::onRequestLogin(MSString username, MSString password)
 {
-	co_return co_await this->async<uint32_t>("login", "login", "", 100, MSTuple{this->name(), username, password});
+	auto userID = co_await this->async<uint32_t>("login", "login", "", 1000, MSTuple{this->name(), username, password});
+	MS_INFO("test2 %u", userID);
+	co_return userID;
 }
 
 MSAsync<void> LogicService::onClientLogin(uint32_t userID, uint32_t code, MSString error)
