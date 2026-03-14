@@ -35,8 +35,5 @@
   }, {
     "name" : "spdlog",
     "version>=" : "1.17.0"
-  }, {
-    "name" : "openssl",
-    "version>=" : "3.6.1#2"
   } ]
 }
