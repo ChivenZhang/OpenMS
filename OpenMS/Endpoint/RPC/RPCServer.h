@@ -57,6 +57,19 @@ protected:
 	MSMap<uint32_t, MSLambda<void(MSStringView const&)>> m_Sessions;
 };
 
+template<class T>
+struct MSSecondTypes;
+
+template<class T, class... Args>
+struct MSSecondTypes<std::tuple<T, Args...>>
+{
+	using types = std::tuple<Args...>;
+	using datas = std::tuple<std::remove_cvref_t<Args>...>;
+	static constexpr std::size_t count = sizeof...(Args);
+	template<std::size_t N>
+	using type = std::tuple_element<N, std::tuple<Args...>>::type;
+};
+
 /// @brief RPC Server Endpoint
 class RPCServer : public RPCServerBase
 {
@@ -71,8 +84,8 @@ public:
 	{
 		return RPCServerBase::bind(name, [method](MSHnd<IChannel> client, MSStringView const& input, MSString& output)->bool
 		{
-			typename TSecondTypes<typename TTraits<F>::argument_datas>::second_datas request;
-			if constexpr (TSecondTypes<typename TTraits<F>::argument_datas>::second_count != 0)
+			typename MSSecondTypes<typename TTraits<F>::argument_datas>::datas request;
+			if constexpr (MSSecondTypes<typename TTraits<F>::argument_datas>::count != 0)
 			{
 				if (MSTypeC(input, request) == false) return false;
 			}
