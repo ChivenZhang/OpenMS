@@ -88,7 +88,10 @@ protected:
                     {
                         if(auto playerService = clientService->player())
                         {
-                            playerService->callServer<void>("matchBattle", 0, MSTuple{ 0U });
+                            playerService->callServer("matchBattle", 0, MSTuple{ 0U }, [](bool result)
+                            {
+                                MS_INFO("匹配结果：%s", result ? "true" : "false");
+                            });
                         }
                     }
                 }
@@ -98,7 +101,9 @@ protected:
                     {
                         if(auto playerService = clientService->player())
                         {
-                            playerService->callPlayer<void>("attack", 0, MSTuple{ 0U });
+                            playerService->callPlayer("attack", 0, MSTuple{ 0U }, []()
+                            {
+                            });
                         }
                     }
                 }
