@@ -18,7 +18,7 @@ The Distributed Network Framework based on Microservice Theory.
 - [x] Support [C++20 coroutine](https://en.cppreference.com/w/cpp/language/coroutines) coding
 - [x] Support [Reactor](https://en.wikipedia.org/wiki/Reactor_pattern) network model
 - [x] Support [Actor](https://en.wikipedia.org/wiki/Erlang_(programming_language)) messaging model
-- [x] Support tcp, udp, [kcp](https://github.com/skywind3000/kcp), rpc, http, mysql, redis
+- [x] Support tcp, udp, [kcp](https://github.com/skywind3000/kcp), rpc, http, websocket，mysql, redis，sqlite
 - [x] Support [Microservice](https://microservices.io/patterns/index.html) cluster
 - [x] Support Windows, macOS, Linux
 - [ ] Support Hot module replacement
