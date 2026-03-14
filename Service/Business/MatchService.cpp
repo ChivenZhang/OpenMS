@@ -14,6 +14,8 @@ MatchService::MatchService()
 {
 	this->bind("enterMatch", [=, this](uint32_t userID, uint32_t gameID)->MSAsync<bool>
 	{
+		MS_INFO("进入匹配 %u -> %u", userID, gameID);
+
 		if (m_UserMatches.emplace(userID, gameID).second)
 		{
 			auto& player = m_Candidates[gameID].emplace_back();
@@ -26,6 +28,8 @@ MatchService::MatchService()
 	});
 	this->bind("leaveMatch", [=, this](uint32_t userID)->MSAsync<bool>
 	{
+		MS_INFO("离开匹配 %u", userID);
+
 		auto result = m_UserMatches.find(userID);
 		if (result != m_UserMatches.end())
 		{

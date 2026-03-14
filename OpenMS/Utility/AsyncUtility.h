@@ -76,17 +76,24 @@ struct TPromiseBase
 	}
 
 	TPromiseBase()
+		:
+		m_ID(0U),
+		m_ThisHandle(nullptr),
+		m_NextHandle(nullptr),
+		m_RootHandle(&m_ThisHandle),
+		m_ThisState(TAsyncState::NONE),
+		m_LastState(TAsyncState::NONE),
+		m_RootState(&m_ThisState)
 	{
 		static uint32_t s_ID = 0;
 		m_ID = ++s_ID;
 	}
-	uint32_t m_ID = 0;
-	std::coroutine_handle<> m_ThisHandle;
-	std::coroutine_handle<> m_NextHandle;
-	TAsyncState m_ThisState = TAsyncState::NONE;
-	TAsyncState m_LastState = TAsyncState::NONE;
-	TAsyncState* m_RootState = &m_ThisState;
-	std::coroutine_handle<>* m_RootHandle = &m_ThisHandle;
+
+	uint32_t m_ID;
+	TAsyncState m_ThisState, m_LastState;
+	TAsyncState* m_RootState;
+	std::coroutine_handle<> m_ThisHandle, m_NextHandle;
+	std::coroutine_handle<>* m_RootHandle;
 };
 
 template <class T>
