@@ -34,7 +34,7 @@ GuestService::GuestService(MSHnd<IChannel> client, uint32_t guestID)
 
 			channel->getContext()->userdata() = userID;
 			MS_INFO("验证成功！ %s", username.c_str());
-			co_await this->async<void>("client", "onLogin", proxyService->name(), 0, MSTuple{ userID });
+			co_await this->async<void>("client", "onLogin", "proxy:" + std::to_string(userID), 0, MSTuple{ userID });
 		}
 		else
 		{
@@ -52,8 +52,16 @@ GuestService::GuestService(MSHnd<IChannel> client, uint32_t guestID)
 		auto userID = channel->getContext()->userdata();
 		if (userID == 0) co_return false;
 		auto result = co_await this->async<bool>("logic", "logout", "", 1000, MSTuple{userID});
-
-		co_await this->async<void>("client", "onLogout", this->name(), 0, MSTuple{result});
+		if (result)
+		{
+			co_await this->async<void>("client", "onLogout", "proxy:" + std::to_string(userID), 0, MSTuple{userID, result});
+			this->cancel("proxy:" + std::to_string(userID));
+			channel->getContext()->userdata() = 0;
+		}
+		else
+		{
+			MS_INFO("注销失败！ %u", userID);
+		}
 		co_return result;
 	});
 	this->bind("signup", [=, this](MSString username, MSString password)-> MSAsync<bool>

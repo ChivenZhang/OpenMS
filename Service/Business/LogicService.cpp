@@ -180,8 +180,6 @@ MSAsync<void> LogicService::onClientLogin(uint32_t userID, uint32_t code, MSStri
 	});
 	this->create("server:" + std::to_string(userID), serverService);
 
-	co_await this->async<void>("client", "onLogin", "proxy:" + std::to_string(userID), 0, MSTuple{userID});
-
 	// Update record
 
 	m_UserLock.lock();
@@ -226,10 +224,10 @@ MSAsync<void> LogicService::onClientLogout(uint32_t userID, uint32_t code, MSStr
 	userInfo.Online = false;
 	m_UserLock.unlock();
 
-	co_return co_await this->async<void>("client", "onLogout", "proxy:" + std::to_string(userID), 0, MSTuple{userID, code});
-	
 	this->cancel("server:" + std::to_string(userID));
 	this->cancel("player:" + std::to_string(userID));
+
+	co_return;
 }
 
 MSAsync<uint32_t> LogicService::onRequestSignup(MSString username, MSString password)
