@@ -9,11 +9,18 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include <future>
-#include <variant>
+#include <any>
 #include <coroutine>
 #include <functional>
 #include "TraitsUtility.h"
+
+template <class T>
+class TAsync;
+
+enum class TAsyncState
+{
+	NONE = 0, PEND, AWAIT, RESUME, YIELD, DONE,
+};
 
 // ==================== Await<T> ====================
 
@@ -25,14 +32,6 @@ template <class T>
 using TAwait = TAwaitTraits<T>::type;
 
 // =================== Promise<T> ===================
-
-enum class TAsyncState
-{
-	NONE = 0, PEND, AWAIT, RESUME, YIELD, DONE,
-};
-
-template <class T>
-class TAsync;
 
 struct TPromiseBase
 {
@@ -98,6 +97,21 @@ struct TPromiseBase
 
 template <class T>
 struct TAsyncPromise;
+
+template<class T>
+struct TFirstType;
+
+template<>
+struct TFirstType<std::tuple<>>
+{
+	using type = void;
+};
+
+template<class... Args>
+struct TFirstType<std::tuple<Args...>>
+{
+	using type = std::tuple_element<0, std::tuple<Args...>>::type;
+};
 
 template <class T>
 struct TAsyncPromise : TPromiseBase
@@ -169,7 +183,7 @@ struct TAsyncPromise : TPromiseBase
 	template <class F>
 	auto await_transform(F&& lambda)
 	{
-		using return_type = TFirstType<typename TTraits<typename TTraits<F>::template argument_data<0>>::argument_datas>::first_type;
+		using return_type = TFirstType<typename TTraits<typename TTraits<F>::template argument_data<0>>::argument_datas>::type;
 
 		struct TLambdaAwaitable
 		{
@@ -294,7 +308,7 @@ struct TAsyncPromise<void> : public TPromiseBase
 	template <class F>
 	auto await_transform(F&& lambda)
 	{
-		using return_type = TFirstType<typename TTraits<typename TTraits<F>::template argument_data<0>>::argument_datas>::first_type;
+		using return_type = TFirstType<typename TTraits<typename TTraits<F>::template argument_data<0>>::argument_datas>::type;
 
 		struct TLambdaAwaitable
 		{
