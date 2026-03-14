@@ -49,3 +49,7 @@ MSAsync<void> PlayerService::onCreatePlayer()
 	MS_INFO("创建玩家 %u", m_UserID);
 	co_return;
 }
+
+void PlayerService::onStateChange(MSString& data, bool full)
+{
+}

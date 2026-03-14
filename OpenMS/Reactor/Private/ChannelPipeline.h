@@ -16,8 +16,8 @@ class ChannelPipeline : public IChannelPipeline
 {
 public:
 	ChannelPipeline(MSRaw<Channel> channel);
-	MSArrayView<const inbound_t> getInbounds() const override;
-	MSArrayView<const outbound_t> getOutbounds() const override;
+	MSListView<const inbound_t> getInbounds() const override;
+	MSListView<const outbound_t> getOutbounds() const override;
 	bool addFirst(MSStringView name, MSRef<IChannelInboundHandler> handler) override;
 	bool addLast(MSStringView name, MSRef<IChannelInboundHandler> handler) override;
 	bool addBefore(MSStringView which, MSStringView name, MSRef<IChannelInboundHandler> handler) override;

@@ -25,7 +25,7 @@ GuestService::GuestService(MSHnd<IChannel> client, uint32_t guestID)
 		auto channel = m_ClientChannel.lock();
 		if (channel == nullptr) co_return 0U;
 		if (auto userID = channel->getContext()->userdata()) co_return userID;
-		auto userID = co_await this->async<uint32_t>("logic", "login", "", 1000, MSTuple{username, password});
+		auto userID = co_await this->async<uint32_t>("logic", "login", "", 5000, MSTuple{username, password});
 		if (userID)
 		{
 			auto proxyService = MSNew<ProxyService>(channel, userID);

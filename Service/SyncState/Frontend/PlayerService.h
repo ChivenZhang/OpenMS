@@ -49,7 +49,7 @@ protected:
 
 	virtual MSAsync<void> onStopBattle();
 
-	virtual MSAsync<void> onStateChange(MSStringView state);
+	virtual void onStateChange(MSStringView state, bool full);
 
 protected:
 	friend class SpaceService;

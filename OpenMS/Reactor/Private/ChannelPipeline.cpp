@@ -26,12 +26,12 @@ ChannelPipeline::ChannelPipeline(MSRaw<Channel> channel)
 {
 }
 
-MSArrayView<const IChannelPipeline::inbound_t> ChannelPipeline::getInbounds() const
+MSListView<const IChannelPipeline::inbound_t> ChannelPipeline::getInbounds() const
 {
 	return m_Inbounds;
 }
 
-MSArrayView<const IChannelPipeline::outbound_t> ChannelPipeline::getOutbounds() const
+MSListView<const IChannelPipeline::outbound_t> ChannelPipeline::getOutbounds() const
 {
 	return m_Outbounds;
 }

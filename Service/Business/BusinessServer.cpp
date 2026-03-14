@@ -12,7 +12,6 @@
 #include "LogicService.h"
 #include <OpenMS/Mailbox/Private/Mail.h>
 #include <OpenMS/Server/Private/Service.h>
-
 #include "LoginService.h"
 #include "MatchService.h"
 

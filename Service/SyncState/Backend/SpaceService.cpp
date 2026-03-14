@@ -64,7 +64,7 @@ SpaceService::SpaceService(uint32_t spaceID, uint32_t gameID)
 			auto& user = m_UserInfos[userID];
 			co_await this->async<void>(caller, "onEnterSpace", "", 0, MSTuple{m_SpaceID, userID });
 			// Whole synchronization of game state
-			co_await this->async<void>(this->name(), "syncWhole", "", 0, MSTuple{userID});
+			co_await this->async<void>(this->name(), "syncFull", "", 0, MSTuple{userID});
 			co_return true;
 		}
 		co_return false;
@@ -80,14 +80,26 @@ SpaceService::SpaceService(uint32_t spaceID, uint32_t gameID)
 		}
 		co_return false;
 	});
-	this->bind("syncWhole", [=, this]()->MSAsync<void>
+	this->bind("syncFull", [=, this]()->MSAsync<void>
 	{
 		if(m_GameState == state_t::START)
 		{
+			MSList<uint32_t> userIDs(m_UserInfos.size());
 			for (auto& user : m_UserInfos)
 			{
+				userIDs.emplace_back(user.first);
+			}
+			for (auto& user : m_UserInfos)
+			{
+				MSString state;
 				auto userID = user.first;
-				this->callClient(userID, "onStateChange", 0, MSTuple{"{name:value}"}, [](){});
+				auto player = user.second.Player.lock();
+				player->onStateChange(state, true);
+				for (auto& peer : m_UserInfos)
+				{
+					auto peerID = peer.first;
+					co_await this->async<void>("client", "onStateChange", "proxy:" + std::to_string(peerID), 0, MSTuple{userID, state, true});
+				}
 			}
 		}
 		co_return;
@@ -96,7 +108,23 @@ SpaceService::SpaceService(uint32_t spaceID, uint32_t gameID)
 	{
 		if(m_GameState == state_t::START)
 		{
-			// TODO: A thousand years later
+			MSList<uint32_t> userIDs(m_UserInfos.size());
+			for (auto& user : m_UserInfos)
+			{
+				userIDs.emplace_back(user.first);
+			}
+			for (auto& user : m_UserInfos)
+			{
+				MSString state;
+				auto userID = user.first;
+				auto player = user.second.Player.lock();
+				player->onStateChange(state, false);
+				for (auto& peer : m_UserInfos)
+				{
+					auto peerID = peer.first;
+					co_await this->async<void>("client", "onStateChange", "proxy:" + std::to_string(peerID), 0, MSTuple{userID, state, true});
+				}
+			}
 		}
 		co_return;
 	});
@@ -108,7 +136,7 @@ SpaceService::SpaceService(uint32_t spaceID, uint32_t gameID)
 
 	m_Timer.start(1000, 2000, [=, this]()
 	{
-		this->call<void>(this->name(), "syncWhole", "", 0, MSTuple{});
+		this->call<void>(this->name(), "syncFull", "", 0, MSTuple{});
 	});
 }
 

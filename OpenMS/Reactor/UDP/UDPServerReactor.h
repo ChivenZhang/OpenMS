@@ -34,7 +34,7 @@ protected:
 	bool m_Multicast;
 	const uint32_t m_Backlog;
 	MSAtomic<bool> m_Sending;
-	MSLambda<void()> m_FireAsync;
+	MSLambda<void()> m_FireSend;
 	MSRef<ISocketAddress> m_Address;
 	MSRef<ISocketAddress> m_LocalAddress;
 	MSList<MSRef<Channel>> m_Channels;

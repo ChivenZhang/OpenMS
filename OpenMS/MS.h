@@ -170,7 +170,7 @@ template <class T, size_t N>
 using MSArray = std::array<T, N>;
 #if 20 <= OPENMS_CPP_VERSION
 template <class T, size_t N = std::dynamic_extent>
-using MSArrayView = std::span<T, N>;
+using MSListView = std::span<T, N>;
 #endif
 template <class T>
 using MSList = std::vector<T>;

@@ -47,6 +47,8 @@ public:
 protected:
 	virtual MSAsync<void> onCreatePlayer();
 
+	virtual void onStateChange(MSString& data, bool full);
+
 protected:
 	friend class SpaceService;
 	const uint32_t m_UserID;

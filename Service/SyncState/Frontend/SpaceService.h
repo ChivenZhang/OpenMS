@@ -43,4 +43,9 @@ protected:
 protected:
 	uint32_t m_UserID;
 	MSHnd<PlayerService> m_PlayerService;
+	struct user_t
+	{
+		MSHnd<PlayerService> Player;
+	};
+	MSMap<uint32_t, user_t> m_UserInfos;
 };

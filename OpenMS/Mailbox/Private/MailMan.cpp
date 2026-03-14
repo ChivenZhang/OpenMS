@@ -74,8 +74,9 @@ MailMan::MailMan(MSRaw<MailHub> context)
 			{
 				switch (mail.Task.state())
 				{
-				case MSAsyncState::NONE: mail.Task.resume(); break;
-				case MSAsyncState::YIELD: mail.Task.resume(); break;
+				case MSAsyncState::NONE: 
+				case MSAsyncState::YIELD: 
+				case MSAsyncState::RESUME: mail.Task.resume(); break;
 				default: break;
 				}
 			}
