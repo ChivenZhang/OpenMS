@@ -27,6 +27,20 @@ struct TTraitsBase
 };
 
 template<class T>
+struct TTraitsBase<T>
+{
+	using return_type = T;
+	using return_data = std::remove_cvref_t<T>;
+	using argument_types = std::tuple<>;
+	using argument_datas = std::tuple<>;
+	static constexpr std::size_t argument_count = 0;
+	template<std::size_t N>
+	using argument_type = void;
+	template<std::size_t N>
+	using argument_data = void;
+};
+
+template<class T>
 struct TTraits;
 
 template<class F>

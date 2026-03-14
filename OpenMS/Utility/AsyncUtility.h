@@ -33,7 +33,7 @@ using TAwait = TAwaitTraits<T>::type;
 
 // =================== Promise<T> ===================
 
-struct TPromiseBase
+struct TAsyncPromiseBase
 {
 	struct InitAwaitable
 	{
@@ -74,47 +74,17 @@ struct TPromiseBase
 		return FinalAwaitable{};
 	}
 
-	TPromiseBase()
-		:
-		m_ID(0U),
-		m_ThisHandle(nullptr),
-		m_NextHandle(nullptr),
-		m_RootHandle(&m_ThisHandle),
-		m_ThisState(TAsyncState::NONE),
-		m_LastState(TAsyncState::NONE),
-		m_RootState(&m_ThisState)
-	{
-		static uint32_t s_ID = 0;
-		m_ID = ++s_ID;
-	}
-
-	uint32_t m_ID;
-	TAsyncState m_ThisState, m_LastState;
-	TAsyncState* m_RootState;
+	TAsyncState m_ThisState = TAsyncState::NONE, m_LastState = TAsyncState::NONE;
+	TAsyncState* m_RootState = &m_ThisState;
 	std::coroutine_handle<> m_ThisHandle, m_NextHandle;
-	std::coroutine_handle<>* m_RootHandle;
+	std::coroutine_handle<>* m_RootHandle = &m_ThisHandle;
 };
 
 template <class T>
 struct TAsyncPromise;
 
-template<class T>
-struct TFirstType;
-
-template<>
-struct TFirstType<std::tuple<>>
-{
-	using type = void;
-};
-
-template<class... Args>
-struct TFirstType<std::tuple<Args...>>
-{
-	using type = std::tuple_element<0, std::tuple<Args...>>::type;
-};
-
 template <class T>
-struct TAsyncPromise : TPromiseBase
+struct TAsyncPromise : TAsyncPromiseBase
 {
 	TAsync<T> get_return_object() noexcept;
 
@@ -171,7 +141,6 @@ struct TAsyncPromise : TPromiseBase
 				m_ThisHandle.promise().m_LastState = TAsyncState::NONE;
 				*m_ThisHandle.promise().m_RootState = m_ThisHandle.promise().m_ThisState;
 				*m_ThisHandle.promise().m_RootHandle = nullptr;
-
 				if (m_ThisHandle.promise().m_Error) std::rethrow_exception(m_ThisHandle.promise().m_Error);
 
 				return m_ThisHandle.promise().result();
@@ -183,7 +152,7 @@ struct TAsyncPromise : TPromiseBase
 	template <class F>
 	auto await_transform(F&& lambda)
 	{
-		using return_type = TFirstType<typename TTraits<typename TTraits<F>::template argument_data<0>>::argument_datas>::type;
+		using return_type = TTraits<typename TTraits<F>::template argument_data<0>>::template argument_data<0>;
 
 		struct TLambdaAwaitable
 		{
@@ -242,7 +211,7 @@ struct TAsyncPromise : TPromiseBase
 };
 
 template <>
-struct TAsyncPromise<void> : public TPromiseBase
+struct TAsyncPromise<void> : TAsyncPromiseBase
 {
 	TAsync<void> get_return_object() noexcept;
 
@@ -308,7 +277,7 @@ struct TAsyncPromise<void> : public TPromiseBase
 	template <class F>
 	auto await_transform(F&& lambda)
 	{
-		using return_type = TFirstType<typename TTraits<typename TTraits<F>::template argument_data<0>>::argument_datas>::type;
+		using return_type = TTraits<typename TTraits<F>::template argument_data<0>>::template argument_data<0>;
 
 		struct TLambdaAwaitable
 		{
@@ -352,7 +321,6 @@ struct TAsyncPromise<void> : public TPromiseBase
 				m_ThisHandle.promise().m_LastState = TAsyncState::NONE;
 				*m_ThisHandle.promise().m_RootState = m_ThisHandle.promise().m_ThisState;
 				*m_ThisHandle.promise().m_RootHandle = nullptr;
-
 				if (m_ThisHandle.promise().m_Error) std::rethrow_exception(m_ThisHandle.promise().m_Error);
 
 				m_ThisHandle = nullptr;
@@ -373,16 +341,11 @@ class TAsync
 {
 public:
 	using promise_type = TAsyncPromise<T>;
-	template <class U>
-	using await_type = std::function<void(U)>;
 
-	TAsync() : m_ThisHandle(nullptr)
-	{
-	}
+public:
+	TAsync() = default;
 
-	TAsync(std::coroutine_handle<promise_type> handle) : m_ThisHandle(handle)
-	{
-	}
+	TAsync(std::coroutine_handle<promise_type> handle) : m_ThisHandle(handle) {}
 
 	TAsync(TAsync&& other) noexcept : m_ThisHandle(other.m_ThisHandle) { other.m_ThisHandle = nullptr; }
 
@@ -413,6 +376,11 @@ public:
 		return m_ThisHandle ? m_ThisHandle.promise().m_ID : 0U;
 	}
 
+	TAsyncState state() const
+	{
+		return *m_ThisHandle.promise().m_RootState;
+	}
+
 	bool done() const
 	{
 		return m_ThisHandle.done();
@@ -429,11 +397,6 @@ public:
 		if(m_ThisHandle) m_ThisHandle.destroy();
 	}
 
-	TAsyncState state() const
-	{
-		return *m_ThisHandle.promise().m_RootState;
-	}
-
 	T value()
 	{
 		return m_ThisHandle.promise().result();
@@ -448,7 +411,7 @@ private:
 template <class T>
 TAsync<T> TAsyncPromise<T>::get_return_object() noexcept
 {
-	return std::coroutine_handle<TAsyncPromise<T>>::from_promise(*this);
+	return std::coroutine_handle<TAsyncPromise>::from_promise(*this);
 }
 
 inline TAsync<void> TAsyncPromise<void>::get_return_object() noexcept
