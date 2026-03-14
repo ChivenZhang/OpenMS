@@ -18,7 +18,11 @@
 // ==================== Await<T> ====================
 
 template <class T>
-using TAwait = std::function<void(T)>;
+struct TAwaitTraits { using type = std::function<void(T)>; };
+template <>
+struct TAwaitTraits<void> { using type = std::function<void()>; };
+template <class T>
+using TAwait = TAwaitTraits<T>::type;
 
 // =================== Promise<T> ===================
 
@@ -37,9 +41,7 @@ struct TPromiseBase
 		bool await_ready() const noexcept { return false; }
 
 		template <class T>
-		void await_suspend(std::coroutine_handle<T> handle) noexcept
-		{
-		}
+		void await_suspend(std::coroutine_handle<T> handle) noexcept {}
 
 		void await_resume() noexcept
 		{
@@ -60,9 +62,7 @@ struct TPromiseBase
 			return std::noop_coroutine();
 		}
 
-		void await_resume() noexcept
-		{
-		}
+		void await_resume() noexcept {}
 	};
 
 	auto initial_suspend() noexcept
@@ -100,7 +100,7 @@ template <class T>
 struct TAsyncPromise;
 
 template <class T>
-struct TAsyncPromise : public TPromiseBase
+struct TAsyncPromise : TPromiseBase
 {
 	TAsync<T> get_return_object() noexcept;
 
@@ -160,8 +160,7 @@ struct TAsyncPromise : public TPromiseBase
 
 				if (m_ThisHandle.promise().m_Error) std::rethrow_exception(m_ThisHandle.promise().m_Error);
 
-				if constexpr (std::is_void_v<U>) m_ThisHandle.promise().result();
-				else return m_ThisHandle.promise().result();
+				return m_ThisHandle.promise().result();
 			}
 		};
 		return TAsyncAwaitable{.m_ThisHandle = sub.m_ThisHandle};
@@ -214,7 +213,6 @@ struct TAsyncPromise : public TPromiseBase
 				m_ThisHandle.promise().m_LastState = TAsyncState::NONE;
 				*m_ThisHandle.promise().m_RootState = m_ThisHandle.promise().m_ThisState;
 				*m_ThisHandle.promise().m_RootHandle = nullptr;
-
 				if (m_ThisHandle.promise().m_Error) std::rethrow_exception(m_ThisHandle.promise().m_Error);
 
 				m_ThisHandle = nullptr;
@@ -285,11 +283,9 @@ struct TAsyncPromise<void> : public TPromiseBase
 				m_ThisHandle.promise().m_LastState = TAsyncState::NONE;
 				*m_ThisHandle.promise().m_RootState = m_ThisHandle.promise().m_ThisState;
 				*m_ThisHandle.promise().m_RootHandle = nullptr;
-
 				if (m_ThisHandle.promise().m_Error) std::rethrow_exception(m_ThisHandle.promise().m_Error);
 
-				if constexpr (std::is_void_v<U>) m_ThisHandle.promise().result();
-				else return m_ThisHandle.promise().result();
+				return m_ThisHandle.promise().result();
 			}
 		};
 		return TAsyncAwaitable{.m_ThisHandle = sub.m_ThisHandle};
