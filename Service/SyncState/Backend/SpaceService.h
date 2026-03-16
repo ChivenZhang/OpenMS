@@ -15,7 +15,7 @@
 class SpaceService : public Service
 {
 public:
-	explicit SpaceService(uint32_t spaceID, uint32_t gameID);
+	SpaceService(uint32_t spaceID, uint32_t gameID);
 
 	uint32_t spaceID() const;
 
@@ -59,6 +59,8 @@ public:
 
 protected:
 	virtual MSRef<PlayerService> onCreatingPlayer(uint32_t userID);
+	virtual MSAsync<void> onEnterSpace(uint32_t userID);
+	virtual MSAsync<void> onLeaveSpace(uint32_t userID);
 
 protected:
 	const uint32_t m_SpaceID, m_GameID;

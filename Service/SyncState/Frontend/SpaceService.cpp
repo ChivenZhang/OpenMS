@@ -29,15 +29,23 @@ SpaceService::SpaceService()
 		if(this->exist("client:" + std::to_string(userID)) == false)
 		{
 			auto playerService = this->onCreatingPlayer(userID);
-			this->create("client:" + std::to_string(userID), playerService);
+			if (this->create("client:" + std::to_string(userID), playerService))
+			{
+				auto& user = m_UserInfos[userID];
+				user.Player = playerService;
+				co_await playerService->onCreatePlayer();
+			}
 		}
 		co_return co_await this->onEnterSpace(spaceID, userID);
 	});
 	this->bind("onLeaveSpace", [=, this](uint32_t spaceID, uint32_t userID)->MSAsync<void>
 	{
-		if(this->exist("client:" + std::to_string(userID)))
+		if(this->exist("client:" + std::to_string(userID)) == true)
 		{
-			this->cancel("client:" + std::to_string(userID));
+			if (this->cancel("client:" + std::to_string(userID)))
+			{
+				m_UserInfos.erase(userID);
+			}
 		}
 		co_return co_await this->onLeaveSpace(spaceID, userID);
 	});
@@ -119,12 +127,13 @@ MSAsync<void> SpaceService::onLogin(uint32_t userID)
 	MS_INFO("登录回调：%u", userID);
 	
 	auto playerService = this->onCreatingPlayer(userID);
-	if(this->create("client:" + std::to_string(userID), playerService))
+	if (this->create("client:" + std::to_string(userID), playerService))
 	{
 		m_UserID = userID;
 		m_PlayerService = playerService;
 
-		MS_INFO("用户 %u 登录成功", userID);
+		auto& user = m_UserInfos[userID];
+		user.Player = playerService;
 		co_await playerService->onCreatePlayer();
 	}
 	co_return;
@@ -153,28 +162,12 @@ MSAsync<void> SpaceService::onSignup(bool result)
 MSAsync<void> SpaceService::onEnterSpace(uint32_t spaceID, uint32_t userID)
 {
 	MS_INFO("用户 %u 进入空间 %u", userID, spaceID);
-
-	if (m_UserInfos.contains(userID) == false)
-	{
-		auto playerService = this->onCreatingPlayer(userID);
-		if (this->create("client:" + std::to_string(userID), playerService))
-		{
-			auto& user = m_UserInfos[userID];
-			user.Player = playerService;
-			co_await playerService->onCreatePlayer();
-		}
-	}
 	co_return;
 }
 
 MSAsync<void> SpaceService::onLeaveSpace(uint32_t spaceID, uint32_t userID)
 {
 	MS_INFO("用户 %u 离开空间 %u", userID, spaceID);
-
-	if (this->cancel("player:" + std::to_string(userID)))
-	{
-		m_UserInfos.erase(userID);
-	}
 	co_return;
 }
 

@@ -134,7 +134,7 @@ bool RPCClientBase::call(MSStringView const& name, uint32_t timeout, MSStringVie
 
 	// Send request to remote server
 
-	MS_INFO("客户发送请求:地址 %s 会话 %u 长度 %u 内容 %s", m_Reactor->address().lock()->getString().c_str(), request.Session, request.Length, input.data());
+	// MS_INFO("客户发送请求:地址 %s 会话 %u 长度 %u 内容 %s", m_Reactor->address().lock()->getString().c_str(), request.Session, request.Length, input.data());
 	m_Reactor->write(IChannelEvent::New(buffer));
 
 	auto status = future.wait_for(std::chrono::milliseconds(timeout));
@@ -191,7 +191,7 @@ bool RPCClientBase::async(MSStringView const& name, uint32_t timeout, MSStringVi
 
 	// Send request to remote server
 
-	MS_INFO("客户发送请求:地址 %s 会话 %u 长度 %u 内容 %s", m_Reactor->address().lock()->getString().c_str(), request.Session, request.Length, input.data());
+	// MS_INFO("客户发送请求:地址 %s 会话 %u 长度 %u 内容 %s", m_Reactor->address().lock()->getString().c_str(), request.Session, request.Length, input.data());
 	m_Reactor->write(IChannelEvent::New(buffer));
 	return true;
 }
@@ -214,7 +214,7 @@ bool RPCClientInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<
 			auto buffer = m_Buffer.substr(0, package.Length);
 			auto& request = *(RPCRequestView*)buffer.data();
 			auto message = MSStringView(request.Buffer, buffer.size() - sizeof(RPCRequestView));
-			MS_INFO("客户接收请求:地址 %s 会话 %u 长度 %u 内容 %s", m_Client->m_Reactor->address().lock()->getString().c_str(), package.Session, package.Length, message.data());
+			// MS_INFO("客户接收请求:地址 %s 会话 %u 长度 %u 内容 %s", m_Client->m_Reactor->address().lock()->getString().c_str(), package.Session, package.Length, message.data());
 			MSString output;
 			if (m_Client->invoke(request.Method, message, output))
 			{
@@ -233,7 +233,7 @@ bool RPCClientInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<
 			auto buffer = m_Buffer.substr(0, package.Length);
 			auto& response = *(RPCResponseView*)buffer.data();
 			auto message = MSStringView(response.Buffer, buffer.size() - sizeof(RPCResponseView));
-			MS_INFO("客户接收响应:地址 %s 会话 %u 长度 %u 内容 %s", m_Client->m_Reactor->address().lock()->getString().c_str(), package.Session, package.Length, message.data());
+			// MS_INFO("客户接收响应:地址 %s 会话 %u 长度 %u 内容 %s", m_Client->m_Reactor->address().lock()->getString().c_str(), package.Session, package.Length, message.data());
 			decltype(m_Client->m_Sessions)::value_type::second_type callback;
 			{
 				MSMutexLock lock(m_Client->m_LockSession);

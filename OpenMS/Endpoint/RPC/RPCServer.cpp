@@ -138,7 +138,7 @@ bool RPCServerBase::call(MSHnd<IChannel> client, MSStringView const& name, uint3
 
 	// Send request to remote server
 
-	MS_INFO("服务发送请求:地址 %s 会话 %u 长度 %u 内容 %s", m_Reactor->address().lock()->getString().c_str(), request.Session, request.Length, input.data());
+	// MS_INFO("服务发送请求:地址 %s 会话 %u 长度 %u 内容 %s", m_Reactor->address().lock()->getString().c_str(), request.Session, request.Length, input.data());
 	m_Reactor->write(IChannelEvent::New(buffer, client));
 
 	auto status = future.wait_for(std::chrono::milliseconds(timeout));
@@ -195,7 +195,7 @@ bool RPCServerBase::async(MSHnd<IChannel> client, MSStringView const& name, uint
 
 	// Send request to remote server
 
-	MS_INFO("服务发送请求:地址 %s 会话 %u 长度 %u 内容 %s", m_Reactor->address().lock()->getString().c_str(), request.Session, request.Length, input.data());
+	// MS_INFO("服务发送请求:地址 %s 会话 %u 长度 %u 内容 %s", m_Reactor->address().lock()->getString().c_str(), request.Session, request.Length, input.data());
 	m_Reactor->write(IChannelEvent::New(buffer, client));
 	return true;
 }
@@ -217,7 +217,7 @@ bool RPCServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<
 		{
 			auto& response = *(RPCResponseView*)m_Buffer.data();
 			auto message = MSStringView(response.Buffer, response.Length - sizeof(RPCResponseView));
-			MS_INFO("服务接收响应:地址 %s 会话 %u 长度 %u 内容 %s", m_Server->m_Reactor->address().lock()->getString().c_str(), package.Session, package.Length, message.data());
+			// MS_INFO("服务接收响应:地址 %s 会话 %u 长度 %u 内容 %s", m_Server->m_Reactor->address().lock()->getString().c_str(), package.Session, package.Length, message.data());
 			if (message.size() <= m_Server->m_Config.Buffers)
 			{
 				decltype(m_Server->m_Sessions)::value_type::second_type callback;
@@ -238,7 +238,7 @@ bool RPCServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw<
 		{
 			auto& request = *(RPCRequestView*)m_Buffer.data();
 			auto message = MSStringView(request.Buffer, request.Length - sizeof(RPCRequestView));
-			MS_INFO("服务接收请求:地址 %s 会话 %u 长度 %u 内容 %s", m_Server->m_Reactor->address().lock()->getString().c_str(), package.Session, package.Length, message.data());
+			// MS_INFO("服务接收请求:地址 %s 会话 %u 长度 %u 内容 %s", m_Server->m_Reactor->address().lock()->getString().c_str(), package.Session, package.Length, message.data());
 			if (message.size() <= m_Server->m_Config.Buffers)
 			{
 				MSString output;

@@ -12,6 +12,8 @@
 #include "iocpp.h"
 #include "PlayerService.h"
 #include "Server/IServer.h"
+#include <gflags/gflags_declare.h>
+DECLARE_string(caller);
 
 SpaceService::SpaceService(uint32_t spaceID, uint32_t gameID)
 	:
@@ -19,28 +21,7 @@ SpaceService::SpaceService(uint32_t spaceID, uint32_t gameID)
 	m_GameID(gameID),
 	m_GameState(state_t::NONE)
 {
-	this->bind("beginPlay", [=, this]()->MSAsync<void>
-	{
-		m_GameState = state_t::START;
-		for (auto& user : m_UserInfos)
-		{
-			auto userID = user.first;
-			co_await this->callPlayer<void>(userID, "startBattle", 0, MSTuple{});
-		}
-		co_return;
-	});
-	this->bind("endPlay", [=, this]()->MSAsync<void>
-	{
-		m_GameState = state_t::STOP;
-		for (auto& user : m_UserInfos)
-		{
-			auto userID = user.first;
-			co_await this->callPlayer<void>(userID, "stopBattle", 0, MSTuple{});
-		}
-		AUTOWIRE_DATA(IServer)->shutdown();
-		co_return;
-	});
-	this->bind("enterSpace", [=, this](MSString caller, uint32_t userID)->MSAsync<bool>
+	this->bind("enterSpace", [=, this](uint32_t userID)->MSAsync<bool>
 	{
 		MS_INFO("用户 %u 加入空间", userID);
 
@@ -50,19 +31,21 @@ SpaceService::SpaceService(uint32_t spaceID, uint32_t gameID)
 			auto& user = m_UserInfos[userID];
 			user.Player = playerService;
 			co_await playerService->onCreatePlayer();
-			co_await this->async<void>(caller, "onEnterSpace", "", 0, MSTuple{m_SpaceID, userID });
+			co_await this->onEnterSpace(userID);
+			co_await this->async<void>(FLAGS_caller, "onEnterSpace", "", 0, MSTuple{m_SpaceID, userID });
 			co_return true;
 		}
 		co_return false;
 	});
-	this->bind("reenterSpace", [=, this](MSString caller, uint32_t userID)->MSAsync<bool>
+	this->bind("reenterSpace", [=, this](uint32_t userID)->MSAsync<bool>
 	{
 		MS_INFO("用户 %u 重新加入空间", userID);
 
 		if (this->exist("player:" + std::to_string(userID)))
 		{
 			auto& user = m_UserInfos[userID];
-			co_await this->async<void>(caller, "onEnterSpace", "", 0, MSTuple{m_SpaceID, userID });
+			co_await this->onEnterSpace(userID);
+			co_await this->async<void>(FLAGS_caller, "onEnterSpace", "", 0, MSTuple{m_SpaceID, userID });
 			// Whole synchronization of game state
 			co_await this->async<void>(this->name(), "syncFull", "", 0, MSTuple{userID});
 			co_return true;
@@ -76,19 +59,43 @@ SpaceService::SpaceService(uint32_t spaceID, uint32_t gameID)
 		if (this->cancel("player:" + std::to_string(userID)))
 		{
 			m_UserInfos.erase(userID);
-			co_await this->callPlayer<void>(userID, "onLeaveSpace", 0, MSTuple{m_SpaceID, userID});
+			co_await this->onLeaveSpace(userID);
+			co_await this->async<void>(FLAGS_caller, "onLeaveSpace", "", 0, MSTuple{m_SpaceID, userID });
 		}
 		co_return false;
+	});
+	this->bind("beginPlay", [=, this]()->MSAsync<void>
+	{
+		m_GameState = state_t::START;
+		for (auto& user : m_UserInfos)
+		{
+			auto userID = user.first;
+			co_await this->callPlayer<void>(userID, "onStartBattle", 0, MSTuple{});
+		}
+		co_return;
+	});
+	this->bind("endPlay", [=, this]()->MSAsync<void>
+	{
+		m_GameState = state_t::STOP;
+
+		MSList<uint32_t> userIDs;
+		for (auto& user : m_UserInfos) userIDs.push_back(user.first);
+
+		for (auto userID : userIDs)
+		{
+			co_await this->callPlayer<void>(userID, "onStopBattle", 0, MSTuple{});
+		}
+		for (auto userID : userIDs)
+		{
+			co_await this->async<void>(this->name(), "leaveSpace", "", 0, MSTuple{ userID });
+		}
+		AUTOWIRE_DATA(IServer)->shutdown();
+		co_return;
 	});
 	this->bind("syncFull", [=, this]()->MSAsync<void>
 	{
 		if(m_GameState == state_t::START)
 		{
-			MSList<uint32_t> userIDs(m_UserInfos.size());
-			for (auto& user : m_UserInfos)
-			{
-				userIDs.emplace_back(user.first);
-			}
 			for (auto& user : m_UserInfos)
 			{
 				MSString state;
@@ -98,6 +105,7 @@ SpaceService::SpaceService(uint32_t spaceID, uint32_t gameID)
 				for (auto& peer : m_UserInfos)
 				{
 					auto peerID = peer.first;
+					MS_INFO("sync %u", userID);
 					co_await this->async<void>("client", "onStateChange", "proxy:" + std::to_string(peerID), 0, MSTuple{userID, state, true});
 				}
 			}
@@ -108,11 +116,6 @@ SpaceService::SpaceService(uint32_t spaceID, uint32_t gameID)
 	{
 		if(m_GameState == state_t::START)
 		{
-			MSList<uint32_t> userIDs(m_UserInfos.size());
-			for (auto& user : m_UserInfos)
-			{
-				userIDs.emplace_back(user.first);
-			}
 			for (auto& user : m_UserInfos)
 			{
 				MSString state;
@@ -122,7 +125,7 @@ SpaceService::SpaceService(uint32_t spaceID, uint32_t gameID)
 				for (auto& peer : m_UserInfos)
 				{
 					auto peerID = peer.first;
-					co_await this->async<void>("client", "onStateChange", "proxy:" + std::to_string(peerID), 0, MSTuple{userID, state, true});
+					co_await this->async<void>("client", "onStateChange", "proxy:" + std::to_string(peerID), 0, MSTuple{userID, state, false});
 				}
 			}
 		}
@@ -143,6 +146,16 @@ SpaceService::SpaceService(uint32_t spaceID, uint32_t gameID)
 MSRef<PlayerService> SpaceService::onCreatingPlayer(uint32_t userID)
 {
 	return MSNew<PlayerService>(userID);
+}
+
+MSAsync<void> SpaceService::onEnterSpace(uint32_t userID)
+{
+	co_return;
+}
+
+MSAsync<void> SpaceService::onLeaveSpace(uint32_t userID)
+{
+	co_return;
 }
 
 uint32_t SpaceService::spaceID() const

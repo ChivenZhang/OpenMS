@@ -14,7 +14,7 @@
 class PlayerService : public Service
 {
 public:
-	explicit PlayerService(uint32_t userID);
+	PlayerService(uint32_t userID);
 
 	uint32_t userID() const;
 

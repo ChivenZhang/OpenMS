@@ -9,19 +9,21 @@
 *
 * =================================================*/
 #include "PlayerService.h"
+#include <gflags/gflags_declare.h>
+DECLARE_string(caller);
 
 PlayerService::PlayerService(uint32_t userID)
 	:
 	m_UserID(userID),
 	m_TickTime(0.0f)
 {
-	this->bind("startBattle", [=, this]()->MSAsync<void>
+	this->bind("onStartBattle", [=, this]()->MSAsync<void>
 	{
 		MS_INFO("用户 %u 开始游戏", userID);
 		co_await this->callClient<void>("onStartBattle", 0, MSTuple{});
 		co_return;
 	});
-	this->bind("stopBattle", [=, this]()->MSAsync<void>
+	this->bind("onStopBattle", [=, this]()->MSAsync<void>
 	{
 		MS_INFO("用户 %u 结束游戏", userID);
 		co_await this->callClient<void>("onStopBattle", 0, MSTuple{});

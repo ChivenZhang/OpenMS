@@ -31,7 +31,7 @@ bool Service::bind(uint32_t method, method_t&& callback)
 
 bool Service::call(uint32_t service, uint32_t method, uint32_t forward, uint32_t timeout, MSStringView request, MSString& response)
 {
-	MSString input(sizeof(request_t) + request.size(), 0);
+	MSString input(sizeof(request_t) + request.size(), '?');
 	auto& requestView = *(request_t*)input.data();
 	requestView.Method = method;
 	if (request.empty() == false) ::memcpy(requestView.Buffer, request.data(), request.size());
@@ -72,7 +72,7 @@ bool Service::call(uint32_t service, uint32_t method, uint32_t forward, uint32_t
 
 bool Service::async(uint32_t service, uint32_t method, uint32_t forward, uint32_t timeout, MSStringView request, MSLambda<void(MSStringView)>&& callback)
 {
-	MSString input(sizeof(request_t) + request.size(), 0);
+	MSString input(sizeof(request_t) + request.size(), '?');
 	auto& requestView = *(request_t*)input.data();
 	requestView.Method = method;
 	if (request.empty() == false) ::memcpy(requestView.Buffer, request.data(), request.size());
@@ -86,7 +86,7 @@ bool Service::async(uint32_t service, uint32_t method, uint32_t forward, uint32_
 	mail.Type = OPENMS_MAIL_TYPE_REQUEST;
 	if (forward != OPENMS_NULL_MAILBOX) mail.Type |= OPENMS_MAIL_TYPE_FORWARD;
 
-	MS_INFO("async %u=>%u via %u #%u @%u", mail.From, mail.To, mail.Copy, mail.Date, mail.Type);
+	// MS_INFO("async %u=>%u via %u #%u @%u", mail.From, mail.To, mail.Copy, mail.Date, mail.Type);
 
 	{
 		MSMutexLock lock(m_LockSession);

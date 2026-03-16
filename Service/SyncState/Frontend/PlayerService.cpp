@@ -53,5 +53,5 @@ MSAsync<void> PlayerService::onStopBattle()
 
 void PlayerService::onStateChange(MSStringView state, bool full)
 {
-	MS_INFO("状态改变：%s", MSString(state.data(), state.size()).c_str());
+	MS_INFO("状态改变：%s 全量：%s", MSString(state.data(), state.size()).c_str(), full ? "yes" : "no");
 }

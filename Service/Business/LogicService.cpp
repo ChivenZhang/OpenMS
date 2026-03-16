@@ -17,7 +17,6 @@ LogicService::LogicService()
 	{
 		MS_INFO("登录请求");
 		auto userID =  co_await this->onRequestLogin(user, pass);
-		MS_INFO("test1 %u", userID);
 		co_return userID;
 	});
 	this->bind("onClientLogin", [this](uint32_t userID, uint32_t code, MSString error)->MSAsync<void>
@@ -72,10 +71,6 @@ LogicService::LogicService()
 			space.second.InGame = inGame;
 			if (inGame) spaceIDs.push_back(space.first);
 		}
-		for (auto& spaceID : spaceIDs)
-		{
-			m_SpaceInfos.erase(spaceID);
-		}
 		m_UserLock.unlock();
 
 		for (auto spaceID : spaceIDs)
@@ -106,11 +101,12 @@ LogicService::LogicService()
 
 		// Broadcast to peers in the space
 
-		MSMutexLock lock(m_UserLock);
-		auto& space = m_SpaceInfos[spaceID];
-		for (auto peerID : space.UserIDs)
+		m_UserLock.lock();
+		auto userIDs = m_SpaceInfos[spaceID].UserIDs;
+		m_UserLock.unlock();
+		for (auto peerID : userIDs)
 		{
-			this->async<void>("client", "onEnterSpace", "proxy:" + std::to_string(peerID), 0, MSTuple{spaceID, userID});
+			co_await this->async<void>("client", "onEnterSpace", "proxy:" + std::to_string(peerID), 0, MSTuple{spaceID, userID});
 		}
 		co_return;
 	});
@@ -122,11 +118,12 @@ LogicService::LogicService()
 
 		// Broadcast to peers in the space
 
-		MSMutexLock lock(m_UserLock);
-		auto& space = m_SpaceInfos[spaceID];
-		for (auto peerID : space.UserIDs)
+		m_UserLock.lock();
+		auto userIDs = m_SpaceInfos[spaceID].UserIDs;
+		m_UserLock.unlock();
+		for (auto peerID : userIDs)
 		{
-			this->async<void>("client", "onLeaveSpace", "proxy:" + std::to_string(peerID), 0, MSTuple{spaceID, userID});
+			co_await this->async<void>("client", "onLeaveSpace", "proxy:" + std::to_string(peerID), 0, MSTuple{spaceID, userID});
 		}
 		co_return;
 	});
@@ -150,7 +147,6 @@ MSAsync<void> LogicService::onGlobalData(MSStringView name, MSStringView value)
 MSAsync<uint32_t> LogicService::onRequestLogin(MSString username, MSString password)
 {
 	auto userID = co_await this->async<uint32_t>("login", "login", "", 1000, MSTuple{this->name(), username, password});
-	MS_INFO("test2 %u", userID);
 	co_return userID;
 }
 
@@ -244,10 +240,11 @@ MSAsync<void> LogicService::onMatchBattle(uint32_t gameID, MSList<uint32_t> user
 {
 	if (auto spaceID = co_await this->onRequestSpace(gameID))
 	{
-		MSMutexLock lock(m_UserLock);
+		m_UserLock.lock();
 		auto& space = m_SpaceInfos[spaceID];
 		space.GameID = gameID;
 		space.UserIDs = userIDs;
+		m_UserLock.unlock();
 	}
 	co_return;
 }
@@ -264,34 +261,39 @@ MSAsync<uint32_t> LogicService::onRequestSpace(uint32_t gameID)
 MSAsync<void> LogicService::onCreateSpace(uint32_t spaceID)
 {
 	m_UserLock.lock();
-	auto space = m_SpaceInfos[spaceID];
+	auto userIDs = m_SpaceInfos[spaceID].UserIDs;
 	m_UserLock.unlock();
-	for (auto& userID : space.UserIDs)
+	for (auto& userID : userIDs)
 	{
-		co_await this->async<bool>("space:" + std::to_string(spaceID), "enterSpace", "", 0, MSTuple{ this->name(), userID});
+		co_await this->async<bool>("space:" + std::to_string(spaceID), "enterSpace", "", 0, MSTuple{ userID});
 	}
 	co_return;
 }
 
 MSAsync<void> LogicService::onDeleteSpace(uint32_t spaceID)
 {
+	m_UserLock.lock();
+	m_SpaceInfos.erase(spaceID);
+	m_UserLock.unlock();
 	co_return;
 }
 
 MSAsync<void> LogicService::onEnterSpace(uint32_t spaceID, uint32_t userID)
 {
-	MSMutexLock lock(m_UserLock);
+	m_UserLock.lock();
 	auto& userInfo = m_UserInfos[userID];
 	userInfo.SpaceID = spaceID;
 	userInfo.InGame = true;
+	m_UserLock.unlock();
 	co_return;
 }
 
 MSAsync<void> LogicService::onLeaveSpace(uint32_t spaceID, uint32_t userID)
 {
-	MSMutexLock lock(m_UserLock);
+	m_UserLock.lock();
 	auto& userInfo = m_UserInfos[userID];
-	userInfo.SpaceID = spaceID;
+	userInfo.SpaceID = 0U;
 	userInfo.InGame = false;
+	m_UserLock.unlock();
 	co_return;
 }

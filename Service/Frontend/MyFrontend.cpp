@@ -41,7 +41,7 @@ protected:
 
     void onStateChange(MSStringView state, bool full) override
     {
-        MS_INFO("玩家 %u 状态改变：%s", this->userID(), state.data());
+        MS_DEBUG("玩家 %u 状态改变：%s 全量：%s", userID(), MSString(state.data(), state.size()).c_str(), full ? "yes" : "no");
     }
 };
 
@@ -63,7 +63,7 @@ protected:
 
         MSThread thread([=, this](){
 
-            MS_INFO("input cmd: [login|logout|match|attack|exit]");
+            MS_INFO("input cmd: [login|logout|match|attack|clear|exit]");
 
             std::string line;
             while(std::getline(std::cin, line))
@@ -88,7 +88,7 @@ protected:
                     {
                         if(auto playerService = clientService->player())
                         {
-                            playerService->callServer("matchBattle", 0, MSTuple{ 0U }, [](bool result)
+                            playerService->callServer("matchBattle", 1000, MSTuple{ 0U }, [](bool result)
                             {
                                 MS_INFO("匹配结果：%s", result ? "true" : "false");
                             });
@@ -101,11 +101,19 @@ protected:
                     {
                         if(auto playerService = clientService->player())
                         {
-                            playerService->callPlayer("attack", 0, MSTuple{ 0U }, []()
+                            playerService->callPlayer("attack", 1000, MSTuple{ 0U }, []()
                             {
                             });
                         }
                     }
+                }
+                else if (line == "clear")
+                {
+#ifdef OPENMS_PLATFORM_WINDOWS
+                    system("cls");
+#else
+                    system("clear");
+#endif
                 }
                 else if(line == "exit")
                 {
@@ -113,7 +121,7 @@ protected:
                     break;
                 }
 
-                MS_INFO("input cmd: [login|logout|match|attack|exit]");
+                MS_INFO("input cmd: [login|logout|match|attack|clear|exit]");
             }
         });
         thread.detach();

@@ -13,7 +13,7 @@
 
 MailBox::~MailBox()
 {
-	MS_INFO("deleting mailbox: %s", m_TextName.c_str());
+	//MS_INFO("deleting mailbox: %s", m_TextName.c_str());
 	while (true)
 	{
 		MSMutexLock mailLock(m_MailLock);
@@ -22,7 +22,7 @@ MailBox::~MailBox()
 		while (handle && handle.done() == false) std::this_thread::yield();
 		m_MailQueue.pop_front();
 	}
-	MS_INFO("deleted mailbox: %s", m_TextName.c_str());
+	//MS_INFO("deleted mailbox: %s", m_TextName.c_str());
 }
 
 MSString MailBox::name() const
