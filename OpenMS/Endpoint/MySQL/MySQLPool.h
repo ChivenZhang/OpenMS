@@ -9,7 +9,7 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "Endpoint/IEndpoint.h"
+#include "OpenMS/Endpoint/IEndpoint.h"
 
 /// @brief MySQL Pool Endpoint
 class MySQLPool : public IEndpoint

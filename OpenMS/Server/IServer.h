@@ -9,9 +9,9 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "MS.h"
+#include "OpenMS/MS.h"
 #include <iocpp.h>
-#include "Utility/TimerUtility.h"
+#include "OpenMS/Utility/TimerUtility.h"
 
 #define OPENMS_LOGO \
 (R"(

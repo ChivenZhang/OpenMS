@@ -10,7 +10,7 @@
 *
 * =================================================*/
 #include <OpenMS/Server/Cluster/ClusterServer.h>
-#include <Server/Private/Service.h>
+#include <OpenMS/Server/Private/Service.h>
 
 class ClusterDemo2 : public ClusterServer
 {

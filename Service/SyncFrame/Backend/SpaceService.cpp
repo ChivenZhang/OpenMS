@@ -12,7 +12,7 @@
 
 #include "iocpp.h"
 #include "PlayerService.h"
-#include "Server/IServer.h"
+#include <OpenMS/Server/IServer.h"
 
 SpaceService::SpaceService(uint32_t spaceID, uint32_t gameID)
 	:

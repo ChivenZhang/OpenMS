@@ -9,7 +9,7 @@
 *
 * =================================================*/
 #include "RPCClient.h"
-#include "Reactor/Private/ChannelHandler.h"
+#include "OpenMS/Reactor/Private/ChannelHandler.h"
 
 class RPCClientInboundHandler : public ChannelInboundHandler
 {

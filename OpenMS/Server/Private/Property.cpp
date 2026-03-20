@@ -1,5 +1,3 @@
-#include "Property.h"
-#include "Property.h"
 /*=================================================
 * Copyright © 2020-2025 ChivenZhang.
 * All Rights Reserved.
@@ -11,7 +9,7 @@
 *
 * =================================================*/
 #include "Property.h"
-#include "Server/IServer.h"
+#include "OpenMS/Server/IServer.h"
 #include <fstream>
 #include <filesystem>
 

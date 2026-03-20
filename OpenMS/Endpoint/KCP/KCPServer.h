@@ -9,9 +9,9 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "Endpoint/IEndpoint.h"
-#include "Server/IProperty.h"
-#include "Reactor/KCP/KCPServerReactor.h"
+#include "OpenMS/Endpoint/IEndpoint.h"
+#include "OpenMS/Server/IProperty.h"
+#include "OpenMS/Reactor/KCP/KCPServerReactor.h"
 
 /// @brief KCP Server Endpoint
 class KCPServer : public IEndpoint

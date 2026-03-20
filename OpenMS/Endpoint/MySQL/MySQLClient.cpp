@@ -9,7 +9,7 @@
 * 
 * =================================================*/
 #include "MySQLClient.h"
-#include "Reactor/Private/ChannelAddress.h"
+#include "OpenMS/Reactor/Private/ChannelAddress.h"
 #include <format>
 #include <mysql/jdbc.h>
 

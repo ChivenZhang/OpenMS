@@ -9,7 +9,7 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "MS.h"
+#include "OpenMS/MS.h"
 #define OPENMS_MAIL_TYPE_REQUEST 0x00000001
 #define OPENMS_MAIL_TYPE_RESPONSE 0x00000002
 #define OPENMS_MAIL_TYPE_FORWARD 0x00000004

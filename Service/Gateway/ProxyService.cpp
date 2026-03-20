@@ -9,8 +9,8 @@
 *
 * =================================================*/
 #include "ProxyService.h"
-#include "Reactor/IChannel.h"
-#include "Mailbox/Private/Mail.h"
+#include <OpenMS/Reactor/IChannel.h>
+#include <OpenMS/Mailbox/Private/Mail.h>
 
 ProxyService::ProxyService(MSHnd<IChannel> client, uint32_t userID)
 	:

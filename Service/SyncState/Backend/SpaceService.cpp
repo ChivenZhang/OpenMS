@@ -11,7 +11,7 @@
 #include "SpaceService.h"
 #include "iocpp.h"
 #include "PlayerService.h"
-#include "Server/IServer.h"
+#include <OpenMS/Server/IServer.h>
 #include <gflags/gflags_declare.h>
 DECLARE_string(caller);
 

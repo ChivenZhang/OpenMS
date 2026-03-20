@@ -9,9 +9,9 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "Endpoint/IEndpoint.h"
-#include "Server/IProperty.h"
-#include "Reactor/TCP/TCPClientReactor.h"
+#include "OpenMS/Endpoint/IEndpoint.h"
+#include "OpenMS/Server/IProperty.h"
+#include "OpenMS/Reactor/TCP/TCPClientReactor.h"
 
 /// @brief TCP Client Endpoint
 class TCPClient : public IEndpoint

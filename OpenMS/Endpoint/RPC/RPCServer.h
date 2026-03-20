@@ -9,10 +9,10 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "Endpoint/IEndpoint.h"
-#include "Reactor/TCP/TCPServerReactor.h"
-#include "Utility/TimerUtility.h"
-#include "Utility/TraitsUtility.h"
+#include "OpenMS/Endpoint/IEndpoint.h"
+#include "OpenMS/Reactor/TCP/TCPServerReactor.h"
+#include "OpenMS/Utility/TimerUtility.h"
+#include "OpenMS/Utility/TraitsUtility.h"
 class RPCServerInboundHandler;
 
 /// @brief RPC Server Base

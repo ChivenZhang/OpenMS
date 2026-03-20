@@ -9,7 +9,7 @@
 *
 * =================================================*/
 #include "ClusterServer.h"
-#include "Mailbox/Private/Mail.h"
+#include "OpenMS/Mailbox/Private/Mail.h"
 #include <utility>
 #include <random>
 

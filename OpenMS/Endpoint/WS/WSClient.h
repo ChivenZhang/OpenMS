@@ -9,8 +9,8 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "../IEndpoint.h"
-#include "../../Reactor/WS/WSClientReactor.h"
+#include "OpenMS/Endpoint/IEndpoint.h"
+#include "OpenMS/Reactor/WS/WSClientReactor.h"
 
 class WSClient : public IEndpoint
 {

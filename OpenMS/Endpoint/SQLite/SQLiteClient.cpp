@@ -9,7 +9,7 @@
 * 
 * =================================================*/
 #include "SQLiteClient.h"
-#include "Reactor/Private/ChannelAddress.h"
+#include "OpenMS/Reactor/Private/ChannelAddress.h"
 #include <sqlite3.h>
 
 SQLiteClient::SQLiteClient(config_t const& config)

@@ -9,10 +9,9 @@
 *
 * =================================================*/
 #include "FrontendClient.h"
-#include "PlayerService.h"
-#include "Handler/AES/AESHandler.h"
-#include "Mailbox/Private/Mail.h"
-#include "Server/Private/Service.h"
+#include <OpenMS/Handler/AES/AESHandler.h>
+#include <OpenMS/Mailbox/Private/Mail.h>
+#include <OpenMS/Server/Private/Service.h>
 
 #define GATEWAY_ADDR "127.0.0.1"
 #define GATEWAY_PORT 9090

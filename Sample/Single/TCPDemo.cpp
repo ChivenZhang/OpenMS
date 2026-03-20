@@ -11,10 +11,6 @@
 #include <OpenMS/Endpoint/TCP/TCPServer.h>
 #include <OpenMS/Endpoint/TCP/TCPClient.h>
 
-#include "Utility/QuickQPS.h"
-QuickQPS qps;
-auto T = ::clock();
-
 int main()
 {
 	auto server = MSNew<TCPServer>(TCPServer::config_t{
@@ -27,15 +23,7 @@ int main()
 				{
 					.OnHandle = [](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)
 					{
-						qps.hit();
-						auto t = ::clock();
-						if (T + 5000 <= t)
-						{
-							MS_INFO("QPS %f", qps.get());
-							T = t;
-						}
-
-						MS_DEBUG("%s", event->Message.c_str());
+						MS_INFO("%s", event->Message.c_str());
 						context->write(IChannelEvent::New("This is server"));
 						return true;
 					}
@@ -53,7 +41,7 @@ int main()
 				{
 					.OnHandle = [](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)
 					{
-						MS_DEBUG("%s", event->Message.c_str());
+						MS_INFO("%s", event->Message.c_str());
 						context->write(IChannelEvent::New("This is client"));
 						return true;
 					}

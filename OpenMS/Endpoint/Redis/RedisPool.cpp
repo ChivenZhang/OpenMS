@@ -9,7 +9,7 @@
 *
 * =================================================*/
 #include "RedisPool.h"
-#include "Reactor/Private/ChannelAddress.h"
+#include "OpenMS/Reactor/Private/ChannelAddress.h"
 #include <hiredis/hiredis.h>
 
 static MSString RedisParseResult(MSRaw<redisReply> reply)

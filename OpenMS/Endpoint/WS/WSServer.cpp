@@ -9,7 +9,7 @@
 *
 * =================================================*/
 #include "WSServer.h"
-#include "../../Reactor/WS/WSChannelAddress.h"
+#include "OpenMS/Reactor/WS/WSChannelAddress.h"
 
 WSServer::WSServer(config_t const& config)
 	:

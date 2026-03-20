@@ -9,11 +9,11 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "Endpoint/IEndpoint.h"
-#include "Endpoint/RPC/RPCProtocol.h"
-#include "Reactor/TCP/TCPClientReactor.h"
-#include "Utility/TimerUtility.h"
-#include "Utility/TraitsUtility.h"
+#include "OpenMS/Endpoint/IEndpoint.h"
+#include "OpenMS/Endpoint/RPC/RPCProtocol.h"
+#include "OpenMS/Reactor/TCP/TCPClientReactor.h"
+#include "OpenMS/Utility/TimerUtility.h"
+#include "OpenMS/Utility/TraitsUtility.h"
 class RPCClientInboundHandler;
 
 /// @brief RPC Client Base

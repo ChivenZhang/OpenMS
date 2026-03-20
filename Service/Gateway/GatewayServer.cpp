@@ -10,11 +10,10 @@
 * =================================================*/
 #include "GatewayServer.h"
 #include "GuestService.h"
-#include "ProxyService.h"
-#include "Endpoint/TCP/TCPServer.h"
-#include "Handler/AES/AESHandler.h"
-#include "Mailbox/Private/Mail.h"
-#include "Server/Private/Service.h"
+#include <OpenMS/Endpoint/TCP/TCPServer.h>
+#include <OpenMS/Handler/AES/AESHandler.h>
+#include <OpenMS/Mailbox/Private/Mail.h>
+#include <OpenMS/Server/Private/Service.h>
 
 #define AES256_KEY 0x50, 0x71, 0x47, 0x55, 0x6f, 0x4c, 0x36, 0x7a, 0x55, 0x50, 0x38, 0x43, 0x30, 0x42, 0x38, 0x43, 0x2f, 0x55, 0x45, 0x4d, 0x50, 0x49, 0x73, 0x36, 0x4f, 0x63, 0x42, 0x4c, 0x79, 0x32, 0x72, 0x35
 

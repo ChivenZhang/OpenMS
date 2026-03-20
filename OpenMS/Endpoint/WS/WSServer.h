@@ -9,8 +9,8 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "../IEndpoint.h"
-#include "../../Reactor/WS/WSServerReactor.h"
+#include "OpenMS/Endpoint/IEndpoint.h"
+#include "OpenMS/Reactor/WS/WSServerReactor.h"
 
 class WSServer : public IEndpoint
 {

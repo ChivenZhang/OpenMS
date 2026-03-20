@@ -9,9 +9,9 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "Endpoint/IEndpoint.h"
-#include "Server/IProperty.h"
-#include "Reactor/UDP/UDPClientReactor.h"
+#include "OpenMS/Endpoint/IEndpoint.h"
+#include "OpenMS/Server/IProperty.h"
+#include "OpenMS/Reactor/UDP/UDPClientReactor.h"
 
 /// @brief UDP Client Endpoint
 class UDPClient : public IEndpoint

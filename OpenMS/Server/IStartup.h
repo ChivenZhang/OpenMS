@@ -9,7 +9,7 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include <MS.h>
+#include <OpenMS/MS.h>
 #include <csignal>
 
 /// @brief Interface for bootstrap

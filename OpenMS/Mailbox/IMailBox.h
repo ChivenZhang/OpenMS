@@ -10,7 +10,7 @@
 *
 * =================================================*/
 #include "IMail.h"
-#include "Utility/AsyncUtility.h"
+#include "OpenMS/Utility/AsyncUtility.h"
 template<class T>
 using MSAsync = TAsync<T>;
 template<class T>

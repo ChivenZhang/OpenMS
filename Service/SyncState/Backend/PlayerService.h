@@ -9,7 +9,7 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include <Server/Private/Service.h>
+#include <OpenMS/Server/Private/Service.h>
 
 class PlayerService : public Service
 {

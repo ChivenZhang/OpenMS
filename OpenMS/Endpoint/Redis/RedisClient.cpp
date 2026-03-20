@@ -9,7 +9,7 @@
 * 
 * =================================================*/
 #include "RedisClient.h"
-#include "Reactor/Private/ChannelAddress.h"
+#include "OpenMS/Reactor/Private/ChannelAddress.h"
 #include <hiredis/hiredis.h>
 
 RedisClient::RedisClient(config_t const& config)

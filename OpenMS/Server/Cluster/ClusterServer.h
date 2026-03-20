@@ -9,10 +9,10 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "Server/Private/Server.h"
+#include "OpenMS/Server/Private/Server.h"
 #include "ClusterConfig.h"
-#include "Endpoint/RPC/RPCClient.h"
-#include "Endpoint/RPC/RPCServer.h"
+#include "OpenMS/Endpoint/RPC/RPCClient.h"
+#include "OpenMS/Endpoint/RPC/RPCServer.h"
 
 /// @brief Base Cluster Service
 class ClusterServer : public Server, public RESOURCE(ClusterConfig), public AUTOWIRE(IMailHub)

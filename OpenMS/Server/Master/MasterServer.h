@@ -9,9 +9,9 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "Server/Private/Server.h"
+#include "OpenMS/Server/Private/Server.h"
 #include "MasterConfig.h"
-#include "Endpoint/RPC/RPCServer.h"
+#include "OpenMS/Endpoint/RPC/RPCServer.h"
 
 /// @brief Base Master Service
 class MasterServer : public Server, public RESOURCE(MasterConfig)

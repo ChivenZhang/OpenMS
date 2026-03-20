@@ -9,7 +9,7 @@
 * Created by chivenzhang@gmail.com & gemini
 *
 * =================================================*/
-#include "MS.h"
+#include "OpenMS/MS.h"
 #include <asio.hpp>
 
 /// @brief Timer Utility

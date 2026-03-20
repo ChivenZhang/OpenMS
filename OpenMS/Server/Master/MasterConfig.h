@@ -9,7 +9,7 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "Server/Private/Property.h"
+#include "OpenMS/Server/Private/Property.h"
 
 /// @brief 
 class MasterConfig : RESOURCE2(Property, IProperty)

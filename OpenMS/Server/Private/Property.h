@@ -9,7 +9,7 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "Server/IProperty.h"
+#include "OpenMS/Server/IProperty.h"
 #define OPENMS_CONFIG_FILE "APPLICATION.json"
 
 class Value : public IValue

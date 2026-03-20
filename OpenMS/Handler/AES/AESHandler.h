@@ -9,7 +9,7 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "Reactor/Private/ChannelHandler.h"
+#include "OpenMS/Reactor/Private/ChannelHandler.h"
 
 class AESInboundHandler : public ChannelInboundHandler
 {

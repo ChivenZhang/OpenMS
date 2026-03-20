@@ -10,7 +10,7 @@
 * =================================================*/
 #include <OpenMS/Endpoint/WS/WSServer.h>
 #include <OpenMS/Endpoint/WS/WSClient.h>
-#include "Reactor/WS/WSChannelEvent.h"
+#include <OpenMS/Reactor/WS/WSChannelEvent.h>
 
 int main()
 {

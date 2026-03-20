@@ -128,7 +128,6 @@ add_library(OpenMS STATIC
 		Server/Private/Server.cpp
 		Server/Private/Server.h
 		Utility/AsyncUtility.h
-		Utility/QuickQPS.h
 		Utility/TimerUtility.cpp
 		Utility/TimerUtility.h
 		Utility/TraitsUtility.h
@@ -193,7 +192,6 @@ target_link_libraries(OpenMS PRIVATE spdlog::spdlog_header_only)
 find_package(unofficial-breakpad CONFIG REQUIRED)
 target_link_libraries(OpenMS PUBLIC unofficial::breakpad::libbreakpad unofficial::breakpad::libbreakpad_client)
 
-target_include_directories(OpenMS PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(OpenMS PUBLIC ${OPENMS_SOURCE_DIR}/External/iocpp)
 target_link_libraries(OpenMS PUBLIC iocpp)
 target_compile_definitions(OpenMS PUBLIC -DASIO_STANDALONE)

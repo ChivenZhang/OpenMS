@@ -11,7 +11,7 @@
 #include "RPCServer.h"
 
 #include "RPCProtocol.h"
-#include "Reactor/Private/ChannelHandler.h"
+#include "OpenMS/Reactor/Private/ChannelHandler.h"
 
 class RPCServerInboundHandler : public ChannelInboundHandler
 {

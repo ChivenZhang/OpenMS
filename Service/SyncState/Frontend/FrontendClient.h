@@ -9,9 +9,9 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include <Server/Private/Server.h>
-#include <Endpoint/TCP/TCPClient.h>
-#include <Mailbox/Private/MailHub.h>
+#include <OpenMS/Server/Private/Server.h>
+#include <OpenMS/Endpoint/TCP/TCPClient.h>
+#include <OpenMS/Mailbox/Private/MailHub.h>
 #include "SpaceService.h"
 
 class FrontendClient : public Server

@@ -9,7 +9,7 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "MS.h"
+#include "OpenMS/MS.h"
 #include <iocpp.h>
 
 /// @brief Interface for properties

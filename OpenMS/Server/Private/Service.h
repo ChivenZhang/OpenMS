@@ -9,8 +9,8 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "Mailbox/Private/MailBox.h"
-#include "Utility/TimerUtility.h"
+#include "OpenMS/Mailbox/Private/MailBox.h"
+#include "OpenMS/Utility/TimerUtility.h"
 
 class Service : public MailBox
 {

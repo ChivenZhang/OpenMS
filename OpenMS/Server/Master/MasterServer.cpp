@@ -9,7 +9,7 @@
 *
 * =================================================*/
 #include "MasterServer.h"
-#include "Mailbox/IMailBox.h"
+#include "OpenMS/Mailbox/IMailBox.h"
 
 MSString MasterServer::identity() const
 {

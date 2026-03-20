@@ -9,7 +9,7 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include "MS.h"
+#include "OpenMS/MS.h"
 
 /// @brief Interface for channel address
 class OPENMS_API IChannelAddress
