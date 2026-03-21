@@ -208,3 +208,29 @@ IMailTask Service::read(IMail mail)
 	}
 	co_return;
 }
+
+void Service::load()
+{
+	try
+	{
+		this->onCreateService();
+	}
+	catch (...) {}
+}
+
+void Service::unload()
+{
+	try
+	{
+		this->onCancelService();
+	}
+	catch (...) {}
+}
+
+void Service::onCreateService()
+{
+}
+
+void Service::onCancelService()
+{
+}

@@ -154,8 +154,11 @@ public:
 
 protected:
 	IMailTask read(IMail mail) override;
+	void load() final;
+	void unload() final;
+	virtual void onCreateService();
+	virtual void onCancelService();
 
-protected:
 	TimerUtility m_Timer;
 	MSMutex m_LockMethod;
 	MSMutex m_LockSession;

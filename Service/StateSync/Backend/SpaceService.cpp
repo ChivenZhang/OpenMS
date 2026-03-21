@@ -34,7 +34,7 @@ namespace state_server
 				user.Player = playerService;
 				co_await playerService->onCreatePlayer();
 				co_await this->onEnterSpace(userID);
-				co_await this->async<void>(FLAGS_caller, "onEnterSpace", "", 0, MSTuple{m_SpaceID, userID });
+				co_await this->async<void>(FLAGS_caller, "onEnterSpace", "", 0, MSTuple{ m_SpaceID, userID });
 				co_return true;
 			}
 			co_return false;
@@ -47,7 +47,7 @@ namespace state_server
 			{
 				auto& user = m_UserInfos[userID];
 				co_await this->onEnterSpace(userID);
-				co_await this->async<void>(FLAGS_caller, "onEnterSpace", "", 0, MSTuple{m_SpaceID, userID });
+				co_await this->async<void>(FLAGS_caller, "onEnterSpace", "", 0, MSTuple{ m_SpaceID, userID });
 				// Whole synchronization of game state
 				co_await this->async<void>(this->name(), "syncFull", "", 0, MSTuple{userID});
 				co_return true;
