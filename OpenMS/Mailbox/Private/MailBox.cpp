@@ -59,6 +59,14 @@ bool MailBox::exist(MSString address) const
 	return m_Context->exist(address);
 }
 
+void MailBox::load()
+{
+}
+
+void MailBox::unload()
+{
+}
+
 void MailBox::error(MSError&& info)
 {
 	MS_ERROR("%s", info.what());

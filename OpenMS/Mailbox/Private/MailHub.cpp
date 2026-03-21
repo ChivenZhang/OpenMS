@@ -40,15 +40,16 @@ bool MailHub::create(MSString address, MSRef<IMailBox> value)
 		if (mailbox == nullptr) return false;
 		mailbox->m_TextName = address;
 		mailbox->m_HashName = MSHash(address);
-		MS_INFO("create mailbox %s, %u", address.c_str(), MSHash(address));
 		auto result = m_MailboxMap.emplace(mailbox->m_HashName, nullptr);
 		if (result.second == false)
 		{
 			MS_ERROR("repeated create %s, %u", mailbox->name().c_str(), mailbox->hash());
 			return false;
 		}
+		MS_INFO("create mailbox %s, %u", address.c_str(), MSHash(address));
 		result.first->second = mailbox;
 		mailbox->m_Context = this;
+		mailbox->load();
 	}
 	if (m_OnChange) m_OnChange(address);
 	return true;
@@ -58,9 +59,16 @@ bool MailHub::cancel(MSString address)
 {
 	{
 		MSMutexLock lock(m_MailboxLock);
+		auto result = m_MailboxMap.find(MSHash(address));
+		if (result == m_MailboxMap.end() || MSCast<MailBox>(result->second) == nullptr)
+		{
+			MS_ERROR("mailbox %s, %u not found", address.c_str(), MSHash(address));
+			return false;
+		}
+		auto mailbox = MSCast<MailBox>(result->second);
 		MS_INFO("delete mailbox %s, %u", address.c_str(), MSHash(address));
-		auto result = m_MailboxMap.erase(MSHash(address));
-		if (result == 0) return false;
+		m_MailboxMap.erase(result);
+		mailbox->unload();
 	}
 	if (m_OnChange) m_OnChange(address);
 	return true;

@@ -29,6 +29,8 @@ public:
 	bool exist(MSString address) const final;
 
 protected:
+	void load() override;
+	void unload() override;
 	virtual void error(MSError&& info);
 	virtual IMailTask read(IMail mail) = 0;
 
