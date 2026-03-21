@@ -49,6 +49,8 @@ namespace state_server
 	protected:
 		virtual MSAsync<void> onCreatePlayer();
 
+		virtual MSAsync<void> onDeletePlayer();
+
 		virtual void onStateChange(MSString& data, bool full);
 
 	protected:

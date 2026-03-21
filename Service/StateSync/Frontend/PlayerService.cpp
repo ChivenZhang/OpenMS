@@ -41,6 +41,11 @@ namespace state_client
 		co_return;
 	}
 
+	MSAsync<void> PlayerService::onDeletePlayer()
+	{
+		co_return;
+	}
+
 	MSAsync<void> PlayerService::onStartBattle()
 	{
 		MS_INFO("开始游戏");

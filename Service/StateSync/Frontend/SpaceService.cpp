@@ -44,9 +44,11 @@ namespace state_client
 		{
 			if(this->exist("client:" + std::to_string(userID)) == true)
 			{
+				auto playerService = m_UserInfos.emplace(userID, user_t{}).first->second.Player.lock();
 				if (this->cancel("client:" + std::to_string(userID)))
 				{
 					m_UserInfos.erase(userID);
+					co_await playerService->onDeletePlayer();
 				}
 			}
 			co_return co_await this->onLeaveSpace(spaceID, userID);

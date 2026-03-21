@@ -50,7 +50,11 @@ namespace state_server
 
 	MSAsync<void> PlayerService::onCreatePlayer()
 	{
-		MS_INFO("创建玩家 %u", m_UserID);
+		co_return;
+	}
+
+	MSAsync<void> PlayerService::onDeletePlayer()
+	{
 		co_return;
 	}
 

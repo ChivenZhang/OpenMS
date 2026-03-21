@@ -58,10 +58,12 @@ namespace state_server
 		{
 			MS_INFO("用户 %u 离开空间", userID);
 
+			auto playerService = m_UserInfos.emplace(userID, user_t{}).first->second.Player.lock();
 			if (this->cancel("player:" + std::to_string(userID)))
 			{
 				m_UserInfos.erase(userID);
 				co_await this->onLeaveSpace(userID);
+				co_await playerService->onDeletePlayer();
 				co_await this->async<void>(FLAGS_caller, "onLeaveSpace", "", 0, MSTuple{m_SpaceID, userID });
 			}
 			co_return false;

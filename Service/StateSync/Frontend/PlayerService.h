@@ -47,6 +47,8 @@ namespace state_client
 	protected:
 		virtual MSAsync<void> onCreatePlayer();
 
+		virtual MSAsync<void> onDeletePlayer();
+
 		virtual MSAsync<void> onStartBattle();
 
 		virtual MSAsync<void> onStopBattle();
