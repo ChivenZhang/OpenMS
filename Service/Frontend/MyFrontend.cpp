@@ -8,8 +8,10 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include <Service/SyncState/Frontend/FrontendClient.h>
-#include <Service/SyncState/Frontend/SpaceService.h>
+#include <Service/StateSync/Frontend/FrontendClient.h>
+#include <Service/StateSync/Frontend/SpaceService.h>
+
+using namespace state_client;
 
 class MyPlayer : public PlayerService
 {

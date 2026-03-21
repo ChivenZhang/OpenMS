@@ -13,16 +13,19 @@
 #include <OpenMS/Endpoint/TCP/TCPClient.h>
 class Service;
 
-class BackendServer : public ClusterServer
+namespace state_server
 {
-public:
-	MSString identity() const override;
+	class BackendServer : public ClusterServer
+	{
+	public:
+		MSString identity() const override;
 
-protected:
-	void onInit() override;
-	void onExit() override;
-	virtual MSRef<Service> onCreatingSpace(uint32_t spaceID, uint32_t gameID);
+	protected:
+		void onInit() override;
+		void onExit() override;
+		virtual MSRef<Service> onCreatingSpace(uint32_t spaceID, uint32_t gameID);
 
-protected:
-	MSHnd<Service> m_SpaceService;
-};
+	protected:
+		MSHnd<Service> m_SpaceService;
+	};
+}

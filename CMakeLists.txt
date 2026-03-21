@@ -41,13 +41,13 @@ add_subdirectory(${OPENMS_SOURCE_DIR}/Service/Business)
 endif()
 
 if(OPENMS_ENABLE_SYNC_STATE)
-add_subdirectory(${OPENMS_SOURCE_DIR}/Service/SyncState/Backend)
-add_subdirectory(${OPENMS_SOURCE_DIR}/Service/SyncState/Frontend)
+add_subdirectory(${OPENMS_SOURCE_DIR}/Service/StateSync/Backend)
+add_subdirectory(${OPENMS_SOURCE_DIR}/Service/StateSync/Frontend)
 endif()
 
 if(OPENMS_ENABLE_SYNC_FRAME)
-add_subdirectory(${OPENMS_SOURCE_DIR}/Service/SyncFrame/Backend)
-add_subdirectory(${OPENMS_SOURCE_DIR}/Service/SyncFrame/Frontend)
+add_subdirectory(${OPENMS_SOURCE_DIR}/Service/FrameSync/Backend)
+add_subdirectory(${OPENMS_SOURCE_DIR}/Service/FrameSync/Frontend)
 endif()
 
 if(OPENMS_ENABLE_SYNC_STATE OR OPENMS_ENABLE_SYNC_FRAME)

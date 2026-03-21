@@ -14,20 +14,23 @@
 #include <OpenMS/Mailbox/Private/MailHub.h>
 #include "SpaceService.h"
 
-class FrontendClient : public Server
+namespace state_client
 {
-public:
-	MSString identity() const override;
+	class FrontendClient : public Server
+	{
+	public:
+		MSString identity() const override;
 
-protected:
-	void onInit() override;
-	void onExit() override;
-	void onUpdate(float time) override;
-	virtual MSRef<SpaceService> onCreatingSpace();
+	protected:
+		void onInit() override;
+		void onExit() override;
+		void onUpdate(float time) override;
+		virtual MSRef<SpaceService> onCreatingSpace();
 
-protected:
-	MSRef<MailHub> m_MailHub;
-	MSRef<TCPClient> m_TCPClient;
-	MSRef<IChannel> m_TCPChannel;
-	MSHnd<SpaceService> m_ClientService;
-};
+	protected:
+		MSRef<MailHub> m_MailHub;
+		MSRef<TCPClient> m_TCPClient;
+		MSRef<IChannel> m_TCPChannel;
+		MSHnd<SpaceService> m_ClientService;
+	};
+}

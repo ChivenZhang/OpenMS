@@ -8,8 +8,10 @@
 * Created by chivenzhang@gmail.com.
 *
 * =================================================*/
-#include <Service/SyncState/Backend/BackendServer.h>
-#include <Service/SyncState/Backend/SpaceService.h>
+#include <Service/StateSync/Backend/BackendServer.h>
+#include <Service/StateSync/Backend/SpaceService.h>
+
+using namespace state_server;
 
 class MyPlayer : public PlayerService
 {
