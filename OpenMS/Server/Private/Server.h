@@ -19,6 +19,7 @@ class Server : public IServer, public AUTOWIRE(IProperty)
 {
 public:
 	int startup() final;
+	int looping() final;
 	void shutdown() final;
 	MSString identity() const override;
 	void postEvent(MSLambda<void()>&& event) final;
@@ -36,8 +37,9 @@ protected:
 
 protected:
 	TimerUtility m_Timer;
+	uint32_t m_FrameCount = 0U;
+	size_t m_FrameTime = 0U, m_FrameNext = 0U;
 	MSMutex m_Lock;
-	MSAtomic<bool> m_Running;
-	MSAtomic<bool> m_Working;
+	MSAtomic<bool> m_Looping, m_Running, m_Working;
 	MSQueue<MSLambda<void()>> m_Events;
 };

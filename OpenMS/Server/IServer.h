@@ -37,6 +37,8 @@ public:
 
 	virtual int startup() = 0;
 
+	virtual int looping() = 0;
+
 	virtual void shutdown() = 0;
 
 	virtual MSString identity() const = 0;

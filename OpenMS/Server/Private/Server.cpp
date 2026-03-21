@@ -16,12 +16,12 @@ char** IStartup::Argv = nullptr;
 
 int Server::startup()
 {
-	m_Running = true;
-	auto frame = 0UL;
-	auto frameTime = ::clock();
-	auto frameNext = frameTime;
+	if (m_Looping == true) return 0;
+	m_Looping = m_Running = true;
+	m_FrameCount = 0UL;
+	m_FrameTime = ::clock();
+	m_FrameNext = m_FrameTime;
 	constexpr auto timePerFrame = 1000 / 15;
-	MS_INFO("starting %s...", this->identity().c_str());
 
 	try
 	{
@@ -37,7 +37,6 @@ int Server::startup()
 		onError(cpptrace::logic_error("unknown exception"));
 		m_Running = false;
 	}
-
 	MS_INFO("started %s", this->identity().c_str());
 
 	while (m_Running)
@@ -65,12 +64,12 @@ int Server::startup()
 			}
 		}
 
-		frameTime = ::clock();
-		onUpdate((float)frameTime * 0.001f);
-		while (frameNext < frameTime)
+		m_FrameTime = ::clock();
+		onUpdate((float)m_FrameTime * 0.001f);
+		while (m_FrameNext < m_FrameTime)
 		{
-			onFrame(frame++);
-			frameNext += timePerFrame;
+			onFrame(m_FrameCount++);
+			m_FrameNext += timePerFrame;
 		}
 	}
 
@@ -81,22 +80,103 @@ int Server::startup()
 	catch (MSError& ex)
 	{
 		onError(std::forward<MSError>(ex));
-		m_Running = false;
 	}
 	catch (...)
 	{
 		onError(cpptrace::logic_error("unknown exception"));
-		m_Running = false;
 	}
-
+	m_Looping = m_Running = false;
 	MS_INFO("terminated %s", this->identity().c_str());
-
 	return 0;
+}
+
+int Server::looping()
+{
+	if (m_Looping == false)
+	{
+		m_FrameCount = 0UL;
+		m_FrameTime = ::clock();
+		m_FrameNext = m_FrameTime;
+		m_Looping = m_Running = true;
+
+		try
+		{
+			onInit();
+		}
+		catch (MSError& ex)
+		{
+			onError(std::move(ex));
+			m_Running = false;
+		}
+		catch (...)
+		{
+			onError(cpptrace::logic_error("unknown exception"));
+			m_Running = false;
+		}
+		MS_INFO("started %s", this->identity().c_str());
+	}
+	else
+	{
+		constexpr auto timePerFrame = 1000 / 15;
+
+		if (m_Running)
+		{
+			if (m_Working)
+			{
+				MSMutexLock lock(m_Lock);
+				m_Working = false;
+				while (m_Running && m_Events.empty() == false)
+				{
+					auto event = m_Events.front();
+					m_Events.pop();
+					try
+					{
+						event();
+					}
+					catch (MSError& ex)
+					{
+						onError(std::forward<MSError>(ex));
+					}
+					catch (...)
+					{
+						onError(cpptrace::logic_error("unknown exception"));
+					}
+				}
+			}
+
+			m_FrameTime = ::clock();
+			onUpdate((float)m_FrameTime * 0.001f);
+			while (m_FrameNext < m_FrameTime)
+			{
+				onFrame(m_FrameCount++);
+				m_FrameNext += timePerFrame;
+			}
+		}
+		else
+		{
+			try
+			{
+				onExit();
+			}
+			catch (MSError& ex)
+			{
+				onError(std::forward<MSError>(ex));
+			}
+			catch (...)
+			{
+				onError(cpptrace::logic_error("unknown exception"));
+			}
+			m_Looping = m_Running = false;
+			MS_INFO("terminated %s", this->identity().c_str());
+			return 0;
+		}
+	}
+	return 1;
 }
 
 void Server::shutdown()
 {
-	m_Running = false;
+	if (m_Looping == true) m_Running = false;
 }
 
 MSString Server::identity() const
