@@ -34,19 +34,19 @@ void RedisServer::onInit()
 	{
 		m_RedisPool->execute("exists mykey" + std::to_string(i), [](bool update, MSString const& result)
 		{
-			MS_INFO("del mykey:%s", result.c_str());
+			MS_INFO("del mykey:{}", result.c_str());
 		});
 		m_RedisPool->execute("del mykey" + std::to_string(i), [](bool update, MSString const& result)
 		{
-			MS_INFO("del mykey:%s", result.c_str());
+			MS_INFO("del mykey:{}", result.c_str());
 		});
 		m_RedisPool->execute("hmset mykey" + std::to_string(i) + " a1 b1 a2 b2", [](bool update, MSString const& result)
 		{
-			MS_INFO("set mykey:%s", result.c_str());
+			MS_INFO("set mykey:{}", result.c_str());
 		});
 		m_RedisPool->execute("hgetall mykey" + std::to_string(i), [](bool update, MSString const& result)
 		{
-			MS_INFO("get mykey:%s", result.c_str());
+			MS_INFO("get mykey:{}", result.c_str());
 		});
 	}
 #endif

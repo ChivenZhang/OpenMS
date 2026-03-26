@@ -43,7 +43,7 @@ protected:
 
     void onStateChange(MSStringView state, bool full) override
     {
-        MS_DEBUG("玩家 %u 状态改变：%s 全量：%s", userID(), MSString(state.data(), state.size()).c_str(), full ? "yes" : "no");
+        MS_DEBUG("玩家 {} 状态改变：{} 全量：{}", userID(), MSString(state.data(), state.size()).c_str(), full ? "yes" : "no");
     }
 };
 
@@ -92,7 +92,7 @@ protected:
                         {
                             playerService->callServer("matchBattle", 1000, MSTuple{ 0U }, [](bool result)
                             {
-                                MS_INFO("匹配结果：%s", result ? "true" : "false");
+                                MS_INFO("匹配结果：{}", result ? "true" : "false");
                             });
                         }
                     }

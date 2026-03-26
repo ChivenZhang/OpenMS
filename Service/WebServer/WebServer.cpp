@@ -42,12 +42,12 @@ protected:
 				catch (MSError const& ex)
 				{
 					cpptrace::logic_error error(ex.what());
-					MS_ERROR("%s", error.what());
+					MS_ERROR("{}", error.what());
 				}
 				catch (...)
 				{
 					cpptrace::logic_error error("unhandled exception");
-					MS_ERROR("%s", error.what());
+					MS_ERROR("{}", error.what());
 				}
 			}
 		}
@@ -93,7 +93,7 @@ void WebServer::onInit()
 		auto& staticPaths = pattern.second;
 		m_HttpServer->bind_get(staticName + ".*", [=, this](HTTPServer::request_t const& request, HTTPServer::response_t& response)
 		{
-			MS_INFO("alias %s", request.Url.c_str());
+			MS_INFO("alias {}", request.Url.c_str());
 			try
 			{
 				std::regex regex(staticName + "(.*)");
@@ -134,7 +134,7 @@ void WebServer::onInit()
 			}
 			catch (MSError& ex)
 			{
-				MS_ERROR("%s", ex.what());
+				MS_ERROR("{}", ex.what());
 				return;
 			}
 			response.Code = HTTP_STATUS_NOT_FOUND;
@@ -150,7 +150,7 @@ void WebServer::onInit()
 		auto& staticPath = pattern.second;
 		m_HttpServer->bind_get(staticName + ".*", [=, this](HTTPServer::request_t const& request, HTTPServer::response_t& response)
 		{
-			MS_INFO("root %s", request.Url.c_str());
+			MS_INFO("root {}", request.Url.c_str());
 
 			auto filePath = request.Url;
 			auto fullPath = std::filesystem::path(staticPath + filePath);
@@ -215,7 +215,7 @@ void WebServer::forward(MSString url, HTTPServer::response_t &response)
 					auto fullPath = std::filesystem::path(staticPath + "/" + filePath);
 					if (std::filesystem::exists(fullPath) && std::filesystem::is_regular_file(fullPath))
 					{
-						MS_INFO("alias %s", url.c_str());
+						MS_INFO("alias {}", url.c_str());
 
 						auto fileSize = std::filesystem::file_size(fullPath);
 						if(m_MaxBodySize && m_MaxBodySize < fileSize)
@@ -244,7 +244,7 @@ void WebServer::forward(MSString url, HTTPServer::response_t &response)
 		}
 		catch (MSError& ex)
 		{
-			MS_ERROR("%s", ex.what());
+			MS_ERROR("{}", ex.what());
 			return;
 		}
 	}
@@ -262,7 +262,7 @@ void WebServer::forward(MSString url, HTTPServer::response_t &response)
 		auto fullPath = std::filesystem::path(staticPath + filePath);
 		if (std::filesystem::exists(fullPath) && std::filesystem::is_regular_file(fullPath))
 		{
-			MS_INFO("root %s", url.c_str());
+			MS_INFO("root {}", url.c_str());
 
 			auto fileSize = std::filesystem::file_size(fullPath);
 			if(m_MaxBodySize && m_MaxBodySize < fileSize)

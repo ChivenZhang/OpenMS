@@ -84,19 +84,19 @@ LogicService::LogicService()
 
 	this->bind("onCreateSpace", [this](uint32_t spaceID)->MSAsync<void>
 	{
-		MS_INFO("创建空间回调 %u", spaceID);
+		MS_INFO("创建空间回调 {}", spaceID);
 		co_return co_await this->onCreateSpace(spaceID);
 	});
 
 	this->bind("onDeleteSpace", [this](uint32_t spaceID)->MSAsync<void>
 	{
-		MS_INFO("删除空间回调 %u", spaceID);
+		MS_INFO("删除空间回调 {}", spaceID);
 		co_return co_await this->onDeleteSpace(spaceID);
 	});
 
 	this->bind("onEnterSpace", [this](uint32_t spaceID, uint32_t userID)->MSAsync<void>
 	{
-		MS_INFO("进入空间回调 %u", spaceID);
+		MS_INFO("进入空间回调 {}", spaceID);
 		co_await this->onEnterSpace(spaceID, userID);
 
 		// Broadcast to peers in the space
@@ -113,7 +113,7 @@ LogicService::LogicService()
 
 	this->bind("onLeaveSpace", [this](uint32_t spaceID, uint32_t userID)->MSAsync<void>
 	{
-		MS_INFO("离开空间回调 %u", spaceID);
+		MS_INFO("离开空间回调 {}", spaceID);
 		co_await this->onLeaveSpace(spaceID, userID);
 
 		// Broadcast to peers in the space

@@ -20,7 +20,7 @@ GuestService::GuestService(MSHnd<IChannel> client, uint32_t guestID)
 {
 	this->bind("login", [=, this](MSString username, MSString password)-> MSAsync<uint32_t>
 	{
-		MS_INFO("登录请求： %s", username.c_str());
+		MS_INFO("登录请求： {}", username.c_str());
 
 		auto channel = m_ClientChannel.lock();
 		if (channel == nullptr) co_return 0U;
@@ -33,12 +33,12 @@ GuestService::GuestService(MSHnd<IChannel> client, uint32_t guestID)
 			if (result == false) co_return 0U;
 
 			channel->getContext()->userdata() = userID;
-			MS_INFO("验证成功！ %s", username.c_str());
+			MS_INFO("验证成功！ {}", username.c_str());
 			co_await this->async<void>("client", "onLogin", "proxy:" + std::to_string(userID), 0, MSTuple{ userID });
 		}
 		else
 		{
-			MS_INFO("验证失败！ %s", username.c_str());
+			MS_INFO("验证失败！ {}", username.c_str());
 		}
 
 		co_return userID;
@@ -60,13 +60,13 @@ GuestService::GuestService(MSHnd<IChannel> client, uint32_t guestID)
 		}
 		else
 		{
-			MS_INFO("注销失败！ %u", userID);
+			MS_INFO("注销失败！ {}", userID);
 		}
 		co_return result;
 	});
 	this->bind("signup", [=, this](MSString username, MSString password)-> MSAsync<bool>
 	{
-		MS_INFO("注册请求： %s", username.c_str());
+		MS_INFO("注册请求： {}", username.c_str());
 
 		auto userID = co_await this->async<uint32_t>("logic", "signup", "", 1000, MSTuple{username, password});
 

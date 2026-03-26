@@ -84,7 +84,7 @@ void FrontendClient::onInit()
 							mail.Date = mailView.Date;
 							mail.Type = mailView.Type;
 							mail.Body = MSStringView(mailView.Body, event->Message.size() - sizeof(MailView));
-							MS_INFO("gate %u=>%u via %u #%u @%u", mail.From, mail.To, mail.Copy, mail.Date, mail.Type);
+							MS_INFO("gate {}=>{} via {} #{} @{}", mail.From, mail.To, mail.Copy, mail.Date, mail.Type);
 							mailHub->send(mail);
 						}
 						return false;
@@ -112,12 +112,12 @@ void FrontendClient::onInit()
 
 					clientService->async(guestName, "signup", "", 5000, MSTuple{"openms", "123456"}, [=](bool result)
 					{
-						MS_INFO("注册结果：%d", result);
+						MS_INFO("注册结果：{}", result);
 
 						MS_INFO("尝试登录...");
 						clientService->async(guestName, "login", "", 5000, MSTuple{"openms", "123456"}, [=](uint32_t userID)
 						{
-							MS_INFO("登录结果：%u", userID);
+							MS_INFO("登录结果：{}", userID);
 							if (userID == 0) return;
 							channel->getContext()->userdata() = userID;
 

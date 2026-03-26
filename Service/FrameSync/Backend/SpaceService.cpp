@@ -21,7 +21,7 @@ SpaceService::SpaceService(uint32_t spaceID, uint32_t gameID)
 {
 	this->bind("enterSpace", [=, this](uint32_t userID)->MSAsync<void>
 	{
-		MS_INFO("用户 %u 加入空间", userID);
+		MS_INFO("用户 {} 加入空间", userID);
 
 		if (this->create("player:" + std::to_string(userID), MSNew<PlayerService>(userID)))
 		{
@@ -33,7 +33,7 @@ SpaceService::SpaceService(uint32_t spaceID, uint32_t gameID)
 	});
 	this->bind("leaveSpace", [=, this](uint32_t userID)->MSAsync<void>
 	{
-		MS_INFO("用户 %u 离开空间", userID);
+		MS_INFO("用户 {} 离开空间", userID);
 
 		if (this->cancel("player:" + std::to_string(userID)))
 		{

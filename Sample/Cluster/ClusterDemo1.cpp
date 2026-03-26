@@ -34,7 +34,7 @@ AuthorService::AuthorService()
 
 	this->bind("verify", [](MSString user, MSString pass)->MSAsync<MSString>
 	{
-		MS_INFO("验证登录（VERIFY） %s %s", user.c_str(), pass.c_str());
+		MS_INFO("验证登录（VERIFY） {} {}", user.c_str(), pass.c_str());
 		co_return "登录成功（SUCCESS）";
 	});
 }

@@ -79,7 +79,7 @@ void ClusterServer::onInit()
 		mailView.Date = mail.Date;
 		mailView.Type = mail.Type;
 		if (mail.Body.empty() == false) ::memcpy(mailView.Body, mail.Body.data(), mail.Body.size());
-		MS_INFO("远程调用: %u => %u", mail.From, mail.To);
+		MS_INFO("远程调用: {} => {}", mail.From, mail.To);
 		MSString response;
 		return client->call("mailbox", 0, request, response);
 	});
@@ -106,7 +106,7 @@ void ClusterServer::onInit()
 			if (result.second)
 			{
 				m_MailRouteMap = result.first;
-				MS_INFO("validate %s, count %u", address.c_str(), (uint32_t)m_MailRouteMap.size());
+				MS_INFO("validate {}, count {}", address.c_str(), (uint32_t)m_MailRouteMap.size());
 			}
 			else
 			{
@@ -135,7 +135,7 @@ void ClusterServer::onInit()
 			newMail.Date = mailView.Date;
 			newMail.Type = mailView.Type;
 			newMail.Body = MSStringView(mailView.Body, request.size() - sizeof(MailView));
-			MS_INFO("被远程调用: %u => %u", newMail.From, newMail.To);
+			MS_INFO("被远程调用: {} => {}", newMail.From, newMail.To);
 			mailHub->send(newMail);
 			return true;
 		}
@@ -153,7 +153,7 @@ void ClusterServer::onInit()
 	{
 		MSMutexLock lock(m_MailRouteLock);
 		m_MailRouteMap = std::move(route);
-		MS_INFO("refresh %s, count %u", m_ServiceServer->address().lock()->getString().c_str(), (uint32_t)m_MailRouteMap.size());
+		MS_INFO("refresh {}, count {}", m_ServiceServer->address().lock()->getString().c_str(), (uint32_t)m_MailRouteMap.size());
 	});
 	m_ClusterClient->startup();
 }
@@ -178,6 +178,6 @@ void ClusterServer::onExit()
 
 bool ClusterServer::onFail(IMail mail)
 {
-	MS_ERROR("fail %u=>%u via %u #%u @%u", mail.From, mail.To, mail.Copy, mail.Date, mail.Type);
+	MS_ERROR("fail {}=>{} via {} #{} @{}", mail.From, mail.To, mail.Copy, mail.Date, mail.Type);
 	return false;
 }

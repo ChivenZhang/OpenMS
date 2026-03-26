@@ -44,7 +44,7 @@ void WSServerReactor::startup()
 			server.init_asio(&loop, error);
 			if (error)
 			{
-				MS_ERROR("failed to init_asio: %s", error.message().c_str());
+				MS_ERROR("failed to init_asio: {}", error.message().c_str());
 				break;
 			}
 
@@ -54,7 +54,7 @@ void WSServerReactor::startup()
 				auto connect = server.get_con_from_hdl(session, error);
 				if (connect == nullptr || error)
 				{
-					MS_ERROR("failed to get_con_from_hdl: %s", error.message().c_str());
+					MS_ERROR("failed to get_con_from_hdl: {}", error.message().c_str());
 					return;
 				}
 
@@ -65,7 +65,7 @@ void WSServerReactor::startup()
 					auto family = server.get_local_endpoint(error).protocol().family();
 					if (family == AF_INET) localAddress = MSNew<WSIPv4Address>(address, portNum);
 					else if (family == AF_INET6) localAddress = MSNew<WSIPv6Address>(address, portNum);
-					else MS_ERROR("unknown address family: %d", family);
+					else MS_ERROR("unknown address family: {}", family);
 				}
 				{
 					auto address = connect->get_raw_socket().remote_endpoint().address().to_string();
@@ -73,7 +73,7 @@ void WSServerReactor::startup()
 					auto family = connect->get_raw_socket().remote_endpoint().protocol().family();
 					if (family == AF_INET) remoteAddress = MSNew<WSIPv4Address>(address, portNum, connect->get_resource());
 					else if (family == AF_INET6) remoteAddress = MSNew<WSIPv6Address>(address, portNum, connect->get_resource());
-					else MS_ERROR("unknown address family: %d", family);
+					else MS_ERROR("unknown address family: {}", family);
 				}
 				if (localAddress == nullptr || remoteAddress == nullptr)
 				{
@@ -89,7 +89,7 @@ void WSServerReactor::startup()
 				auto connect = server.get_con_from_hdl(session, error);
 				if (connect == nullptr || error)
 				{
-					MS_ERROR("failed to get_con_from_hdl: %s", error.message().c_str());
+					MS_ERROR("failed to get_con_from_hdl: {}", error.message().c_str());
 					return;
 				}
 
@@ -115,7 +115,7 @@ void WSServerReactor::startup()
 			server.listen(asio::ip::address::from_string(m_Address->getAddress()), m_Address->getPort(), error);
 			if (error)
 			{
-				MS_ERROR("failed to listen: %s", error.message().c_str());
+				MS_ERROR("failed to listen: {}", error.message().c_str());
 				break;
 			}
 
@@ -129,12 +129,12 @@ void WSServerReactor::startup()
 				auto family = server.get_local_endpoint(error).protocol().family();
 				if (family == AF_INET) localAddress = MSNew<WSIPv4Address>(address, portNum);
 				else if (family == AF_INET6) localAddress = MSNew<WSIPv6Address>(address, portNum);
-				else MS_ERROR("unknown address family: %d", family);
+				else MS_ERROR("unknown address family: {}", family);
 				if (localAddress == nullptr) break;
 				m_LocalAddress = localAddress;
 			}
 
-			MS_INFO("listening on %s:%d", m_LocalAddress->getAddress().c_str(), m_LocalAddress->getPort());
+			MS_INFO("listening on {}:{}", m_LocalAddress->getAddress().c_str(), m_LocalAddress->getPort());
 
 			m_FireSend = [&](MSRef<IChannelEvent> event)
 			{
@@ -151,7 +151,7 @@ void WSServerReactor::startup()
 			server.start_accept(error);
 			if (error)
 			{
-				MS_ERROR("failed to start_accept: %s", error.message().c_str());
+				MS_ERROR("failed to start_accept: {}", error.message().c_str());
 				break;
 			}
 
@@ -216,7 +216,7 @@ void WSServerReactor::write(MSRef<IChannelEvent> event)
 
 void WSServerReactor::onConnect(MSRef<Channel> channel)
 {
-	MS_DEBUG("accepted from %s", channel->getRemote().lock()->getString().c_str());
+	MS_DEBUG("accepted from {}", channel->getRemote().lock()->getString().c_str());
 
 	auto _channel = MSCast<WSChannel>(channel);
 	m_ChannelMap[_channel->getHandle().lock().get()] = channel;
@@ -225,7 +225,7 @@ void WSServerReactor::onConnect(MSRef<Channel> channel)
 
 void WSServerReactor::onDisconnect(MSRef<Channel> channel)
 {
-	MS_DEBUG("rejected from %s", channel->getRemote().lock()->getString().c_str());
+	MS_DEBUG("rejected from {}", channel->getRemote().lock()->getString().c_str());
 
 	auto _channel = MSCast<WSChannel>(channel);
 	m_ChannelMap.erase(_channel->getHandle().lock().get());

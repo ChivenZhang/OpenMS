@@ -44,7 +44,7 @@ void SQLiteServer::onInit()
 		{
 			MSString line;
 			for (size_t k = 0; k < cols; ++k) line += result[i + k] + " ";
-			MS_INFO("%s", line.c_str());
+			MS_INFO("{}", line.c_str());
 		}
 	}
 #endif

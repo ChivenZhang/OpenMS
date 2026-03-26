@@ -31,7 +31,7 @@ void MySQLPool::startup()
 		MS_ERROR("cannot get mysql driver instance");
 		return;
 	}
-	MS_INFO("MySQL Driver： %d.%d.%d", driver->getMajorVersion(), driver->getMinorVersion(), driver->getPatchVersion());
+	MS_INFO("MySQL Driver： {}.{}.{}", driver->getMajorVersion(), driver->getMinorVersion(), driver->getPatchVersion());
 
 	m_Running = true;
 	m_ThreadList.resize(config.Instance);
@@ -60,7 +60,7 @@ void MySQLPool::startup()
 						}
 						catch (MSError& ex)
 						{
-							MS_ERROR("%s", ex.what());
+							MS_ERROR("{}", ex.what());
 						}
 						context = nullptr;
 						std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -146,7 +146,7 @@ void MySQLPool::startup()
 				}
 				catch (MSError& ex)
 				{
-					MS_ERROR("%s: %s", sql.c_str(), ex.what());
+					MS_ERROR("{}: {}", sql.c_str(), ex.what());
 
 					updateNum = -1;
 					output.clear();
@@ -160,7 +160,7 @@ void MySQLPool::startup()
 				}
 				catch (MSError& ex)
 				{
-					MS_ERROR("%s", ex.what());
+					MS_ERROR("{}", ex.what());
 				}
 			}
 
@@ -171,7 +171,7 @@ void MySQLPool::startup()
 	}
 
 	m_Address = IPv4Address::New(MSStringView(config.IP), config.PortNum);
-	MS_INFO("accepted from %s:%d", config.IP.c_str(), config.PortNum);
+	MS_INFO("accepted from {}:{}", config.IP.c_str(), config.PortNum);
 }
 
 void MySQLPool::shutdown()
@@ -188,7 +188,7 @@ void MySQLPool::shutdown()
 		if (execute.Callback) execute.Callback(-1, {});
 	}
 
-	MS_INFO("rejected from %s:%d", m_Address->getAddress().c_str(), m_Address->getPort());
+	MS_INFO("rejected from {}:{}", m_Address->getAddress().c_str(), m_Address->getPort());
 	m_Address = nullptr;
 }
 

@@ -37,7 +37,7 @@ MailMan::MailMan(MSRaw<MailHub> context)
 						m_TaskUnlock.wait_for(mailboxLock, std::chrono::milliseconds(500));
 						continue;
 					}
-					MS_INFO("steal %u", (uint32_t)m_TempQueue.size());
+					MS_INFO("steal {}", (uint32_t)m_TempQueue.size());
 					MSMutexLock lock(m_TaskLock);
 					while (!m_TempQueue.empty())
 					{
@@ -94,7 +94,7 @@ MailMan::MailMan(MSRaw<MailHub> context)
 					{
 						MSPrintError(ex);
 					}
-					MS_DEBUG("done %u=>%u via %u #%u @%u", mail.Mail.From, mail.Mail.To, mail.Mail.Copy, mail.Mail.Date, mail.Mail.Type);
+					MS_DEBUG("done {}=>{} via {} #{} @{}", mail.Mail.From, mail.Mail.To, mail.Mail.Copy, mail.Mail.Date, mail.Mail.Type);
 				}
 				else
 				{

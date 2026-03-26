@@ -43,13 +43,13 @@ void TCPClientReactor::startup()
 			error = client.open(endpoint.protocol(), error);
 			if (error)
 			{
-				MS_ERROR("failed to open: %s", error.message().c_str());
+				MS_ERROR("failed to open: {}", error.message().c_str());
 				break;
 			}
 			error = client.connect(endpoint, error);
 			if (error)
 			{
-				MS_ERROR("failed to connect: %s", error.message().c_str());
+				MS_ERROR("failed to connect: {}", error.message().c_str());
 				break;
 			}
 
@@ -64,7 +64,7 @@ void TCPClientReactor::startup()
 					auto family = client.local_endpoint().protocol().family();
 					if (family == AF_INET) localAddress = MSNew<IPv4Address>(address, portNum);
 					else if (family == AF_INET6) localAddress = MSNew<IPv6Address>(address, portNum);
-					else MS_ERROR("unknown address family: %d", family);
+					else MS_ERROR("unknown address family: {}", family);
 				}
 				{
 					auto address = client.remote_endpoint().address().to_string();
@@ -72,7 +72,7 @@ void TCPClientReactor::startup()
 					auto family = client.remote_endpoint().protocol().family();
 					if (family == AF_INET) remoteAddress = MSNew<IPv4Address>(address, portNum);
 					else if (family == AF_INET6) remoteAddress = MSNew<IPv6Address>(address, portNum);
-					else MS_ERROR("unknown address family: %d", family);
+					else MS_ERROR("unknown address family: {}", family);
 				}
 				if (localAddress == nullptr || remoteAddress == nullptr)
 				{
@@ -82,7 +82,7 @@ void TCPClientReactor::startup()
 				m_LocalAddress = localAddress;
 			}
 
-			MS_INFO("listening on %s:%d", m_LocalAddress->getAddress().c_str(), m_LocalAddress->getPort());
+			MS_INFO("listening on {}:{}", m_LocalAddress->getAddress().c_str(), m_LocalAddress->getPort());
 
 			// Read and write data in async way
 
@@ -97,10 +97,10 @@ void TCPClientReactor::startup()
 					auto buffer = _channel->getBuffer();
 					socket->async_read_some(asio::buffer(buffer.data(), buffer.size()), [=, &read_func](asio::error_code error, size_t length)
 					{
-						MS_DEBUG("tcp async read: %s 长度 %u 状态 %d", channel.lock()->getRemote().lock()->getString().c_str(), (uint32_t)length, error.value());
+						MS_DEBUG("tcp async read: {} 长度 {} 状态 {}", channel.lock()->getRemote().lock()->getString().c_str(), (uint32_t)length, error.value());
 						if (error)
 						{
-							MS_ERROR("can't read from socket: %s", error.message().c_str());
+							MS_ERROR("can't read from socket: {}", error.message().c_str());
 							reactor->onDisconnect(channel.lock());
 						}
 						else
@@ -123,12 +123,12 @@ void TCPClientReactor::startup()
 					if (socket->is_open() == false) return;
 					socket->async_write_some(asio::buffer(event->Message), [=, &write_func](asio::error_code error, size_t length) mutable
 					{
-						MS_DEBUG("tcp async write: %s 长度 %u 状态 %d", channel.lock()->getRemote().lock()->getString().c_str(), (uint32_t)length, error.value());
+						MS_DEBUG("tcp async write: {} 长度 {} 状态 {}", channel.lock()->getRemote().lock()->getString().c_str(), (uint32_t)length, error.value());
 						if (error)
 						{
 							if (event->Promise) event->Promise->set_value(false);
 
-							MS_ERROR("can't write to socket: %s", error.message().c_str());
+							MS_ERROR("can't write to socket: {}", error.message().c_str());
 							reactor->onDisconnect(channel.lock());
 						}
 						else
@@ -231,7 +231,7 @@ void TCPClientReactor::write(MSRef<IChannelEvent> event)
 
 void TCPClientReactor::onConnect(MSRef<Channel> channel)
 {
-	MS_DEBUG("accepted from %s", channel->getRemote().lock()->getString().c_str());
+	MS_DEBUG("accepted from {}", channel->getRemote().lock()->getString().c_str());
 
 	m_Channel = channel;
 	ChannelReactor::onConnect(channel);
@@ -239,7 +239,7 @@ void TCPClientReactor::onConnect(MSRef<Channel> channel)
 
 void TCPClientReactor::onDisconnect(MSRef<Channel> channel)
 {
-	MS_INFO("rejected from %s", channel->getRemote().lock()->getString().c_str());
+	MS_INFO("rejected from {}", channel->getRemote().lock()->getString().c_str());
 
 	m_Channel = nullptr;
 	ChannelReactor::onDisconnect(channel);

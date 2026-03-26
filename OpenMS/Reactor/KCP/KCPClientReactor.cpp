@@ -51,13 +51,13 @@ void KCPClientReactor::startup()
 			error = client.open(endpoint.protocol(), error);
 			if (error)
 			{
-				MS_ERROR("failed to open: %s", error.message().c_str());
+				MS_ERROR("failed to open: {}", error.message().c_str());
 				break;
 			}
 			error = client.connect(endpoint, error);
 			if (error)
 			{
-				MS_ERROR("failed to connect: %s", error.message().c_str());
+				MS_ERROR("failed to connect: {}", error.message().c_str());
 				break;
 			}
 
@@ -72,7 +72,7 @@ void KCPClientReactor::startup()
 					auto family = client.local_endpoint().protocol().family();
 					if (family == AF_INET) localAddress = MSNew<IPv4Address>(address, portNum);
 					else if (family == AF_INET6) localAddress = MSNew<IPv6Address>(address, portNum);
-					else MS_ERROR("unknown address family: %d", family);
+					else MS_ERROR("unknown address family: {}", family);
 				}
 				{
 					auto address = client.remote_endpoint().address().to_string();
@@ -80,13 +80,13 @@ void KCPClientReactor::startup()
 					auto family = client.remote_endpoint().protocol().family();
 					if (family == AF_INET) remoteAddress = MSNew<IPv4Address>(address, portNum);
 					else if (family == AF_INET6) remoteAddress = MSNew<IPv6Address>(address, portNum);
-					else MS_ERROR("unknown address family: %d", family);
+					else MS_ERROR("unknown address family: {}", family);
 				}
 				if (localAddress == nullptr || remoteAddress == nullptr) break;
 				m_LocalAddress = localAddress;
 			}
 
-			MS_INFO("listening on %s:%d", m_LocalAddress->getAddress().c_str(), m_LocalAddress->getPort());
+			MS_INFO("listening on {}:{}", m_LocalAddress->getAddress().c_str(), m_LocalAddress->getPort());
 
 			// Read and write data in async way
 
@@ -102,7 +102,7 @@ void KCPClientReactor::startup()
 					{
 						if (error)
 						{
-							MS_ERROR("failed to receive: %s", error.message().c_str());
+							MS_ERROR("failed to receive: {}", error.message().c_str());
 							reactor->onDisconnect(channel.lock());
 						}
 						else
@@ -132,16 +132,16 @@ void KCPClientReactor::startup()
 			client.send(asio::buffer("what's session id?", sizeof("what's session id?")), 0, error);
 			if (error)
 			{
-				MS_ERROR("failed to send: %s", error.message().c_str());
+				MS_ERROR("failed to send: {}", error.message().c_str());
 				break;
 			}
 			client.receive(asio::buffer(buffer), 0, error);
 			if (error)
 			{
-				MS_ERROR("failed to receive: %s", error.message().c_str());
+				MS_ERROR("failed to receive: {}", error.message().c_str());
 				break;
 			}
-			MS_INFO("kcp session id: %u", ikcp_getconv(buffer));
+			MS_INFO("kcp session id: {}", ikcp_getconv(buffer));
 			{
 				auto session = ikcp_create(ikcp_getconv(buffer), nullptr);
 				auto channel = MSNew<KCPChannel>(reactor, localAddress, remoteAddress, (uint32_t)(rand() % reactor->m_WorkerList.size()), session, &client, client.remote_endpoint());
@@ -273,7 +273,7 @@ void KCPClientReactor::write(MSRef<IChannelEvent> event)
 
 void KCPClientReactor::onConnect(MSRef<Channel> channel)
 {
-	MS_DEBUG("accepted from %s", channel->getRemote().lock()->getString().c_str());
+	MS_DEBUG("accepted from {}", channel->getRemote().lock()->getString().c_str());
 
 	m_Channel = channel;
 	ChannelReactor::onConnect(channel);
@@ -281,7 +281,7 @@ void KCPClientReactor::onConnect(MSRef<Channel> channel)
 
 void KCPClientReactor::onDisconnect(MSRef<Channel> channel)
 {
-	MS_DEBUG("rejected from %s", channel->getRemote().lock()->getString().c_str());
+	MS_DEBUG("rejected from {}", channel->getRemote().lock()->getString().c_str());
 
 	m_Channel = nullptr;
 	m_ChannelRemoved = channel;

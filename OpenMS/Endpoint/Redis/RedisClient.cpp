@@ -29,7 +29,7 @@ void RedisClient::startup()
 	}
 	if(context->err)
 	{
-		MS_ERROR("%s", context->errstr);
+		MS_ERROR("{}", context->errstr);
 		redisFree(context);
 		return;
 	}
@@ -39,7 +39,7 @@ void RedisClient::startup()
 	}
 	else if(config.Password.size())
 	{
-		auto result = (redisReply*)redisCommand(context, "AUTH %s", config.Password.c_str());
+		auto result = (redisReply*)redisCommand(context, "AUTH {}", config.Password.c_str());
 		if(result == nullptr)
 		{
 			MS_ERROR("cannot to auth");
@@ -48,7 +48,7 @@ void RedisClient::startup()
 		}
 		if(result->type == REDIS_REPLY_ERROR)
 		{
-			MS_ERROR("%s", result->str);
+			MS_ERROR("{}", result->str);
 			freeReplyObject(result);
 			redisFree(context);
 			return;
@@ -62,7 +62,7 @@ void RedisClient::startup()
 
 	m_Context = context;
 	m_Address = IPv4Address::New(MSStringView(config.IP), config.PortNum);
-	MS_INFO("accepted from %s:%d", m_Address->getAddress().c_str(), m_Address->getPort());
+	MS_INFO("accepted from {}:{}", m_Address->getAddress().c_str(), m_Address->getPort());
 }
 
 void RedisClient::shutdown()
@@ -70,7 +70,7 @@ void RedisClient::shutdown()
 	if(m_Context) redisFree(m_Context);
 	m_Context = nullptr;
 
-	MS_INFO("rejected from %s:%d", m_Address->getAddress().c_str(), m_Address->getPort());
+	MS_INFO("rejected from {}:{}", m_Address->getAddress().c_str(), m_Address->getPort());
 	m_Address = nullptr;
 }
 
@@ -181,7 +181,7 @@ bool RedisClient::execute(MSString const &cmd, MSString& output)
 	}
 	if(result->type == REDIS_REPLY_ERROR)
 	{
-		MS_ERROR("%s", result->str);
+		MS_ERROR("{}", result->str);
 		freeReplyObject(result);
 		return false;
 	}

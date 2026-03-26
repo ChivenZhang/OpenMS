@@ -10,18 +10,17 @@
 * =================================================*/
 #include "Server.h"
 #include <cpptrace/cpptrace.hpp>
-
 int IStartup::Argc = 0;
 char** IStartup::Argv = nullptr;
+static constexpr auto OPENMS_FRAME_TIME = 1000 / 20;
 
 int Server::startup()
 {
 	if (m_Looping == true) return 0;
-	m_Looping = m_Running = true;
 	m_FrameCount = 0UL;
 	m_FrameTime = ::clock();
 	m_FrameNext = m_FrameTime;
-	constexpr auto timePerFrame = 1000 / 15;
+	m_Looping = m_Running = true;
 
 	try
 	{
@@ -37,7 +36,7 @@ int Server::startup()
 		onError(cpptrace::logic_error("unknown exception"));
 		m_Running = false;
 	}
-	MS_INFO("started %s", this->identity().c_str());
+	MS_INFO("started {}", this->identity().c_str());
 
 	while (m_Running)
 	{
@@ -69,7 +68,7 @@ int Server::startup()
 		while (m_FrameNext < m_FrameTime)
 		{
 			onFrame(m_FrameCount++);
-			m_FrameNext += timePerFrame;
+			m_FrameNext += OPENMS_FRAME_TIME;
 		}
 	}
 
@@ -86,7 +85,7 @@ int Server::startup()
 		onError(cpptrace::logic_error("unknown exception"));
 	}
 	m_Looping = m_Running = false;
-	MS_INFO("terminated %s", this->identity().c_str());
+	MS_INFO("terminated {}", this->identity().c_str());
 	return 0;
 }
 
@@ -113,12 +112,10 @@ int Server::looping()
 			onError(cpptrace::logic_error("unknown exception"));
 			m_Running = false;
 		}
-		MS_INFO("started %s", this->identity().c_str());
+		MS_INFO("started {}", this->identity().c_str());
 	}
 	else
 	{
-		constexpr auto timePerFrame = 1000 / 15;
-
 		if (m_Running)
 		{
 			if (m_Working)
@@ -149,7 +146,7 @@ int Server::looping()
 			while (m_FrameNext < m_FrameTime)
 			{
 				onFrame(m_FrameCount++);
-				m_FrameNext += timePerFrame;
+				m_FrameNext += OPENMS_FRAME_TIME;
 			}
 		}
 		else
@@ -167,7 +164,7 @@ int Server::looping()
 				onError(cpptrace::logic_error("unknown exception"));
 			}
 			m_Looping = m_Running = false;
-			MS_INFO("terminated %s", this->identity().c_str());
+			MS_INFO("terminated {}", this->identity().c_str());
 			return 0;
 		}
 	}
@@ -186,8 +183,8 @@ MSString Server::identity() const
 
 void Server::postEvent(MSLambda<void()>&& event)
 {
-	MSMutexLock lock(m_Lock);
 	m_Working = true;
+	MSMutexLock lock(m_Lock);
 	m_Events.emplace(std::move(event));
 }
 

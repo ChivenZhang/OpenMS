@@ -60,6 +60,6 @@ namespace state_client
 
 	void PlayerService::onStateChange(MSStringView state, bool full)
 	{
-		MS_INFO("状态改变：%s 全量：%s", MSString(state.data(), state.size()).c_str(), full ? "yes" : "no");
+		MS_INFO("状态改变：{} 全量：{}", MSString(state.data(), state.size()).c_str(), full ? "yes" : "no");
 	}
 }

@@ -20,7 +20,7 @@ public:
     {
         this->bind("attack", [=, this]()->MSAsync<void>
         {
-            MS_INFO("用户 %u 发动攻击", userID);
+            MS_INFO("用户 {} 发动攻击", userID);
             co_await this->callClient<void>("onAttack", 0, MSTuple{});
         });
     }

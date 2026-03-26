@@ -86,7 +86,7 @@ bool Service::async(uint32_t service, uint32_t method, uint32_t forward, uint32_
 	mail.Type = OPENMS_MAIL_TYPE_REQUEST;
 	if (forward != OPENMS_NULL_MAILBOX) mail.Type |= OPENMS_MAIL_TYPE_FORWARD;
 
-	// MS_INFO("async %u=>%u via %u #%u @%u", mail.From, mail.To, mail.Copy, mail.Date, mail.Type);
+	// MS_INFO("async {}=>{} via {} #{} @{}", mail.From, mail.To, mail.Copy, mail.Date, mail.Type);
 
 	{
 		MSMutexLock lock(m_LockSession);

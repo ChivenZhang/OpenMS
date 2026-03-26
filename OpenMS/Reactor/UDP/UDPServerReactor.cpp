@@ -47,13 +47,13 @@ void UDPServerReactor::startup()
 			error = server.open(endpoint.protocol(), error);
 			if (error)
 			{
-				MS_ERROR("failed to open: %s", error.message().c_str());
+				MS_ERROR("failed to open: {}", error.message().c_str());
 				break;
 			}
 			error = server.set_option(udp::socket::broadcast(m_Broadcast), error);
 			if (error)
 			{
-				MS_ERROR("failed to set broadcast option: %s", error.message().c_str());
+				MS_ERROR("failed to set broadcast option: {}", error.message().c_str());
 				break;
 			}
 			if (m_Multicast)
@@ -61,20 +61,20 @@ void UDPServerReactor::startup()
 				error = server.set_option(udp::socket::reuse_address(true), error);
 				if (error)
 				{
-					MS_ERROR("failed to set reuse_address option: %s", error.message().c_str());
+					MS_ERROR("failed to set reuse_address option: {}", error.message().c_str());
 					break;
 				}
 				error = server.set_option(multicast::join_group(endpoint.address()), error);
 				if (error)
 				{
-					MS_ERROR("failed to set multicast option: %s", error.message().c_str());
+					MS_ERROR("failed to set multicast option: {}", error.message().c_str());
 					break;
 				}
 			}
 			error = server.bind(endpoint, error);
 			if (error)
 			{
-				MS_ERROR("failed to bind: %s", error.message().c_str());
+				MS_ERROR("failed to bind: {}", error.message().c_str());
 				break;
 			}
 
@@ -88,19 +88,19 @@ void UDPServerReactor::startup()
 				auto family = server.local_endpoint().protocol().family();
 				if (family == AF_INET) localAddress = MSNew<IPv4Address>(address, portNum);
 				else if (family == AF_INET6) localAddress = MSNew<IPv6Address>(address, portNum);
-				else MS_ERROR("unknown address family: %d", family);
+				else MS_ERROR("unknown address family: {}", family);
 				if (localAddress == nullptr)
 				{
 					error = server.shutdown(tcp::socket::shutdown_both, error);
-					if (error) MS_ERROR("failed to shutdown: %s", error.message().c_str());
+					if (error) MS_ERROR("failed to shutdown: {}", error.message().c_str());
 					error = server.close(error);
-					if (error) MS_ERROR("failed to close: %s", error.message().c_str());
+					if (error) MS_ERROR("failed to close: {}", error.message().c_str());
 					break;
 				}
 				m_LocalAddress = localAddress;
 			}
 
-			MS_INFO("listening on %s:%d", m_LocalAddress->getAddress().c_str(), m_LocalAddress->getPort());
+			MS_INFO("listening on {}:{}", m_LocalAddress->getAddress().c_str(), m_LocalAddress->getPort());
 
 			// Read and write data in async way
 
@@ -131,7 +131,7 @@ void UDPServerReactor::startup()
 								auto family = server.local_endpoint().protocol().family();
 								if (family == AF_INET) localAddress = MSNew<IPv4Address>(address, portNum);
 								else if (family == AF_INET6) localAddress = MSNew<IPv6Address>(address, portNum);
-								else MS_ERROR("unknown address family: %d", family);
+								else MS_ERROR("unknown address family: {}", family);
 							}
 							{
 								auto address = client.address().to_string();
@@ -139,7 +139,7 @@ void UDPServerReactor::startup()
 								auto family = client.protocol().family();
 								if (family == AF_INET) remoteAddress = MSNew<IPv4Address>(address, portNum);
 								else if (family == AF_INET6) remoteAddress = MSNew<IPv6Address>(address, portNum);
-								else MS_ERROR("unknown address family: %d", family);
+								else MS_ERROR("unknown address family: {}", family);
 							}
 							if (localAddress == nullptr || remoteAddress == nullptr)
 							{
@@ -153,7 +153,7 @@ void UDPServerReactor::startup()
 
 						if (error)
 						{
-							MS_ERROR("can't read from socket: %s", error.message().c_str());
+							MS_ERROR("can't read from socket: {}", error.message().c_str());
 							reactor->onDisconnect(channel);
 						}
 						else
@@ -179,7 +179,7 @@ void UDPServerReactor::startup()
 						{
 							if (event->Promise) event->Promise->set_value(false);
 
-							MS_ERROR("can't write to socket: %s", error.message().c_str());
+							MS_ERROR("can't write to socket: {}", error.message().c_str());
 							reactor->onDisconnect(channel.lock());
 						}
 						else
@@ -283,7 +283,7 @@ void UDPServerReactor::write(MSRef<IChannelEvent> event)
 
 void UDPServerReactor::onConnect(MSRef<Channel> channel)
 {
-	MS_DEBUG("accepted from %s", channel->getRemote().lock()->getString().c_str());
+	MS_DEBUG("accepted from {}", channel->getRemote().lock()->getString().c_str());
 
 	auto remote = MSCast<ISocketAddress>(channel->getRemote().lock());
 	auto hashName = remote->getHashName();
@@ -295,7 +295,7 @@ void UDPServerReactor::onConnect(MSRef<Channel> channel)
 
 void UDPServerReactor::onDisconnect(MSRef<Channel> channel)
 {
-	MS_DEBUG("rejected from %s", channel->getRemote().lock()->getString().c_str());
+	MS_DEBUG("rejected from {}", channel->getRemote().lock()->getString().c_str());
 
 	auto remote = MSCast<ISocketAddress>(channel->getRemote().lock());
 	auto hashName = remote->getHashName();

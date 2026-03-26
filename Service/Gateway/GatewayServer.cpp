@@ -83,7 +83,7 @@ void GatewayServer::onInit()
 							mail.Type = mailView.Type | OPENMS_MAIL_TYPE_CLIENT;
 							mail.Body = MSStringView(mailView.Body, event->Message.size() - sizeof(MailView));
 
-							MS_DEBUG("client %u=>%u via %u #%u @%u", mail.From, mail.To, mail.Copy, mail.Date, mail.Type);
+							MS_DEBUG("client {}=>{} via {} #{} @{}", mail.From, mail.To, mail.Copy, mail.Date, mail.Type);
 							mailHub->send(mail);
 						}
 						else
@@ -100,7 +100,7 @@ void GatewayServer::onInit()
 							if (mail.Type & OPENMS_MAIL_TYPE_REQUEST) mail.Type |= OPENMS_MAIL_TYPE_CLIENT;
 							if (mail.Type & OPENMS_MAIL_TYPE_RESPONSE) mail.Type &= ~OPENMS_MAIL_TYPE_CLIENT;
 
-							MS_INFO("client %u=>%u via %u #%u @%u", mail.From, mail.To, mail.Copy, mail.Date, mail.Type);
+							MS_INFO("client {}=>{} via {} #{} @{}", mail.From, mail.To, mail.Copy, mail.Date, mail.Type);
 							mailHub->send(mail);
 						}
 						return false;

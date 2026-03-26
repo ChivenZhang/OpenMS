@@ -26,7 +26,7 @@ void ClusterDemo2::onInit()
 	// Invoke remote call...
 
 	auto result = loginService->call<MSString>("loginService", "login", "", 1000, MSTuple{"admin", "123456"});
-	MS_INFO("登录结果（Result）: %s", result.first.c_str());
+	MS_INFO("登录结果（Result）: {}", result.first.c_str());
 }
 
 void ClusterDemo2::onExit()

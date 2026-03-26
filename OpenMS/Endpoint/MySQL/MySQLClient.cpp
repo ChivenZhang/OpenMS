@@ -24,13 +24,13 @@ void MySQLClient::startup()
 	auto config = m_Config;
 	
 	auto driver = sql::mysql::get_mysql_driver_instance();
-	MS_INFO("MySQL Driver： %d.%d.%d", driver->getMajorVersion(), driver->getMinorVersion(), driver->getPatchVersion());
+	MS_INFO("MySQL Driver： {}.{}.{}", driver->getMajorVersion(), driver->getMinorVersion(), driver->getPatchVersion());
 	auto hostName = std::format("tcp://{}:{}", config.IP, config.PortNum);
 	m_Context.reset(driver->connect(hostName, config.UserName, config.Password));
 	m_Context->setSchema(config.Database);
 
 	m_Address = IPv4Address::New(MSStringView(config.IP), config.PortNum);
-	MS_INFO("accepted from %s:%d", config.IP.c_str(), config.PortNum);
+	MS_INFO("accepted from {}:{}", config.IP.c_str(), config.PortNum);
 }
 
 void MySQLClient::shutdown()
@@ -38,7 +38,7 @@ void MySQLClient::shutdown()
 	if (m_Context) m_Context->close();
 	m_Context = nullptr;
 
-	MS_INFO("rejected from %s:%d", m_Address->getAddress().c_str(), m_Address->getPort());
+	MS_INFO("rejected from {}:{}", m_Address->getAddress().c_str(), m_Address->getPort());
 	m_Address = nullptr;
 }
 
@@ -91,7 +91,7 @@ uint64_t MySQLClient::execute(MSString const &sql, MSStringList &output)
 	}
 	catch (MSError& ex)
 	{
-		MS_ERROR("%s: %s", sql.c_str(), ex.what());
+		MS_ERROR("{}: {}", sql.c_str(), ex.what());
 	}
 	return -1;
 }
@@ -135,7 +135,7 @@ uint64_t MySQLClient::prepare(MSString const &sql, MSStringList const& params, M
 	}
 	catch (MSError& ex)
 	{
-		MS_ERROR("%s: %s", sql.c_str(), ex.what());
+		MS_ERROR("{}: {}", sql.c_str(), ex.what());
 	}
 	return -1;
 }

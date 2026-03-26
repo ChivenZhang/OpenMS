@@ -43,19 +43,19 @@ void WSClientReactor::startup()
 			client.init_asio(&loop, error);
 			if (error)
 			{
-				MS_ERROR("failed to init_asio: %s", error.message().c_str());
+				MS_ERROR("failed to init_asio: {}", error.message().c_str());
 				break;
 			}
 
 			client.set_open_handler([this, &client](websocketpp::connection_hdl session)
 			{
-				MS_INFO("connected to %s", m_Address->getString().c_str());
+				MS_INFO("connected to {}", m_Address->getString().c_str());
 
 				websocketpp::lib::error_code error;
 				auto connect = client.get_con_from_hdl(session, error);
 				if (connect == nullptr || error)
 				{
-					MS_ERROR("failed to get_con_from_hdl: %s", error.message().c_str());
+					MS_ERROR("failed to get_con_from_hdl: {}", error.message().c_str());
 					client.stop();
 					return;
 				}
@@ -71,7 +71,7 @@ void WSClientReactor::startup()
 						auto family = client.get_local_endpoint(error).protocol().family();
 						if (family == AF_INET) localAddress = MSNew<WSIPv4Address>(address, portNum, connect->get_resource());
 						else if (family == AF_INET6) localAddress = MSNew<WSIPv6Address>(address, portNum, connect->get_resource());
-						else MS_ERROR("unknown address family: %d", family);
+						else MS_ERROR("unknown address family: {}", family);
 					}
 					{
 						auto address = connect->get_raw_socket().remote_endpoint().address().to_string();
@@ -79,7 +79,7 @@ void WSClientReactor::startup()
 						auto family = connect->get_raw_socket().remote_endpoint().protocol().family();
 						if (family == AF_INET) remoteAddress = MSNew<WSIPv4Address>(address, portNum);
 						else if (family == AF_INET6) remoteAddress = MSNew<WSIPv6Address>(address, portNum);
-						else MS_ERROR("unknown address family: %d", family);
+						else MS_ERROR("unknown address family: {}", family);
 					}
 					if (localAddress == nullptr || remoteAddress == nullptr)
 					{
@@ -89,7 +89,7 @@ void WSClientReactor::startup()
 					m_LocalAddress = localAddress;
 				}
 
-				MS_INFO("listening on %s:%d", m_LocalAddress->getAddress().c_str(), m_LocalAddress->getPort());
+				MS_INFO("listening on {}:{}", m_LocalAddress->getAddress().c_str(), m_LocalAddress->getPort());
 
 				auto channel = MSNew<WSChannel>(this, localAddress, remoteAddress, (uint32_t)(rand() % this->m_WorkerList.size()), session);
 				this->onConnect(channel);
@@ -107,7 +107,7 @@ void WSClientReactor::startup()
 			auto connect = client.get_connection("ws://" + m_Address->getString(), error);
 			if (error)
 			{
-				MS_ERROR("failed to get_connection: %s", error.message().c_str());
+				MS_ERROR("failed to get_connection: {}", error.message().c_str());
 				break;
 			}
 			client.connect(connect);
@@ -183,7 +183,7 @@ void WSClientReactor::write(MSRef<IChannelEvent> event)
 
 void WSClientReactor::onConnect(MSRef<Channel> channel)
 {
-	MS_DEBUG("accepted from %s", channel->getRemote().lock()->getString().c_str());
+	MS_DEBUG("accepted from {}", channel->getRemote().lock()->getString().c_str());
 
 	m_Channel = channel;
 	ChannelReactor::onConnect(channel);
@@ -191,7 +191,7 @@ void WSClientReactor::onConnect(MSRef<Channel> channel)
 
 void WSClientReactor::onDisconnect(MSRef<Channel> channel)
 {
-	MS_INFO("rejected from %s", channel->getRemote().lock()->getString().c_str());
+	MS_INFO("rejected from {}", channel->getRemote().lock()->getString().c_str());
 
 	m_Channel = nullptr;
 	ChannelReactor::onDisconnect(channel);

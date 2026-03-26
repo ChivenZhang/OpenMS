@@ -133,7 +133,7 @@ void RedisPool::startup()
 								}
 								if(context->err)
 								{
-									MS_ERROR("%s", context->errstr);
+									MS_ERROR("{}", context->errstr);
 									redisFree(context); context = nullptr;
 									break;
 								}
@@ -143,7 +143,7 @@ void RedisPool::startup()
 								}
 								else if(config.Password.size())
 								{
-									auto result = (redisReply*)redisCommand(context, "AUTH %s", config.Password.c_str());
+									auto result = (redisReply*)redisCommand(context, "AUTH {}", config.Password.c_str());
 									if(result == nullptr)
 									{
 										MS_ERROR("cannot to auth");
@@ -152,7 +152,7 @@ void RedisPool::startup()
 									}
 									if(result->type == REDIS_REPLY_ERROR)
 									{
-										MS_ERROR("%s", result->str);
+										MS_ERROR("{}", result->str);
 										freeReplyObject(result);
 										redisFree(context); context = nullptr;
 										break;
@@ -169,7 +169,7 @@ void RedisPool::startup()
 						}
 						catch (MSError& ex)
 						{
-							MS_ERROR("%s", ex.what());
+							MS_ERROR("{}", ex.what());
 						}
 						context = nullptr;
 						std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -208,7 +208,7 @@ void RedisPool::startup()
 					}
 					else if(result->type == REDIS_REPLY_ERROR)
 					{
-						MS_ERROR("%s", result->str);
+						MS_ERROR("{}", result->str);
 						freeReplyObject(result);
 						updateNum = false;
 					}
@@ -221,7 +221,7 @@ void RedisPool::startup()
 				}
 				catch (MSError& ex)
 				{
-					MS_ERROR("%s", ex.what());
+					MS_ERROR("{}", ex.what());
 
 					updateNum = false;
 					output.clear();
@@ -235,7 +235,7 @@ void RedisPool::startup()
 				}
 				catch (MSError& ex)
 				{
-					MS_ERROR("%s", ex.what());
+					MS_ERROR("{}", ex.what());
 				}
 			}
 
@@ -246,7 +246,7 @@ void RedisPool::startup()
 	}
 
 	m_Address = IPv4Address::New(MSStringView(config.IP), config.PortNum);
-	MS_INFO("accepted from %s:%d", config.IP.c_str(), config.PortNum);
+	MS_INFO("accepted from {}:{}", config.IP.c_str(), config.PortNum);
 }
 
 void RedisPool::shutdown()
@@ -263,7 +263,7 @@ void RedisPool::shutdown()
 		if (execute.Callback) execute.Callback(-1, {});
 	}
 
-	MS_INFO("rejected from %s:%d", m_Address->getAddress().c_str(), m_Address->getPort());
+	MS_INFO("rejected from {}:{}", m_Address->getAddress().c_str(), m_Address->getPort());
 	m_Address = nullptr;
 }
 

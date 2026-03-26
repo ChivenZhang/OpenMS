@@ -126,17 +126,15 @@
 #define MSAssert(...) assert(__VA_ARGS__)
 
 // ============================================
-
-#ifndef SPDLOG_FMT_EXTERNAL
-#define SPDLOG_FMT_EXTERNAL
+#ifndef SPDLOG_USE_STD_FORMAT
+#define SPDLOG_USE_STD_FORMAT
 #endif
-#include <fmt/printf.h>
 #include <spdlog/spdlog.h>
-#define MS_DEBUG(...) SPDLOG_DEBUG(fmt::sprintf(__VA_ARGS__))
-#define MS_INFO(...) SPDLOG_INFO(fmt::sprintf(__VA_ARGS__))
-#define MS_WARN(...) SPDLOG_WARN(fmt::sprintf(__VA_ARGS__))
-#define MS_ERROR(...) SPDLOG_ERROR(fmt::sprintf(__VA_ARGS__))
-#define MS_FATAL(...) do{ SPDLOG_CRITICAL(fmt::sprintf(__VA_ARGS__)); std::abort(); } while(0)
+#define MS_DEBUG(...) SPDLOG_DEBUG(__VA_ARGS__)
+#define MS_INFO(...) SPDLOG_INFO(__VA_ARGS__)
+#define MS_WARN(...) SPDLOG_WARN(__VA_ARGS__)
+#define MS_ERROR(...) SPDLOG_ERROR(__VA_ARGS__)
+#define MS_FATAL(...) do{ SPDLOG_CRITICAL(__VA_ARGS__); std::abort(); } while(0)
 #ifndef MS_PRINT
 #define MS_PRINT(...) MS_INFO(__VA_ARGS__)
 #endif
@@ -211,7 +209,7 @@ void MSThrow(E&& error)
 }
 inline void MSPrintError(MSError const& error, uint32_t level =  0)
 {
-	MS_ERROR("%s exception: %s", MSString(level, '\t').c_str(), error.what());
+	MS_ERROR("{} exception: {}", MSString(level, '\t').c_str(), error.what());
 	try
 	{
 		std::rethrow_if_nested(error);
@@ -220,7 +218,7 @@ inline void MSPrintError(MSError const& error, uint32_t level =  0)
 		MSPrintError(nested, level + 1);
 	} catch (...)
 	{
-		MS_ERROR("%s exception: %s", MSString(level + 1, '\t').c_str(), "Unknown nested exception");
+		MS_ERROR("{} exception: {}", MSString(level + 1, '\t').c_str(), "Unknown nested exception");
 	}
 }
 template <class T>

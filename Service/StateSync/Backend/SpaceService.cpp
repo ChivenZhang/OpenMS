@@ -25,7 +25,7 @@ namespace state_server
 	{
 		this->bind("enterSpace", [=, this](uint32_t userID)->MSAsync<bool>
 		{
-			MS_INFO("用户 %u 加入空间", userID);
+			MS_INFO("用户 {} 加入空间", userID);
 
 			auto playerService = this->onCreatingPlayer(userID);
 			if (this->create("player:" + std::to_string(userID), playerService))
@@ -41,7 +41,7 @@ namespace state_server
 		});
 		this->bind("reenterSpace", [=, this](uint32_t userID)->MSAsync<bool>
 		{
-			MS_INFO("用户 %u 重新加入空间", userID);
+			MS_INFO("用户 {} 重新加入空间", userID);
 
 			if (this->exist("player:" + std::to_string(userID)))
 			{
@@ -56,7 +56,7 @@ namespace state_server
 		});
 		this->bind("leaveSpace", [=, this](uint32_t userID)->MSAsync<bool>
 		{
-			MS_INFO("用户 %u 离开空间", userID);
+			MS_INFO("用户 {} 离开空间", userID);
 
 			auto playerService = m_UserInfos.emplace(userID, user_t{}).first->second.Player.lock();
 			if (this->cancel("player:" + std::to_string(userID)))
@@ -109,7 +109,7 @@ namespace state_server
 					for (auto& peer : m_UserInfos)
 					{
 						auto peerID = peer.first;
-						MS_INFO("sync %u", userID);
+						MS_INFO("sync {}", userID);
 						co_await this->async<void>("client", "onStateChange", "proxy:" + std::to_string(peerID), 0, MSTuple{userID, state, true});
 					}
 				}

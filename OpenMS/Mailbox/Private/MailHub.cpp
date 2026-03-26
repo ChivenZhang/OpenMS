@@ -43,10 +43,10 @@ bool MailHub::create(MSString address, MSRef<IMailBox> value)
 		auto result = m_MailboxMap.emplace(mailbox->m_HashName, nullptr);
 		if (result.second == false)
 		{
-			MS_ERROR("repeated create %s, %u", mailbox->name().c_str(), mailbox->hash());
+			MS_ERROR("repeated create {}, {}", mailbox->name().c_str(), mailbox->hash());
 			return false;
 		}
-		MS_INFO("create mailbox %s, %u", address.c_str(), MSHash(address));
+		MS_INFO("create mailbox {}, {}", address.c_str(), MSHash(address));
 		result.first->second = mailbox;
 		mailbox->m_Context = this;
 		mailbox->load();
@@ -62,11 +62,11 @@ bool MailHub::cancel(MSString address)
 		auto result = m_MailboxMap.find(MSHash(address));
 		if (result == m_MailboxMap.end() || MSCast<MailBox>(result->second) == nullptr)
 		{
-			MS_ERROR("mailbox %s, %u not found", address.c_str(), MSHash(address));
+			MS_ERROR("mailbox {}, {} not found", address.c_str(), MSHash(address));
 			return false;
 		}
 		auto mailbox = MSCast<MailBox>(result->second);
-		MS_INFO("delete mailbox %s, %u", address.c_str(), MSHash(address));
+		MS_INFO("delete mailbox {}, {}", address.c_str(), MSHash(address));
 		m_MailboxMap.erase(result);
 		mailbox->unload();
 	}
@@ -91,7 +91,7 @@ uint32_t MailHub::send(IMail mail)
 		if (result == m_MailboxMap.end() || result->second == nullptr)
 		{
 			m_MailboxLock.unlock();
-			MS_DEBUG("send %u=>%u via %u #%u @%u", mail.From, mail.To, mail.Copy, mail.Date, mail.Type);
+			MS_DEBUG("send {}=>{} via {} #{} @{}", mail.From, mail.To, mail.Copy, mail.Date, mail.Type);
 			if (m_OnFailed && m_OnFailed(mail)) return mail.Date;
 			return 0;
 		}
@@ -112,11 +112,11 @@ uint32_t MailHub::send(IMail mail)
 		newMail.Mail.Type = mail.Type;
 		newMail.Mail.Body = MSStringView((char*)newMail.Data.data(), newMail.Data.size());
 		newMail.Task = toMailbox->read(newMail.Mail);
-		MS_DEBUG("push %u=>%u via %u #%u @%u", mail.From, mail.To, mail.Copy, mail.Date, mail.Type);
+		MS_DEBUG("push {}=>{} via {} #{} @{}", mail.From, mail.To, mail.Copy, mail.Date, mail.Type);
 
 		if (toMailbox->m_MailQueue.size() == 1)
 		{
-			// MS_DEBUG("join %u=>%u via %u #%u @%u", mail.From, mail.To, mail.Copy, mail.Date, mail.Type);
+			// MS_DEBUG("join {}=>{} via {} #{} @{}", mail.From, mail.To, mail.Copy, mail.Date, mail.Type);
 			thread_local std::mt19937 gen(std::random_device{}());
 			std::uniform_int_distribution<size_t> dist(0, m_MailWorkers.size() - 1);
 			auto index = dist(gen);

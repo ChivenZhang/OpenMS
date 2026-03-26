@@ -41,7 +41,7 @@ void StorageServer::onInit()
 	auto userService = MSNew<UserService>();
 	userService->bind("loginDB", [=, this](MSString username, MSString password)->MSAsync<uint32_t>
 	{
-		MS_INFO("查询用户：%s", username.data());
+		MS_INFO("查询用户：{}", username.data());
 
 		MSStringList result;
 		auto rows = m_SQLiteClient->prepare("select id from user where username = ? and password = ? limit 1;", { username, password }, result);
@@ -50,7 +50,7 @@ void StorageServer::onInit()
 	});
 	userService->bind("signupDB", [=, this](MSString username, MSString password)->MSAsync<bool>
 	{
-		MS_INFO("创建用户：%s", username.data());
+		MS_INFO("创建用户：{}", username.data());
 
 		MSStringList result;
 		auto rows = m_SQLiteClient->prepare("insert into user(username, password) values(?, ?);", { username, password }, result);

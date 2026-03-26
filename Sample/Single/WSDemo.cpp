@@ -24,7 +24,7 @@ int main()
 				{
 					.OnHandle = [](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)
 					{
-						MS_INFO("%s", event->Message.c_str());
+						MS_INFO("{}", event->Message.c_str());
 						context->write(WSChannelEvent::New("This is server", WSChannelEvent::opcode_t::TEXT));
 						return true;
 					}
@@ -43,7 +43,7 @@ int main()
 				{
 					.OnHandle = [](MSRaw<IChannelContext> context, MSRaw<IChannelEvent> event)
 					{
-						MS_INFO("%s", event->Message.c_str());
+						MS_INFO("{}", event->Message.c_str());
 						context->write(WSChannelEvent::New("This is client", WSChannelEvent::opcode_t::TEXT));
 						return true;
 					}

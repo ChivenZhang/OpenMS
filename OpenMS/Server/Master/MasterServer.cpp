@@ -78,7 +78,7 @@ void MasterServer::onInit()
 			if (info.first == channel) continue;
 			m_ClusterServer->call<void>(info.first, "pull", 0, result);
 		}
-		MS_INFO("validate %s, count %u", address.c_str(), (uint32_t)result.size());
+		MS_INFO("validate {}, count {}", address.c_str(), (uint32_t)result.size());
 		return result;
 	});
 }

@@ -17,13 +17,13 @@ PlayerService::PlayerService(uint32_t userID)
 {
 	this->bind("startBattle", [=, this]()->MSAsync<void>
 	{
-		MS_INFO("用户 %u 开始游戏", userID);
+		MS_INFO("用户 {} 开始游戏", userID);
 		co_await this->callClient<void>("onStartBattle", 0, MSTuple{});
 		co_return;
 	});
 	this->bind("stopBattle", [=, this]()->MSAsync<void>
 	{
-		MS_INFO("用户 %u 结束游戏", userID);
+		MS_INFO("用户 {} 结束游戏", userID);
 		co_await this->callClient<void>("onStopBattle", 0, MSTuple{});
 		co_return;
 	});
@@ -34,7 +34,7 @@ PlayerService::PlayerService(uint32_t userID)
 	});
 	this->bind("attack", [=, this]()->MSAsync<void>
 	{
-		MS_INFO("用户 %u 发动攻击", userID);
+		MS_INFO("用户 {} 发动攻击", userID);
 		co_await this->callClient<void>("onAttack", 0, MSTuple{});
 		co_return;
 	});

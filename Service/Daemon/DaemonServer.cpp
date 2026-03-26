@@ -28,7 +28,7 @@ void DaemonServer::onInit()
 
 	daemonService->bind("createSpace", [=](MSString caller, uint32_t spaceID, uint32_t gameID)->MSAsync<bool>
 	{
-		MS_INFO("守护进程：CREATE SPACE!!! %u", spaceID);
+		MS_INFO("守护进程：CREATE SPACE!!! {}", spaceID);
 #ifdef OPENMS_PLATFORM_WINDOWS
 		auto result = system(("start " + launchPath + ".exe" " --space=" + std::to_string(spaceID) + " --game=" + std::to_string(gameID) + " --caller=" + caller + " >> " + std::to_string(spaceID) + ".log 2>&1").c_str());
 #elif defined(OPENMS_PLATFORM_APPLE)

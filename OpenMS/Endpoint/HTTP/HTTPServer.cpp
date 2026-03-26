@@ -111,7 +111,7 @@ bool HTTPServer::bind_internal(MSStringView path, uint8_t type, method_t&& metho
 		}
 		break;
 	default:
-		MS_WARN("unknown method %d", type);
+		MS_WARN("unknown method {}", type);
 		return false;
 	}
 	return true;
@@ -255,12 +255,12 @@ bool HTTPServerInboundHandler::channelRead(MSRaw<IChannelContext> context, MSRaw
 			catch (MSError const& ex)
 			{
 				cpptrace::logic_error error(ex.what());
-				MS_ERROR("%s", error.what());
+				MS_ERROR("{}", error.what());
 			}
 			catch (...)
 			{
 				cpptrace::logic_error error("unhandled exception");
-				MS_ERROR("%s", error.what());
+				MS_ERROR("{}", error.what());
 			}
 
 			if (handler->m_Response.Code == 0)
@@ -334,12 +334,12 @@ bool HTTPServerRequestHandler::channelRead(MSRaw<IChannelContext> context, MSRaw
 		catch (MSError const& ex)
 		{
 			cpptrace::logic_error error(ex.what());
-			MS_ERROR("%s", error.what());
+			MS_ERROR("{}", error.what());
 		}
 		catch (...)
 		{
 			cpptrace::logic_error error("unhandled exception");
-			MS_ERROR("%s", error.what());
+			MS_ERROR("{}", error.what());
 		}
 	}
     return false;
@@ -361,12 +361,12 @@ bool HTTPServerResponseHandler::channelWrite(MSRaw<IChannelContext> context, MSR
 		catch (MSError const& ex)
 		{
 			cpptrace::logic_error error(ex.what());
-			MS_ERROR("%s", error.what());
+			MS_ERROR("{}", error.what());
 		}
 		catch (...)
 		{
 			cpptrace::logic_error error("unhandled exception");
-			MS_ERROR("%s", error.what());
+			MS_ERROR("{}", error.what());
 		}
 	}
     return false;

@@ -25,7 +25,7 @@ void SQLiteClient::startup()
 	
 	if (sqlite3_open(config.Database.c_str(), &m_Context) != SQLITE_OK)
 	{
-		MS_ERROR("cannot open sqlite database: %s", sqlite3_errmsg(m_Context));
+		MS_ERROR("cannot open sqlite database: {}", sqlite3_errmsg(m_Context));
 	}
 }
 
@@ -78,10 +78,10 @@ uint64_t SQLiteClient::execute(MSString const &sql, MSStringList &output)
 			return result;
 		}
 		sqlite3_finalize(stmt);
-		MS_ERROR("%s: %s", sql.c_str(), sqlite3_errmsg(m_Context));
+		MS_ERROR("{}: {}", sql.c_str(), sqlite3_errmsg(m_Context));
 		return -1;
 	}
-	MS_ERROR("%s: %s", sql.c_str(), sqlite3_errmsg(m_Context));
+	MS_ERROR("{}: {}", sql.c_str(), sqlite3_errmsg(m_Context));
 	return -1;
 }
 
@@ -115,9 +115,9 @@ uint64_t SQLiteClient::prepare(MSString const &sql, MSStringList const& params, 
 			return result;
 		}
 		sqlite3_finalize(stmt);
-		MS_ERROR("%s: %s", sql.c_str(), sqlite3_errmsg(m_Context));
+		MS_ERROR("{}: {}", sql.c_str(), sqlite3_errmsg(m_Context));
 		return -1;
 	}
-	MS_ERROR("%s: %s", sql.c_str(), sqlite3_errmsg(m_Context));
+	MS_ERROR("{}: {}", sql.c_str(), sqlite3_errmsg(m_Context));
 	return -1;
 }

@@ -45,19 +45,19 @@ void TCPServerReactor::startup()
 			error = server.open(endpoint.protocol(), error);
 			if (error)
 			{
-				MS_ERROR("failed to open: %s", error.message().c_str());
+				MS_ERROR("failed to open: {}", error.message().c_str());
 				break;
 			}
 			error = server.bind(endpoint, error);
 			if (error)
 			{
-				MS_ERROR("failed to bind: %s", error.message().c_str());
+				MS_ERROR("failed to bind: {}", error.message().c_str());
 				break;
 			}
 			error = server.listen((int32_t)m_Backlog, error);
 			if (error)
 			{
-				MS_ERROR("failed to listen: %s", error.message().c_str());
+				MS_ERROR("failed to listen: {}", error.message().c_str());
 				break;
 			}
 
@@ -71,12 +71,12 @@ void TCPServerReactor::startup()
 				auto family = server.local_endpoint().protocol().family();
 				if (family == AF_INET) localAddress = MSNew<IPv4Address>(address, portNum);
 				else if (family == AF_INET6) localAddress = MSNew<IPv6Address>(address, portNum);
-				else MS_ERROR("unknown address family: %d", family);
+				else MS_ERROR("unknown address family: {}", family);
 				if (localAddress == nullptr) break;
 				m_LocalAddress = localAddress;
 			}
 
-			MS_INFO("listening on %s:%d", m_LocalAddress->getAddress().c_str(), m_LocalAddress->getPort());
+			MS_INFO("listening on {}:{}", m_LocalAddress->getAddress().c_str(), m_LocalAddress->getPort());
 
 			// Read and write data in async way
 
@@ -92,10 +92,10 @@ void TCPServerReactor::startup()
 					auto buffer = client->getBuffer();
 					socket->async_read_some(asio::buffer(buffer.data(), buffer.size()), [=, &read_func](asio::error_code error, size_t length)
 					{
-						MS_DEBUG("tcp async read: %s 长度 %u 状态 %d", channel.lock()->getRemote().lock()->getString().c_str(), (uint32_t)length, error.value());
+						MS_DEBUG("tcp async read: {} 长度 {} 状态 {}", channel.lock()->getRemote().lock()->getString().c_str(), (uint32_t)length, error.value());
 						if (error)
 						{
-							MS_ERROR("can't read from socket: %s", error.message().c_str());
+							MS_ERROR("can't read from socket: {}", error.message().c_str());
 							reactor->onDisconnect(channel.lock());
 						}
 						else
@@ -117,12 +117,12 @@ void TCPServerReactor::startup()
 					auto socket = client->getSocket();
 					socket->async_write_some(asio::buffer(event->Message), [=, &write_func](asio::error_code error, size_t length) mutable
 					{
-						MS_DEBUG("tcp async write: %s 长度 %u 状态 %d", channel.lock()->getRemote().lock()->getString().c_str(), (uint32_t)length, error.value());
+						MS_DEBUG("tcp async write: {} 长度 {} 状态 {}", channel.lock()->getRemote().lock()->getString().c_str(), (uint32_t)length, error.value());
 						if (error)
 						{
 							if (event->Promise) event->Promise->set_value(false);
 
-							MS_ERROR("can't write to socket: %s", error.message().c_str());
+							MS_ERROR("can't write to socket: {}", error.message().c_str());
 							reactor->onDisconnect(channel.lock());
 						}
 						else
@@ -149,7 +149,7 @@ void TCPServerReactor::startup()
 			{
 				server.async_accept([=, &accept_func, &read_func](asio::error_code error, tcp::socket client)
 				{
-					if (error) MS_ERROR("failed to accept: %s", error.message().c_str());
+					if (error) MS_ERROR("failed to accept: {}", error.message().c_str());
 					else
 					{
 						// Get the actual ip and port number
@@ -161,7 +161,7 @@ void TCPServerReactor::startup()
 							auto family = client.local_endpoint().protocol().family();
 							if (family == AF_INET) localAddress = MSNew<IPv4Address>(address, portNum);
 							else if (family == AF_INET6) localAddress = MSNew<IPv6Address>(address, portNum);
-							else MS_ERROR("unknown address family: %d", family);
+							else MS_ERROR("unknown address family: {}", family);
 						}
 						{
 							auto address = client.remote_endpoint().address().to_string();
@@ -169,7 +169,7 @@ void TCPServerReactor::startup()
 							auto family = client.remote_endpoint().protocol().family();
 							if (family == AF_INET) remoteAddress = MSNew<IPv4Address>(address, portNum);
 							else if (family == AF_INET6) remoteAddress = MSNew<IPv6Address>(address, portNum);
-							else MS_ERROR("unknown address family: %d", family);
+							else MS_ERROR("unknown address family: {}", family);
 						}
 						if (localAddress == nullptr || remoteAddress == nullptr)
 						{
@@ -267,7 +267,7 @@ void TCPServerReactor::write(MSRef<IChannelEvent> event)
 
 void TCPServerReactor::onConnect(MSRef<Channel> channel)
 {
-	MS_DEBUG("accepted from %s", channel->getRemote().lock()->getString().c_str());
+	MS_DEBUG("accepted from {}", channel->getRemote().lock()->getString().c_str());
 
 	auto remote = MSCast<ISocketAddress>(channel->getRemote().lock());
 	auto hashName = remote->getHashName();
@@ -277,7 +277,7 @@ void TCPServerReactor::onConnect(MSRef<Channel> channel)
 
 void TCPServerReactor::onDisconnect(MSRef<Channel> channel)
 {
-	MS_DEBUG("rejected from %s", channel->getRemote().lock()->getString().c_str());
+	MS_DEBUG("rejected from {}", channel->getRemote().lock()->getString().c_str());
 
 	auto remote = MSCast<ISocketAddress>(channel->getRemote().lock());
 	auto hashName = remote->getHashName();

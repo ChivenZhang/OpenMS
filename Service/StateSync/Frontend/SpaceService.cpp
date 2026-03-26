@@ -89,7 +89,7 @@ namespace state_client
 
 			this->async(guestName, "signup", "", timeout, MSTuple{username, password}, [](bool result)
 			{
-				MS_INFO("注册结果：%s", result ? "true" : "false");
+				MS_INFO("注册结果：{}", result ? "true" : "false");
 			});
 		});
 	}
@@ -105,7 +105,7 @@ namespace state_client
 
 			this->async(guestName, "login", "", timeout, MSTuple{username, password}, [](uint32_t userID)
 			{
-				MS_INFO("登录结果：%d", userID);
+				MS_INFO("登录结果：{}", userID);
 			});
 		});
 	}
@@ -121,14 +121,14 @@ namespace state_client
 
 			this->async(guestName, "logout", "", timeout, MSTuple{}, [](bool result)
 			{
-				MS_INFO("注销结果：%s", result ? "true" : "false");
+				MS_INFO("注销结果：{}", result ? "true" : "false");
 			});
 		});
 	}
 
 	MSAsync<void> SpaceService::onLogin(uint32_t userID)
 	{
-		MS_INFO("登录回调：%u", userID);
+		MS_INFO("登录回调：{}", userID);
 
 		auto playerService = this->onCreatingPlayer(userID);
 		if (this->create("client:" + std::to_string(userID), playerService))
@@ -145,33 +145,33 @@ namespace state_client
 
 	MSAsync<void> SpaceService::onLogout(uint32_t userID, bool result)
 	{
-		MS_INFO("注销回调：%s", result ? "true" : "false");
+		MS_INFO("注销回调：{}", result ? "true" : "false");
 
 		if(this->cancel("client:" + std::to_string(userID)))
 		{
 			m_UserID = 0;
 			m_PlayerService.reset();
 
-			MS_INFO("用户 %u 注销成功", userID);
+			MS_INFO("用户 {} 注销成功", userID);
 		}
 		co_return;
 	}
 
 	MSAsync<void> SpaceService::onSignup(bool result)
 	{
-		MS_INFO("注册回调：%s", result ? "true" : "false");
+		MS_INFO("注册回调：{}", result ? "true" : "false");
 		co_return;
 	}
 
 	MSAsync<void> SpaceService::onEnterSpace(uint32_t spaceID, uint32_t userID)
 	{
-		MS_INFO("用户 %u 进入空间 %u", userID, spaceID);
+		MS_INFO("用户 {} 进入空间 {}", userID, spaceID);
 		co_return;
 	}
 
 	MSAsync<void> SpaceService::onLeaveSpace(uint32_t spaceID, uint32_t userID)
 	{
-		MS_INFO("用户 %u 离开空间 %u", userID, spaceID);
+		MS_INFO("用户 {} 离开空间 {}", userID, spaceID);
 		co_return;
 	}
 
