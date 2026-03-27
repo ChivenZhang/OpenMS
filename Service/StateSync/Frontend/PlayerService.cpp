@@ -13,9 +13,10 @@
 
 namespace state_client
 {
-	PlayerService::PlayerService(uint32_t userID)
+	PlayerService::PlayerService(uint32_t userID, bool ghost)
 		:
-		m_UserID(userID)
+		m_UserID(userID),
+		m_IsGhost(ghost)
 	{
 		this->bind("onStartBattle", [=, this]()->MSAsync<void>
 		{
@@ -34,6 +35,11 @@ namespace state_client
 	uint32_t PlayerService::userID() const
 	{
 		return m_UserID;
+	}
+
+	bool PlayerService::isGhost() const
+	{
+		return m_IsGhost;
 	}
 
 	MSAsync<void> PlayerService::onCreatePlayer()

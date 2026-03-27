@@ -16,9 +16,11 @@ namespace state_client
 	class PlayerService : public Service
 	{
 	public:
-		explicit PlayerService(uint32_t userID);
+		PlayerService(uint32_t userID, bool ghost);
 
 		uint32_t userID() const;
+
+		bool isGhost() const;
 
 		template<class F, class...Args>
 		bool callServer(MSStringView method, uint32_t timeout, MSTuple<Args...>&& args, F&& callback)
@@ -57,6 +59,7 @@ namespace state_client
 
 	protected:
 		friend class SpaceService;
+		const bool m_IsGhost;
 		const uint32_t m_UserID;
 	};
 }

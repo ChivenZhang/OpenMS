@@ -40,7 +40,7 @@ namespace state_client
 
 		virtual MSAsync<void> onLeaveSpace(uint32_t spaceID, uint32_t userID);
 
-		virtual MSRef<PlayerService> onCreatingPlayer(uint32_t userID);
+		virtual MSRef<PlayerService> onCreatingPlayer(uint32_t userID, bool ghost);
 
 	protected:
 		uint32_t m_UserID;

@@ -16,10 +16,27 @@ namespace state_client
 	{
 		this->bind("onLogin", [=, this](uint32_t userID)->MSAsync<void>
 		{
+			auto playerService = this->onCreatingPlayer(userID, false);
+			if (this->create("client:" + std::to_string(userID), playerService))
+			{
+				m_UserID = userID;
+				m_PlayerService = playerService;
+
+				auto& user = m_UserInfos[userID];
+				user.Player = playerService;
+				co_await playerService->onCreatePlayer();
+			}
 			co_return co_await this->onLogin(userID);
 		});
 		this->bind("onLogout", [=, this](uint32_t userID, bool result)->MSAsync<void>
 		{
+			if(this->cancel("client:" + std::to_string(userID)))
+			{
+				m_UserID = 0;
+				m_PlayerService.reset();
+
+				MS_INFO("用户 {} 注销成功", userID);
+			}
 			co_return co_await this->onLogout(userID, result);
 		});
 		this->bind("onSignup", [=, this](bool result)->MSAsync<void>
@@ -30,7 +47,7 @@ namespace state_client
 		{
 			if(this->exist("client:" + std::to_string(userID)) == false)
 			{
-				auto playerService = this->onCreatingPlayer(userID);
+				auto playerService = this->onCreatingPlayer(userID, true);
 				if (this->create("client:" + std::to_string(userID), playerService))
 				{
 					auto& user = m_UserInfos[userID];
@@ -129,31 +146,12 @@ namespace state_client
 	MSAsync<void> SpaceService::onLogin(uint32_t userID)
 	{
 		MS_INFO("登录回调：{}", userID);
-
-		auto playerService = this->onCreatingPlayer(userID);
-		if (this->create("client:" + std::to_string(userID), playerService))
-		{
-			m_UserID = userID;
-			m_PlayerService = playerService;
-
-			auto& user = m_UserInfos[userID];
-			user.Player = playerService;
-			co_await playerService->onCreatePlayer();
-		}
 		co_return;
 	}
 
 	MSAsync<void> SpaceService::onLogout(uint32_t userID, bool result)
 	{
 		MS_INFO("注销回调：{}", result ? "true" : "false");
-
-		if(this->cancel("client:" + std::to_string(userID)))
-		{
-			m_UserID = 0;
-			m_PlayerService.reset();
-
-			MS_INFO("用户 {} 注销成功", userID);
-		}
 		co_return;
 	}
 
@@ -175,8 +173,8 @@ namespace state_client
 		co_return;
 	}
 
-	MSRef<PlayerService> SpaceService::onCreatingPlayer(uint32_t userID)
+	MSRef<PlayerService> SpaceService::onCreatingPlayer(uint32_t userID, bool ghost)
 	{
-		return MSNew<PlayerService>(userID);
+		return MSNew<PlayerService>(userID, ghost);
 	}
 }

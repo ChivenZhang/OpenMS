@@ -16,7 +16,7 @@ using namespace state_client;
 class MyPlayer : public PlayerService
 {
 public:
-    explicit MyPlayer(uint32_t userID) : PlayerService(userID)
+    explicit MyPlayer(uint32_t userID, bool ghost) : PlayerService(userID, ghost)
     {
         this->bind("onAttack", [=]()->MSAsync<void>
         {
@@ -50,9 +50,9 @@ protected:
 class MySpace : public SpaceService
 {
 protected:
-    MSRef<PlayerService> onCreatingPlayer(uint32_t userID) override
+    MSRef<PlayerService> onCreatingPlayer(uint32_t userID, bool ghost) override
     {
-        return MSNew<MyPlayer>(userID);
+        return MSNew<MyPlayer>(userID, ghost);
     }
 };
 
