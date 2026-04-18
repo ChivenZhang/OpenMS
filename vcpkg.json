@@ -1,39 +1,40 @@
 {
-  "name" : "openms",
-  "version-string" : "1.0.0",
-  "builtin-baseline" : "80d54ff62d528339c626a6fbc3489a7f25956ade",
-  "dependencies" : [ {
-    "name" : "asio",
-    "version>=" : "1.32.0"
-  }, {
-    "name" : "kcp",
-    "version>=" : "1.7"
-  }, {
-    "name" : "mbedtls",
-    "version>=" : "3.6.1"
-  }, {
-    "name" : "nlohmann-json",
-    "version>=" : "3.11.3#1"
-  }, {
-    "name" : "http-parser",
-    "version>=" : "2.9.4#3"
-  }, {
-    "name" : "cpptrace",
-    "version>=" : "0.7.4"
-  }, {
-    "name" : "hiredis",
-    "version>=" : "1.2.0"
-  }, {
-    "name" : "breakpad",
-    "version>=" : "2024-02-16"
-  }, {
-    "name" : "gflags",
-    "version>=" : "2.3.0"
-  }, {
-    "name" : "sqlite3",
-    "version>=" : "3.51.1"
-  }, {
-    "name" : "spdlog",
-    "version>=" : "1.17.0"
-  } ]
+  "name": "openms",
+  "version-string": "1.0.0",
+  "builtin-baseline": "256acc64012b23a13041d8705805e1f23b43a024",
+  "dependencies": [
+    {
+      "name": "asio"
+    },
+    {
+      "name": "kcp"
+    },
+    {
+      "name": "mbedtls"
+    },
+    {
+      "name": "nlohmann-json"
+    },
+    {
+      "name": "http-parser"
+    },
+    {
+      "name": "cpptrace"
+    },
+    {
+      "name": "hiredis"
+    },
+    {
+      "name": "breakpad"
+    },
+    {
+      "name": "gflags"
+    },
+    {
+      "name": "sqlite3"
+    },
+    {
+      "name": "spdlog"
+    }
+  ]
 }
